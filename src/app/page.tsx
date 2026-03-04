@@ -31,7 +31,7 @@ export default async function HomePage() {
       excerpt: 'ಭಾರತದಲ್ಲಿ ಎಲೆಕ್ಟ್ರಿಕ್ ವಾಹನಗಳ ಬಳಕೆ ಹೆಚ್ಚುತ್ತಿದೆ. ಆದರೆ ಮೂಲಸೌಕರ್ಯಗಳ ಕೊರತೆ ಒಂದು ದೊಡ್ಡ ಸವಾಲಾಗಿ ಪರಿಣಮಿಸಿದೆ.',
       cover_image: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=1200&q=80',
       category: { name: 'TECHNOLOGY' }
-    };
+    } as any;
   }
 
   // 2) Latest Articles
