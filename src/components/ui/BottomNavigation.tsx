@@ -123,8 +123,13 @@ export default function BottomNavigation({ role }: BottomNavigationProps) {
       style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
     >
       <div 
-        className={`mx-auto flex flex-row items-center justify-between px-2 h-16 pointer-events-auto shadow-[0_-4px_30px_rgba(0,0,0,0.6)] ${isAdminView ? 'bg-[#0f52ba]/95' : 'bg-[#181623]/95'} backdrop-blur-xl border ${isAdminView ? 'border-white/20' : 'border-white/5'} rounded-[1.5rem]`}
-        style={{ width: '100%', maxWidth: '420px', transition: 'background-color 0.3s' }}
+        className={`mx-auto flex flex-row items-center justify-between px-2 h-16 pointer-events-auto shadow-[0_-4px_30px_rgba(0,0,0,0.3)] backdrop-blur-xl border rounded-[1.5rem] ${isAdminView ? 'border-white/20' : 'border-border/50'}`}
+        style={{ 
+          width: '100%', 
+          maxWidth: '420px', 
+          transition: 'background-color 0.3s',
+          background: isAdminView ? 'rgba(15,82,186,0.95)' : 'var(--color-surface)',
+        }}
       >
         {CURRENT_NAV_ITEMS.map((item) => {
           const isActive = item.exact
@@ -144,14 +149,14 @@ export default function BottomNavigation({ role }: BottomNavigationProps) {
                   height: '38px',
                   borderRadius: '50%',
                   background: isActive ? (isAdminView ? '#ffffff' : '#ffe500') : 'transparent',
-                  color: isActive ? (isAdminView ? '#0f52ba' : '#181623') : (isAdminView ? '#e2e8f0' : '#8b88a0'),
+                  color: isActive ? (isAdminView ? '#0f52ba' : '#181623') : 'var(--color-muted)',
                 }}
               >
                 {item.icon}
               </div>
               <span 
                 className="text-[8px] font-black tracking-wider transition-colors"
-                style={{ color: isActive ? (isAdminView ? '#ffffff' : '#ffe500') : (isAdminView ? '#e2e8f0' : '#8b88a0') }}
+                style={{ color: isActive ? (isAdminView ? '#ffffff' : '#ffe500') : 'var(--color-muted)' }}
               >
                 {item.label}
               </span>

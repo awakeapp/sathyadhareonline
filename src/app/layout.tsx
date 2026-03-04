@@ -66,15 +66,16 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`dark ${dmSans.variable} ${balooTamma.variable}`} suppressHydrationWarning>
       <body
-        className="text-white font-sans antialiased"
+        className="font-sans antialiased"
         style={{ 
-          backgroundColor: '#181623',
-          minHeight: '100dvh', // Modern dvh for mobile
+          backgroundColor: 'var(--color-background)',
+          color: 'var(--color-text)',
+          minHeight: '100dvh',
           display: 'flex',
           flexDirection: 'column'
         }}
       >
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#181623' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--color-background)' }}>
           {/* ─────────── STICKY TOP HEADER ─────────── */}
           <TopHeader user={user} role={role} categories={categories ?? []} />
 
