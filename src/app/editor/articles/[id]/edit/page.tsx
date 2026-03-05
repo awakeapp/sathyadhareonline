@@ -4,6 +4,7 @@ import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import RichTextEditor from '@/components/RichTextEditorClient';
 import { CoverImageUpload } from '@/app/admin/articles/[id]/edit/CoverImageUpload';
+import { Send } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -89,7 +90,7 @@ export default async function EditorEditArticlePage({
         .upload(path, coverFile, { upsert: true, contentType: coverFile.type });
       if (!uploadError) {
         const { data: urlData } = sb.storage.from('article-images').getPublicUrl(path);
-        updateData.cover_image = `${urlData.publicUrl}?t=${Date.now()}`;
+        updateData.cover_image = `${urlData.publicUrl}?t=${new Date().getTime()}`;
       }
     }
 
@@ -239,7 +240,7 @@ export default async function EditorEditArticlePage({
             <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-amber-500/5 border border-amber-500/15">
               <svg className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               <p className="text-xs text-amber-400/80">
-                Save your changes first, then click <strong>"Submit for Review"</strong> to send to an admin for approval.
+                Save your changes first, then click <strong>&quot;Submit for Review&quot;</strong> to send to an admin for approval.
               </p>
             </div>
           )}
@@ -265,8 +266,8 @@ export default async function EditorEditArticlePage({
             <form action={submitForReviewAction}>
               <input type="hidden" name="id" value={article.id} />
               <button type="submit"
-                className="w-full py-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/25 text-amber-400 font-bold text-sm hover:bg-amber-500/25 transition-colors">
-                📤 Submit for Review
+                className="w-full py-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/25 text-amber-400 font-bold text-sm hover:bg-amber-500/25 transition-colors flex items-center justify-center gap-2">
+                <Send className="w-4 h-4" /> Submit for Review
               </button>
             </form>
             <p className="text-[11px] text-white/20 text-center mt-2">An admin will review and publish your article.</p>

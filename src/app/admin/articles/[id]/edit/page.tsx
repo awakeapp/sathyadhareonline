@@ -4,6 +4,7 @@ import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import RichTextEditor from '@/components/RichTextEditorClient';
 import { CoverImageUpload } from './CoverImageUpload';
+import { Star } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -134,8 +135,8 @@ export default async function EditArticlePage({
                 : 'border-[var(--color-border)] bg-black/20'
             }`}>
               <div className="flex items-center gap-3">
-                <div className={`text-xl transition-all ${article.is_featured ? 'scale-110 drop-shadow-md text-[var(--color-primary)]' : 'grayscale opacity-40'}`}>
-                  ⭐
+                <div className={`transition-all ${article.is_featured ? 'scale-110 drop-shadow-md text-[var(--color-primary)]' : 'grayscale opacity-40'}`}>
+                  <Star className="w-6 h-6" fill={article.is_featured ? "currentColor" : "none"} />
                 </div>
                 <div>
                   <p className="text-sm font-bold text-white leading-tight">

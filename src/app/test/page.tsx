@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { Check } from 'lucide-react'
 
 export default async function TestPage() {
   const supabase = await createClient()
@@ -20,8 +21,8 @@ export default async function TestPage() {
         </div>
       ) : (
         <div style={{ marginTop: '1rem' }}>
-          <strong style={{ color: 'green' }}>
-            ✅ Connected — {data?.length ?? 0} row(s) in profiles
+          <strong style={{ color: 'green', display: 'flex', alignItems: 'center' }}>
+            <Check className="inline-block w-4 h-4 mr-2" /> Connected — {data?.length ?? 0} row(s) in profiles
           </strong>
           <pre style={{ marginTop: '1rem', background: '#f4f4f4', padding: '1rem', borderRadius: '8px' }}>
             Session Auth UID: {session?.user?.id || 'No session'}{'\n'}

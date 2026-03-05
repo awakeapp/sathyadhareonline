@@ -4,13 +4,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ADMIN_NAV, EDITOR_NAV, READER_NAV } from './nav-items';
 import { useReaderMode } from '@/context/ReaderModeContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/Tooltip';
 
 interface SidebarProps {
   role?: string | null;
 }
 
-export default function DesktopSidebar({ role }: SidebarProps) {
+export function DesktopSidebar({ role }: SidebarProps) {
   const pathname = usePathname();
   const { readerMode, enableReaderMode } = useReaderMode();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -84,43 +85,66 @@ export default function DesktopSidebar({ role }: SidebarProps) {
           
           if ('readerModeToggle' in item && item.readerModeToggle) {
             return (
-              <button
-                key={item.href}
-                onClick={() => enableReaderMode()}
-                className={`w-full flex items-center ${isCollapsed ? 'justify-center px-0' : 'px-3 gap-3'} py-3 rounded-xl transition-all ${
-                  isActive
-                    ? 'bg-amber-500/10 text-amber-500 font-bold'
-                    : 'text-[var(--color-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text)] font-semibold'
-                }`}
-                title={isCollapsed ? item.name : undefined}
-              >
-                <item.icon size={20} className={isActive ? 'text-amber-500' : ''} />
-                {!isCollapsed && <span className="text-sm truncate">{item.name}</span>}
-              </button>
+              <Tooltip key={item.href}>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => enableReaderMode()}
+                    className={`w-full flex items-center ${isCollapsed ? 'justify-center px-0' : 'px-3 gap-3'} py-3 rounded-xl transition-all hover:scale-[1.03] active:scale-95 ${
+                      isActive
+                        ? 'bg-amber-500/10 text-amber-500 font-bold'
+                        : 'text-[var(--color-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text)] font-semibold'
+                    }`}
+                  >
+                    <item.icon size={20} className={isActive ? 'text-amber-500' : ''} />
+                    {!isCollapsed && <span className="text-sm truncate">{item.name}</span>}
+                  </button>
+                </TooltipTrigger>
+                {isCollapsed && (
+                  <TooltipContent side="right">
+                    <p>{item.name}</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
             );
           }
           
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center ${isCollapsed ? 'justify-center px-0' : 'px-3 gap-3'} py-3 rounded-xl transition-all ${
-                isHighlight 
-                  ? 'bg-violet-600/15 text-violet-400 hover:bg-violet-600/25 font-bold shadow-sm'
-                  : isActive
-                  ? isAdminView ? 'bg-[#0047ff]/10 text-[#4f8ef7] font-bold' : 'bg-[#ffe500]/10 text-[#ffe500] font-bold'
-                  : 'text-[var(--color-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text)] font-semibold'
-              }`}
-              title={isCollapsed ? item.name : undefined}
-            >
-              <item.icon size={20} className={
-                isHighlight ? 'text-violet-400' : isActive ? (isAdminView ? 'text-[#4f8ef7]' : 'text-[#ffe500]') : ''
-              } />
-              {!isCollapsed && <span className="text-sm truncate">{item.name}</span>}
-            </Link>
+            <Tooltip key={item.href}>
+              <TooltipTrigger asChild>
+                <Link
+                  href={item.href}
+                  className={`flex items-center ${isCollapsed ? 'justify-center px-0' : 'px-3 gap-3'} py-3 rounded-xl transition-all hover:scale-[1.03] active:scale-95 ${
+                    isHighlight 
+                      ? 'bg-violet-600/15 text-violet-400 hover:bg-violet-600/25 font-bold shadow-sm'
+                      : isActive
+                      ? isAdminView ? 'bg-[#4f8ef7]/10 text-[#4f8ef7] font-bold shadow-sm border border-[#4f8ef7]/20 scale-[1.02]' : 'bg-[#ffe500]/10 text-[#ffe500] font-bold shadow-sm border border-[#ffe500]/20 scale-[1.02]'
+                      : 'text-[var(--color-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text)] font-semibold border border-transparent'
+                  }`}
+                >
+                  <item.icon size={20} className={
+                    isHighlight ? 'text-violet-400' : isActive ? (isAdminView ? 'text-[#4f8ef7]' : 'text-[#ffe500]') : ''
+                  } />
+                  {!isCollapsed && <span className="text-sm truncate">{item.name}</span>}
+                </Link>
+              </TooltipTrigger>
+              {isCollapsed && (
+                <TooltipContent side="right">
+                  <p>{item.name}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
           );
         })}
       </nav>
     </aside>
   );
+}
+
+export default function DesktopSidebarWrapper(props: SidebarProps) {
+  // Radix tooltip provider wrapper
+  return (
+    <TooltipProvider delayDuration={150}>
+      <DesktopSidebar {...props} />
+    </TooltipProvider>
+  )
 }

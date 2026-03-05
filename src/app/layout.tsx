@@ -8,6 +8,7 @@ import MainWrapper from '@/components/MainWrapper'
 import { ReaderModeProvider } from '@/context/ReaderModeContext'
 import { ThemeProvider } from '@/providers/ThemeProvider'
 import NavigationWrapper from '@/components/navigation/NavigationWrapper'
+import { Toaster } from 'sonner'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -68,7 +69,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${dmSans.variable} ${balooTamma.variable}`} suppressHydrationWarning>
       <body
-        className="font-sans antialiased"
+        className="font-sans antialiased transition-colors duration-300"
         style={{ 
           backgroundColor: 'var(--color-background)',
           color: 'var(--color-text)',
@@ -91,6 +92,7 @@ export default async function RootLayout({
             </div>
             
             <InstallPrompt />
+            <Toaster position="top-center" theme="system" richColors />
           </ReaderModeProvider>
         </ThemeProvider>
       </body>

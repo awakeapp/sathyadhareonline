@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import AnalyticsCharts from './AnalyticsCharts';
+import { Flame } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,7 +32,7 @@ export default async function AnalyticsPage() {
     .from('article_views').select('*', { count: 'exact', head: true });
 
   // ── Per-day views — last 30 days ─────────────────────────────────
-  const since30 = new Date(Date.now() - 30 * 86400_000).toISOString();
+  const since30 = new Date(new Date().getTime() - 30 * 86400_000).toISOString();
   const { data: viewRows30 } = await supabase
     .from('article_views')
     .select('created_at')
@@ -42,7 +43,7 @@ export default async function AnalyticsPage() {
   function buildDayPoints(days: number) {
     const map: Record<string, number> = {};
     for (let i = days - 1; i >= 0; i--) {
-      const d = new Date(Date.now() - i * 86400_000).toISOString().slice(0, 10);
+      const d = new Date(new Date().getTime() - i * 86400_000).toISOString().slice(0, 10);
       map[d] = 0;
     }
     for (const row of viewRows30 ?? []) {
@@ -149,7 +150,7 @@ export default async function AnalyticsPage() {
         {/* ── Top articles ─────────────────────────────────────────── */}
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl shadow-lg overflow-hidden">
           <div className="px-5 py-4 border-b border-[var(--color-border)] flex items-center gap-2">
-            <span className="text-base">🔥</span>
+            <Flame className="w-5 h-5 text-orange-500" />
             <h2 className="text-sm font-bold text-white uppercase tracking-wider">Top Articles by Views</h2>
           </div>
           {topArticles.length === 0 ? (

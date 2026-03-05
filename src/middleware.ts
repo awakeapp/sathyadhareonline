@@ -22,7 +22,7 @@ export async function middleware(request: NextRequest) {
           // This updates the request cookies for Server Components!
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
 
-          // 🔥 CRITICAL: Next.js 14/15 'cookies()' API uses the RAW string header, 
+          // CRITICAL: Next.js 14/15 'cookies()' API uses the RAW string header, 
           // not the request.cookies map. If we don't update the raw string, Server 
           // Components evaluate the old expired token and redirect to /login randomly!
           const rawCookies = request.cookies.getAll()

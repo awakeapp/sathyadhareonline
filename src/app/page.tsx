@@ -43,10 +43,10 @@ export default async function HomePage() {
 
   if (!latestArticles || latestArticles.length === 0) {
     latestArticles = [
-      { id: 'l1', title: 'ಭಾರತೀಯ ಬಾಹ್ಯಾಕಾಶ ಸಂಶೋಧನಾ ಸಂಸ್ಥೆಯ (ISRO) ಐತಿಹಾಸಿಕ ನೆಗೆತ', slug: 'l1', excerpt: '', cover_image: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=80', published_at: new Date().toISOString(), category: { name: 'SCIENCE' } },
+      { id: 'l1', title: 'ಭಾರತೀಯ ಬಾಹ್ಯಾಕಾಶ ಸಂಶೋಧನಾ ಸಂಸ್ಥೆಯ (ISRO) ಐತಿಹಾಸಿಕ ನೆಗೆತ', slug: 'l1', excerpt: '', cover_image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80', published_at: new Date().toISOString(), category: { name: 'SCIENCE' } },
       { id: 'l2', title: 'ದೈನಂದಿನ ಜೀವನದಲ್ಲಿ ಯೋಗ: ಮಾನಸಿಕ ಮತ್ತು ದೈಹಿಕ ಶಾಂತಿಗಾಗಿ', slug: 'l2', excerpt: '', cover_image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&q=80', published_at: new Date().toISOString(), category: { name: 'LIFE' } },
-      { id: 'l3', title: 'ಆರ್ಟಿಫಿಶಿಯಲ್ ಇಂಟೆಲಿಜೆನ್ಸ್ ಭವಿಷ್ಯವನ್ನು ಹೇಗೆ ಬದಲಾಯಿಸುತ್ತಿದೆ?', slug: 'l3', excerpt: '', cover_image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80', published_at: new Date().toISOString(), category: { name: 'TECH' } },
-      { id: 'l4', title: 'ಕರ್ನಾಟಕದ ಪ್ರಾಚೀನ ದೇವಾಲಯಗಳ ವಾಸ್ತುಶಿಲ್ಪದ ಪರಂಪರೆ', slug: 'l4', excerpt: '', cover_image: 'https://images.unsplash.com/photo-1594916890333-3d0cf3099778?w=800&q=80', published_at: new Date().toISOString(), category: { name: 'HISTORY' } },
+      { id: 'l3', title: 'ಆರ್ಟಿಫಿಶಿಯಲ್ ಇಂಟೆಲಿಜೆನ್ಸ್ ಭವಿಷ್ಯವನ್ನು ಹೇಗೆ ಬದಲಾಯಿಸುತ್ತಿದೆ?', slug: 'l3', excerpt: '', cover_image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80', published_at: new Date().toISOString(), category: { name: 'TECH' } },
+      { id: 'l4', title: 'ಕರ್ನಾಟಕದ ಪ್ರಾಚೀನ ದೇವಾಲಯಗಳ ವಾಸ್ತುಶಿಲ್ಪದ ಪರಂಪರೆ', slug: 'l4', excerpt: '', cover_image: 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=800&q=80', published_at: new Date().toISOString(), category: { name: 'HISTORY' } },
     ] as any;
   }
 
@@ -84,9 +84,9 @@ export default async function HomePage() {
 
   if (trending.length === 0) {
     trending = [
-      { id: 't1', title: 'ಮಳೆಗಾಲದಲ್ಲಿ ಸಹಜ ಪ್ರಕೃತಿಯ ಸೌಂದರ್ಯದ ದರ್ಶನ', slug: 't1', cover_image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb773b09?w=800&q=80', category: { name: 'NATURE' }, published_at: new Date().toISOString() },
-      { id: 't2', title: 'ಮಕ್ಕಳಲ್ಲಿ ಕಥೆ ಓದುವ ಹವ್ಯಾಸವನ್ನು ಹೇಗೆ ಬೆಳೆಸುವುದು?', slug: 't2', cover_image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&q=80', category: { name: 'LITERATURE' }, published_at: new Date().toISOString() },
-      { id: 't3', title: 'ಡಿಜಿಟಲ್ ಜಗತ್ತಿನಲ್ಲಿ ಡೇಟಾ ಸುರಕ್ಷತೆಯ ಸವಾಲುಗಳು', slug: 't3', cover_image: 'https://images.unsplash.com/photo-1614064641913-6b71a17960fc?w=800&q=80', category: { name: 'TECH' }, published_at: new Date().toISOString() },
+      { id: 't1', title: 'ಮಳೆಗಾಲದಲ್ಲಿ ಸಹಜ ಪ್ರಕೃತಿಯ ಸೌಂದರ್ಯದ ದರ್ಶನ', slug: 't1', cover_image: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=800&q=80', category: { name: 'NATURE' }, published_at: new Date().toISOString() },
+      { id: 't2', title: 'ಮಕ್ಕಳಲ್ಲಿ ಕಥೆ ಓದುವ ಹವ್ಯಾಸವನ್ನು ಹೇಗೆ ಬೆಳೆಸುವುದು?', slug: 't2', cover_image: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=80', category: { name: 'LITERATURE' }, published_at: new Date().toISOString() },
+      { id: 't3', title: 'ಡಿಜಿಟಲ್ ಜಗತ್ತಿನಲ್ಲಿ ಡೇಟಾ ಸುರಕ್ಷತೆಯ ಸವಾಲುಗಳು', slug: 't3', cover_image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80', category: { name: 'TECH' }, published_at: new Date().toISOString() },
     ] as any;
   }
 

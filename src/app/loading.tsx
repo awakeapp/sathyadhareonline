@@ -1,40 +1,40 @@
+import { Skeleton } from '@/components/ui/Skeleton';
+import { Card, CardContent } from '@/components/ui/Card';
+
 export default function Loading() {
   return (
-    <main className="max-w-5xl mx-auto p-6 md:p-10 font-sans min-h-screen">
-      {/* Page Header Skeleton */}
-      <div className="animate-pulse mb-12">
-        <div className="h-10 bg-gray-200 rounded-lg w-2/3 md:w-1/3 mb-4"></div>
-        <div className="h-5 bg-gray-100 rounded-md w-full max-w-lg"></div>
-        <div className="h-5 bg-gray-100 rounded-md w-3/4 max-w-sm mt-3"></div>
+    <div className="font-sans antialiased min-h-[100svh] px-4 pt-1 pb-32 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl scroll-smooth">
+      {/* Hero / Featured Article Skeleton */}
+      <div className="mb-8 pt-0 mt-4 sm:mt-6">
+        <Skeleton className="w-full h-64 md:h-96 rounded-[2rem] shadow-none" />
       </div>
 
-      {/* Hero / Featured Article Skeleton */}
-      <div className="w-full h-64 md:h-96 bg-gray-200 rounded-3xl animate-pulse mb-16 shadow-sm"></div>
-
       {/* Grid Header */}
-      <div className="animate-pulse flex items-center justify-between mb-8 border-b-2 border-gray-100 pb-2">
-        <div className="h-8 bg-gray-200 rounded-md w-32"></div>
-        <div className="h-5 bg-gray-100 rounded-md w-20"></div>
+      <div className="animate-in fade-in flex items-center justify-between mb-5 mt-10 px-2">
+        <Skeleton className="h-4 w-32" />
       </div>
 
       {/* Cards Grid Skeleton */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="flex flex-col gap-5 mt-5">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="flex flex-col bg-white rounded-xl border border-gray-100 p-4 shadow-sm h-full animate-pulse">
-            {/* Image placeholder */}
-            <div className="w-full h-40 bg-gray-200 rounded-lg mb-4"></div>
-            
-            {/* Title placeholder */}
-            <div className="h-6 bg-gray-200 rounded-md w-full mb-2.5"></div>
-            <div className="h-6 bg-gray-200 rounded-md w-4/5 mb-4"></div>
-            
-            {/* Excerpt lines */}
-            <div className="h-4 bg-gray-100 rounded w-full mb-2"></div>
-            <div className="h-4 bg-gray-100 rounded w-full mb-2"></div>
-            <div className="h-4 bg-gray-100 rounded w-2/3 mt-auto"></div>
-          </div>
+          <Card key={i} className="rounded-3xl border-transparent bg-[var(--color-surface)] shadow-none h-[120px] flex items-center">
+            <CardContent className="p-4 flex gap-4 w-full h-full">
+              {/* Image placeholder */}
+              <Skeleton className="w-24 h-24 rounded-2xl shrink-0" />
+              
+              <div className="flex flex-col justify-center flex-1 h-full gap-2">
+                {/* Title placeholder */}
+                <Skeleton className="h-5 w-full" />
+                <Skeleton className="h-5 w-4/5" />
+                
+                <div className="mt-auto">
+                  <Skeleton className="h-3 w-1/3" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
-    </main>
+    </div>
   );
 }

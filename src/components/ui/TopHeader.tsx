@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useReaderMode } from '@/context/ReaderModeContext';
 import { useTheme } from 'next-themes';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
+import { ArrowLeft, Eye } from 'lucide-react';
 
 
 interface TopHeaderProps {
@@ -112,9 +113,9 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
           <span className="opacity-60 hidden sm:inline">—</span>
           <button
             onClick={handleReturnToDashboard}
-            className="underline underline-offset-2 hover:no-underline transition-all"
+            className="underline underline-offset-2 hover:no-underline transition-all flex items-center gap-1.5"
           >
-            🔙 Return to {dashboardLabel}
+            <ArrowLeft className="w-3.5 h-3.5" /> Return to {dashboardLabel}
           </button>
         </div>
       )}
@@ -286,13 +287,11 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
                       <ThemeSwitcher />
                     </div>
 
-                    {/* Switch to Reader Mode CTA in drawer */}
                     <button
                       onClick={() => { setIsMenuOpen(false); handleSwitchToReader(); }}
                       className="flex items-center gap-3 py-3 text-sm font-semibold text-[#ffe500] hover:opacity-80 transition-opacity text-left"
                     >
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" /></svg>
-                      👁️ Switch to Reader Mode
+                      <Eye className="w-5 h-5 text-current" /> Switch to Reader Mode
                     </button>
 
                     <Link href="/" onClick={() => setIsMenuOpen(false)}
@@ -351,9 +350,9 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
                           <>
                             <button
                               onClick={() => { setIsMenuOpen(false); handleReturnToDashboard(); }}
-                              className="py-3 text-[13px] font-black text-[#0047ff] dark:text-[#ffe500] uppercase tracking-widest text-left"
+                              className="py-3 text-[13px] font-black text-[#0047ff] dark:text-[#ffe500] uppercase tracking-widest text-left flex items-center gap-1.5"
                             >
-                              🔙 Back to {dashboardLabel}
+                              <ArrowLeft className="w-4 h-4" /> Back to {dashboardLabel}
                             </button>
                           </>
                         )}

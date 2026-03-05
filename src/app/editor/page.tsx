@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader } from '@/components/ui/Card';
+import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { SquarePen, FileText, ChevronRight, Eye } from 'lucide-react';
+import { SquarePen, FileText, ChevronRight, Eye, Hand } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -65,8 +65,8 @@ export default async function EditorDashboard() {
       {/* ── Profile header ────────────────────────────────────── */}
       <header className="mb-10 mt-4">
         <p className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-widest">Editor Workspace</p>
-        <h1 className="text-2xl font-black tracking-tight mt-1 truncate">
-          Welcome back, {name.split(' ')[0]} 👋
+        <h1 className="text-2xl font-black tracking-tight mt-1 truncate flex items-center gap-2">
+          Welcome back, {name.split(' ')[0]} <Hand className="w-6 h-6 text-amber-500" />
         </h1>
         <p className="text-sm text-[var(--color-muted)] mt-1 font-semibold">Here&apos;s your content overview for today.</p>
       </header>

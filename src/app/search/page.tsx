@@ -3,6 +3,7 @@ import ArticleCard from '@/components/ui/ArticleCard';
 import SectionHeader from '@/components/ui/SectionHeader';
 import SearchBar from '@/components/ui/SearchBar';
 import { Card } from '@/components/ui/Card';
+import { Search, Library } from 'lucide-react';
 
 interface Props {
   searchParams: Promise<{ q?: string }>;
@@ -12,6 +13,7 @@ export default async function SearchPage({ searchParams }: Props) {
   const { q } = await searchParams;
   const supabase = await createClient();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let results: any[] = [];
   let searched = false;
 
@@ -58,7 +60,9 @@ export default async function SearchPage({ searchParams }: Props) {
 
           {results.length === 0 ? (
             <Card className="text-center py-24 rounded-3xl mt-6 shadow-none border-dashed bg-[var(--color-surface)] border-[var(--color-border)]">
-              <span className="text-5xl mb-4 block opacity-50">🔍</span>
+              <div className="flex justify-center mb-4 opacity-50">
+                <Search className="w-12 h-12 text-[var(--color-muted)]" />
+              </div>
               <p className="text-base font-bold text-[var(--color-text)] tracking-tight">
                 We couldn&apos;t find any articles matching your search.
               </p>
@@ -76,7 +80,9 @@ export default async function SearchPage({ searchParams }: Props) {
         </section>
       ) : (
         <section className="text-center py-20 opacity-50">
-          <span className="text-5xl mb-4 block">📚</span>
+          <div className="flex justify-center mb-4">
+            <Library className="w-12 h-12 text-[var(--color-muted)]" />
+          </div>
           <p className="text-sm text-[var(--color-muted)] font-medium">Enter a search term above to browse our archive.</p>
         </section>
       )}

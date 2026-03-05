@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { Newspaper, Globe, PenTool } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { getRedirectPath } from '@/lib/auth/redirectAfterLogin'
 
@@ -132,16 +133,16 @@ export default function LoginPage() {
           {/* Feature badges */}
           <div className="mt-10 flex flex-col gap-3 w-full">
             {[
-              { icon: '📰', label: 'Breaking news & editorials' },
-              { icon: '🌏', label: 'Regional & national coverage' },
-              { icon: '✍️', label: 'In-depth investigative reports' },
-            ].map((f) => (
+              { icon: <Newspaper className="w-5 h-5" />, label: 'Breaking news & editorials' },
+              { icon: <Globe className="w-5 h-5" />, label: 'Regional & national coverage' },
+              { icon: <PenTool className="w-5 h-5" />, label: 'In-depth investigative reports' },
+            ].map((f, i) => (
               <div
-                key={f.label}
+                key={i}
                 className="flex items-center gap-3 px-4 py-3 rounded-2xl text-left"
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
               >
-                <span className="text-lg">{f.icon}</span>
+                <div className="text-white drop-shadow-md">{f.icon}</div>
                 <span className="text-white/70 text-sm font-medium">{f.label}</span>
               </div>
             ))}

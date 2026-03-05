@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Plus, LayoutTemplate, Shapes, Users, BarChart3, Settings, Eye, FileText, Layers, Image as ImageIcon } from 'lucide-react';
+import { Plus, LayoutTemplate, Shapes, Users, BarChart3, Settings, Eye, FileText, Layers, Image as ImageIcon, Hand } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,8 +69,9 @@ export default async function AdminPage() {
       <header className="flex items-center justify-between mt-4 mb-8">
         <div>
           <p className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-widest">Admin Panel</p>
-          <h1 className="text-2xl font-black tracking-tight mt-1">
-            {profile?.full_name ? `Hi, ${profile.full_name.split(' ')[0]} 👋` : 'Dashboard'}
+          <h1 className="text-2xl font-black tracking-tight mt-1 flex items-center gap-2">
+            {profile?.full_name ? `Hi, ${profile.full_name.split(' ')[0]}` : 'Dashboard'}
+            {profile?.full_name && <Hand className="w-6 h-6 text-amber-500" />}
           </h1>
           <p className="text-xs text-[var(--color-muted)] mt-1 capitalize font-semibold">{profile?.role?.replace('_', ' ')}</p>
         </div>
