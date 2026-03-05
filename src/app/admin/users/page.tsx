@@ -6,13 +6,12 @@ import { RoleSelect } from './RoleSelect';
 
 export const dynamic = 'force-dynamic';
 
-const ALLOWED_ROLES = ['reader', 'editor', 'moderator', 'admin'];
+const ALLOWED_ROLES = ['reader', 'editor', 'admin'];
 
 const ROLE_META: Record<string, { label: string; color: string }> = {
   super_admin: { label: 'Super Admin', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
   admin:       { label: 'Admin',       color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
   editor:      { label: 'Editor',      color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-  moderator:   { label: 'Moderator',   color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' },
   reader:      { label: 'Reader',      color: 'bg-gray-500/10 text-gray-400 border-gray-500/20' },
 };
 
@@ -144,7 +143,6 @@ export default async function AdminUsersPage() {
                   className="w-full px-3.5 py-3 rounded-xl bg-black/20 border border-[var(--color-border)] text-white focus:ring-2 focus:ring-amber-500/40 outline-none appearance-none text-sm"
                 >
                   <option value="editor"    className="bg-[#181623]">Editor</option>
-                  <option value="moderator" className="bg-[#181623]">Moderator</option>
                   <option value="admin"     className="bg-[#181623]">Admin</option>
                 </select>
               </div>

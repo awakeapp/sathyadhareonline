@@ -17,25 +17,8 @@ const STATUS_META: Record<ArticleStatus, { label: string; color: string }> = {
 };
 
 // Allowed role → transitions map
-// Editors:    draft → in_review
 // Admins:     in_review → published | in_review → archived | published → archived
 const TRANSITIONS: Record<string, { from: ArticleStatus[]; to: ArticleStatus; label: string; btnClass: string }[]> = {
-  editor: [
-    {
-      from: ['draft'],
-      to: 'in_review',
-      label: 'Submit for Review',
-      btnClass: 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/20',
-    },
-  ],
-  moderator: [
-    {
-      from: ['draft'],
-      to: 'in_review',
-      label: 'Submit for Review',
-      btnClass: 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/20',
-    },
-  ],
   admin: [
     {
       from: ['draft'],
@@ -110,16 +93,10 @@ export default async function ArticlesPage() {
   const allowedTransitions = TRANSITIONS[role] ?? [];
 
   // ── Fetch articles ───────────────────────────────────────────
-  // Editors only see their own articles; admins see everything.
-  let articlesQuery = supabase
+  const articlesQuery = supabase
     .from('articles')
     .select('id, title, status, is_deleted, is_featured, author_id')
     .order('created_at', { ascending: false });
-
-  if (role === 'editor') {
-    // Scope to the current user's own articles
-    articlesQuery = articlesQuery.eq('author_id', user.id);
-  }
 
   const { data: articles, error } = await articlesQuery;
 
@@ -239,10 +216,10 @@ export default async function ArticlesPage() {
             </Link>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-white leading-tight">
-                {role === 'editor' ? 'Your Articles' : 'Articles'}
+                Articles
               </h1>
               <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
-                {articles?.length || 0} {role === 'editor' ? 'of yours' : 'Total'} · {role}
+                {articles?.length || 0} Total · {role}
               </p>
             </div>
           </div>

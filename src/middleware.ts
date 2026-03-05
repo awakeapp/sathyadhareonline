@@ -21,9 +21,20 @@ export async function middleware(request: NextRequest) {
         setAll(cookiesToSet) {
           // This updates the request cookies for Server Components!
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          // Recreate the response to properly forward the modified request
+
+          // 🔥 CRITICAL: Next.js 14/15 'cookies()' API uses the RAW string header, 
+          // not the request.cookies map. If we don't update the raw string, Server 
+          // Components evaluate the old expired token and redirect to /login randomly!
+          const rawCookies = request.cookies.getAll()
+          request.headers.set(
+            'cookie',
+            rawCookies.map(c => `${c.name}=${c.value}`).join('; ')
+          )
+
+          // Recreate the response to properly forward the modified request headers
           supabaseResponse = NextResponse.next({ request })
-          // Set the updated cookies on the outgoing response so the browser gets them
+
+          // Set the updated cookies on the outgoing response so the browser saves them
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           )
@@ -44,11 +55,12 @@ export async function middleware(request: NextRequest) {
     url.pathname = path
     const redirectRes = NextResponse.redirect(url)
     
-    // Copy any Set-Cookie headers from the refreshed supabaseResponse
-    const setCookies = supabaseResponse.headers.getSetCookie()
-    for (const cookie of setCookies) {
-      redirectRes.headers.append('Set-Cookie', cookie)
-    }
+    // Apply cookies from supabaseResponse using the cookies API 
+    // to properly preserve all attributes (max-age, path, secure, etc.)
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectRes.cookies.set(cookie.name, cookie.value, cookie)
+    })
+    
     return redirectRes
   }
 

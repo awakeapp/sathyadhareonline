@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   id          uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   full_name   text,
   role        text NOT NULL DEFAULT 'reader'
-                CHECK (role IN ('super_admin', 'editor', 'moderator', 'reader')),
+                CHECK (role IN ('super_admin', 'editor', 'admin', 'moderator', 'reader')),
   created_at  timestamptz NOT NULL DEFAULT now(),
   updated_at  timestamptz NOT NULL DEFAULT now()
 );

@@ -11,7 +11,7 @@ LANGUAGE sql STABLE SECURITY DEFINER AS $$
   SELECT EXISTS (
     SELECT 1 FROM profiles
     WHERE id = auth.uid()
-      AND role IN ('super_admin', 'editor', 'moderator')
+      AND role IN ('super_admin', 'editor', 'admin')
   );
 $$;
 

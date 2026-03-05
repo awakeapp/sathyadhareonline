@@ -21,7 +21,7 @@ export default async function MediaLibraryPage() {
     .eq('id', user.id)
     .single();
 
-  if (!profile || !['super_admin', 'editor', 'moderator'].includes(profile.role)) {
+  if (!profile || !['super_admin', 'editor', 'admin'].includes(profile.role)) {
     redirect('/admin');
   }
 

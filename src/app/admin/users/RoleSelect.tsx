@@ -2,12 +2,11 @@
 
 import { useRef, useTransition } from 'react';
 
-const ROLES = ['reader', 'editor', 'moderator', 'admin'] as const;
+const ROLES = ['reader', 'editor', 'admin'] as const;
 
 const ROLE_LABELS: Record<string, string> = {
   reader:    'Reader',
   editor:    'Editor',
-  moderator: 'Moderator',
   admin:     'Admin',
 };
 

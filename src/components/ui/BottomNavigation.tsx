@@ -133,7 +133,7 @@ export default function BottomNavigation({ role }: BottomNavigationProps) {
   const isPrivilegedRole = role === 'super_admin' || role === 'admin' || role === 'editor'
 
   // Show admin nav only when on admin routes AND not in reader mode
-  const isAdminView = pathname.startsWith('/admin') &&
+  const isAdminView = (pathname.startsWith('/admin') || pathname.startsWith('/editor')) &&
     isPrivilegedRole &&
     !readerMode
 
