@@ -49,9 +49,13 @@ export async function GET(request: NextRequest) {
         role = 'reader'
         // Wrap in try catch so it doesn't break if insert fails
         try {
+          const fullName = data.user.user_metadata?.full_name || data.user.user_metadata?.name || ''
+          const avatarUrl = data.user.user_metadata?.avatar_url || data.user.user_metadata?.picture || ''
+          
           await supabase.from('profiles').insert({
             id: data.user.id,
-            full_name: data.user.user_metadata?.full_name || data.user.user_metadata?.name || '',
+            full_name: fullName,
+            avatar_url: avatarUrl,
             role: role,
           })
         } catch (e) {

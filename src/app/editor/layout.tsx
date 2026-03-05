@@ -9,11 +9,17 @@ export default async function EditorLayout({ children }: { children: React.React
 
   if (!user) redirect('/login');
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
+  let profile = null;
+  try {
+    const { data: p } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+    profile = p;
+  } catch (e) {
+    console.error('Editor layout fetching error:', e);
+  }
 
   // ── Defence-in-depth: only editors allowed here ─────────────────
   if (!profile || profile.role !== 'editor') {

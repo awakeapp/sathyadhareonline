@@ -14,9 +14,14 @@ import { ArrowLeft, Eye } from 'lucide-react';
 interface TopHeaderProps {
   user: User | null;
   role?: string | null;
+  profile?: {
+    full_name: string | null;
+    avatar_url: string | null;
+    role: string | null;
+  } | null;
 }
 
-export default function TopHeader({ user, role }: TopHeaderProps) {
+export default function TopHeader({ user, role, profile }: TopHeaderProps) {
   const pathname = usePathname();
   const router   = useRouter();
 
@@ -197,14 +202,19 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
             {/* ── Profile / User Icon ─────────────────────────── */}
             <button
               onClick={() => setIsMenuOpen(true)}
-              className="tap-highlight w-9 h-9 rounded-xl flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-all active:scale-95"
+              className="tap-highlight w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-all active:scale-95"
               title="Profile"
               aria-label="Open profile"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-[20px] h-[20px]">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
+              {profile?.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={profile.avatar_url} alt={profile.full_name || ''} className="w-full h-full object-cover" />
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-[20px] h-[20px]">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              )}
             </button>
           </div>
         </div>
@@ -281,11 +291,19 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
 
                     <div className="h-px bg-[var(--color-border)] my-2" />
                     
-                    {/* Theme Toggle in Drawer */}
                     <div className="flex items-center justify-between py-3">
                       <span className="text-sm font-semibold text-[var(--color-text)]">Theme</span>
                       <ThemeSwitcher />
                     </div>
+
+                    <Link href="/profile" onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-3 py-3 text-sm font-semibold text-[var(--color-text)] hover:text-[#ffe500] transition-colors">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
+                      My Profile
+                    </Link>
 
                     <button
                       onClick={() => { setIsMenuOpen(false); handleSwitchToReader(); }}
@@ -389,6 +407,15 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
                           <span className="text-[13px] font-bold text-[var(--color-text)] uppercase tracking-widest">Theme</span>
                           <ThemeSwitcher />
                         </div>
+
+                        <Link href="/profile" onClick={() => setIsMenuOpen(false)}
+                          className="py-3.5 text-[15px] font-semibold text-[var(--color-text)] hover:text-[var(--color-primary)] transition-colors border-t border-[var(--color-border)] flex items-center gap-3">
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                          </svg>
+                          My Profile
+                        </Link>
                       </div>
                     </nav>
                   </div>

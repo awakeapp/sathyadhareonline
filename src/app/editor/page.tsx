@@ -20,30 +20,19 @@ export default async function EditorDashboard() {
   const name = profile.full_name ?? 'Editor';
 
   // ── Stats ────────────────────────────────────────────────────────
-  const { count: totalCount } = await supabase
-    .from('articles').select('*', { count: 'exact', head: true })
-    .eq('author_id', user.id).eq('is_deleted', false);
+  const responses = await Promise.all([
+    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('author_id', user.id).eq('is_deleted', false),
+    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('author_id', user.id).eq('status', 'published').eq('is_deleted', false),
+    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('author_id', user.id).eq('status', 'draft').eq('is_deleted', false),
+    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('author_id', user.id).eq('status', 'in_review').eq('is_deleted', false),
+    supabase.from('articles').select('id, title, status, updated_at, slug').eq('author_id', user.id).eq('is_deleted', false).order('updated_at', { ascending: false }).limit(5),
+  ]);
 
-  const { count: publishedCount } = await supabase
-    .from('articles').select('*', { count: 'exact', head: true })
-    .eq('author_id', user.id).eq('status', 'published').eq('is_deleted', false);
-
-  const { count: draftCount } = await supabase
-    .from('articles').select('*', { count: 'exact', head: true })
-    .eq('author_id', user.id).eq('status', 'draft').eq('is_deleted', false);
-
-  const { count: reviewCount } = await supabase
-    .from('articles').select('*', { count: 'exact', head: true })
-    .eq('author_id', user.id).eq('status', 'in_review').eq('is_deleted', false);
-
-  // ── Recent articles ──────────────────────────────────────────────
-  const { data: recent } = await supabase
-    .from('articles')
-    .select('id, title, status, updated_at, slug')
-    .eq('author_id', user.id)
-    .eq('is_deleted', false)
-    .order('updated_at', { ascending: false })
-    .limit(5);
+  const totalCount = responses[0].count ?? 0;
+  const publishedCount = responses[1].count ?? 0;
+  const draftCount = responses[2].count ?? 0;
+  const reviewCount = responses[3].count ?? 0;
+  const recent = responses[4].data || [];
 
   const statusMeta: Record<string, { label: string; cls: string }> = {
     draft:     { label: 'Draft',      cls: 'bg-gray-500/10 text-[var(--color-muted)] border-gray-500/20' },
@@ -53,10 +42,10 @@ export default async function EditorDashboard() {
   };
 
   const stats = [
-    { label: 'Total Articles', value: totalCount ?? 0, color: '#8b5cf6' },
-    { label: 'Published',      value: publishedCount ?? 0, color: '#10b981' },
-    { label: 'In Review',      value: reviewCount ?? 0, color: '#f59e0b' },
-    { label: 'Drafts',         value: draftCount ?? 0, color: '#6b7280' },
+    { label: 'Total Articles', value: totalCount, color: '#8b5cf6' },
+    { label: 'Published',      value: publishedCount, color: '#10b981' },
+    { label: 'In Review',      value: reviewCount, color: '#f59e0b' },
+    { label: 'Drafts',         value: draftCount, color: '#6b7280' },
   ];
 
   return (
@@ -140,7 +129,7 @@ export default async function EditorDashboard() {
                     </p>
                   </div>
                   <span className={`flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${meta.cls}`}>
-                    {meta.label}
+                    {(meta as { label: string; cls: string }).label}
                   </span>
                   <Button asChild variant="outline" size="sm" className="hidden sm:flex rounded-full text-xs font-bold ml-2">
                     <Link href={`/editor/articles/${a.id}/edit`}>

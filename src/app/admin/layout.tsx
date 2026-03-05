@@ -9,16 +9,22 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   if (!user) redirect('/login');
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
+  let profile = null;
+  try {
+    const { data: p } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+    profile = p;
+  } catch (e) {
+    console.error('Admin layout fetching error:', e);
+  }
 
   const role = profile?.role;
 
   // Route protection
-  if (role !== 'admin' && role !== 'super_admin') {
+  if (!role || (role !== 'admin' && role !== 'super_admin')) {
     redirect('/login');
   }
 

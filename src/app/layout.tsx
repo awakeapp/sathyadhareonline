@@ -54,14 +54,22 @@ export default async function RootLayout({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  let role: string | null = null
+  let profile: {
+    role: string | null;
+    full_name: string | null;
+    avatar_url: string | null;
+  } | null = null
   if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-    role = profile?.role || null
+    try {
+      const { data: p } = await supabase
+        .from('profiles')
+        .select('role, full_name, avatar_url')
+        .eq('id', user.id)
+        .single()
+      profile = p || null
+    } catch (e) {
+      console.error('Layout profile fetch error:', e)
+    }
   }
 
 
@@ -80,11 +88,11 @@ export default async function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ReaderModeProvider>
             <div className="flex min-h-screen">
-              <NavigationWrapper role={role} />
+              <NavigationWrapper role={profile?.role || null} />
               
               <div className="flex-1 flex flex-col min-w-0">
                 {/* ─────────── FIXED TOP HEADER ─────────── */}
-                <TopHeader user={user} role={role} />
+                <TopHeader user={user} role={profile?.role || null} profile={profile} />
 
                 {/* ─────────── PAGE CONTENT ─────────── */}
                 <MainWrapper>{children}</MainWrapper>

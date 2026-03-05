@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Plus, LayoutTemplate, Shapes, Users, BarChart3, Settings, Eye, FileText, Layers, Image as ImageIcon, Hand } from 'lucide-react';
+import { Plus, Shapes, Users, Eye, FileText, Layers, Image as ImageIcon, Hand } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,17 +22,8 @@ export default async function AdminPage() {
   const isSuperAdmin = profile?.role === 'super_admin';
 
   // ── Real metrics ────────────────────────────────────────────
-  const [
-    { count: totalArticles },
-    { count: publishedArticles },
-    { count: draftArticles },
-    { count: inReviewArticles },
-    { count: totalViews },
-    { count: totalCategories },
-    { count: totalUsers },
-    { data: recentUsers },
-    { data: recentArticles },
-  ] = await Promise.all([
+  // ── Real metrics ────────────────────────────────────────────
+  const responses = await Promise.all([
     supabase.from('articles').select('*', { count: 'exact', head: true }).eq('is_deleted', false),
     supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'published').eq('is_deleted', false),
     supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'draft').eq('is_deleted', false),
@@ -43,6 +34,16 @@ export default async function AdminPage() {
     supabase.from('profiles').select('id, full_name, email, avatar_url').order('created_at', { ascending: false }).limit(5),
     supabase.from('articles').select('id, title, status, published_at').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
   ]);
+
+  const totalArticles = responses[0].count ?? 0;
+  const publishedArticles = responses[1].count ?? 0;
+  const draftArticles = responses[2].count ?? 0;
+  const inReviewArticles = responses[3].count ?? 0;
+  const totalViews = responses[4].count ?? 0;
+  const totalCategories = responses[5].count ?? 0;
+  const totalUsers = responses[6].count ?? 0;
+  const recentUsers = responses[7].data || [];
+  const recentArticles = responses[8].data || [];
 
   const initials = (profile?.full_name || user.email || 'A').charAt(0).toUpperCase();
 
@@ -143,8 +144,8 @@ export default async function AdminPage() {
                 <Card hoverable className="rounded-2xl">
                   <div className="flex items-center justify-between gap-3 px-5 py-3.5">
                     <span className="flex-1 text-sm font-bold truncate group-hover:text-[var(--color-primary)] transition-colors">{a.title}</span>
-                    <span className={`shrink-0 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${statusColor(a.status)}`}>
-                      {a.status.replace('_', ' ')}
+                    <span className={`shrink-0 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${statusColor(a.status || 'draft')}`}>
+                      {(a.status || 'draft').replace('_', ' ')}
                     </span>
                   </div>
                 </Card>

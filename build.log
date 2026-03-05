@@ -1,0 +1,77 @@
+﻿
+> sathyadhare@0.1.0 build
+> next build
+
+Ôû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+node.exe : ÔÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ÔÜá The "middle...leware-to-proxy:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 11.0s
+  Running TypeScript ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/6) ...
+  Generating static pages using 7 workers (1/6) 
+  Generating static pages using 7 workers (2/6) 
+  Generating static pages using 7 workers (4/6) 
+Ô£ô Generating static pages using 7 workers (6/6) in 135.7ms
+  Finalizing page optimization ...
+
+Route (app)
+Ôöî ãÆ /
+Ôö£ ãÆ /_not-found
+Ôö£ ãÆ /admin
+Ôö£ ãÆ /admin/analytics
+Ôö£ ãÆ /admin/articles
+Ôö£ ãÆ /admin/articles/[id]/edit
+Ôö£ ãÆ /admin/articles/new
+Ôö£ ãÆ /admin/categories
+Ôö£ ãÆ /admin/categories/new
+Ôö£ ãÆ /admin/comments
+Ôö£ ãÆ /admin/friday
+Ôö£ ãÆ /admin/friday/new
+Ôö£ ãÆ /admin/media
+Ôö£ ãÆ /admin/newsletter
+Ôö£ ãÆ /admin/sequels
+Ôö£ ãÆ /admin/sequels/[id]/edit
+Ôö£ ãÆ /admin/sequels/new
+Ôö£ ãÆ /admin/series
+Ôö£ ãÆ /admin/series/[id]
+Ôö£ ãÆ /admin/submissions
+Ôö£ ãÆ /admin/users
+Ôö£ ãÆ /api/admin/categories
+Ôö£ ãÆ /api/admin/newsletter
+Ôö£ ãÆ /api/admin/newsletter/send
+Ôö£ ãÆ /app
+Ôö£ ãÆ /articles/[slug]
+Ôö£ ãÆ /auth/callback
+Ôö£ ãÆ /authors/[id]
+Ôö£ ãÆ /categories/[slug]
+Ôö£ ãÆ /editor
+Ôö£ ãÆ /editor/articles
+Ôö£ ãÆ /editor/articles/[id]/edit
+Ôö£ ãÆ /editor/articles/new
+Ôö£ ãÆ /friday
+Ôö£ ãÆ /login
+Ôö£ ãÆ /logout
+Ôö£ ãÆ /profile
+Ôö£ ãÆ /saved
+Ôö£ ãÆ /search
+Ôö£ ãÆ /sequels
+Ôö£ ãÆ /sequels/[slug]
+Ôö£ ãÆ /signup
+Ôö£ ãÆ /submit
+Ôö£ ãÆ /test
+Ôöö ãÆ /test_ui
+
+
+ãÆ Proxy (Middleware)
+
+ãÆ  (Dynamic)  server-rendered on demand
+
