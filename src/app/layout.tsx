@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import InstallPrompt from '@/components/InstallPrompt'
 import BottomNavigation from '@/components/ui/BottomNavigation'
 import TopHeader from '@/components/ui/TopHeader'
+import MainWrapper from '@/components/MainWrapper'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -24,6 +25,8 @@ export const viewport: Viewport = {
   themeColor: '#181623',
   width: 'device-width',
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: 'cover',
 }
 
@@ -58,10 +61,7 @@ export default async function RootLayout({
     role = profile?.role || null
   }
 
-  const { data: categories } = await supabase
-    .from('categories')
-    .select('name, slug')
-    .order('name')
+
 
   return (
     <html lang="en" className={`dark ${dmSans.variable} ${balooTamma.variable}`} suppressHydrationWarning>
@@ -70,27 +70,20 @@ export default async function RootLayout({
         style={{ 
           backgroundColor: 'var(--color-background)',
           color: 'var(--color-text)',
-          minHeight: '100dvh',
-          display: 'flex',
-          flexDirection: 'column'
+          margin: 0,
+          padding: 0,
         }}
       >
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--color-background)' }}>
-          {/* ─────────── STICKY TOP HEADER ─────────── */}
-          <TopHeader user={user} role={role} categories={categories ?? []} />
+        {/* ─────────── FIXED TOP HEADER ─────────── */}
+        <TopHeader user={user} role={role} />
 
-          {/* ─────────── PAGE CONTENT (Elastic Page Transitions) ─────────── */}
-          <main className="flex-1 overflow-x-hidden pb-32 pt-2 animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out" 
-                style={{ WebkitTapHighlightColor: 'transparent' }}>
-            {children}
-          </main>
+        {/* ─────────── PAGE CONTENT ─────────── */}
+        <MainWrapper>{children}</MainWrapper>
 
-          {/* ─────────── FIXED BOTTOM NAV ─────────── */}
-          <BottomNavigation user={user} role={role} />
-          
-          <InstallPrompt />
-        </div>
+        {/* ─────────── FIXED BOTTOM NAV ─────────── */}
+        <BottomNavigation user={user} role={role} />
         
+        <InstallPrompt />
       </body>
     </html>
   )

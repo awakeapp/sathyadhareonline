@@ -1,9 +1,15 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const ADMIN_ROLES = ['super_admin', 'editor', 'moderator']
+// Route access rules
+const ROUTE_ROLES: Record<string, string[]> = {
+  '/admin':  ['super_admin', 'admin'],
+  '/editor': ['super_admin', 'admin', 'editor'],
+  '/app':    ['super_admin', 'admin', 'editor', 'reader'],
+}
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
   const response = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -29,24 +35,62 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
-    return NextResponse.redirect(new URL('/', request.url))
+  // ---------- Auth guard for protected routes ----------
+  const protectedPrefix = Object.keys(ROUTE_ROLES).find((prefix) =>
+    pathname.startsWith(prefix)
+  )
+
+  if (protectedPrefix) {
+    // Must be logged in
+    if (!user) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+
+    // Fetch role from profiles table
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    const role = profile?.role as string | undefined
+
+    const allowedRoles = ROUTE_ROLES[protectedPrefix]
+    if (!role || !allowedRoles.includes(role)) {
+      // Redirect unauthorized users to login
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
   }
 
-  // Fetch role from profiles table
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
+  // ---------- Redirect logged-in users away from /login and /signup ----------
+  if (user && (pathname === '/login' || pathname === '/signup')) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
 
-  if (!profile || !ADMIN_ROLES.includes(profile.role)) {
-    return NextResponse.redirect(new URL('/', request.url))
+    const role = profile?.role as string | undefined
+
+    if (role === 'super_admin' || role === 'admin') {
+      return NextResponse.redirect(new URL('/admin', request.url))
+    } else if (role === 'editor') {
+      return NextResponse.redirect(new URL('/editor', request.url))
+    } else {
+      return NextResponse.redirect(new URL('/app', request.url))
+    }
   }
 
   return response
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: [
+    '/admin/:path*',
+    '/editor/:path*',
+    '/app/:path*',
+    '/login',
+    '/signup',
+    // Note: /auth/callback is intentionally NOT in the matcher so it passes through freely
+  ],
 }
