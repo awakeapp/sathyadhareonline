@@ -185,8 +185,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
               </Link>
             )}
 
-            {/* Theme toggle */}
-            <ThemeSwitcher />
+
 
             {/* ── 3-bar hamburger "More" ─────────────────────────── */}
             <button
@@ -275,6 +274,12 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
                     </Link>
 
                     <div className="h-px bg-[var(--color-border)] my-2" />
+                    
+                    {/* Theme Toggle in Drawer */}
+                    <div className="flex items-center justify-between py-3">
+                      <span className="text-sm font-semibold text-[var(--color-text)]">Theme</span>
+                      <ThemeSwitcher />
+                    </div>
 
                     {/* Switch to Reader Mode CTA in drawer */}
                     <button
@@ -368,6 +373,14 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
                             Login
                           </Link>
                         )}
+                        
+                        <div className="h-px bg-[var(--color-border)] my-2" />
+                        
+                        {/* Theme Toggle in Drawer */}
+                        <div className="flex items-center justify-between py-2">
+                          <span className="text-[13px] font-bold text-[var(--color-text)] uppercase tracking-widest">Theme</span>
+                          <ThemeSwitcher />
+                        </div>
                       </div>
                     </nav>
                   </div>

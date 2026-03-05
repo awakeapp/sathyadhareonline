@@ -3,6 +3,9 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { DeleteArticleButton } from './DeleteArticleButton';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Plus, ChevronLeft, FileText, Sparkles, AlertCircle } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,66 +13,26 @@ export const dynamic = 'force-dynamic';
 type ArticleStatus = 'draft' | 'in_review' | 'published' | 'archived';
 
 const STATUS_META: Record<ArticleStatus, { label: string; color: string }> = {
-  draft:      { label: 'Draft',      color: 'bg-gray-500/10 text-gray-400 border-gray-500/20' },
-  in_review:  { label: 'In Review',  color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-  published:  { label: 'Published',  color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
-  archived:   { label: 'Archived',   color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+  draft:      { label: 'Draft',      color: 'bg-gray-500/10 text-[var(--color-muted)] border-gray-500/20' },
+  in_review:  { label: 'In Review',  color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
+  published:  { label: 'Published',  color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
+  archived:   { label: 'Archived',   color: 'bg-purple-500/10 text-purple-500 border-purple-500/20' },
 };
 
 // Allowed role → transitions map
 // Admins:     in_review → published | in_review → archived | published → archived
-const TRANSITIONS: Record<string, { from: ArticleStatus[]; to: ArticleStatus; label: string; btnClass: string }[]> = {
+const TRANSITIONS: Record<string, { from: ArticleStatus[]; to: ArticleStatus; label: string; btnVariant: "primary" | "secondary" | "ghost" | "outline" | "destructive", customClass?: string }[]> = {
   admin: [
-    {
-      from: ['draft'],
-      to: 'in_review',
-      label: 'Submit for Review',
-      btnClass: 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/20',
-    },
-    {
-      from: ['in_review'],
-      to: 'published',
-      label: 'Approve & Publish',
-      btnClass: 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20',
-    },
-    {
-      from: ['in_review', 'published'],
-      to: 'archived',
-      label: 'Archive',
-      btnClass: 'bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border-purple-500/20',
-    },
-    {
-      from: ['archived'],
-      to: 'draft',
-      label: 'Unarchive (Draft)',
-      btnClass: 'bg-gray-500/10 hover:bg-gray-500/20 text-gray-300 border-gray-500/20',
-    },
+    { from: ['draft'], to: 'in_review', label: 'Submit for Review', btnVariant: 'outline', customClass: 'text-amber-500 hover:text-amber-500 bg-amber-500/5 hover:bg-amber-500/10 border-amber-500/20' },
+    { from: ['in_review'], to: 'published', label: 'Approve & Publish', btnVariant: 'outline', customClass: 'text-emerald-500 hover:text-emerald-500 bg-emerald-500/5 hover:bg-emerald-500/10 border-emerald-500/20' },
+    { from: ['in_review', 'published'], to: 'archived', label: 'Archive', btnVariant: 'outline', customClass: 'text-purple-500 hover:text-purple-500 bg-purple-500/5 hover:bg-purple-500/10 border-purple-500/20' },
+    { from: ['archived'], to: 'draft', label: 'Unarchive (Draft)', btnVariant: 'outline' },
   ],
   super_admin: [
-    {
-      from: ['draft'],
-      to: 'in_review',
-      label: 'Submit for Review',
-      btnClass: 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/20',
-    },
-    {
-      from: ['in_review'],
-      to: 'published',
-      label: 'Approve & Publish',
-      btnClass: 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20',
-    },
-    {
-      from: ['in_review', 'published'],
-      to: 'archived',
-      label: 'Archive',
-      btnClass: 'bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border-purple-500/20',
-    },
-    {
-      from: ['archived'],
-      to: 'draft',
-      label: 'Unarchive (Draft)',
-      btnClass: 'bg-gray-500/10 hover:bg-gray-500/20 text-gray-300 border-gray-500/20',
-    },
+    { from: ['draft'], to: 'in_review', label: 'Submit for Review', btnVariant: 'outline', customClass: 'text-amber-500 hover:text-amber-500 bg-amber-500/5 hover:bg-amber-500/10 border-amber-500/20' },
+    { from: ['in_review'], to: 'published', label: 'Approve & Publish', btnVariant: 'outline', customClass: 'text-emerald-500 hover:text-emerald-500 bg-emerald-500/5 hover:bg-emerald-500/10 border-emerald-500/20' },
+    { from: ['in_review', 'published'], to: 'archived', label: 'Archive', btnVariant: 'outline', customClass: 'text-purple-500 hover:text-purple-500 bg-purple-500/5 hover:bg-purple-500/10 border-purple-500/20' },
+    { from: ['archived'], to: 'draft', label: 'Unarchive (Draft)', btnVariant: 'outline' },
   ],
 };
 
@@ -205,89 +168,92 @@ export default async function ArticlesPage() {
 
   // ── Render ───────────────────────────────────────────────────
   return (
-    <div className="min-h-screen pb-24 px-4 pt-6 bg-[var(--color-background)] font-sans antialiased text-white safe-area-pb">
-      <div className="max-w-2xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <Link href="/admin" className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:text-white transition-colors active:scale-95">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
+    <div className="font-sans antialiased max-w-3xl mx-auto py-2">
+      <div className="flex items-center justify-between mb-8 mt-4">
+        <div className="flex items-center gap-4">
+          <Button asChild variant="outline" size="icon" className="rounded-full w-10 h-10 border-[var(--color-border)] text-[var(--color-muted)]">
+            <Link href="/admin">
+              <ChevronLeft className="w-5 h-5" />
             </Link>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-white leading-tight">
-                Articles
-              </h1>
-              <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
-                {articles?.length || 0} Total · {role}
-              </p>
-            </div>
+          </Button>
+          <div>
+            <h1 className="text-2xl font-black tracking-tight leading-tight">
+              Articles
+            </h1>
+            <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
+              {articles?.length || 0} Total · {role}
+            </p>
           </div>
-          <Link
-            href="/admin/articles/new"
-            className="flex items-center gap-1.5 bg-[var(--color-primary)] text-black px-4 py-2.5 rounded-full text-sm font-bold hover:bg-[#ffed4a] transition-all shadow-lg shadow-[var(--color-primary)]/20 active:scale-95"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>
-            <span className="hidden sm:inline">New</span>
+        </div>
+        <Button asChild className="rounded-full shadow-sm pr-5">
+          <Link href="/admin/articles/new">
+            <Plus className="w-5 h-5 mr-1" />
+            <span className="hidden sm:inline">New Article</span>
+            <span className="sm:hidden">New</span>
           </Link>
-        </div>
+        </Button>
+      </div>
 
-        {/* ── Workflow legend ─────────────────────────────── */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {(Object.entries(STATUS_META) as [ArticleStatus, { label: string; color: string }][]).map(([key, meta]) => (
-            <span key={key} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${meta.color}`}>
-              {meta.label}
-            </span>
-          ))}
-        </div>
+      {/* ── Workflow legend ─────────────────────────────── */}
+      <div className="flex flex-wrap gap-2 mb-6 px-1">
+        {(Object.entries(STATUS_META) as [ArticleStatus, { label: string; color: string }][]).map(([key, meta]) => (
+          <span key={key} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${meta.color}`}>
+            {meta.label}
+          </span>
+        ))}
+      </div>
 
-        {!articles || articles.length === 0 ? (
-          <div className="py-20 text-center text-[var(--color-muted)] flex flex-col items-center bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl p-8">
-            <svg className="w-12 h-12 mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9" /></svg>
-            <p className="font-semibold text-white mb-1">No articles found</p>
-            <p className="text-sm">Create your first article to get started!</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {articles.map((article) => {
-              const status = (article.status ?? 'draft') as ArticleStatus;
-              const statusMeta = STATUS_META[status] ?? STATUS_META.draft;
+      {!articles || articles.length === 0 ? (
+        <Card className="py-20 text-center flex flex-col items-center border-[var(--color-border)] border-dashed rounded-[2rem] shadow-none bg-[var(--color-surface)]">
+          <FileText className="w-12 h-12 mb-4 opacity-20 text-[var(--color-muted)]" />
+          <p className="font-bold mb-1 text-lg tracking-tight">No articles found</p>
+          <p className="text-sm text-[var(--color-muted)]">Create your first article to get started!</p>
+          <Button asChild className="mt-6 rounded-xl">
+             <Link href="/admin/articles/new">Write Article</Link>
+          </Button>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {articles.map((article) => {
+            const status = (article.status ?? 'draft') as ArticleStatus;
+            const statusMeta = STATUS_META[status] ?? STATUS_META.draft;
 
-              // Resolve which transition buttons this role can show for this article
-              const availableTransitions = allowedTransitions.filter(
-                (t) => t.from.includes(status) && !article.is_deleted
-              );
+            // Resolve which transition buttons this role can show for this article
+            const availableTransitions = allowedTransitions.filter(
+              (t) => t.from.includes(status) && !article.is_deleted
+            );
 
-              return (
-                <div
-                  key={article.id}
-                  className={`flex flex-col p-5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl shadow-lg relative overflow-hidden group transition-all ${
-                    article.is_deleted ? 'opacity-60 grayscale-[50%]' : ''
-                  } ${
-                    article.is_featured && !article.is_deleted ? 'border-[var(--color-primary)]/30 shadow-[var(--color-primary)]/5' : ''
-                  } ${
-                    status === 'in_review' && !article.is_deleted ? 'border-amber-500/20' : ''
-                  }`}
-                >
+            return (
+              <Card
+                key={article.id}
+                className={`overflow-hidden transition-all duration-300 ${
+                  article.is_deleted ? 'opacity-50 grayscale' : ''
+                } ${
+                  article.is_featured && !article.is_deleted ? 'border-[var(--color-primary)]/30 ring-1 ring-[var(--color-primary)]/30' : ''
+                } ${
+                  status === 'in_review' && !article.is_deleted ? 'border-amber-500/30' : ''
+                }`}
+              >
+                <CardContent className="p-5">
                   {/* ── Title & badges ──────────────────────── */}
-                  <div className="mb-4">
-                    <div className="flex items-start gap-2 mb-2">
+                  <div className="mb-5">
+                    <div className="flex items-start gap-2.5 mb-2.5">
                       {article.is_featured && (
-                        <span title="Featured" className="text-[var(--color-primary)] text-lg mt-0.5">
-                          <svg className="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                        <span title="Featured" className="text-[var(--color-primary)] mt-0.5">
+                          <Sparkles className="w-5 h-5 fill-current" />
                         </span>
                       )}
-                      <h3 className="font-bold text-white text-[16px] leading-tight flex-1">{article.title}</h3>
+                      <h3 className="font-bold text-lg leading-tight tracking-tight flex-1">{article.title}</h3>
                     </div>
 
-                    <div className="flex gap-2 items-center flex-wrap">
+                    <div className="flex gap-2 items-center flex-wrap mt-2">
                       {/* Status badge */}
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${statusMeta.color}`}>
                         {statusMeta.label}
                       </span>
                       {article.is_deleted && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/20">
-                          Deleted
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-500/10 text-red-500 border border-red-500/20">
+                          <AlertCircle className="w-3 h-3 mr-1" /> Deleted
                         </span>
                       )}
                     </div>
@@ -298,12 +264,11 @@ export default async function ArticlesPage() {
 
                     {/* Edit — always visible (non-deleted) */}
                     {!article.is_deleted && (
-                      <Link
-                        href={`/admin/articles/${article.id}/edit`}
-                        className="flex-1 sm:flex-none text-center bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 px-4 py-2 rounded-xl transition-colors text-xs font-bold uppercase tracking-wider"
-                      >
-                        Edit
-                      </Link>
+                      <Button asChild variant="outline" size="sm" className="flex-1 sm:flex-none text-blue-500 hover:text-blue-500 hover:bg-blue-500/10 border-blue-500/20 bg-blue-500/5">
+                        <Link href={`/admin/articles/${article.id}/edit`}>
+                          Edit
+                        </Link>
+                      </Button>
                     )}
 
                     {/* ── Workflow transition buttons ──────── */}
@@ -311,12 +276,14 @@ export default async function ArticlesPage() {
                       <form key={t.to} action={transitionStatusAction} className="flex-1 sm:flex-none">
                         <input type="hidden" name="id"  value={article.id} />
                         <input type="hidden" name="to"  value={t.to} />
-                        <button
+                        <Button
                           type="submit"
-                          className={`w-full text-center px-4 py-2 rounded-xl border transition-colors text-xs font-bold uppercase tracking-wider ${t.btnClass}`}
+                          variant={t.btnVariant}
+                          size="sm"
+                          className={`w-full ${t.customClass || ''}`}
                         >
                           {t.label}
-                        </button>
+                        </Button>
                       </form>
                     ))}
 
@@ -325,16 +292,14 @@ export default async function ArticlesPage() {
                       <form action={featureArticleAction} className="flex-1 sm:flex-none">
                         <input type="hidden" name="id"      value={article.id} />
                         <input type="hidden" name="current" value={String(article.is_featured)} />
-                        <button
+                        <Button
                           type="submit"
-                          className={`w-full text-center px-4 py-2 rounded-xl border transition-colors text-xs font-bold uppercase tracking-wider ${
-                            article.is_featured
-                              ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] border-[var(--color-primary)]/20 hover:bg-[var(--color-primary)]/20'
-                              : 'bg-white/5 text-[var(--color-muted)] border-white/10 hover:bg-white/10 hover:text-white'
-                          }`}
+                          size="sm"
+                          variant={article.is_featured ? 'primary' : 'outline'}
+                          className={`w-full ${article.is_featured ? 'shadow-sm shadow-[var(--color-primary)]/20 text-black' : ''}`}
                         >
                           {article.is_featured ? 'Unfeature' : 'Feature'}
-                        </button>
+                        </Button>
                       </form>
                     )}
 
@@ -342,9 +307,9 @@ export default async function ArticlesPage() {
                     {article.is_deleted && (
                       <form action={restoreArticleAction} className="flex-1 sm:flex-none">
                         <input type="hidden" name="id" value={article.id} />
-                        <button type="submit" className="w-full text-center bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 px-4 py-2 rounded-xl transition-colors text-xs font-bold uppercase tracking-wider">
+                        <Button type="submit" variant="outline" size="sm" className="w-full text-sky-500 hover:text-sky-500 bg-sky-500/5 hover:bg-sky-500/10 border-sky-500/20">
                           Restore
-                        </button>
+                        </Button>
                       </form>
                     )}
 
@@ -360,12 +325,12 @@ export default async function ArticlesPage() {
                     )}
 
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

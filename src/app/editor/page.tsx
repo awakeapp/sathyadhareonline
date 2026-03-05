@@ -1,6 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { Card, CardContent, CardHeader } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { SquarePen, FileText, ChevronRight, Eye } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,112 +46,127 @@ export default async function EditorDashboard() {
     .limit(5);
 
   const statusMeta: Record<string, { label: string; cls: string }> = {
-    draft:     { label: 'Draft',      cls: 'bg-gray-500/10 text-gray-400 border-gray-500/20' },
-    in_review: { label: 'In Review',  cls: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-    published: { label: 'Published',  cls: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
-    archived:  { label: 'Archived',   cls: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+    draft:     { label: 'Draft',      cls: 'bg-gray-500/10 text-[var(--color-muted)] border-gray-500/20' },
+    in_review: { label: 'In Review',  cls: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
+    published: { label: 'Published',  cls: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
+    archived:  { label: 'Archived',   cls: 'bg-purple-500/10 text-purple-500 border-purple-500/20' },
   };
 
   const stats = [
-    { label: 'Total Articles', value: totalCount ?? 0, color: 'text-indigo-400', bg: 'bg-indigo-500/10 border-indigo-500/20' },
-    { label: 'Published',      value: publishedCount ?? 0, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
-    { label: 'In Review',      value: reviewCount ?? 0, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
-    { label: 'Drafts',         value: draftCount ?? 0, color: 'text-gray-300', bg: 'bg-gray-500/10 border-gray-500/20' },
+    { label: 'Total Articles', value: totalCount ?? 0, color: '#8b5cf6' },
+    { label: 'Published',      value: publishedCount ?? 0, color: '#10b981' },
+    { label: 'In Review',      value: reviewCount ?? 0, color: '#f59e0b' },
+    { label: 'Drafts',         value: draftCount ?? 0, color: '#6b7280' },
   ];
 
   return (
-    <div className="min-h-full pb-16 px-5 pt-8 max-w-3xl mx-auto">
+    <div className="font-sans antialiased max-w-5xl mx-auto py-2">
 
-      {/* ── Welcome header ──────────────────────────────────────── */}
-      <div className="mb-8">
-        <p className="text-xs uppercase tracking-widest font-semibold text-violet-400 mb-1">Editor Workspace</p>
-        <h1 className="text-2xl font-extrabold text-white tracking-tight">
+      {/* ── Profile header ────────────────────────────────────── */}
+      <header className="mb-10 mt-4">
+        <p className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-widest">Editor Workspace</p>
+        <h1 className="text-2xl font-black tracking-tight mt-1 truncate">
           Welcome back, {name.split(' ')[0]} 👋
         </h1>
-        <p className="text-sm text-white/40 mt-1">Here&apos;s what&apos;s happening with your articles today.</p>
-      </div>
+        <p className="text-sm text-[var(--color-muted)] mt-1 font-semibold">Here&apos;s your content overview for today.</p>
+      </header>
 
-      {/* ── Stat cards ──────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        {stats.map(s => (
-          <div key={s.label} className={`rounded-2xl border p-4 ${s.bg}`}>
-            <p className={`text-2xl font-extrabold tabular-nums ${s.color}`}>{s.value}</p>
-            <p className="text-[11px] text-white/40 font-semibold uppercase tracking-wider mt-0.5">{s.label}</p>
-          </div>
+      {/* ── Stats row ──────────────────────────────────────── */}
+      <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--color-muted)] mb-4">Your Progress</h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
+        {stats.map((s) => (
+          <Card key={s.label} hoverable className="rounded-[1.5rem]">
+            <CardContent className="p-5 flex flex-col gap-1 items-center justify-center text-center">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted)]">{s.label}</span>
+              <span className="text-[28px] font-black tracking-tight" style={{ color: s.color }}>{s.value}</span>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
-      {/* ── Quick actions ────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-        <Link href="/editor/articles/new"
-          className="flex items-center gap-4 p-5 rounded-2xl bg-violet-600/15 border border-violet-500/25 hover:bg-violet-600/25 transition-all group">
-          <div className="w-11 h-11 rounded-xl bg-violet-600/25 flex items-center justify-center text-violet-300 flex-shrink-0 group-hover:bg-violet-600/40 transition-colors">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-          </div>
-          <div>
-            <p className="font-bold text-white text-sm">Write New Article</p>
-            <p className="text-xs text-white/40 mt-0.5">Start a fresh draft</p>
-          </div>
-          <svg className="w-4 h-4 text-white/20 ml-auto group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 18l6-6-6-6" /></svg>
+      {/* ── Quick Actions ────────────────────────────────────────── */}
+      <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--color-muted)] mb-4">Quick Actions</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-10">
+        <Link href="/editor/articles/new" className="group outline-none">
+          <Card hoverable className="h-full rounded-[1.5rem] bg-[var(--color-surface)] group-hover:bg-[var(--color-surface-2)] transition-colors border-transparent">
+            <CardContent className="p-5 flex items-center gap-4 h-full">
+              <div className="w-12 h-12 rounded-2xl bg-violet-600 border border-violet-500/20 flex items-center justify-center text-white shadow-lg shadow-violet-600/20 group-hover:scale-105 transition-transform">
+                <SquarePen className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-sm text-[var(--color-text)] truncate">Write New Article</p>
+                <p className="text-xs text-[var(--color-muted)] mt-0.5 truncate">Start a fresh draft</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[var(--color-muted)] opacity-50 group-hover:translate-x-1 group-hover:opacity-100 transition-all" />
+            </CardContent>
+          </Card>
         </Link>
 
-        <Link href="/editor/articles"
-          className="flex items-center gap-4 p-5 rounded-2xl bg-white/[0.04] border border-white/8 hover:bg-white/[0.07] transition-all group">
-          <div className="w-11 h-11 rounded-xl bg-white/8 flex items-center justify-center text-white/50 flex-shrink-0 group-hover:bg-white/15 transition-colors">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9" />
-            </svg>
-          </div>
-          <div>
-            <p className="font-bold text-white text-sm">My Articles</p>
-            <p className="text-xs text-white/40 mt-0.5">{totalCount ?? 0} article{totalCount !== 1 ? 's' : ''} total</p>
-          </div>
-          <svg className="w-4 h-4 text-white/20 ml-auto group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 18l6-6-6-6" /></svg>
+        <Link href="/editor/articles" className="group outline-none">
+          <Card hoverable className="h-full rounded-[1.5rem] bg-[var(--color-surface)] group-hover:bg-[var(--color-surface-2)] transition-colors border-transparent">
+            <CardContent className="p-5 flex items-center gap-4 h-full">
+              <div className="w-12 h-12 rounded-2xl bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-primary)] shadow-sm group-hover:scale-105 transition-transform">
+                <FileText className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-sm text-[var(--color-text)] truncate">My Articles</p>
+                <p className="text-xs text-[var(--color-muted)] mt-0.5 truncate">Manage your {totalCount ?? 0} post{totalCount !== 1 ? 's' : ''}</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[var(--color-muted)] opacity-50 group-hover:translate-x-1 group-hover:opacity-100 transition-all" />
+            </CardContent>
+          </Card>
         </Link>
       </div>
 
       {/* ── Recent articles ──────────────────────────────────────── */}
-      <div className="bg-[#181623] border border-white/5 rounded-3xl overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
-          <h2 className="text-sm font-bold text-white uppercase tracking-wider">Recent Activity</h2>
-          <Link href="/editor/articles" className="text-xs text-violet-400 hover:text-violet-300 font-semibold transition-colors">
-            View all →
-          </Link>
-        </div>
-
+      <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--color-muted)] mb-4">Recent Activity</h2>
+      <Card hoverable className="rounded-3xl overflow-hidden mb-10 border-[var(--color-border)]">
         {!recent || recent.length === 0 ? (
-          <div className="py-14 text-center text-white/30">
-            <svg className="w-10 h-10 mx-auto mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9" /></svg>
-            <p className="text-sm font-semibold text-white/40">No articles yet</p>
-            <p className="text-xs mt-1 text-white/20">Write your first article to get started</p>
+          <div className="py-14 text-center">
+            <FileText className="w-10 h-10 mx-auto mb-3 opacity-20 text-[var(--color-muted)]" />
+            <p className="text-sm font-bold text-[var(--color-muted)]">No articles yet</p>
+            <p className="text-xs mt-1 text-[var(--color-muted)] opacity-70">Write your first article to get started</p>
           </div>
         ) : (
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-[var(--color-border)]">
             {recent.map(a => {
               const meta = statusMeta[a.status] ?? statusMeta.draft;
               return (
-                <div key={a.id} className="flex items-center px-5 py-3.5 gap-3 hover:bg-white/[0.02] transition-colors">
+                <div key={a.id} className="flex items-center px-5 py-4 gap-3 hover:bg-[var(--color-surface)] transition-colors">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-white truncate">{a.title}</p>
-                    <p className="text-[11px] text-white/30 mt-0.5">
+                    <p className="text-sm font-bold text-[var(--color-text)] truncate group-hover:text-[var(--color-primary)] transition-colors">{a.title}</p>
+                    <p className="text-[11px] font-semibold text-[var(--color-muted)] mt-1">
                       Updated {new Date(a.updated_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </p>
                   </div>
                   <span className={`flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${meta.cls}`}>
                     {meta.label}
                   </span>
-                  <Link href={`/editor/articles/${a.id}/edit`}
-                    className="flex-shrink-0 px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 text-[11px] font-bold uppercase tracking-wider transition-colors">
-                    Edit
+                  <Button asChild variant="outline" size="sm" className="hidden sm:flex rounded-full text-xs font-bold ml-2">
+                    <Link href={`/editor/articles/${a.id}/edit`}>
+                      Edit
+                    </Link>
+                  </Button>
+                  <Link href={`/editor/articles/${a.id}/edit`} className="sm:hidden p-2 text-[var(--color-primary)] ml-2 bg-[var(--color-primary)]/10 rounded-full">
+                     <SquarePen className="w-4 h-4" />
                   </Link>
                 </div>
               );
             })}
           </div>
         )}
+      </Card>
+
+      {/* ── Site link ─────────────────────────────────────────── */}
+      <div className="flex justify-center pb-8 border-t border-[var(--color-border)] pt-8">
+        <Button asChild variant="secondary" className="rounded-full shadow-sm pr-7 pl-6">
+          <Link href="/">
+            <Eye className="w-4 h-4 mr-2" />
+            View Reader Site
+          </Link>
+        </Button>
       </div>
+
     </div>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useTransition } from 'react';
+import { Select } from '@/components/ui/Input';
 
 const ROLES = ['reader', 'editor', 'admin'] as const;
 
@@ -27,24 +28,24 @@ export function RoleSelect({ userId, currentRole, updateRole }: Props) {
   }
 
   return (
-    <form ref={formRef} className="flex items-center gap-2">
+    <form ref={formRef} className="flex items-center gap-3">
       <input type="hidden" name="userId" value={userId} />
-      <select
+      <Select
         name="role"
         defaultValue={currentRole}
         onChange={handleChange}
         disabled={isPending}
-        className="rounded-xl border px-3 py-1.5 text-xs font-bold bg-black/30 border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 disabled:opacity-50 disabled:cursor-wait transition-all appearance-none cursor-pointer hover:border-white/20"
+        className="h-9 py-1 text-xs bg-[var(--color-surface-2)]"
       >
         {ROLES.map((r) => (
-          <option key={r} value={r} className="bg-[#181623]">
+          <option key={r} value={r}>
             {ROLE_LABELS[r] ?? r}
           </option>
         ))}
-      </select>
+      </Select>
       {isPending && (
-        <span className="text-[10px] text-[var(--color-muted)] animate-pulse font-semibold">
-          saving…
+        <span className="text-[10px] text-[var(--color-muted)] animate-pulse font-bold tracking-widest uppercase">
+          Saving
         </span>
       )}
     </form>

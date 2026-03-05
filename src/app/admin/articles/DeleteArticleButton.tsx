@@ -1,6 +1,7 @@
 'use client';
 
 import { useTransition } from 'react';
+import { Button } from '@/components/ui/Button';
 
 interface Props {
   articleId: string;
@@ -23,13 +24,15 @@ export function DeleteArticleButton({ articleId, articleTitle, deleteAction }: P
   }
 
   return (
-    <button
+    <Button
       type="button"
       onClick={handleClick}
       disabled={isPending}
-      className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-md transition-colors text-xs font-semibold disabled:opacity-50 disabled:cursor-wait"
+      variant="destructive"
+      size="sm"
+      className="w-full sm:w-auto"
     >
       {isPending ? 'Deleting…' : 'Delete'}
-    </button>
+    </Button>
   );
 }

@@ -3,16 +3,20 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import Link from 'next/link';
 import { RoleSelect } from './RoleSelect';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Input, Select, Label } from '@/components/ui/Input';
+import { ChevronLeft, UserPlus, ShieldCheck } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 const ALLOWED_ROLES = ['reader', 'editor', 'admin'];
 
 const ROLE_META: Record<string, { label: string; color: string }> = {
-  super_admin: { label: 'Super Admin', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
-  admin:       { label: 'Admin',       color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-  editor:      { label: 'Editor',      color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-  reader:      { label: 'Reader',      color: 'bg-gray-500/10 text-gray-400 border-gray-500/20' },
+  super_admin: { label: 'Super Admin', color: 'bg-purple-500/10 text-purple-500 border-purple-500/20' },
+  admin:       { label: 'Admin',       color: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
+  editor:      { label: 'Editor',      color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
+  reader:      { label: 'Reader',      color: 'bg-gray-500/10 text-[var(--color-muted)] border-gray-500/20' },
 };
 
 async function updateRole(formData: FormData) {
@@ -83,137 +87,120 @@ export default async function AdminUsersPage() {
     new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 
   return (
-    <div className="min-h-screen pb-24 px-4 pt-6 bg-[var(--color-background)] font-sans antialiased text-white safe-area-pb">
-      <div className="max-w-2xl mx-auto space-y-8">
+    <div className="font-sans antialiased max-w-3xl mx-auto py-2">
 
-        {/* ── Header ─────────────────────────────────────────── */}
-        <div className="flex items-center gap-3">
-          <Link href="/admin"
-            className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:text-white transition-colors active:scale-95">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
+      {/* ── Header ─────────────────────────────────────────── */}
+      <div className="flex items-center gap-4 mb-8 mt-4">
+        <Button asChild variant="outline" size="icon" className="rounded-full w-10 h-10 border-[var(--color-border)] text-[var(--color-muted)]">
+          <Link href="/admin">
+            <ChevronLeft className="w-5 h-5" />
           </Link>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight leading-tight">Users & Roles</h1>
-            <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
-              {users?.length || 0} profiles · super admin view
-            </p>
-          </div>
+        </Button>
+        <div>
+          <h1 className="text-2xl font-black tracking-tight leading-tight">Users & Roles</h1>
+          <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
+            {users?.length || 0} profiles · super admin view
+          </p>
         </div>
+      </div>
 
-        {/* ── Invite Editor form ──────────────────────────────── */}
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl p-6 shadow-xl">
-          <div className="flex items-center gap-2 mb-5">
-            <div className="w-8 h-8 rounded-xl bg-amber-500/15 flex items-center justify-center">
-              <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-              </svg>
+      {/* ── Invite Editor form ──────────────────────────────── */}
+      <Card className="rounded-[2rem] border-[var(--color-border)] mb-10 overflow-hidden shadow-lg shadow-black/5">
+        <div className="bg-[var(--color-surface)] p-6 border-b border-[var(--color-border)]">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+               <UserPlus className="w-5 h-5 text-amber-500" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-white">Add Team Member</h2>
-              <p className="text-[11px] text-[var(--color-muted)]">Sends an invite email via Supabase Auth</p>
+              <h2 className="text-sm font-bold tracking-tight">Add Team Member</h2>
+              <p className="text-[11px] font-semibold text-[var(--color-muted)] uppercase tracking-wider">Sends invite via Supabase Auth</p>
             </div>
           </div>
-          <form action={inviteEditorAction} className="space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        </div>
+        <CardContent className="p-6">
+          <form action={inviteEditorAction} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted)] mb-1.5">Email *</label>
-                <input
-                  required name="email" type="email"
-                  placeholder="editor@example.com"
-                  className="w-full px-3.5 py-3 rounded-xl bg-black/20 border border-[var(--color-border)] text-white placeholder-white/20 focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500/40 outline-none transition-all text-sm"
-                />
+                <Label>Email *</Label>
+                <Input required name="email" type="email" placeholder="editor@example.com" />
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted)] mb-1.5">Full Name</label>
-                <input
-                  name="full_name" type="text"
-                  placeholder="Jane Doe"
-                  className="w-full px-3.5 py-3 rounded-xl bg-black/20 border border-[var(--color-border)] text-white placeholder-white/20 focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500/40 outline-none transition-all text-sm"
-                />
+                <Label>Full Name</Label>
+                <Input name="full_name" type="text" placeholder="Jane Doe" />
               </div>
             </div>
-            <div className="flex items-end gap-3">
-              <div className="flex-1">
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted)] mb-1.5">Assign Role</label>
-                <select
-                  name="role"
-                  defaultValue="editor"
-                  className="w-full px-3.5 py-3 rounded-xl bg-black/20 border border-[var(--color-border)] text-white focus:ring-2 focus:ring-amber-500/40 outline-none appearance-none text-sm"
-                >
-                  <option value="editor"    className="bg-[#181623]">Editor</option>
-                  <option value="admin"     className="bg-[#181623]">Admin</option>
-                </select>
+            <div className="flex flex-col sm:flex-row items-end gap-4">
+              <div className="flex-1 w-full">
+                <Label>Assign Role</Label>
+                <Select name="role" defaultValue="editor">
+                  <option value="editor">Editor</option>
+                  <option value="admin">Admin</option>
+                </Select>
               </div>
-              <button
-                type="submit"
-                className="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm transition-all active:scale-95 shadow-lg shadow-amber-500/20 whitespace-nowrap"
-              >
+              <Button type="submit" variant="primary" className="w-full sm:w-auto h-12 shadow-sm text-black">
                 Send Invite
-              </button>
+              </Button>
             </div>
           </form>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* ── Role legend ─────────────────────────────────────── */}
-        <div className="flex flex-wrap gap-2">
-          {Object.entries(ROLE_META).map(([key, meta]) => (
-            <span key={key} className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${meta.color}`}>
-              {meta.label}
-            </span>
-          ))}
-        </div>
-
-        {/* ── Users list ──────────────────────────────────────── */}
-        {!users || users.length === 0 ? (
-          <div className="py-20 text-center flex flex-col items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl">
-            <p className="text-[var(--color-muted)] text-sm">No users found.</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {users.map((u) => {
-              const initials = (u.full_name || u.email || '?').charAt(0).toUpperCase();
-              const roleMeta = ROLE_META[u.role] ?? ROLE_META.reader;
-              return (
-                <div key={u.id}
-                  className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl p-5 shadow-lg group hover:border-white/15 transition-colors">
-                  <div className="flex items-center gap-4">
-                    {/* Avatar */}
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-amber-400 flex items-center justify-center text-black font-bold text-base shrink-0 shadow-inner">
-                      {initials}
-                    </div>
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <h3 className="font-bold text-white text-sm truncate">{u.full_name || 'Anonymous'}</h3>
-                        <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${roleMeta.color}`}>
-                          {roleMeta.label}
-                        </span>
-                      </div>
-                      <p className="text-xs text-[var(--color-muted)] truncate">{u.email || '—'}</p>
-                      <p className="text-[10px] text-[var(--color-muted)]/60 mt-0.5 font-semibold uppercase tracking-wider">
-                        Joined {u.created_at ? formatDate(u.created_at) : '—'}
-                      </p>
-                    </div>
-                    {/* Role selector */}
-                    <div className="shrink-0">
-                      {u.role === 'super_admin' ? (
-                        <div className="px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[10px] font-black tracking-wide uppercase">
-                          Super Admin
-                        </div>
-                      ) : (
-                        <RoleSelect userId={u.id} currentRole={u.role} updateRole={updateRole} />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
+      {/* ── Role legend ─────────────────────────────────────── */}
+      <div className="flex flex-wrap gap-2 mb-6 px-1">
+        {Object.entries(ROLE_META).map(([key, meta]) => (
+          <span key={key} className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${meta.color}`}>
+            {meta.label}
+          </span>
+        ))}
       </div>
+
+      {/* ── Users list ──────────────────────────────────────── */}
+      {!users || users.length === 0 ? (
+        <Card className="py-20 text-center flex flex-col items-center bg-[var(--color-surface)] border-[var(--color-border)] border-dashed rounded-[2rem] shadow-none">
+          <p className="text-[var(--color-muted)] font-bold tracking-tight">No users found.</p>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {users.map((u) => {
+            const initials = (u.full_name || u.email || '?').charAt(0).toUpperCase();
+            const roleMeta = ROLE_META[u.role] ?? ROLE_META.reader;
+            return (
+              <Card key={u.id} hoverable className="rounded-3xl border-transparent bg-[var(--color-surface)] shadow-none">
+                <CardContent className="p-5 flex items-center gap-4">
+                  {/* Avatar */}
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-amber-400 flex items-center justify-center text-black font-black text-lg shrink-0 shadow-inner">
+                    {initials}
+                  </div>
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <h3 className="font-bold text-sm truncate leading-tight">{u.full_name || 'Anonymous'}</h3>
+                      <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${roleMeta.color}`}>
+                        {roleMeta.label}
+                      </span>
+                    </div>
+                    <p className="text-xs text-[var(--color-muted)] truncate mb-0.5 font-medium">{u.email || '—'}</p>
+                    <p className="text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-widest opacity-70">
+                      Joined {u.created_at ? formatDate(u.created_at) : '—'}
+                    </p>
+                  </div>
+                  {/* Role selector */}
+                  <div className="shrink-0 flex items-center">
+                    {u.role === 'super_admin' ? (
+                      <div className="px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-500 text-[10px] font-black tracking-wide uppercase flex items-center gap-1.5">
+                        <ShieldCheck className="w-3.5 h-3.5" /> Super Admin
+                      </div>
+                    ) : (
+                      <RoleSelect userId={u.id} currentRole={u.role} updateRole={updateRole} />
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
     </div>
   );
 }
