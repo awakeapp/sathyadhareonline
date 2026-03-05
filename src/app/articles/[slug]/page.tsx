@@ -14,6 +14,17 @@ import { Input } from '@/components/ui/Input';
 
 export const revalidate = 60;
 
+const MOCKS: Record<string, any> = {
+  'mock-hero': { title: 'ವಿದ್ಯುತ್ ವಾಹನಗಳ ಭವಿಷ್ಯ ಮತ್ತು ಸವಾಲುಗಳು', cover_image: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=1200&q=80', category: { name: 'TECHNOLOGY' } },
+  'l1': { title: 'ಭಾರತೀಯ ಬಾಹ್ಯಾಕಾಶ ಸಂಶೋಧನಾ ಸಂಸ್ಥೆಯ (ISRO) ಐತಿಹಾಸಿಕ ನೆಗೆತ', cover_image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&q=80', category: { name: 'SCIENCE' } },
+  'l2': { title: 'ದೈನಂದಿನ ಜೀವನದಲ್ಲಿ ಯೋಗ: ಮಾನಸಿಕ ಮತ್ತು ದೈಹಿಕ ಶಾಂತಿಗಾಗಿ', cover_image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=1200&q=80', category: { name: 'LIFE' } },
+  'l3': { title: 'ಆರ್ಟಿಫಿಶಿಯಲ್ ಇಂಟೆಲಿಜೆನ್ಸ್ ಭವಿಷ್ಯವನ್ನು ಹೇಗೆ ಬದಲಾಯಿಸುತ್ತಿದೆ?', cover_image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&q=80', category: { name: 'TECH' } },
+  'l4': { title: 'ಕರ್ನಾಟಕದ ಪ್ರಾಚೀನ ದೇವಾಲಯಗಳ ವಾಸ್ತುಶಿಲ್ಪದ ಪರಂಪರೆ', cover_image: 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=1200&q=80', category: { name: 'HISTORY' } },
+  't1': { title: 'ಮಳೆಗಾಲದಲ್ಲಿ ಸಹಜ ಪ್ರಕೃತಿಯ ಸೌಂದರ್ಯದ ದರ್ಶನ', cover_image: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1200&q=80', category: { name: 'NATURE' } },
+  't2': { title: 'ಮಕ್ಕಳಲ್ಲಿ ಕಥೆ ಓದುವ ಹವ್ಯಾಸವನ್ನು ಹೇಗೆ ಬೆಳೆಸುವುದು?', cover_image: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1200&q=80', category: { name: 'LITERATURE' } },
+  't3': { title: 'ಡಿಜಿಟಲ್ ಜಗತ್ತಿನಲ್ಲಿ ಡೇಟಾ ಸುರಕ್ಷತೆಯ ಸವಾಲುಗಳು', cover_image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&q=80', category: { name: 'TECH' } },
+};
+
 // ── View tracker server action ───────────────────────────────
 async function trackView(articleId: string, sessionId: string): Promise<void> {
   'use server';
@@ -70,9 +81,17 @@ function formatDate(dateStr?: string | null) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const supabase = await createClient();
-  const { data: article } = await supabase
+  const { data: dbArticle } = await supabase
     .from('articles').select('title, excerpt, cover_image').eq('slug', slug).single();
-  if (!article) return {};
+    
+  let article: any = dbArticle;
+  if (!article) {
+    if (MOCKS[slug]) {
+      article = { title: MOCKS[slug].title, excerpt: 'Mock article preview.', cover_image: MOCKS[slug].cover_image };
+    } else {
+      return {};
+    }
+  }
   return {
     title: `${article.title} | Sathyadhare`,
     description: article.excerpt || '',
@@ -85,11 +104,38 @@ export default async function ArticlePage({ params }: Props) {
   const { slug } = await params;
   const supabase = await createClient();
 
-  const { data: article, error } = await supabase
+  const { data: dbArticle, error } = await supabase
     .from('articles')
     .select('*, author:profiles(id, full_name), category:categories(name)')
     .eq('slug', slug).single();
-  if (error || !article) notFound();
+    
+  let article: any = dbArticle;
+  
+  if (error || !article) {
+    if (MOCKS[slug]) {
+      article = {
+        id: slug,
+        title: MOCKS[slug].title,
+        slug: slug,
+        content: `
+          <p><strong>ಸೂಚನೆ:</strong> ಇದು ಕೇವಲ ಉದಾಹರಣೆಗಾಗಿ ರಚಿಸಲಾದ ಕೃತಕ (Mock) ಲೇಖನ. ಡೇಟಾಬೇಸ್‌ನಲ್ಲಿ ಇದುವರೆಗೆ ನೈಜ ಲೇಖನವಿಲ್ಲ, ಆದ್ದರಿಂದ ಈ ಡಮ್ಮಿ ಡೇಟಾವನ್ನು ತೋರಿಸಲಾಗುತ್ತಿದೆ.</p>
+          <br/>
+          <p>ಇದು ಹೋಮ್‌ಪೇಜ್ ವಿನ್ಯಾಸಕ್ಕಾಗಿ ಒದಗಿಸಲಾದ ಕೃತಕ (Mock) ಲೇಖನ. ನಿಜವಾದ ಡೇಟಾವನ್ನು ಡೇಟಾಬೇಸ್‌ಗೆ ಸೇರಿಸಿದಾಗ ಈ ಲೇಖನ ಇರುವುದಿಲ್ಲ.</p>
+          <p>This is a mock placeholder article to demonstrate the reading view. You clicked on a demo card from the homepage.</p>
+          <br/>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam nec efficitur enim. Nullam ultricies tincidunt risus. Fusce scelerisque tellus et libero hendrerit congue. Aenean quis tristique nibh. Nunc nec nisl non velit viverra luctus. Integer vehicula tempor magna convallis egestas. Nulla volutpat pretium purus a ornare.</p>
+        `,
+        cover_image: MOCKS[slug].cover_image,
+        published_at: new Date().toISOString(),
+        read_time: 3,
+        category: MOCKS[slug].category,
+        author: { full_name: 'Sathyadhare Editor' },
+        category_id: 'mock-category',
+      } as any;
+    } else {
+      notFound();
+    }
+  }
 
   // Check initial bookmark state
   const { data: { user } } = await supabase.auth.getUser();
