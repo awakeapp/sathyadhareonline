@@ -110,10 +110,18 @@ export default async function ArticlesPage() {
   const allowedTransitions = TRANSITIONS[role] ?? [];
 
   // ── Fetch articles ───────────────────────────────────────────
-  const { data: articles, error } = await supabase
+  // Editors only see their own articles; admins see everything.
+  let articlesQuery = supabase
     .from('articles')
-    .select('id, title, status, is_deleted, is_featured')
+    .select('id, title, status, is_deleted, is_featured, author_id')
     .order('created_at', { ascending: false });
+
+  if (role === 'editor') {
+    // Scope to the current user's own articles
+    articlesQuery = articlesQuery.eq('author_id', user.id);
+  }
+
+  const { data: articles, error } = await articlesQuery;
 
   if (error) console.error('Error fetching articles:', error);
 
@@ -230,9 +238,11 @@ export default async function ArticlesPage() {
               </svg>
             </Link>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-white leading-tight">Articles</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-white leading-tight">
+                {role === 'editor' ? 'Your Articles' : 'Articles'}
+              </h1>
               <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
-                {articles?.length || 0} Total · {role}
+                {articles?.length || 0} {role === 'editor' ? 'of yours' : 'Total'} · {role}
               </p>
             </div>
           </div>

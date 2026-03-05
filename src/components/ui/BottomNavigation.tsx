@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { User } from '@supabase/supabase-js';
+import { useReaderMode } from '@/context/ReaderModeContext';
 
 interface BottomNavigationProps {
   user?: User | null;
@@ -126,9 +127,15 @@ const ADMIN_NAV: { label: string; href: string; exact: boolean; icon: React.Reac
 
 export default function BottomNavigation({ role }: BottomNavigationProps) {
   const pathname    = usePathname()
+  const { readerMode } = useReaderMode()
+
   const isAuthPage  = pathname === '/login' || pathname === '/signup'
+  const isPrivilegedRole = role === 'super_admin' || role === 'admin' || role === 'editor'
+
+  // Show admin nav only when on admin routes AND not in reader mode
   const isAdminView = pathname.startsWith('/admin') &&
-    (role === 'super_admin' || role === 'admin' || role === 'editor')
+    isPrivilegedRole &&
+    !readerMode
 
   const NAV = isAdminView ? ADMIN_NAV : READER_NAV
 

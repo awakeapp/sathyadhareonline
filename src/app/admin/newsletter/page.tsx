@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import type { Metadata } from 'next';
+import Link from 'next/link';
+import NewsletterClient from './NewsletterClient';
 
-export const metadata: Metadata = { title: 'Newsletter Subscribers | Admin' };
 export const dynamic = 'force-dynamic';
 
 export default async function AdminNewsletterPage() {
@@ -10,8 +10,13 @@ export default async function AdminNewsletterPage() {
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
-  const { data: isAdmin } = await supabase.rpc('is_admin');
-  if (!isAdmin) redirect('/');
+
+  const { data: profile } = await supabase
+    .from('profiles').select('role').eq('id', user.id).single();
+
+  if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
+    redirect('/admin?error=unauthorized');
+  }
 
   const { data: subscribers, error } = await supabase
     .from('newsletter_subscribers')
@@ -21,51 +26,28 @@ export default async function AdminNewsletterPage() {
   if (error) console.error('Newsletter fetch error:', error);
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Newsletter Subscribers</h1>
-          <p className="text-sm text-gray-400 mt-1">{subscribers?.length ?? 0} total subscribers</p>
-        </div>
-      </div>
+    <div className="min-h-screen pb-24 px-4 pt-6 bg-[var(--color-background)] font-sans antialiased text-white">
+      <div className="max-w-3xl mx-auto">
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        {!subscribers || subscribers.length === 0 ? (
-          <div className="px-6 py-16 text-center text-gray-400">
-            No subscribers yet.
+        {/* ── Header ──────────────────────────────────────────────── */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <Link href="/admin"
+              className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:text-white transition-colors active:scale-95">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-white leading-tight">Newsletter</h1>
+              <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
+                {subscribers?.length ?? 0} subscribers
+              </p>
+            </div>
           </div>
-        ) : (
-          <table className="min-w-full divide-y divide-gray-100">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">#</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Subscribed</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {subscribers.map((sub, idx) => (
-                <tr key={sub.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 text-sm text-gray-400 tabular-nums">{idx + 1}</td>
-                  <td className="px-6 py-4">
-                    <a
-                      href={`mailto:${sub.email}`}
-                      className="text-sm font-medium text-indigo-600 hover:underline"
-                    >
-                      {sub.email}
-                    </a>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {new Date(sub.created_at).toLocaleDateString('en-US', {
-                      year: 'numeric', month: 'short', day: 'numeric',
-                      hour: '2-digit', minute: '2-digit',
-                    })}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        </div>
+
+        <NewsletterClient subscribers={subscribers ?? []} />
       </div>
     </div>
   );

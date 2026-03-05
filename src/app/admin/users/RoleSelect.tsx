@@ -4,6 +4,13 @@ import { useRef, useTransition } from 'react';
 
 const ROLES = ['reader', 'editor', 'moderator', 'admin'] as const;
 
+const ROLE_LABELS: Record<string, string> = {
+  reader:    'Reader',
+  editor:    'Editor',
+  moderator: 'Moderator',
+  admin:     'Admin',
+};
+
 interface Props {
   userId: string;
   currentRole: string;
@@ -21,31 +28,23 @@ export function RoleSelect({ userId, currentRole, updateRole }: Props) {
   }
 
   return (
-    <form ref={formRef}>
+    <form ref={formRef} className="flex items-center gap-2">
       <input type="hidden" name="userId" value={userId} />
       <select
         name="role"
         defaultValue={currentRole}
         onChange={handleChange}
         disabled={isPending}
-        className={`
-          rounded-lg border px-2.5 py-1.5 text-xs font-semibold
-          bg-white dark:bg-gray-800
-          border-gray-200 dark:border-gray-700
-          text-gray-700 dark:text-gray-200
-          focus:outline-none focus:ring-2 focus:ring-indigo-500
-          disabled:opacity-50 disabled:cursor-wait
-          transition-opacity
-        `}
+        className="rounded-xl border px-3 py-1.5 text-xs font-bold bg-black/30 border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/50 disabled:opacity-50 disabled:cursor-wait transition-all appearance-none cursor-pointer hover:border-white/20"
       >
         {ROLES.map((r) => (
-          <option key={r} value={r}>
-            {r}
+          <option key={r} value={r} className="bg-[#181623]">
+            {ROLE_LABELS[r] ?? r}
           </option>
         ))}
       </select>
       {isPending && (
-        <span className="ml-2 text-xs text-gray-400 dark:text-gray-500 animate-pulse">
+        <span className="text-[10px] text-[var(--color-muted)] animate-pulse font-semibold">
           saving…
         </span>
       )}

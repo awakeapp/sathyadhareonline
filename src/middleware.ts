@@ -1,16 +1,14 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-// Route access rules
+// Route access rules — middleware is the outermost gate
 const ROUTE_ROLES: Record<string, string[]> = {
   '/admin':  ['super_admin', 'admin'],
-  '/editor': ['super_admin', 'admin', 'editor'],
-  '/app':    ['super_admin', 'admin', 'editor', 'reader'],
+  '/editor': ['editor'],
 }
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
-  const response = NextResponse.next({ request })
+  let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,84 +19,74 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            request.cookies.set(name, value)
-            response.cookies.set(name, value, options)
-          })
+          // This updates the request cookies for Server Components!
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          // Recreate the response to properly forward the modified request
+          supabaseResponse = NextResponse.next({ request })
+          // Set the updated cookies on the outgoing response so the browser gets them
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
         },
       },
     }
   )
 
-  // Verify JWT with Supabase (never trust cookie data alone)
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Verify JWT (also implicitly triggers a session refresh if expired)
+  const { data: { user } } = await supabase.auth.getUser()
 
-  // ---------- Bypass route guards for auth callback ----------
-  if (pathname.startsWith('/auth/callback')) {
-    return response
+  const { pathname } = request.nextUrl
+  if (pathname.startsWith('/auth/callback')) return supabaseResponse
+
+  // Helper to safely redirect while preserving refreshed cookies
+  const redirectWithCookies = (path: string) => {
+    const url = request.nextUrl.clone()
+    url.pathname = path
+    const redirectRes = NextResponse.redirect(url)
+    
+    // Copy any Set-Cookie headers from the refreshed supabaseResponse
+    const setCookies = supabaseResponse.headers.getSetCookie()
+    for (const cookie of setCookies) {
+      redirectRes.headers.append('Set-Cookie', cookie)
+    }
+    return redirectRes
   }
 
-  // ---------- Auth guard for protected routes ----------
-  const protectedPrefix = Object.keys(ROUTE_ROLES).find((prefix) =>
-    pathname.startsWith(prefix)
-  )
+  // 1. Check Protected Routes
+  const protectedPrefix = Object.keys(ROUTE_ROLES).find(prefix => pathname.startsWith(prefix))
 
   if (protectedPrefix) {
-    // Must be logged in
-    if (!user) {
-      return NextResponse.redirect(new URL('/login', request.url))
-    }
+    if (!user) return redirectWithCookies('/login')
 
-    // Fetch role from profiles table
     const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
+      .from('profiles').select('role').eq('id', user.id).single()
 
     const role = profile?.role as string | undefined
+    const allowed = ROUTE_ROLES[protectedPrefix]
 
-    const allowedRoles = ROUTE_ROLES[protectedPrefix]
-    if (!role || !allowedRoles.includes(role)) {
-      // Redirect unauthorized users to login
-      return NextResponse.redirect(new URL('/login', request.url))
+    if (!role || !allowed.includes(role)) {
+      return redirectWithCookies('/login')
     }
   }
 
-  // ---------- Redirect logged-in users away from /login and /signup ----------
+  // 2. Auth Pages Routing (Skip login/signup if already logged in)
   if (user && (pathname === '/login' || pathname === '/signup')) {
     const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
+      .from('profiles').select('role').eq('id', user.id).single()
     const role = profile?.role as string | undefined
 
     if (role === 'super_admin' || role === 'admin') {
-      return NextResponse.redirect(new URL('/admin', request.url))
+      return redirectWithCookies('/admin')
     } else if (role === 'editor') {
-      return NextResponse.redirect(new URL('/editor', request.url))
+      return redirectWithCookies('/editor')
     } else {
-      return NextResponse.redirect(new URL('/', request.url))
+      return redirectWithCookies('/')
     }
   }
 
-  return response
+  return supabaseResponse
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - api (API routes)
-     * Feel free to modify this pattern to include more paths.
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 }

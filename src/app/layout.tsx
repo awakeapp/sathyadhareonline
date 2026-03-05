@@ -6,6 +6,7 @@ import InstallPrompt from '@/components/InstallPrompt'
 import BottomNavigation from '@/components/ui/BottomNavigation'
 import TopHeader from '@/components/ui/TopHeader'
 import MainWrapper from '@/components/MainWrapper'
+import { ReaderModeProvider } from '@/context/ReaderModeContext'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -74,16 +75,18 @@ export default async function RootLayout({
           padding: 0,
         }}
       >
-        {/* ─────────── FIXED TOP HEADER ─────────── */}
-        <TopHeader user={user} role={role} />
+        <ReaderModeProvider>
+          {/* ─────────── FIXED TOP HEADER ─────────── */}
+          <TopHeader user={user} role={role} />
 
-        {/* ─────────── PAGE CONTENT ─────────── */}
-        <MainWrapper>{children}</MainWrapper>
+          {/* ─────────── PAGE CONTENT ─────────── */}
+          <MainWrapper>{children}</MainWrapper>
 
-        {/* ─────────── FIXED BOTTOM NAV ─────────── */}
-        <BottomNavigation user={user} role={role} />
-        
-        <InstallPrompt />
+          {/* ─────────── FIXED BOTTOM NAV ─────────── */}
+          <BottomNavigation user={user} role={role} />
+          
+          <InstallPrompt />
+        </ReaderModeProvider>
       </body>
     </html>
   )

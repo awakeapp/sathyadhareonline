@@ -1,198 +1,199 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import AnalyticsCharts from './AnalyticsCharts';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AnalyticsPage() {
   const supabase = await createClient();
 
-  // Admin guard
+  // ── Auth guard ──────────────────────────────────────────────────
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
-  const { data: isAdmin } = await supabase.rpc('is_admin');
-  if (!isAdmin) redirect('/');
 
-  // ── Metrics ─────────────────────────────────────────────────
+  const { data: profile } = await supabase
+    .from('profiles').select('role').eq('id', user.id).single();
 
-  // Total articles (not deleted)
+  if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
+    redirect('/admin?error=unauthorized');
+  }
+
+  // ── Headline metrics ─────────────────────────────────────────────
   const { count: totalArticles } = await supabase
-    .from('articles')
-    .select('*', { count: 'exact', head: true })
-    .eq('is_deleted', false);
+    .from('articles').select('*', { count: 'exact', head: true }).eq('is_deleted', false);
 
-  // Published articles
   const { count: publishedArticles } = await supabase
-    .from('articles')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'published')
-    .eq('is_deleted', false);
+    .from('articles').select('*', { count: 'exact', head: true })
+    .eq('status', 'published').eq('is_deleted', false);
 
-  // Total views
   const { count: totalViews } = await supabase
-    .from('article_views')
-    .select('*', { count: 'exact', head: true });
+    .from('article_views').select('*', { count: 'exact', head: true });
 
-  // ── Top Articles by Views ────────────────────────────────────
-  const { data: viewRows } = await supabase
+  // ── Per-day views — last 30 days ─────────────────────────────────
+  const since30 = new Date(Date.now() - 30 * 86400_000).toISOString();
+  const { data: viewRows30 } = await supabase
     .from('article_views')
-    .select('article_id');
+    .select('created_at')
+    .gte('created_at', since30);
 
+  // Build a map date → count for both 7 and 30 day windows
+  const todayStr = new Date().toISOString().slice(0, 10);
+  function buildDayPoints(days: number) {
+    const map: Record<string, number> = {};
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 86400_000).toISOString().slice(0, 10);
+      map[d] = 0;
+    }
+    for (const row of viewRows30 ?? []) {
+      const d = row.created_at?.slice(0, 10);
+      if (d && d in map) map[d]++;
+    }
+    return Object.entries(map).map(([date, views]) => ({ date, views }));
+  }
+
+  const days7  = buildDayPoints(7);
+  const days30 = buildDayPoints(30);
+
+  // ── Top articles by views ────────────────────────────────────────
+  const { data: allViewRows } = await supabase.from('article_views').select('article_id');
   const viewCounts: Record<string, number> = {};
-  for (const row of viewRows ?? []) {
+  for (const row of allViewRows ?? []) {
     viewCounts[row.article_id] = (viewCounts[row.article_id] ?? 0) + 1;
   }
-
-  const topIds = Object.entries(viewCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([id]) => id);
-
+  const topIds = Object.entries(viewCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([id]) => id);
   let topArticles: { id: string; title: string; slug: string }[] = [];
   if (topIds.length > 0) {
-    const { data } = await supabase
-      .from('articles')
-      .select('id, title, slug')
-      .in('id', topIds)
-      .eq('is_deleted', false);
-
-    topArticles = (data ?? []).sort(
-      (a, b) => (viewCounts[b.id] ?? 0) - (viewCounts[a.id] ?? 0)
-    );
+    const { data } = await supabase.from('articles').select('id, title, slug').in('id', topIds).eq('is_deleted', false);
+    topArticles = (data ?? []).sort((a, b) => (viewCounts[b.id] ?? 0) - (viewCounts[a.id] ?? 0));
   }
 
-  const stats = [
+  // ── Category breakdown ────────────────────────────────────────────
+  const { data: catArticles } = await supabase
+    .from('articles')
+    .select('category_id, categories(name)')
+    .eq('is_deleted', false)
+    .not('category_id', 'is', null);
+
+  const catMap: Record<string, { name: string; count: number }> = {};
+  for (const row of catArticles ?? []) {
+    const name = (row.categories as { name?: string } | null)?.name;
+    if (!name || !row.category_id) continue;
+    if (!catMap[row.category_id]) catMap[row.category_id] = { name, count: 0 };
+    catMap[row.category_id].count++;
+  }
+  const categoryStats = Object.values(catMap).sort((a, b) => b.count - a.count);
+
+  // Suppress unused warning
+  void todayStr;
+
+  // ── UI ───────────────────────────────────────────────────────────
+  const statCards = [
     {
       label: 'Total Articles',
       value: totalArticles ?? 0,
-      icon: (
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      ),
-      color: 'from-indigo-500 to-indigo-600',
-      bg: 'bg-indigo-50',
-      text: 'text-indigo-600',
+      icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+      color: 'from-indigo-500/20 to-indigo-600/10 border-indigo-500/20',
+      iconColor: 'text-indigo-400',
     },
     {
       label: 'Published',
       value: publishedArticles ?? 0,
-      icon: (
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-        </svg>
-      ),
-      color: 'from-emerald-500 to-emerald-600',
-      bg: 'bg-emerald-50',
-      text: 'text-emerald-600',
+      icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4',
+      color: 'from-emerald-500/20 to-emerald-600/10 border-emerald-500/20',
+      iconColor: 'text-emerald-400',
     },
     {
       label: 'Total Views',
       value: (totalViews ?? 0).toLocaleString(),
-      icon: (
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-        </svg>
-      ),
-      color: 'from-violet-500 to-violet-600',
-      bg: 'bg-violet-50',
-      text: 'text-violet-600',
+      icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z',
+      color: 'from-violet-500/20 to-violet-600/10 border-violet-500/20',
+      iconColor: 'text-violet-400',
     },
   ];
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-10">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Analytics</h1>
-          <p className="text-sm text-gray-400 mt-1">Overview of your journal performance</p>
-        </div>
-        <Link
-          href="/admin"
-          className="text-sm text-gray-500 hover:text-gray-800 font-medium bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition-colors"
-        >
-          ← Dashboard
-        </Link>
-      </div>
+    <div className="min-h-screen pb-24 px-4 pt-6 bg-[var(--color-background)] font-sans antialiased text-white">
+      <div className="max-w-3xl mx-auto space-y-6">
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
-        {stats.map((s) => (
-          <div
-            key={s.label}
-            className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className={`inline-flex p-3 rounded-xl ${s.bg} ${s.text} mb-4`}>
-              {s.icon}
+        {/* ── Header ──────────────────────────────────────────────── */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-white leading-tight">Analytics</h1>
+            <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
+              Journal performance overview
+            </p>
+          </div>
+          <Link href="/admin"
+            className="px-3 py-2 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-muted)] hover:text-white transition-colors">
+            ← Dashboard
+          </Link>
+        </div>
+
+        {/* ── Stat Cards ──────────────────────────────────────────── */}
+        <div className="grid grid-cols-3 gap-4">
+          {statCards.map(s => (
+            <div key={s.label} className={`bg-gradient-to-b ${s.color} border rounded-3xl p-4 shadow-lg`}>
+              <svg className={`w-5 h-5 ${s.iconColor} mb-3`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d={s.icon} />
+              </svg>
+              <p className="text-2xl font-extrabold text-white tabular-nums">{s.value}</p>
+              <p className="text-[10px] uppercase tracking-widest font-semibold text-[var(--color-muted)] mt-0.5">{s.label}</p>
             </div>
-            <p className="text-sm font-semibold text-gray-500 mb-1">{s.label}</p>
-            <p className="text-4xl font-extrabold text-gray-900">{s.value}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Top Articles */}
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-100 flex items-center gap-2">
-          <span className="text-lg">🔥</span>
-          <h2 className="text-lg font-bold text-gray-900">Top Articles by Views</h2>
+          ))}
         </div>
 
-        {topArticles.length === 0 ? (
-          <div className="px-6 py-12 text-center text-gray-400">
-            No view data yet. Views will appear here once articles are read.
+        {/* ── Interactive chart + category breakdown ───────────────── */}
+        <AnalyticsCharts days7={days7} days30={days30} categoryStats={categoryStats} />
+
+        {/* ── Top articles ─────────────────────────────────────────── */}
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl shadow-lg overflow-hidden">
+          <div className="px-5 py-4 border-b border-[var(--color-border)] flex items-center gap-2">
+            <span className="text-base">🔥</span>
+            <h2 className="text-sm font-bold text-white uppercase tracking-wider">Top Articles by Views</h2>
           </div>
-        ) : (
-          <ol className="divide-y divide-gray-50">
-            {topArticles.map((article, idx) => {
-              const views = viewCounts[article.id] ?? 0;
-              const maxViews = viewCounts[topArticles[0].id] ?? 1;
-              const barWidth = Math.round((views / maxViews) * 100);
-
-              return (
-                <li key={article.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-4">
-                    {/* Rank */}
-                    <span className={`w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-full text-xs font-extrabold ${
-                      idx === 0 ? 'bg-yellow-400 text-white' :
-                      idx === 1 ? 'bg-gray-300 text-gray-700' :
-                      idx === 2 ? 'bg-amber-600/80 text-white' :
-                      'bg-gray-100 text-gray-500'
-                    }`}>
-                      {idx + 1}
-                    </span>
-
-                    {/* Title + bar */}
-                    <div className="flex-1 min-w-0">
-                      <Link
-                        href={`/articles/${article.slug}`}
-                        target="_blank"
-                        className="text-sm font-semibold text-gray-900 hover:text-indigo-600 transition-colors line-clamp-1"
-                      >
-                        {article.title}
-                      </Link>
-                      {/* Progress bar */}
-                      <div className="mt-1.5 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-indigo-400 rounded-full"
-                          style={{ width: `${barWidth}%` }}
-                        />
+          {topArticles.length === 0 ? (
+            <div className="px-5 py-10 text-center text-[var(--color-muted)] text-sm">
+              No view data yet.
+            </div>
+          ) : (
+            <ol className="divide-y divide-[var(--color-border)]">
+              {topArticles.map((article, idx) => {
+                const views = viewCounts[article.id] ?? 0;
+                const maxViews = viewCounts[topArticles[0].id] ?? 1;
+                const barWidth = Math.round((views / maxViews) * 100);
+                return (
+                  <li key={article.id} className="px-5 py-4 hover:bg-white/[0.02] transition-colors">
+                    <div className="flex items-center gap-3">
+                      <span className={`w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-full text-xs font-extrabold ${
+                        idx === 0 ? 'bg-[var(--color-primary)] text-black' :
+                        idx === 1 ? 'bg-white/20 text-white' :
+                        idx === 2 ? 'bg-amber-600/70 text-white' :
+                        'bg-white/5 text-[var(--color-muted)]'
+                      }`}>
+                        {idx + 1}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <Link href={`/articles/${article.slug}`} target="_blank"
+                          className="text-sm font-semibold text-white hover:text-[var(--color-primary)] transition-colors line-clamp-1">
+                          {article.title}
+                        </Link>
+                        <div className="mt-1.5 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                          <div className="h-full bg-[var(--color-primary)]/60 rounded-full" style={{ width: `${barWidth}%` }} />
+                        </div>
                       </div>
+                      <span className="flex-shrink-0 text-sm font-bold text-white tabular-nums">
+                        {views.toLocaleString()}
+                        <span className="text-[10px] font-normal text-[var(--color-muted)] ml-1">views</span>
+                      </span>
                     </div>
+                  </li>
+                );
+              })}
+            </ol>
+          )}
+        </div>
 
-                    {/* View count */}
-                    <span className="flex-shrink-0 text-sm font-bold text-gray-700 tabular-nums">
-                      {views.toLocaleString()}
-                      <span className="text-xs font-normal text-gray-400 ml-1">views</span>
-                    </span>
-                  </div>
-                </li>
-              );
-            })}
-          </ol>
-        )}
       </div>
     </div>
   );
