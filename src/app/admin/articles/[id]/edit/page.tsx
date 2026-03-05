@@ -204,8 +204,10 @@ export default async function EditArticlePage({
                     defaultValue={article.status}
                     className="w-full px-4 py-3.5 rounded-2xl bg-black/20 border border-[var(--color-border)] text-white focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all outline-none appearance-none"
                   >
-                    <option value="draft" className="bg-[#181623]">Save as Draft</option>
-                    <option value="published" className="bg-[#181623]">Publish (Live)</option>
+                    <option value="draft"      className="bg-[#181623]">Draft</option>
+                    <option value="in_review"  className="bg-[#181623]">In Review</option>
+                    <option value="published"  className="bg-[#181623]">Published</option>
+                    <option value="archived"   className="bg-[#181623]">Archived</option>
                   </select>
                   <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-[var(--color-muted)]">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
@@ -248,12 +250,9 @@ export default async function EditArticlePage({
               />
             </div>
 
-            {/* Content Container Setup */}
             <div className="pt-2">
               <label className="block text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider mb-2 px-1">Main Narrative</label>
-              <div className="rounded-2xl overflow-hidden border border-[var(--color-border)] bg-white prose-editor-container">
-                <RichTextEditor name="content" defaultValue={article.content ?? ''} />
-              </div>
+              <RichTextEditor name="content" defaultValue={article.content ?? ''} />
             </div>
 
             {/* Actions */}

@@ -18,5 +18,5 @@ export async function getRedirectPath(
 
   if (role === 'super_admin' || role === 'admin') return '/admin'
   if (role === 'editor') return '/editor'
-  return '/app'
+  return '/'
 }

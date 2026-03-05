@@ -35,6 +35,11 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // ---------- Bypass route guards for auth callback ----------
+  if (pathname.startsWith('/auth/callback')) {
+    return response
+  }
+
   // ---------- Auth guard for protected routes ----------
   const protectedPrefix = Object.keys(ROUTE_ROLES).find((prefix) =>
     pathname.startsWith(prefix)
@@ -77,7 +82,7 @@ export async function middleware(request: NextRequest) {
     } else if (role === 'editor') {
       return NextResponse.redirect(new URL('/editor', request.url))
     } else {
-      return NextResponse.redirect(new URL('/app', request.url))
+      return NextResponse.redirect(new URL('/', request.url))
     }
   }
 
@@ -86,11 +91,14 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/admin/:path*',
-    '/editor/:path*',
-    '/app/:path*',
-    '/login',
-    '/signup',
-    // Note: /auth/callback is intentionally NOT in the matcher so it passes through freely
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - api (API routes)
+     * Feel free to modify this pattern to include more paths.
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

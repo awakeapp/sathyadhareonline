@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { getRedirectPath } from '@/lib/auth/redirectAfterLogin'
@@ -32,7 +31,6 @@ const GoogleIcon = () => (
 )
 
 export default function LoginPage() {
-  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -69,7 +67,7 @@ export default function LoginPage() {
     }
 
     const destination = await getRedirectPath(supabase, data.user.id)
-    router.replace(destination)
+    window.location.href = destination
   }
 
   /* ── Google OAuth ── */

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
@@ -51,7 +50,6 @@ function getPasswordStrength(pw: string): { level: number; label: string; color:
 }
 
 export default function SignupPage() {
-  const router = useRouter()
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -117,7 +115,9 @@ export default function SignupPage() {
     }
 
     setMessage('Account created! Redirecting to login…')
-    setTimeout(() => router.replace('/login'), 1800)
+    setTimeout(() => {
+      window.location.href = '/login'
+    }, 1800)
   }
 
   /* ── Google OAuth ── */

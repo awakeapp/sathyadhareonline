@@ -48,6 +48,10 @@
     scroll-behavior: smooth;
     background-color: var(--color-background);
     color: var(--color-text);
+    /* Lock all text — nothing selectable by default */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
   }
 
   body {
@@ -57,6 +61,20 @@
     line-height: 1.6;
     padding-top: 0;
     margin: 0;
+  }
+
+  /* Only article prose may be selected/copied */
+  .allow-select,
+  .allow-select * {
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -webkit-touch-callout: default !important;
+  }
+
+  /* Allow form inputs to be interactable */
+  input, textarea, select, [contenteditable] {
+    user-select: text !important;
+    -webkit-user-select: text !important;
   }
 
   .scrollbar-none {

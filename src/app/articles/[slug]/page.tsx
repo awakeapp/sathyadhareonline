@@ -166,9 +166,9 @@ export default async function ArticlePage({ params }: Props) {
         </div>
       )}
 
-      {/* Article content */}
+      {/* Article content — ONLY this section is copy-pasteable */}
       <div 
-        className="prose-article whitespace-pre-wrap mt-6 mb-12"
+        className="allow-select prose-article whitespace-pre-wrap mt-6 mb-12"
         dangerouslySetInnerHTML={{ __html: article.content }}
       />
 

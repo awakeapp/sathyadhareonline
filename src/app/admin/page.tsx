@@ -10,258 +10,173 @@ export default async function AdminPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-
-
   const { data: profile } = await supabase
     .from('profiles')
     .select('full_name, role')
     .eq('id', user.id)
     .single();
 
-  // ── Metrics ─────────────────────────────────────────────────
-  const { count: totalArticles } = await supabase
-    .from('articles')
-    .select('*', { count: 'exact', head: true })
-    .eq('is_deleted', false);
+  const isSuperAdmin = profile?.role === 'super_admin';
 
-  const { count: publishedArticles } = await supabase
-    .from('articles')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'published')
-    .eq('is_deleted', false);
+  // ── Real metrics ────────────────────────────────────────────
+  const [
+    { count: totalArticles },
+    { count: publishedArticles },
+    { count: draftArticles },
+    { count: inReviewArticles },
+    { count: totalViews },
+    { count: totalCategories },
+    { count: totalUsers },
+    { data: recentUsers },
+    { data: recentArticles },
+  ] = await Promise.all([
+    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('is_deleted', false),
+    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'published').eq('is_deleted', false),
+    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'draft').eq('is_deleted', false),
+    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'in_review').eq('is_deleted', false),
+    supabase.from('article_views').select('*', { count: 'exact', head: true }),
+    supabase.from('categories').select('*', { count: 'exact', head: true }),
+    supabase.from('profiles').select('*', { count: 'exact', head: true }),
+    supabase.from('profiles').select('id, full_name, email, avatar_url').order('created_at', { ascending: false }).limit(5),
+    supabase.from('articles').select('id, title, status, published_at').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
+  ]);
 
-  const { count: totalViews } = await supabase
-    .from('article_views')
-    .select('*', { count: 'exact', head: true });
+  const initials = (profile?.full_name || user.email || 'A').charAt(0).toUpperCase();
 
-  const { count: totalCategories } = await supabase
-    .from('categories')
-    .select('*', { count: 'exact', head: true });
+  const quickActions = [
+    { href: '/admin/articles/new',  label: 'New Article',    icon: 'M12 4v16m8-8H4',                                                                     color: '#0047ff' },
+    { href: '/admin/articles',      label: 'All Articles',   icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9', color: '#0047ff' },
+    { href: '/admin/categories',    label: 'Categories',     icon: 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z', color: '#0047ff' },
+    { href: '/admin/series',        label: 'Series',         icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10', color: '#0047ff' },
+    { href: '/admin/media',         label: 'Media Library',  icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z', color: '#0047ff' },
+    { href: '/admin/users',         label: 'Users & Roles',  icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z', color: '#0047ff' },
+  ];
 
-  const { data: recentUsers } = await supabase
-    .from('profiles')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(4);
+  const statusColor = (s: string) => {
+    if (s === 'published') return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+    if (s === 'in_review') return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+    if (s === 'archived')  return 'text-purple-400 bg-purple-500/10 border-purple-500/20';
+    return 'text-gray-400 bg-gray-500/10 border-gray-500/20';
+  };
 
   return (
-    <div className="min-h-screen pb-24 px-4 pt-2 bg-[#f4f5f8] dark:bg-[#181623] font-sans antialiased safe-area-pb text-gray-900 dark:text-white transition-colors">
-      
-      {/* ── Top Nav Header ──────────────────────────────────────── */}
-      <header className="flex items-center justify-between mb-8">
-        <div className="w-10 h-10 rounded-2xl bg-[#0f52ba] flex items-center justify-center text-white font-black text-xl shadow-lg shadow-[#0f52ba]/30">
-          S
+    <div className="min-h-screen pb-28 px-4 pt-2 bg-[#f4f5f8] dark:bg-[#181623] font-sans antialiased safe-area-pb text-gray-900 dark:text-white transition-colors">
+
+      {/* ── Profile header ────────────────────────────────────── */}
+      <header className="flex items-center justify-between py-4 mb-6">
+        <div>
+          <p className="text-xs font-semibold text-gray-400 dark:text-[#8b88a0] uppercase tracking-widest">Admin Panel</p>
+          <h1 className="text-xl font-black tracking-tight">
+            {profile?.full_name ? `Hi, ${profile.full_name.split(' ')[0]} 👋` : 'Dashboard'}
+          </h1>
+          <p className="text-[11px] text-gray-400 dark:text-[#8b88a0] mt-0.5 capitalize font-semibold">{profile?.role?.replace('_', ' ')}</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="w-10 h-10 rounded-full bg-white dark:bg-[#242235] border border-gray-100 dark:border-white/5 flex items-center justify-center text-gray-500 dark:text-[var(--color-muted)] shadow-sm">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-          </button>
-          <button className="w-10 h-10 rounded-full bg-white dark:bg-[#242235] border border-gray-100 dark:border-white/5 flex items-center justify-center text-gray-500 dark:text-[var(--color-muted)] shadow-sm">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <circle cx="5" cy="12" r="2" />
-              <circle cx="12" cy="12" r="2" />
-              <circle cx="19" cy="12" r="2" />
-            </svg>
-          </button>
-          <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden shadow-sm border border-white dark:border-gray-800">
-            {profile?.full_name ? (
-              <div className="w-full h-full flex items-center justify-center text-sm font-bold bg-[#ffe500] text-black uppercase">
-                {profile.full_name.charAt(0)}
-              </div>
-            ) : (
-              <svg className="w-full h-full text-gray-400 mt-1" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 14c-4.418 0-8 2.686-8 6h16c0-3.314-3.582-6-8-6zM12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z"/>
-              </svg>
-            )}
+          <Link href="/admin/articles/new"
+            className="w-9 h-9 rounded-full bg-[#0047ff] text-white flex items-center justify-center shadow-lg shadow-[#0047ff]/30 active:scale-95 transition-transform">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>
+          </Link>
+          <div className="w-10 h-10 rounded-full bg-[#ffe500] flex items-center justify-center text-black font-black text-base shadow-md">
+            {initials}
           </div>
         </div>
       </header>
 
-      {/* ── Top Horizontal Insights Cards ───────────────────────── */}
-      <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-none pb-2 -mx-4 px-4">
-        
-        {/* Card 1 */}
-        <div className="snap-center shrink-0 w-[180px] bg-white dark:bg-[#242235] rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-white/5 flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-4">
-            <span className="text-xs font-semibold text-gray-500 dark:text-[#8b88a0]">Articles total</span>
-            <span className="text-gray-400 dark:text-[#8b88a0]">•••</span>
+      {/* ── Metrics row ──────────────────────────────────────── */}
+      <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-none pb-1 -mx-4 px-4 mb-6">
+        {[
+          { label: 'Total',     value: totalArticles ?? 0,    sub: 'articles',  color: '#0047ff' },
+          { label: 'Published', value: publishedArticles ?? 0, sub: 'live',      color: '#10b981' },
+          { label: 'In Review', value: inReviewArticles ?? 0,  sub: 'pending',   color: '#f59e0b' },
+          { label: 'Draft',     value: draftArticles ?? 0,     sub: 'editing',   color: '#6b7280' },
+          { label: 'Views',     value: (totalViews ?? 0).toLocaleString(), sub: 'total', color: '#8b5cf6' },
+          { label: 'Users',     value: totalUsers ?? 0,        sub: 'registered', color: '#ec4899' },
+          { label: 'Categories', value: totalCategories ?? 0,  sub: 'active',    color: '#0047ff' },
+        ].map((m) => (
+          <div key={m.label} className="snap-center shrink-0 w-[130px] bg-white dark:bg-[#242235] rounded-3xl p-4 border border-gray-100 dark:border-white/5 shadow-sm flex flex-col gap-1">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-[#8b88a0]">{m.label}</span>
+            <span className="text-2xl font-black tracking-tight" style={{ color: m.color }}>{m.value}</span>
+            <span className="text-[10px] text-gray-400 dark:text-[#8b88a0] font-semibold">{m.sub}</span>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#0f52ba] text-white flex items-center justify-center">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9" />
-              </svg>
-            </div>
-            <span className="text-2xl font-black">{totalArticles ?? 0}+</span>
-          </div>
-          <div className="mt-4 text-[10px] font-bold text-emerald-500 tracking-wide">
-            +9.1% increase
-          </div>
-        </div>
-
-        {/* Card 2 */}
-        <div className="snap-center shrink-0 w-[180px] bg-white dark:bg-[#242235] rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-white/5 flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-4">
-            <span className="text-xs font-semibold text-gray-500 dark:text-[#8b88a0]">Categories active</span>
-            <span className="text-gray-400 dark:text-[#8b88a0]">•••</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#0f52ba] text-white flex items-center justify-center">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-              </svg>
-            </div>
-            <span className="text-2xl font-black">{totalCategories ?? 0}+</span>
-          </div>
-          <div className="mt-4 text-[10px] font-bold text-emerald-500 tracking-wide">
-            +12.1% increase
-          </div>
-        </div>
-
-        {/* Card 3 (Placeholder for Deals) */}
-        <div className="snap-center shrink-0 w-[180px] bg-white dark:bg-[#242235] rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-white/5 flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-4">
-            <span className="text-xs font-semibold text-gray-500 dark:text-[#8b88a0]">Published</span>
-            <span className="text-gray-400 dark:text-[#8b88a0]">•••</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#0f52ba] text-white flex items-center justify-center">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <span className="text-2xl font-black">{publishedArticles ?? 0}+</span>
-          </div>
-          <div className="mt-4 text-[10px] font-bold text-emerald-500 tracking-wide">
-            +2.4% increase
-          </div>
-        </div>
-
+        ))}
       </div>
 
-      {/* ── Overview Section ──────────────────────────────────────── */}
-      <div className="mt-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold tracking-tight">Overview</h2>
-          <div className="px-3 py-1.5 rounded-full bg-white dark:bg-[#242235] border border-gray-100 dark:border-white/5 shadow-sm flex items-center gap-1.5 cursor-pointer">
-            <span className="text-xs font-medium text-gray-400 dark:text-[#8b88a0]">Last 30 days</span>
-            <svg className="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-          </div>
-        </div>
-
-        <div className="flex gap-4 flex-col sm:flex-row">
-          {/* Main Primary Card */}
-          <div className="flex-1 bg-[#0047ff] text-white rounded-3xl p-6 shadow-xl shadow-[#0047ff]/20 flex flex-col justify-between">
-            <div className="flex items-center gap-2 mb-4">
-              <svg className="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-              <span className="font-semibold opacity-90">Total Views</span>
-            </div>
-            <div>
-              <div className="text-4xl font-black tracking-tighter mb-2">{(totalViews ?? 0).toLocaleString()}+</div>
-              <div className="flex items-center gap-2">
-                <div className="px-2 py-0.5 rounded-lg bg-white/20 text-white text-[10px] font-bold flex items-center gap-1 backdrop-blur-sm">
-                  ↑ 4.6%
-                </div>
-                <span className="text-[10px] text-white/60">vs last month</span>
+      {/* ── Quick Actions ─────────────────────────────────────── */}
+      <section className="mb-8">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-[#8b88a0] mb-3">Quick Actions</h2>
+        <div className="grid grid-cols-3 gap-3">
+          {quickActions.map((a) => (
+            <Link key={a.href} href={a.href}
+              className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-[#242235] border border-gray-100 dark:border-white/5 rounded-2xl shadow-sm hover:shadow-md active:scale-95 transition-all">
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white" style={{ background: a.color }}>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={a.icon} />
+                </svg>
               </div>
-            </div>
-          </div>
-
-          {/* Secondary White Card */}
-          <div className="flex-1 bg-white dark:bg-[#242235] text-gray-900 dark:text-white border border-gray-100 dark:border-white/5 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
-             <div className="flex items-center gap-2 mb-4 text-gray-600 dark:text-[#8b88a0]">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-              <span className="font-semibold">Registered Users</span>
-            </div>
-            <div>
-              <div className="text-4xl font-black tracking-tighter mb-2">368+</div>
-              <div className="flex items-center gap-2">
-                <div className="px-2 py-0.5 rounded-lg bg-red-500/10 text-red-500 text-[10px] font-bold flex items-center gap-1">
-                  ↓ 4.6%
-                </div>
-                <span className="text-[10px] text-gray-400 dark:text-[#8b88a0]">vs last month</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Recent Action Row ─────────────────────────────────────── */}
-      <div className="mt-8">
-        <h3 className="text-sm font-semibold mb-4 text-gray-800 dark:text-gray-200">
-          Recent sign-ups today!
-        </h3>
-        <div className="flex items-center justify-between">
-          {recentUsers?.map((u, i) => (
-             <div key={i} className="flex flex-col items-center gap-2">
-              <div className="w-14 h-14 rounded-full bg-indigo-100 dark:bg-indigo-900/30 overflow-hidden border-2 border-white dark:border-[#181623] shadow-sm shadow-black/5 flex items-center justify-center font-bold text-indigo-500 relative">
-                {u.avatar_url ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={u.avatar_url} alt={u.full_name || 'User'} className="w-full h-full object-cover" />
-                ) : (
-                  u.full_name?.charAt(0).toUpperCase() || 'U'
-                )}
-              </div>
-               <span className="text-[11px] font-semibold text-gray-600 dark:text-[#8b88a0]">
-                 {u.full_name?.split(' ')[0] || 'User'}
-               </span>
-             </div>
+              <span className="text-[10px] font-bold text-center leading-tight text-gray-700 dark:text-gray-300">{a.label}</span>
+            </Link>
           ))}
-          {(!recentUsers || recentUsers.length === 0) && (
-            <span className="text-xs text-gray-400">No recent users.</span>
+        </div>
+      </section>
+
+      {/* ── Recent Articles ───────────────────────────────────── */}
+      <section className="mb-8">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-[#8b88a0]">Recent Articles</h2>
+          <Link href="/admin/articles" className="text-[11px] font-bold text-[#0047ff] dark:text-[#ffe500]">View all →</Link>
+        </div>
+        <div className="space-y-2">
+          {recentArticles?.map((a) => (
+            <Link key={a.id} href={`/admin/articles/${a.id}/edit`}
+              className="flex items-center justify-between gap-3 bg-white dark:bg-[#242235] border border-gray-100 dark:border-white/5 rounded-2xl px-4 py-3 shadow-sm active:scale-[0.99] transition-transform">
+              <span className="flex-1 text-sm font-semibold text-gray-800 dark:text-white truncate">{a.title}</span>
+              <span className={`shrink-0 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${statusColor(a.status)}`}>
+                {a.status.replace('_', ' ')}
+              </span>
+            </Link>
+          ))}
+          {(!recentArticles || recentArticles.length === 0) && (
+            <div className="text-center py-8 text-gray-400 text-sm">No articles yet</div>
           )}
         </div>
-      </div>
+      </section>
 
-      {/* ── Quick Actions Grid ──────────────────────────────────── */}
-      <div className="mt-8 mb-6">
-        <h2 className="text-lg font-bold tracking-tight mb-4">Quick Actions</h2>
-        <div className="flex justify-between md:justify-start md:gap-8 items-start">
-          
-          <Link href="/admin/articles/new" className="flex flex-col items-center gap-3 w-16 group">
-            <div className="w-16 h-16 rounded-2xl bg-white dark:bg-[#242235] border border-gray-100 dark:border-white/5 flex items-center justify-center shadow-sm shrink-0 transition-transform group-active:scale-95 group-hover:border-blue-500/30">
-              <div className="w-8 h-8 rounded-full bg-[#0047ff] text-white flex items-center justify-center">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>
-              </div>
-            </div>
-            <span className="text-[10px] font-semibold text-center leading-tight">New Article</span>
-          </Link>
-
-          <Link href="/admin/categories/new" className="flex flex-col items-center gap-3 w-16 group">
-            <div className="w-16 h-16 rounded-2xl bg-white dark:bg-[#242235] border border-gray-100 dark:border-white/5 flex items-center justify-center shadow-sm shrink-0 transition-transform group-active:scale-95 group-hover:border-blue-500/30">
-              <div className="w-8 h-8 rounded-full bg-[#0047ff] text-white flex items-center justify-center">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
-              </div>
-            </div>
-            <span className="text-[10px] font-semibold text-center leading-tight">Add Category</span>
-          </Link>
-
-          <Link href="/admin/users" className="flex flex-col items-center gap-3 w-16 group">
-            <div className="w-16 h-16 rounded-2xl bg-white dark:bg-[#242235] border border-gray-100 dark:border-white/5 flex items-center justify-center shadow-sm shrink-0 transition-transform group-active:scale-95 group-hover:border-blue-500/30">
-              <div className="w-8 h-8 rounded-full bg-[#0047ff] text-white flex items-center justify-center">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-              </div>
-            </div>
-            <span className="text-[10px] font-semibold text-center leading-tight">Manage Users</span>
-          </Link>
-
-          <Link href="/admin/submissions" className="flex flex-col items-center gap-3 w-16 group">
-            <div className="w-16 h-16 rounded-2xl bg-white dark:bg-[#242235] border border-gray-100 dark:border-white/5 flex items-center justify-center shadow-sm shrink-0 transition-transform group-active:scale-95 group-hover:border-blue-500/30">
-              <div className="w-8 h-8 rounded-full bg-[#0047ff] text-white flex items-center justify-center">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
-              </div>
-            </div>
-            <span className="text-[10px] font-semibold text-center leading-tight">Guest Replies</span>
-          </Link>
-
+      {/* ── Recent Users ─────────────────────────────────────── */}
+      <section className="mb-8">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-[#8b88a0]">Recent Users</h2>
+          {isSuperAdmin && (
+            <Link href="/admin/users" className="text-[11px] font-bold text-[#0047ff] dark:text-[#ffe500]">Manage →</Link>
+          )}
         </div>
+        <div className="flex gap-4 overflow-x-auto scrollbar-none pb-1">
+          {recentUsers?.map((u) => (
+            <div key={u.id} className="shrink-0 flex flex-col items-center gap-1.5">
+              <div className="w-12 h-12 rounded-full bg-[#ffe500] flex items-center justify-center text-black font-bold text-base overflow-hidden shadow-sm">
+                {u.avatar_url
+                  // eslint-disable-next-line @next/next/no-img-element
+                  ? <img src={u.avatar_url} alt="" className="w-full h-full object-cover" />
+                  : (u.full_name || u.email || '?').charAt(0).toUpperCase()
+                }
+              </div>
+              <span className="text-[10px] font-semibold text-gray-500 dark:text-[#8b88a0] max-w-[56px] truncate text-center">
+                {u.full_name?.split(' ')[0] || 'User'}
+              </span>
+            </div>
+          ))}
+          {(!recentUsers || recentUsers.length === 0) && (
+            <p className="text-xs text-gray-400">No users yet.</p>
+          )}
+        </div>
+      </section>
+
+      {/* ── Site link ─────────────────────────────────────────── */}
+      <div className="flex justify-center">
+        <Link href="/"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white dark:bg-[#242235] border border-gray-100 dark:border-white/10 text-sm font-semibold text-gray-600 dark:text-gray-300 shadow-sm active:scale-95 transition-all">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+          View Live Site
+        </Link>
       </div>
 
     </div>

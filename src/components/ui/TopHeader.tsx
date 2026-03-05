@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import type { User } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/client';
 
 
 interface TopHeaderProps {
@@ -15,7 +16,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
   const pathname = usePathname();
   const isAuthPage = pathname === '/login' || pathname === '/signup';
   const isAdmin  = pathname.startsWith('/admin') || pathname.startsWith('/editor');
-  const isReaderMode = pathname.startsWith('/app');
+  const isReaderMode = !isAdmin && !isAuthPage;
   const isPrivilegedRole = role === 'super_admin' || role === 'admin' || role === 'editor';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [theme, setTheme] = useState<string>(() => {
@@ -24,6 +25,17 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
     if (saved) return saved;
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
+
+  const [clientUser, setClientUser] = useState<User | null>(user);
+
+  useEffect(() => {
+    const { data: authListener } = createClient().auth.onAuthStateChange((_event, session) => {
+      setClientUser(session?.user || null);
+    });
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   // Apply class on mount and whenever theme changes
   useEffect(() => {
@@ -69,7 +81,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
           {/* ── Reader Mode / Return to Dashboard button ─────── */}
           {isPrivilegedRole && isAdmin && (
             <Link
-              href="/app"
+              href="/"
               className="tap-highlight flex items-center gap-1.5 px-3 h-8 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all active:scale-95"
               style={{ background: 'rgba(255,229,0,0.12)', color: '#ffe500', border: '1px solid rgba(255,229,0,0.25)' }}
               title="Reader Mode"
@@ -84,16 +96,16 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
             <Link
               href={
                 role === 'super_admin' || role === 'admin' ? '/admin' :
-                role === 'editor' ? '/editor' : '/app'
+                role === 'editor' ? '/editor' : '/'
               }
               className="tap-highlight flex items-center gap-1.5 px-3 h-8 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all active:scale-95"
               style={{ background: 'rgba(0,71,255,0.15)', color: '#4f8ef7', border: '1px solid rgba(0,71,255,0.3)' }}
-              title="Return to Dashboard"
+              title="Back to Admin Dashboard"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-[14px] h-[14px] flex-shrink-0">
                 <path d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              <span className="hidden sm:inline">Dashboard</span>
+              <span className="hidden sm:inline">Back to Admin Dashboard</span>
             </Link>
           )}
 
@@ -260,19 +272,13 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
 
                     <div className="mt-5 flex flex-col gap-1">
                       {/* Privileged role — link to their dashboard */}
-                      {(role === 'admin' || role === 'super_admin') && (
-                        <Link href="/admin" onClick={() => setIsMenuOpen(false)}
+                      {isPrivilegedRole && (
+                        <Link href={role === 'super_admin' || role === 'admin' ? '/admin' : '/editor'} onClick={() => setIsMenuOpen(false)}
                           className="py-3 text-[13px] font-black text-[#0047ff] dark:text-[#ffe500] uppercase tracking-widest">
-                          Admin Panel
+                          Back to Admin Dashboard
                         </Link>
                       )}
-                      {role === 'editor' && (
-                        <Link href="/editor" onClick={() => setIsMenuOpen(false)}
-                          className="py-3 text-[13px] font-black text-[#0047ff] dark:text-[#ffe500] uppercase tracking-widest">
-                          Editor Dashboard
-                        </Link>
-                      )}
-                      {user ? (
+                      {clientUser ? (
                         <Link href="/logout" onClick={() => setIsMenuOpen(false)}
                           className="py-3 text-[13px] font-bold text-red-400 uppercase tracking-widest">
                           Logout

@@ -147,14 +147,9 @@ export default async function NewArticlePage() {
                 className="w-full px-4 py-3.5 rounded-2xl bg-black/20 border border-[var(--color-border)] text-white placeholder-gray-500 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all outline-none resize-none leading-relaxed" />
             </div>
 
-            {/* Content Container Setup */}
-            {/* Note: In dark theme Context, RichTextEditorClient needs a text-black reset internally, 
-                or better, we handle its dark mode in its own component. Let's wrap it in a container. */}
             <div className="pt-2">
               <label className="block text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider mb-2 px-1">Content</label>
-              <div className="rounded-2xl overflow-hidden border border-[var(--color-border)] bg-white prose-editor-container">
-                <RichTextEditor name="content" />
-              </div>
+              <RichTextEditor name="content" />
             </div>
 
             {/* Actions */}
