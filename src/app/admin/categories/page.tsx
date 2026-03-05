@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import CategoryManagerClient from './CategoryManagerClient';
+import { Button } from '@/components/ui/Button';
+import { ChevronLeft, Plus } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,35 +29,33 @@ export default async function CategoriesPage() {
     .order('created_at', { ascending: false });
 
   return (
-    <div className="min-h-screen pb-24 px-4 pt-6 bg-[var(--color-background)] font-sans antialiased text-white safe-area-pb">
-      <div className="max-w-2xl mx-auto">
-        {/* ── Header ──────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <Link href="/admin" className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:text-white transition-colors active:scale-95">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
+    <div className="font-sans antialiased max-w-3xl mx-auto py-2">
+      {/* ── Header ──────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between mb-8 mt-4">
+        <div className="flex items-center gap-4">
+          <Button asChild variant="outline" size="icon" className="rounded-full w-10 h-10 border-[var(--color-border)] text-[var(--color-muted)]">
+            <Link href="/admin">
+              <ChevronLeft className="w-5 h-5" />
             </Link>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-white leading-tight">Categories</h1>
-              <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
-                {categories?.length || 0} Total
-              </p>
-            </div>
+          </Button>
+          <div>
+            <h1 className="text-2xl font-black tracking-tight leading-tight">Categories</h1>
+            <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
+              {categories?.length || 0} Total
+            </p>
           </div>
-          <Link
-            href="/admin/categories/new"
-            className="flex items-center gap-1.5 bg-[var(--color-primary)] text-black px-4 py-2.5 rounded-full text-sm font-bold hover:bg-[#ffed4a] transition-all shadow-lg shadow-[var(--color-primary)]/20 active:scale-95"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>
-            <span className="hidden sm:inline">New</span>
-          </Link>
         </div>
-
-        {/* ── Interactive category list with edit/delete ─────────── */}
-        <CategoryManagerClient categories={categories ?? []} />
+        <Button asChild className="rounded-full shadow-sm pr-5">
+          <Link href="/admin/categories/new">
+            <Plus className="w-5 h-5 mr-1" />
+            <span className="hidden sm:inline">New Category</span>
+            <span className="sm:hidden">New</span>
+          </Link>
+        </Button>
       </div>
+
+      {/* ── Interactive category list with edit/delete ─────────── */}
+      <CategoryManagerClient categories={categories ?? []} />
     </div>
   );
 }

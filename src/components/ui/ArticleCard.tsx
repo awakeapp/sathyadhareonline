@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Card, CardContent } from '@/components/ui/Card';
 
 interface Article {
   id: string;
@@ -30,36 +31,33 @@ function formatDate(dateStr?: string | null) {
 
 export default function ArticleCard({ article, variant = 'list' }: ArticleCardProps) {
   const categoryName = getCategory(article);
-  const readTime = article.read_time ? `${article.read_time} MINUTES` : '3 MINUTES';
+  const readTime = article.read_time ? `${article.read_time} MIN READ` : '3 MIN READ';
   const date = formatDate(article.published_at);
 
   if (variant === 'list') {
     return (
-      <Link
-        href={`/articles/${article.slug}`}
-        className="group relative block w-full rounded-[1.25rem] tap-highlight transition-transform duration-300 active:scale-95 z-0"
-        style={{ background: '#ffffff', boxShadow: '0 4px 14px rgba(0,0,0,0.2)' }}
-      >
-        <div className="flex flex-col sm:flex-row w-full h-full">
-          
+      <Link href={`/articles/${article.slug}`} className="group relative block w-full tap-highlight transition-transform duration-300 active:scale-[0.98] outline-none">
+        <Card hoverable className="rounded-3xl border-transparent bg-[var(--color-surface)] shadow-none overflow-hidden h-full flex flex-col sm:flex-row group-hover:bg-[var(--color-surface-2)]">
           {/* Image Side */}
-          <div className="relative w-full sm:w-1/3 aspect-[4/3] sm:aspect-auto rounded-t-[1.25rem] sm:rounded-l-[1.25rem] sm:rounded-tr-none overflow-hidden isolate">
+          <div className="relative w-full sm:w-[35%] aspect-[16/10] sm:aspect-auto sm:h-auto overflow-hidden">
             {article.cover_image ? (
-            <img
-              src={article.cover_image}
-              alt={article.title}
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-          ) : (
-            <div className="absolute inset-0 bg-[#242235]" />
-          )}
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={article.cover_image}
+                alt={article.title}
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-[var(--color-surface-2)]" />
+            )}
             
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 40%)' }} />
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent sm:hidden" />
 
-            {/* Bottom-overlapping yellow badge INSIDE the image */}
+            {/* Mobile Badge */}
             {categoryName && (
-              <div className="absolute bottom-3 left-3 z-10 hidden sm:block">
-                <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest text-[#181623]" style={{ background: '#ffe500' }}>
+              <div className="absolute top-3 left-3 z-10 sm:hidden">
+                <span className="px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest text-black bg-[var(--color-primary)] shadow-sm">
                   {categoryName}
                 </span>
               </div>
@@ -67,73 +65,76 @@ export default function ArticleCard({ article, variant = 'list' }: ArticleCardPr
           </div>
 
           {/* Content Side */}
-          <div className="relative flex flex-col flex-1 p-5 gap-2 justify-between">
+          <CardContent className="flex flex-col flex-1 p-5 sm:p-6 justify-between border-t sm:border-t-0 sm:border-l border-[var(--color-border)]">
             <div>
-              <h3 className="text-sm sm:text-base font-extrabold leading-tight text-[#181623] line-clamp-2">
+              {/* Desktop Badge */}
+              {categoryName && (
+                <div className="hidden sm:inline-block mb-3">
+                  <span className="px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest text-[var(--color-primary)] bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20">
+                    {categoryName}
+                  </span>
+                </div>
+              )}
+              
+              <h3 className="text-base sm:text-lg font-bold leading-snug text-[var(--color-text)] line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors">
                 {article.title}
               </h3>
+              
               {article.excerpt && (
-                <p className="text-[#333] text-xs leading-relaxed line-clamp-2 mt-2 font-medium">
+                <p className="text-[var(--color-muted)] text-sm leading-relaxed line-clamp-2 mt-2 font-medium">
                   {article.excerpt}
                 </p>
               )}
             </div>
 
-            <div className="mt-3 flex items-center flex-wrap gap-1.5 text-[8px] font-bold uppercase tracking-widest text-[#777]">
-              <span>{categoryName || 'ARTICLE'}</span>
-              <span>|</span>
+            <div className="mt-4 flex items-center flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted)]">
               {date && <span>{date}</span>}
-              {date && <span>|</span>}
-              <span className="flex items-center gap-1 text-[#444]">
-                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              {date && <span className="opacity-30">•</span>}
+              <span className="flex items-center gap-1.5">
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 {readTime}
               </span>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </Link>
     );
   }
 
-  // Grid (Dark or White)
-  const isDark = variant === 'grid-dark';
+  // Grid Style
   return (
-    <Link
-      href={`/articles/${article.slug}`}
-      className="group flex flex-col tap-highlight z-0"
-    >
-      {/* Outer wrapper relative, NOT hidden, to hold the badge */}
-      <div className="relative w-full aspect-[3/4]">
-        {/* Inner container to clip the image radius */}
-        <div 
-          className="absolute inset-0 rounded-[1.25rem] overflow-hidden shadow-sm"
-          style={{ background: isDark ? '#242235' : '#ffffff' }}
-        >
+    <Link href={`/articles/${article.slug}`} className="group flex flex-col tap-highlight h-full outline-none">
+      <Card hoverable className="rounded-[1.75rem] border-transparent bg-transparent shadow-none h-full flex flex-col">
+        {/* Image Container */}
+        <div className="relative w-full aspect-[4/5] rounded-[1.75rem] overflow-hidden mb-3 bg-[var(--color-surface-2)]">
           {article.cover_image && (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={article.cover_image}
               alt={article.title}
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
               loading="lazy"
             />
           )}
+          {/* Subtle gradient overlay to ensure badge readability if added later */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
-      </div>
-      
-      {/* Meta Text strictly outside the image area */}
-      <div className="mt-3 px-1 flex flex-col gap-0.5">
-        <h3 
-          className="text-xs font-bold leading-tight line-clamp-2 transition-colors"
-          style={{ color: '#ffffff' }}
-        >
-          {article.title}
-        </h3>
-        <p className="text-[9px] font-bold uppercase tracking-widest mt-1" style={{ color: '#a3a0b5' }}>
-          {categoryName || 'ARTICLE'} {date && `| ${date}`}
-        </p>
-      </div>
+        
+        {/* Meta Text strictly outside the image area */}
+        <div className="px-1 flex flex-col flex-1 pb-1">
+          <p className="text-[9px] font-bold uppercase tracking-widest mb-1.5 text-[var(--color-primary)]">
+            {categoryName || 'ARTICLE'}
+          </p>
+          <h3 className="text-sm font-bold leading-snug line-clamp-2 text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors mb-2">
+            {article.title}
+          </h3>
+          <div className="mt-auto text-[9px] font-bold uppercase tracking-widest text-[var(--color-muted)]">
+            {date && `${date}`}
+          </div>
+        </div>
+      </Card>
     </Link>
   );
 }

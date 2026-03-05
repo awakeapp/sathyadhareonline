@@ -88,19 +88,13 @@
     display: none;
   }
 
+  /* Globally hide all scrollbars */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    display: none;
   }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: var(--color-border);
-    border-radius: 10px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-muted);
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
   img {

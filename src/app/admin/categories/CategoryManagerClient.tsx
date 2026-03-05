@@ -1,6 +1,11 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { Button } from '@/components/ui/Button';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Input, Label } from '@/components/ui/Input';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from '@/components/ui/Modal';
+import { Edit2, Trash2, Folder, Shield, CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface Category {
   id: string;
@@ -17,11 +22,16 @@ const COLORS = ['bg-blue-500', 'bg-emerald-500', 'bg-purple-500', 'bg-rose-500',
 
 export default function CategoryManagerClient({ categories: initial }: Props) {
   const [cats, setCats] = useState<Category[]>(initial);
+  
+  // Edit State
   const [editTarget, setEditTarget] = useState<Category | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
   const [editName, setEditName] = useState('');
   const [editSlug, setEditSlug] = useState('');
   const [editIcon, setEditIcon] = useState('');
+  
+  // Delete State
+  const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
+
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -87,147 +97,136 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
     <>
       {/* ── Success / Error toasts ──────────────────────────────── */}
       {successMsg && (
-        <div className="mb-4 flex items-center gap-2 px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 text-sm font-semibold">
-          <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-          {successMsg}
-        </div>
+        <Card className="mb-6 border-emerald-500/30 bg-emerald-500/5 shadow-none rounded-2xl">
+          <CardContent className="p-4 flex items-center gap-3 text-emerald-500">
+            <CheckCircle2 className="w-5 h-5" />
+            <span className="font-bold text-sm tracking-tight">{successMsg}</span>
+          </CardContent>
+        </Card>
       )}
       {error && (
-        <div className="mb-4 flex items-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm font-semibold">
-          <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          {error}
-        </div>
+        <Card className="mb-6 border-red-500/30 bg-red-500/5 shadow-none rounded-2xl">
+          <CardContent className="p-4 flex items-center gap-3 text-red-500">
+            <AlertCircle className="w-5 h-5" />
+            <span className="font-bold text-sm tracking-tight">{error}</span>
+          </CardContent>
+        </Card>
       )}
 
       {/* ── Category list ────────────────────────────────────────── */}
       {cats.length === 0 ? (
-        <div className="py-20 text-center text-[var(--color-muted)] flex flex-col items-center bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl p-8 shadow-lg">
-          <p className="font-semibold text-white mb-1">No categories found</p>
-          <p className="text-sm">Create your first category to organize content.</p>
-        </div>
+        <Card className="py-20 text-center flex flex-col items-center bg-[var(--color-surface)] border-[var(--color-border)] border-dashed rounded-[2rem] shadow-none">
+          <Folder className="w-12 h-12 mb-4 opacity-20 text-[var(--color-muted)]" />
+          <p className="font-bold mb-1 text-lg tracking-tight">No categories found</p>
+          <p className="text-sm text-[var(--color-muted)]">Create your first category to organize content.</p>
+        </Card>
       ) : (
         <div className="space-y-4">
           {cats.map((cat, idx) => (
-            <div
-              key={cat.id}
-              className="flex items-center gap-4 p-5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl shadow-lg relative overflow-hidden group hover:border-[var(--color-primary)]/30 transition-colors"
-            >
-              {/* Color avatar */}
-              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-white font-bold text-lg shadow-inner relative ${COLORS[idx % COLORS.length]}`}>
-                <svg className="w-5 h-5 absolute opacity-30" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" /></svg>
-                <span className="relative z-10">{cat.name.charAt(0).toUpperCase()}</span>
-              </div>
-
-              {/* Info */}
-              <div className="flex-1 min-w-0 pr-2">
-                <h3 className="font-bold text-white text-[16px] truncate mb-1">{cat.name}</h3>
-                <div className="flex items-center gap-2 text-[12px] text-[var(--color-muted)] font-mono bg-black/30 w-fit rounded-md px-2 py-0.5">
-                  <span className="opacity-50">/</span>
-                  <span>{cat.slug}</span>
+            <Card key={cat.id} hoverable className="rounded-3xl border-transparent bg-[var(--color-surface)] shadow-none">
+              <CardContent className="p-5 flex items-center gap-4">
+                {/* Color avatar */}
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 text-white font-black text-xl shadow-inner relative ${COLORS[idx % COLORS.length]}`}>
+                  <Folder className="w-6 h-6 absolute opacity-30 mix-blend-overlay" />
+                  <span className="relative z-10">{cat.name.charAt(0).toUpperCase()}</span>
                 </div>
-              </div>
 
-              {/* Action buttons */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button
-                  onClick={() => openEdit(cat)}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-colors active:scale-95"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                  Edit
-                </button>
-                <button
-                  onClick={() => setDeleteTarget(cat)}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors active:scale-95"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                  Delete
-                </button>
-              </div>
-            </div>
+                {/* Info */}
+                <div className="flex-1 min-w-0 pr-2">
+                  <h3 className="font-bold text-[17px] truncate tracking-tight">{cat.name}</h3>
+                  <div className="flex items-center gap-2 text-[12px] text-[var(--color-muted)] font-mono bg-[var(--color-surface-2)] mt-1.5 w-fit rounded-lg px-2.5 py-1 font-medium border border-[var(--color-border)]">
+                    <span className="opacity-50">/</span>
+                    <span>{cat.slug}</span>
+                  </div>
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex flex-col sm:flex-row items-center gap-2 flex-shrink-0">
+                  <Button
+                    onClick={() => openEdit(cat)}
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto text-blue-500 border-blue-500/20 bg-blue-500/5 hover:bg-blue-500/10 hover:text-blue-500"
+                  >
+                    <Edit2 className="w-4 h-4 sm:mr-1.5" />
+                    <span className="hidden sm:inline">Edit</span>
+                  </Button>
+                  <Button
+                    onClick={() => setDeleteTarget(cat)}
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto text-red-500 border-red-500/20 bg-red-500/5 hover:bg-red-500/10 hover:text-red-500"
+                  >
+                    <Trash2 className="w-4 h-4 sm:mr-1.5" />
+                    <span className="hidden sm:inline">Delete</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
 
       {/* ══ EDIT MODAL ══════════════════════════════════════════════ */}
-      {editTarget && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={closeEdit}>
-          <div className="w-full max-w-md bg-[var(--color-background)] border border-[var(--color-border)] rounded-3xl shadow-2xl p-6" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-white">Edit Category</h2>
-              <button onClick={closeEdit} className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--color-surface)] text-[var(--color-muted)] hover:text-white transition-colors">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
-            </div>
+      <Modal open={!!editTarget} onOpenChange={(open) => !open && closeEdit()}>
+        <ModalContent>
+          <ModalHeader>
+            <ModalTitle>Edit Category</ModalTitle>
+            <ModalDescription>Make changes to the category details below.</ModalDescription>
+          </ModalHeader>
 
-            <form onSubmit={handleUpdate} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-widest text-[var(--color-muted)] mb-1.5">Name</label>
-                <input
-                  required value={editName} onChange={e => setEditName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl bg-black/20 border border-[var(--color-border)] text-white placeholder-gray-500 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-widest text-[var(--color-muted)] mb-1.5">URL Slug</label>
-                <input
-                  required value={editSlug} onChange={e => setEditSlug(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl bg-black/20 border border-[var(--color-border)] text-white placeholder-gray-500 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all outline-none font-mono text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-widest text-[var(--color-muted)] mb-1.5">Icon Name <span className="font-normal normal-case opacity-50">(optional)</span></label>
-                <input
-                  value={editIcon} onChange={e => setEditIcon(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl bg-black/20 border border-[var(--color-border)] text-white placeholder-gray-500 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all outline-none"
-                />
-              </div>
-              {error && <p className="text-red-400 text-sm">{error}</p>}
-              <div className="flex gap-3 pt-2">
-                <button type="button" onClick={closeEdit}
-                  className="flex-1 py-3 rounded-2xl border border-[var(--color-border)] text-[var(--color-muted)] hover:text-white hover:bg-white/5 font-semibold text-sm transition-colors">
-                  Cancel
-                </button>
-                <button type="submit" disabled={isPending}
-                  className="flex-1 py-3 rounded-2xl bg-[var(--color-primary)] text-black font-bold text-sm hover:bg-[#ffed4a] transition-colors disabled:opacity-60">
-                  {isPending ? 'Saving…' : 'Save Changes'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+          <form onSubmit={handleUpdate} className="grid gap-4 py-4">
+            <div>
+              <Label>Name</Label>
+              <Input
+                required value={editName} onChange={e => setEditName(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>URL Slug</Label>
+              <Input
+                required value={editSlug} onChange={e => setEditSlug(e.target.value)}
+                className="font-mono text-sm"
+              />
+            </div>
+            <div>
+              <Label>Icon Name <span className="font-normal normal-case opacity-50">(optional)</span></Label>
+              <Input
+                value={editIcon} onChange={e => setEditIcon(e.target.value)}
+              />
+            </div>
+          </form>
+
+          <ModalFooter>
+             <Button variant="ghost" onClick={closeEdit}>Cancel</Button>
+             <Button variant="primary" onClick={handleUpdate} disabled={isPending} loading={isPending}>Save Changes</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
       {/* ══ DELETE CONFIRM MODAL ════════════════════════════════════ */}
-      {deleteTarget && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => setDeleteTarget(null)}>
-          <div className="w-full max-w-sm bg-[var(--color-background)] border border-red-500/30 rounded-3xl shadow-2xl p-6" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center gap-3 mb-4">
+      <Modal open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <ModalContent className="border-red-500/30 shadow-red-500/5">
+          <ModalHeader>
+            <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 rounded-2xl bg-red-500/15 flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <AlertCircle className="w-5 h-5 text-red-500" />
               </div>
-              <div>
-                <h2 className="text-base font-bold text-white">Delete Category?</h2>
-                <p className="text-xs text-[var(--color-muted)] mt-0.5">This cannot be undone.</p>
-              </div>
+              <ModalTitle>Delete Category?</ModalTitle>
             </div>
-            <p className="text-sm text-[var(--color-muted)] mb-6">
-              Are you sure you want to delete <span className="font-bold text-white">"{deleteTarget.name}"</span>? Articles in this category will become uncategorized.
-            </p>
-            {error && <p className="text-red-400 text-sm mb-3">{error}</p>}
-            <div className="flex gap-3">
-              <button onClick={() => setDeleteTarget(null)}
-                className="flex-1 py-3 rounded-2xl border border-[var(--color-border)] text-[var(--color-muted)] hover:text-white font-semibold text-sm transition-colors">
-                Cancel
-              </button>
-              <button onClick={handleDelete} disabled={isPending}
-                className="flex-1 py-3 rounded-2xl bg-red-500 text-white font-bold text-sm hover:bg-red-600 transition-colors disabled:opacity-60">
-                {isPending ? 'Deleting…' : 'Yes, Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+            <ModalDescription className="text-[var(--color-text)]">
+               Are you sure you want to delete <span className="font-bold">"{deleteTarget?.name}"</span>? Articles in this category will become uncategorized.
+               <br />
+               <span className="text-red-500 font-bold text-xs mt-2 block">This action cannot be undone.</span>
+            </ModalDescription>
+          </ModalHeader>
+
+          <ModalFooter>
+            <Button variant="ghost" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={isPending} loading={isPending}>Yes, Delete</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </>
   );
 }
