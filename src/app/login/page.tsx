@@ -49,7 +49,7 @@ export default function LoginPage() {
     return () => observer.disconnect()
   }, [])
 
-  const logoSrc = theme === 'dark' ? '/logo-light.png' : '/logo-dark.png'
+  const logoSrc = theme === 'dark' ? '/logo-dark.png' : '/logo-light.png'
 
   /* ── Email / Password Login ── */
   async function handleLogin(e: React.FormEvent) {

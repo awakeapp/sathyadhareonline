@@ -128,7 +128,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
           <Link href={isAdminRoute ? dashboardHref : '/'} className="flex items-center flex-shrink-0 tap-highlight">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={currentTheme === 'dark' ? '/logo-light.png' : '/logo-dark.png'}
+              src={currentTheme === 'dark' ? '/logo-dark.png' : '/logo-light.png'}
               alt="Sathyadhare Logo"
               className="h-[26px] min-w-[110px] object-left object-contain transition-opacity duration-300"
               suppressHydrationWarning
@@ -224,7 +224,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
               <div className="flex items-center justify-between px-5 pt-4 pb-4 border-b border-[var(--color-border)]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={theme === 'dark' ? '/logo-light.png' : '/logo-dark.png'}
+                  src={theme === 'dark' ? '/logo-dark.png' : '/logo-light.png'}
                   alt="Sathyadhare"
                   className="h-[24px] object-contain"
                   suppressHydrationWarning

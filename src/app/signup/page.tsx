@@ -72,7 +72,7 @@ export default function SignupPage() {
     return () => observer.disconnect()
   }, [])
 
-  const logoSrc = theme === 'dark' ? '/logo-light.png' : '/logo-dark.png'
+  const logoSrc = theme === 'dark' ? '/logo-dark.png' : '/logo-light.png'
   const strength = getPasswordStrength(password)
   const passwordsMatch = password && confirmPassword && password === confirmPassword
 
