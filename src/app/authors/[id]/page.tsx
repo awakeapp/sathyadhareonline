@@ -2,6 +2,11 @@ import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import ArticleCard from '@/components/ui/ArticleCard';
+import SectionHeader from '@/components/ui/SectionHeader';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { ChevronLeft } from 'lucide-react';
 
 export const revalidate = 60;
 
@@ -40,7 +45,7 @@ export default async function AuthorPage({ params }: Props) {
   // Fetch published articles by this author
   const { data: articles } = await supabase
     .from('articles')
-    .select('id, title, slug, excerpt, cover_image, published_at')
+    .select('id, title, slug, excerpt, cover_image, published_at, category:categories(name)')
     .eq('author_id', id)
     .eq('status', 'published')
     .eq('is_deleted', false)
@@ -49,88 +54,59 @@ export default async function AuthorPage({ params }: Props) {
   const displayName = profile.full_name ?? 'Author';
   const initials = displayName
     .split(' ')
+    .filter(Boolean)
     .map((w: string) => w[0])
     .join('')
     .slice(0, 2)
-    .toUpperCase();
+    .toUpperCase() || '?';
 
   return (
-    <main className="max-w-4xl mx-auto px-6 py-12 font-sans">
-      <Link href="/" className="text-indigo-600 hover:underline text-sm font-medium mb-10 inline-block">
-        &larr; Home
-      </Link>
+    <div className="font-sans antialiased min-h-[100svh] px-4 py-8 pb-32 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl border-t border-[var(--color-border)]">
+      
+      <Button asChild variant="ghost" size="sm" className="mb-6 -ml-2 text-[var(--color-muted)] hover:text-[var(--color-text)]">
+        <Link href="/">
+          <ChevronLeft className="w-4 h-4 mr-1" />
+          Home
+        </Link>
+      </Button>
 
       {/* Author card */}
-      <div className="flex items-center gap-6 mb-12 p-8 bg-white border border-gray-100 rounded-2xl shadow-sm">
-        <div className="w-20 h-20 rounded-full bg-indigo-600 flex items-center justify-center text-white text-2xl font-extrabold shadow-md flex-shrink-0">
-          {initials}
-        </div>
-        <div>
-          <h1 className="text-2xl font-extrabold text-gray-900">{displayName}</h1>
-          {profile.role && (
-            <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 uppercase tracking-wider">
-              {profile.role}
-            </span>
-          )}
-          <p className="mt-2 text-sm text-gray-400 font-medium">
-            {articles?.length ?? 0} published article{(articles?.length ?? 0) !== 1 ? 's' : ''}
-          </p>
-        </div>
-      </div>
+      <Card className="mb-10 rounded-[2rem] shadow-none bg-[var(--color-surface)] border-[var(--color-border)]">
+        <CardContent className="p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+          <div className="w-24 h-24 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-black text-3xl font-black shadow-inner flex-shrink-0">
+            {initials}
+          </div>
+          <div>
+            <h1 className="text-3xl font-black text-[var(--color-text)] tracking-tight">{displayName}</h1>
+            <div className="flex flex-col sm:flex-row items-center gap-2 mt-2">
+              {profile.role && (
+                <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20">
+                   {profile.role}
+                </span>
+              )}
+              <span className="hidden sm:inline text-[var(--color-muted)]">•</span>
+              <p className="text-sm font-semibold text-[var(--color-muted)]">
+                 {articles?.length ?? 0} published article{(articles?.length ?? 0) !== 1 ? 's' : ''}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Articles */}
-      <h2 className="text-xl font-bold text-gray-900 mb-6">Articles by {displayName}</h2>
+      <SectionHeader title={`Articles by ${displayName}`} />
 
       {!articles || articles.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
-          <p className="text-lg font-medium">No articles yet.</p>
-        </div>
+        <Card className="text-center py-20 rounded-3xl mt-4 shadow-none border-dashed bg-[var(--color-surface)] border-[var(--color-border)]">
+          <p className="text-sm font-bold tracking-widest uppercase text-[var(--color-muted)]">No articles yet</p>
+        </Card>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-5 mt-4">
           {articles.map((article) => (
-            <Link
-              key={article.id}
-              href={`/articles/${article.slug}`}
-              className="group bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300"
-            >
-              {article.cover_image ? (
-                <div className="w-full h-44 overflow-hidden">
-                  <img
-                    src={article.cover_image}
-                    alt={article.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-              ) : (
-                <div className="w-full h-44 bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center">
-                  <svg className="w-12 h-12 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                      d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9" />
-                  </svg>
-                </div>
-              )}
-              <div className="p-5">
-                {article.published_at && (
-                  <time className="text-xs text-indigo-500 font-semibold uppercase tracking-wider">
-                    {new Date(article.published_at).toLocaleDateString('en-US', {
-                      year: 'numeric', month: 'long', day: 'numeric',
-                    })}
-                  </time>
-                )}
-                <h3 className="mt-1 text-base font-bold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-2">
-                  {article.title}
-                </h3>
-                {article.excerpt && (
-                  <p className="mt-2 text-sm text-gray-500 line-clamp-3">{article.excerpt}</p>
-                )}
-                <span className="mt-4 inline-flex items-center text-xs font-semibold text-indigo-600 gap-1">
-                  Read article →
-                </span>
-              </div>
-            </Link>
+             <ArticleCard key={article.id} variant="list" article={article as any} />
           ))}
         </div>
       )}
-    </main>
+    </div>
   );
 }

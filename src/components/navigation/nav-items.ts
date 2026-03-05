@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, Library, Users, Menu, SquarePen, Eye, Home, Search, User, Layers } from 'lucide-react';
+import { LayoutDashboard, FileText, Library, Users, Menu, SquarePen, Eye, Home, Search, Layers, Mic } from 'lucide-react';
 
 export const ADMIN_NAV = [
   { name: 'Dashboard', href: '/admin', exact: true, icon: LayoutDashboard },
@@ -17,8 +17,8 @@ export const EDITOR_NAV = [
 
 export const READER_NAV = [
   { name: 'Home', href: '/', exact: true, icon: Home },
-  { name: 'Series', href: '/sequels', exact: false, icon: Layers },
+  { name: 'Sequels', href: '/sequels', exact: false, icon: Layers },
   { name: 'Search', href: '/search', exact: false, icon: Search },
-  { name: 'Categories', href: '/categories', exact: false, icon: Library },
-  { name: 'Profile', href: '/profile', exact: false, icon: User },
+  { name: 'Podcast', href: '/podcast', exact: false, icon: Mic },
+  { name: 'More', href: '#more', exact: false, icon: Menu, isMoreToggle: true },
 ];

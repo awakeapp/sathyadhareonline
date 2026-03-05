@@ -3,7 +3,7 @@ import NewsletterForm from '@/components/NewsletterForm';
 import HeroBanner from '@/components/ui/HeroBanner';
 import ArticleCard from '@/components/ui/ArticleCard';
 import SectionHeader from '@/components/ui/SectionHeader';
-import HorizontalScroller from '@/components/ui/HorizontalScroller';
+import { Card } from '@/components/ui/Card';
 
 export const revalidate = 60;
 
@@ -43,9 +43,10 @@ export default async function HomePage() {
 
   if (!latestArticles || latestArticles.length === 0) {
     latestArticles = [
-      { id: 'l1', title: 'ಬಾಹ್ಯಾಕಾಶದ ಮರ್ಮಗಳು', slug: 'l1', excerpt: '', cover_image: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=80', published_at: new Date().toISOString(), category: { name: 'SCIENCE' } },
-      { id: 'l2', title: 'ಆರೋಗ್ಯಕರ ಜೀವನಕ್ಕೆ ೧೦ ಸೂತ್ರಗಳು', slug: 'l2', excerpt: '', cover_image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&q=80', published_at: new Date().toISOString(), category: { name: 'LIFE' } },
-      { id: 'l3', title: 'ಕೃತಕ ಬುದ್ಧಿಮತ್ತೆಯ ಕ್ರಾಂತಿ', slug: 'l3', excerpt: '', cover_image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80', published_at: new Date().toISOString(), category: { name: 'TECH' } },
+      { id: 'l1', title: 'ಭಾರತೀಯ ಬಾಹ್ಯಾಕಾಶ ಸಂಶೋಧನಾ ಸಂಸ್ಥೆಯ (ISRO) ಐತಿಹಾಸಿಕ ನೆಗೆತ', slug: 'l1', excerpt: '', cover_image: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=80', published_at: new Date().toISOString(), category: { name: 'SCIENCE' } },
+      { id: 'l2', title: 'ದೈನಂದಿನ ಜೀವನದಲ್ಲಿ ಯೋಗ: ಮಾನಸಿಕ ಮತ್ತು ದೈಹಿಕ ಶಾಂತಿಗಾಗಿ', slug: 'l2', excerpt: '', cover_image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&q=80', published_at: new Date().toISOString(), category: { name: 'LIFE' } },
+      { id: 'l3', title: 'ಆರ್ಟಿಫಿಶಿಯಲ್ ಇಂಟೆಲಿಜೆನ್ಸ್ ಭವಿಷ್ಯವನ್ನು ಹೇಗೆ ಬದಲಾಯಿಸುತ್ತಿದೆ?', slug: 'l3', excerpt: '', cover_image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80', published_at: new Date().toISOString(), category: { name: 'TECH' } },
+      { id: 'l4', title: 'ಕರ್ನಾಟಕದ ಪ್ರಾಚೀನ ದೇವಾಲಯಗಳ ವಾಸ್ತುಶಿಲ್ಪದ ಪರಂಪರೆ', slug: 'l4', excerpt: '', cover_image: 'https://images.unsplash.com/photo-1594916890333-3d0cf3099778?w=800&q=80', published_at: new Date().toISOString(), category: { name: 'HISTORY' } },
     ] as any;
   }
 
@@ -83,98 +84,65 @@ export default async function HomePage() {
 
   if (trending.length === 0) {
     trending = [
-      { id: 't1', title: 'ಕರ್ನಾಟಕದ ಸಂಸ್ಕೃತಿ ಮತ್ತು ಇತಿಹಾಸ', slug: 't1', cover_image: 'https://images.unsplash.com/photo-1600100397561-433ff484439c?w=800&q=80', category: { name: 'CULTURE' }, published_at: new Date().toISOString() },
-      { id: 't2', title: 'ಪರಿಸರ ಸಂರಕ್ಷಣೆ ನಮ್ಮ ಹೊಣೆ', slug: 't2', cover_image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb773b09?w=800&q=80', category: { name: 'NATURE' }, published_at: new Date().toISOString() },
-    ] as any;
-  }
-
-  // 4) Series (Sequels)
-  let { data: latestSequels } = await supabase
-    .from('sequels').select('id, title, slug, banner_image, published_at')
-    .eq('status', 'published').eq('is_deleted', false)
-    .order('published_at', { ascending: false }).limit(6);
-
-  if (!latestSequels || latestSequels.length === 0) {
-    latestSequels = [
-      { id: 's1', title: 'ಭಾರತೀಯ ಕಲೆಗಳು', slug: 's1', banner_image: 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=800&q=80', published_at: new Date().toISOString() },
-      { id: 's2', title: 'ಆಧುನಿಕ ವೈದ್ಯಕೀಯ', slug: 's2', banner_image: 'https://images.unsplash.com/photo-1532187875605-2fe358a77e76?w=800&q=80', published_at: new Date().toISOString() },
+      { id: 't1', title: 'ಮಳೆಗಾಲದಲ್ಲಿ ಸಹಜ ಪ್ರಕೃತಿಯ ಸೌಂದರ್ಯದ ದರ್ಶನ', slug: 't1', cover_image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb773b09?w=800&q=80', category: { name: 'NATURE' }, published_at: new Date().toISOString() },
+      { id: 't2', title: 'ಮಕ್ಕಳಲ್ಲಿ ಕಥೆ ಓದುವ ಹವ್ಯಾಸವನ್ನು ಹೇಗೆ ಬೆಳೆಸುವುದು?', slug: 't2', cover_image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&q=80', category: { name: 'LITERATURE' }, published_at: new Date().toISOString() },
+      { id: 't3', title: 'ಡಿಜಿಟಲ್ ಜಗತ್ತಿನಲ್ಲಿ ಡೇಟಾ ಸುರಕ್ಷತೆಯ ಸವಾಲುಗಳು', slug: 't3', cover_image: 'https://images.unsplash.com/photo-1614064641913-6b71a17960fc?w=800&q=80', category: { name: 'TECH' }, published_at: new Date().toISOString() },
     ] as any;
   }
 
   return (
-    <div className="min-h-[100svh] px-4 pt-1 pb-32 max-w-lg mx-auto sm:max-w-2xl lg:max-w-5xl">
+    <div className="font-sans antialiased min-h-[100svh] px-4 pt-1 pb-32 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl scroll-smooth">
       
       {/* Hero */}
       {featured && (
-        <div className="mb-6 pt-0">
+        <div className="mb-8 pt-0 mt-4 sm:mt-6">
           <HeroBanner article={featured} />
         </div>
       )}
 
-      {/* Latest Sequels */}
-      {latestSequels && latestSequels.length > 0 && (
-        <section className="mb-10">
-          <SectionHeader title="Latest Sequels" />
-          <HorizontalScroller className="-mx-4 px-4 sm:mx-0 sm:px-0 flex gap-5">
-            {latestSequels.map((seq: any) => (
-              <div key={seq.id} style={{ minWidth: '180px', width: '45vw', maxWidth: '220px' }}>
-                <ArticleCard
-                  variant="grid-dark"
-                  article={{
-                    ...seq,
-                    cover_image: seq.banner_image,
-                    category: { name: 'SEQUEL' }
-                  }}
-                />
-              </div>
-            ))}
-          </HorizontalScroller>
-        </section>
-      )}
-
-      {/* Trending Articles */}
+      {/* Trending Articles - List View */}
       {trending.length > 0 && (
-        <section className="mb-10">
+        <section className="mb-12">
           <SectionHeader title="Trending Articles" />
-          <HorizontalScroller className="-mx-4 px-4 sm:mx-0 sm:px-0 flex gap-5">
+          <div className="flex flex-col gap-5 mt-5">
             {trending.map((item: any) => (
-              <div key={item.id} style={{ minWidth: '180px', width: '45vw', maxWidth: '220px' }}>
-                <ArticleCard variant="grid-dark" article={item} />
+              <div key={item.id} className="w-full">
+                <ArticleCard variant="list" article={item} />
               </div>
             ))}
-          </HorizontalScroller>
+          </div>
         </section>
       )}
 
-      {/* Latest Articles */}
+      {/* Latest Articles - List View */}
       {latestArticles && latestArticles.length > 0 && (
-        <section className="mb-10">
+        <section className="mb-12">
           <SectionHeader title="Latest Articles" />
-          <HorizontalScroller className="-mx-4 px-4 sm:mx-0 sm:px-0 flex gap-5">
+          <div className="flex flex-col gap-5 mt-5">
             {latestArticles.map((item: any) => (
-              <div key={item.id} style={{ minWidth: '180px', width: '45vw', maxWidth: '220px' }}>
-                <ArticleCard variant="grid-dark" article={item} />
+              <div key={item.id} className="w-full">
+                <ArticleCard variant="list" article={item} />
               </div>
             ))}
-          </HorizontalScroller>
+          </div>
         </section>
       )}
 
       {/* Community Banner */}
-      <section 
-        className="rounded-[2rem] p-10 flex flex-col sm:flex-row items-center gap-6 shadow-2xl mt-12 mb-4"
-        style={{ background: '#201d31', border: '1px solid rgba(255,255,255,0.05)' }}
-      >
-        <div className="sm:w-1/2 flex flex-col justify-center gap-2">
-          <h2 className="text-xl sm:text-2xl font-black text-white leading-tight tracking-tighter">
-            JOIN READERS<br />COMMUNITY
+      <Card className="rounded-[2rem] p-8 sm:p-10 flex flex-col sm:flex-row items-center gap-8 shadow-none mt-16 mb-4 bg-[var(--color-surface-2)] border-transparent overflow-hidden relative">
+        {/* Subtle decorative background blur */}
+        <div className="absolute -top-24 -right-24 w-48 h-48 bg-[var(--color-primary)]/10 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="sm:w-[45%] flex flex-col justify-center gap-3 relative z-10 text-center sm:text-left">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight tracking-tight">
+             JOIN READERS<br />COMMUNITY
           </h2>
-          <p className="text-[10px] uppercase tracking-widest text-[#a3a0b5] font-bold">Get weekly updates in your inbox</p>
+          <p className="text-[10px] sm:text-xs uppercase tracking-[0.15em] text-[var(--color-primary)] font-bold">Get weekly updates in your inbox</p>
         </div>
-        <div className="w-full sm:w-1/2 flex items-center justify-end">
+        <div className="w-full sm:w-[55%] flex items-center justify-end relative z-10">
           <NewsletterForm />
         </div>
-      </section>
+      </Card>
 
     </div>
   );

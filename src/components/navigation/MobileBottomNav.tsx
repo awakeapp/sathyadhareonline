@@ -66,6 +66,23 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
             );
           }
 
+          if ('isMoreToggle' in item && item.isMoreToggle) {
+            return (
+              <button
+                key={item.name}
+                onClick={() => window.dispatchEvent(new Event('toggle-drawer'))}
+                className="tap-highlight flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all text-[var(--color-muted)] hover:text-[var(--color-text)] focus:outline-none"
+              >
+                <div className="relative">
+                  <item.icon size={22} className="stroke-[2.2px]" />
+                </div>
+                <span className="text-[10px] font-semibold tracking-wide truncate">
+                  {item.name}
+                </span>
+              </button>
+            );
+          }
+
           return (
             <Link
               key={item.href}

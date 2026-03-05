@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import ArticleCard from '@/components/ui/ArticleCard';
+import { Card } from '@/components/ui/Card';
 
 export const revalidate = 60;
 
@@ -30,12 +31,21 @@ export default async function CategoryPage({ params }: Props) {
     .order('published_at', { ascending: false });
 
   return (
-    <div className="min-h-[100svh] px-4 py-6 pb-24 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl">
+    <div className="font-sans antialiased min-h-[100svh] px-4 py-8 pb-32 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl border-t border-[var(--color-border)]">
+      
+      <div className="mb-6 px-1">
+        <h1 className="text-3xl font-black text-[var(--color-text)] tracking-tight">
+          {category.name}
+        </h1>
+        <p className="text-[var(--color-muted)] text-xs font-bold uppercase tracking-widest mt-1">
+          {articles?.length || 0} Articles
+        </p>
+      </div>
 
       {!articles?.length ? (
-        <div className="text-center py-24 rounded-[1.25rem] mt-6" style={{ background: '#242235' }}>
-          <p className="text-sm font-bold tracking-widest uppercase text-[#a3a0b5]">No articles found</p>
-        </div>
+        <Card className="text-center py-24 rounded-3xl mt-6 shadow-none border-dashed bg-[var(--color-surface)] border-[var(--color-border)]">
+          <p className="text-sm font-bold tracking-widest uppercase text-[var(--color-muted)]">No articles found</p>
+        </Card>
       ) : (
         <div className="flex flex-col gap-5 mt-2">
           {articles.map((article) => (

@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import { subscribeAction } from '@/app/actions/newsletter';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 export default function NewsletterForm() {
   const [state, setState] = useState<'idle' | 'loading' | 'success' | 'exists' | 'error'>('idle');
@@ -20,46 +23,53 @@ export default function NewsletterForm() {
 
   if (state === 'success') {
     return (
-      <div className="flex flex-col items-center gap-3 py-4">
-        <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-          <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
+      <div className="flex flex-col items-center gap-3 py-4 w-full text-center">
+        <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
+          <CheckCircle2 className="w-6 h-6 text-emerald-500" />
         </div>
-        <p className="text-white font-semibold text-lg">Thank you for subscribing.</p>
-        <p className="text-indigo-200 text-sm">You&apos;ll hear from us soon.</p>
+        <div>
+          <p className="text-white font-bold text-lg leading-tight">Thank you for subscribing.</p>
+          <p className="text-[var(--color-muted)] text-sm font-medium mt-1">You&apos;ll hear from us soon.</p>
+        </div>
       </div>
     );
   }
 
   if (state === 'exists') {
     return (
-      <div className="flex flex-col items-center gap-2 py-4">
-        <p className="text-yellow-300 font-semibold text-lg">Already subscribed.</p>
-        <p className="text-indigo-200 text-sm">This email is already on our list.</p>
+      <div className="flex flex-col items-center gap-3 py-4 w-full text-center">
+        <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
+          <AlertCircle className="w-6 h-6 text-amber-500" />
+        </div>
+        <div>
+          <p className="text-amber-500 font-bold text-lg leading-tight">Already subscribed.</p>
+          <p className="text-[var(--color-muted)] text-sm font-medium mt-1">This email is already on our list.</p>
+        </div>
       </div>
     );
   }
 
   return (
     <form action={handleSubmit} className="flex flex-col sm:flex-row gap-3 w-full max-w-md mx-auto">
-      <input
+      <Input
         name="email"
         type="email"
         required
         placeholder="your@email.com"
         disabled={state === 'loading'}
-        className="flex-1 px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-indigo-300 focus:outline-none focus:ring-2 focus:ring-white/40 backdrop-blur-sm transition-all"
+        className="flex-1 px-4 py-3 h-12 rounded-2xl bg-black/40 border-[var(--color-border)] text-white placeholder-[var(--color-muted)] focus:ring-[var(--color-primary)] transition-all"
       />
-      <button
+      <Button
         type="submit"
         disabled={state === 'loading'}
-        className="px-6 py-3 bg-white text-indigo-700 font-bold rounded-xl hover:bg-indigo-50 transition-colors shadow-md disabled:opacity-60 whitespace-nowrap"
+        loading={state === 'loading'}
+        variant="primary"
+        className="h-12 px-6 rounded-2xl text-black shadow-none whitespace-nowrap"
       >
         {state === 'loading' ? 'Subscribing…' : 'Subscribe'}
-      </button>
+      </Button>
       {state === 'error' && (
-        <p className="w-full text-center text-red-300 text-sm mt-1">{errorMsg}</p>
+        <p className="w-full text-center text-red-400 font-semibold text-sm mt-1">{errorMsg}</p>
       )}
     </form>
   );

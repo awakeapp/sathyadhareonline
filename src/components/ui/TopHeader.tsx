@@ -57,6 +57,12 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
     };
   }, []);
 
+  useEffect(() => {
+    const handleToggleMenu = () => setIsMenuOpen((prev) => !prev);
+    window.addEventListener('toggle-drawer', handleToggleMenu);
+    return () => window.removeEventListener('toggle-drawer', handleToggleMenu);
+  }, []);
+
   // (Theme is now handled by next-themes via ThemeProvider on the root html element)
 
   // Label for the "return to dashboard" button
@@ -187,17 +193,16 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
 
 
 
-            {/* ── 3-bar hamburger "More" ─────────────────────────── */}
+            {/* ── Profile / User Icon ─────────────────────────── */}
             <button
               onClick={() => setIsMenuOpen(true)}
               className="tap-highlight w-9 h-9 rounded-xl flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-all active:scale-95"
-              title="Menu"
-              aria-label="Open menu"
+              title="Profile"
+              aria-label="Open profile"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="w-[20px] h-[20px]">
-                <line x1="3" y1="6"  x2="21" y2="6"  />
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="18" x2="21" y2="18" />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-[20px] h-[20px]">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
               </svg>
             </button>
           </div>
@@ -363,10 +368,14 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
                           </Link>
                         )}
                         {clientUser ? (
-                          <Link href="/logout" onClick={() => setIsMenuOpen(false)}
-                            className="py-3 text-[13px] font-bold text-red-400 uppercase tracking-widest">
-                            Logout
-                          </Link>
+                          <div className="py-2 mt-2">
+                            <div className="text-[10px] uppercase font-bold text-[var(--color-muted)] tracking-widest">Signed in as</div>
+                            <div className="text-sm font-bold text-[var(--color-text)] truncate mb-4">{clientUser.email}</div>
+                            <Link href="/logout" onClick={() => setIsMenuOpen(false)}
+                              className="py-2 inline-block text-[13px] font-bold text-red-500 uppercase tracking-widest">
+                              Logout
+                            </Link>
+                          </div>
                         ) : (
                           <Link href="/login" onClick={() => setIsMenuOpen(false)}
                             className="py-3 text-[13px] font-bold text-[var(--color-text)] uppercase tracking-widest">
