@@ -3,10 +3,11 @@ import { DM_Sans, Baloo_Tamma_2 } from 'next/font/google'
 import './globals.css'
 import { createClient } from '@/lib/supabase/server'
 import InstallPrompt from '@/components/InstallPrompt'
-import BottomNavigation from '@/components/ui/BottomNavigation'
 import TopHeader from '@/components/ui/TopHeader'
 import MainWrapper from '@/components/MainWrapper'
 import { ReaderModeProvider } from '@/context/ReaderModeContext'
+import { ThemeProvider } from '@/providers/ThemeProvider'
+import NavigationWrapper from '@/components/navigation/NavigationWrapper'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -65,7 +66,7 @@ export default async function RootLayout({
 
 
   return (
-    <html lang="en" className={`dark ${dmSans.variable} ${balooTamma.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${dmSans.variable} ${balooTamma.variable}`} suppressHydrationWarning>
       <body
         className="font-sans antialiased"
         style={{ 
@@ -75,18 +76,23 @@ export default async function RootLayout({
           padding: 0,
         }}
       >
-        <ReaderModeProvider>
-          {/* ─────────── FIXED TOP HEADER ─────────── */}
-          <TopHeader user={user} role={role} />
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ReaderModeProvider>
+            <div className="flex min-h-screen">
+              <NavigationWrapper role={role} />
+              
+              <div className="flex-1 flex flex-col min-w-0">
+                {/* ─────────── FIXED TOP HEADER ─────────── */}
+                <TopHeader user={user} role={role} />
 
-          {/* ─────────── PAGE CONTENT ─────────── */}
-          <MainWrapper>{children}</MainWrapper>
-
-          {/* ─────────── FIXED BOTTOM NAV ─────────── */}
-          <BottomNavigation user={user} role={role} />
-          
-          <InstallPrompt />
-        </ReaderModeProvider>
+                {/* ─────────── PAGE CONTENT ─────────── */}
+                <MainWrapper>{children}</MainWrapper>
+              </div>
+            </div>
+            
+            <InstallPrompt />
+          </ReaderModeProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

@@ -6,6 +6,8 @@ import { useState, useEffect } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 import { useReaderMode } from '@/context/ReaderModeContext';
+import { useTheme } from 'next-themes';
+import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 
 
 interface TopHeaderProps {
@@ -30,12 +32,15 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
   const isOnReaderSide   = !isAdminRoute && !isAuthPage;
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [theme, setTheme] = useState<string>(() => {
-    if (typeof window === 'undefined') return 'dark';
-    const saved = localStorage.getItem('theme');
-    if (saved) return saved;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  });
+  
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    requestAnimationFrame(() => setMounted(true));
+  }, []);
+  
+  const currentTheme = mounted ? (theme === 'system' ? resolvedTheme : theme) : 'dark';
+
 
   const [clientUser, setClientUser] = useState<User | null>(user);
 
@@ -52,17 +57,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
     };
   }, []);
 
-  // Apply dark/light class on mount and whenever theme changes
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-  }, [theme]);
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.documentElement.classList.toggle('dark', newTheme === 'dark');
-  };
+  // (Theme is now handled by next-themes via ThemeProvider on the root html element)
 
   // Label for the "return to dashboard" button
   const dashboardLabel =
@@ -133,7 +128,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
           <Link href={isAdminRoute ? dashboardHref : '/'} className="flex items-center flex-shrink-0 tap-highlight">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={theme === 'dark' ? '/logo-light.png' : '/logo-dark.png'}
+              src={currentTheme === 'dark' ? '/logo-light.png' : '/logo-dark.png'}
               alt="Sathyadhare Logo"
               className="h-[26px] min-w-[110px] object-left object-contain transition-opacity duration-300"
               suppressHydrationWarning
@@ -191,25 +186,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
             )}
 
             {/* Theme toggle */}
-            <button
-              onClick={toggleTheme}
-              className="tap-highlight w-9 h-9 rounded-xl flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-all active:scale-95"
-              title="Toggle theme"
-            >
-              {theme === 'dark' ? (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]">
-                  <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" />
-                  <line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" />
-                  <line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                </svg>
-              ) : (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                </svg>
-              )}
-            </button>
+            <ThemeSwitcher />
 
             {/* ── 3-bar hamburger "More" ─────────────────────────── */}
             <button
