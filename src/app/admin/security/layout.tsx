@@ -1,10 +1,14 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Shield, ShieldAlert, Key } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 
 export const dynamic = 'force-dynamic';
 
 export default function SecurityLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const tabs = [
     { name: 'Login History', href: '/admin/security/login-history', icon: Shield },
     { name: 'API Keys', href: '/admin/security/api-keys', icon: Key },
@@ -30,13 +34,20 @@ export default function SecurityLayout({ children }: { children: React.ReactNode
         {/* ── Nav Tabs ─────────────────────────────────────────────── */}
         <Card className="rounded-[1.5rem] border-[var(--color-border)] bg-[var(--color-surface)] shadow-none p-2 mb-6">
           <div className="flex gap-2">
-            {tabs.map(tab => (
-              <Link key={tab.name} href={tab.href}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all text-[var(--color-muted)] hover:text-white hover:bg-white/5">
-                <tab.icon className="w-4 h-4" />
-                {tab.name}
-              </Link>
-            ))}
+            {tabs.map(tab => {
+              const isActive = pathname === tab.href;
+              return (
+                <Link key={tab.name} href={tab.href}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                    isActive 
+                      ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' 
+                      : 'text-[var(--color-muted)] hover:text-white hover:bg-white/5'
+                  }`}>
+                  <tab.icon className="w-4 h-4" />
+                  {tab.name}
+                </Link>
+              );
+            })}
           </div>
         </Card>
 

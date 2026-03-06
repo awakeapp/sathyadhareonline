@@ -1,10 +1,12 @@
+'use client';
+
 import Link from 'next/link';
-import { IndianRupee, Layers, FileOutput, ArrowLeftRight } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { IndianRupee, Layers } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 
-export const dynamic = 'force-dynamic';
-
 export default function FinancialLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const tabs = [
     { name: 'Revenue Reports', href: '/admin/financial/revenue', icon: IndianRupee },
     { name: 'Subscription Plans', href: '/admin/financial/plans', icon: Layers },
@@ -30,13 +32,20 @@ export default function FinancialLayout({ children }: { children: React.ReactNod
         {/* ── Nav Tabs ─────────────────────────────────────────────── */}
         <Card className="rounded-[1.5rem] border-[var(--color-border)] bg-[var(--color-surface)] shadow-none p-2 mb-6 max-w-max">
           <div className="flex gap-2">
-            {tabs.map(tab => (
-              <Link key={tab.name} href={tab.href}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all text-[var(--color-muted)] hover:text-white hover:bg-white/5 active:bg-white/10">
-                <tab.icon className="w-4 h-4" />
-                {tab.name}
-              </Link>
-            ))}
+            {tabs.map(tab => {
+              const isActive = pathname === tab.href;
+              return (
+                <Link key={tab.name} href={tab.href}
+                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                    isActive 
+                    ? 'text-black bg-white shadow-xl' 
+                    : 'text-[var(--color-muted)] hover:text-white hover:bg-white/5 shadow-none'
+                  }`}>
+                  <tab.icon className="w-4 h-4" />
+                  {tab.name}
+                </Link>
+              );
+            })}
           </div>
         </Card>
 

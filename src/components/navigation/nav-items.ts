@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, Library, Users, Menu, SquarePen, Eye, Home, Search, Layers, Mic, ScrollText, Settings, Shield, LucideIcon } from 'lucide-react';
+import { LayoutDashboard, FileText, Library, Users, Menu, SquarePen, Eye, Home, Search, Layers, Mic, ScrollText, Settings, Shield, IndianRupee, LucideIcon } from 'lucide-react';
 
 export interface NavItem {
   name: string;
@@ -17,6 +17,7 @@ export const ADMIN_NAV: NavItem[] = [
   { name: 'Categories', href: '/admin/categories', exact: false, icon: Library },
   { name: 'Series', href: '/admin/series', exact: false, icon: Layers },
   { name: 'Users', href: '/admin/users', exact: false, icon: Users },
+  { name: 'Financials', href: '/admin/financial', exact: false, icon: IndianRupee, role: 'super_admin' },
   { name: 'Audit Logs', href: '/admin/audit-logs', exact: false, icon: ScrollText, role: 'super_admin' },
   { name: 'Security', href: '/admin/security', exact: false, icon: Shield, role: 'super_admin' },
   { name: 'Settings', href: '/admin/settings', exact: false, icon: Settings, role: 'super_admin' },

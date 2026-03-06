@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Plus, Shapes, Users, Eye, FileText, Hand, ScrollText, MessageSquare, History, Settings, Shield, LucideIcon } from 'lucide-react';
+import { Plus, Shapes, Users, Eye, FileText, Hand, ScrollText, MessageSquare, History, Settings, Shield, IndianRupee, LucideIcon } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -92,6 +92,7 @@ export default async function AdminPage() {
     { href: '/admin/categories',    label: 'Categories',     icon: Shapes, color: 'bg-indigo-500' },
     { href: '/admin/users',         label: 'Users & Roles',  icon: Users, color: 'bg-amber-500', superOnly: true },
     { href: '/admin/comments',      label: 'Comments',       icon: MessageSquare, color: 'bg-emerald-500' },
+    { href: '/admin/financial',     label: 'Financials',     icon: IndianRupee, color: 'bg-emerald-600', superOnly: true },
     { href: '/admin/audit-logs',    label: 'Audit Logs',     icon: ScrollText, color: 'bg-purple-600', superOnly: true },
     { href: '/admin/settings',      label: 'Settings',       icon: Settings, color: 'bg-pink-600', superOnly: true },
     { href: '/admin/security',      label: 'Security',       icon: Shield, color: 'bg-rose-600', superOnly: true },
