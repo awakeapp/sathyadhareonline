@@ -29,6 +29,7 @@ export default async function MediaLibraryPage() {
   const { data: mediaItems, error } = await supabase
     .from('media')
     .select('id, url, uploaded_by, created_at')
+    .eq('is_deleted', false)
     .order('created_at', { ascending: false });
 
   if (error) console.error('Error fetching media:', error);

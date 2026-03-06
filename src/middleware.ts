@@ -47,7 +47,7 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   const { pathname } = request.nextUrl
-  if (pathname.startsWith('/auth/callback')) return supabaseResponse
+  if (pathname.startsWith('/auth/callback') || pathname === '/suspended') return supabaseResponse
 
   // Helper to safely redirect while preserving refreshed cookies
   const redirectWithCookies = (path: string) => {
@@ -71,13 +71,27 @@ export async function middleware(request: NextRequest) {
     if (!user) return redirectWithCookies('/login')
 
     const { data: profile } = await supabase
-      .from('profiles').select('role').eq('id', user.id).single()
+      .from('profiles').select('role, status').eq('id', user.id).single()
 
     const role = profile?.role as string | undefined
+    const status = profile?.status as string | undefined
     const allowed = ROUTE_ROLES[protectedPrefix]
+
+    if (status === 'suspended' || status === 'banned') {
+      return redirectWithCookies('/suspended')
+    }
 
     if (!role || !allowed.includes(role)) {
       return redirectWithCookies('/login')
+    }
+  }
+
+  // 1b. Check status for non-protected routes too if logged in
+  if (user && pathname !== '/suspended' && !pathname.startsWith('/auth') && pathname !== '/login') {
+    const { data: profile } = await supabase
+      .from('profiles').select('status').eq('id', user.id).single()
+    if (profile?.status === 'suspended' || profile?.status === 'banned') {
+      return redirectWithCookies('/suspended')
     }
   }
 

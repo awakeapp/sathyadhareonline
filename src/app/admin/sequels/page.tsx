@@ -13,6 +13,7 @@ export default async function SequelsPage() {
   const { data: sequels, error } = await supabase
     .from('sequels')
     .select('id, title, status')
+    .eq('is_deleted', false)
     .order('created_at', { ascending: false });
 
   if (error) {

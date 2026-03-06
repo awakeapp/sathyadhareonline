@@ -60,6 +60,7 @@ export default async function ArticlesPage() {
   const articlesQuery = supabase
     .from('articles')
     .select('id, title, status, is_deleted, is_featured, author_id')
+    .eq('is_deleted', false)
     .order('created_at', { ascending: false });
 
   const { data: articles, error } = await articlesQuery;
@@ -133,7 +134,10 @@ export default async function ArticlesPage() {
 
     if (!profile || !['admin', 'super_admin'].includes(profile.role)) return;
 
-    await supabaseAction.from('articles').update({ is_deleted: true }).eq('id', id);
+    await supabaseAction
+      .from('articles')
+      .update({ is_deleted: true, deleted_at: new Date().toISOString() })
+      .eq('id', id);
 
     await logAuditEvent(actionUser.id, 'ARTICLE_DELETED', { article_id: id });
 
@@ -149,7 +153,13 @@ export default async function ArticlesPage() {
     const supabaseAction = await createClient();
     const { data: { user } } = await supabaseAction.auth.getUser();
     if (!user) return;
-    await supabaseAction.from('articles').update({ is_deleted: false }).eq('id', id);
+    const { error: restoreError } = await supabaseAction
+      .from('articles')
+      .update({ is_deleted: false, deleted_at: null })
+      .eq('id', id);
+
+    if (restoreError) throw restoreError;
+
     await logAuditEvent(user.id, 'ARTICLE_RESTORED', { article_id: id });
     revalidatePath('/admin/articles');
     redirect('/admin/articles');

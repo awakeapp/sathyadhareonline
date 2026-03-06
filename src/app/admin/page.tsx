@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Plus, Shapes, Users, Eye, FileText, Hand, ScrollText, MessageSquare, History } from 'lucide-react';
+import { Plus, Shapes, Users, Eye, FileText, Hand, ScrollText, MessageSquare, History, Settings, LucideIcon } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,7 +56,8 @@ export default async function AdminPage() {
 
     const getVal = (idx: number) => {
       const res = results[idx];
-      return res.status === 'fulfilled' ? (res as PromiseFulfilledResult<any>).value : null;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return res.status === 'fulfilled' ? (res as PromiseFulfilledResult<{ count: number | null; data: any }>).value : null;
     };
 
     pageData = {
@@ -92,6 +93,7 @@ export default async function AdminPage() {
     { href: '/admin/users',         label: 'Users & Roles',  icon: Users, color: 'bg-amber-500', superOnly: true },
     { href: '/admin/comments',      label: 'Comments',       icon: MessageSquare, color: 'bg-emerald-500' },
     { href: '/admin/audit-logs',    label: 'Audit Logs',     icon: ScrollText, color: 'bg-purple-600', superOnly: true },
+    { href: '/admin/settings',      label: 'Settings',       icon: Settings, color: 'bg-pink-600', superOnly: true },
   ].filter(a => !a.superOnly || isSuperAdmin);
 
   const statusColor = (s: string) => {
@@ -210,7 +212,7 @@ export default async function AdminPage() {
       <section className="mb-10">
         <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--color-muted)] mb-4">Quick Actions</h2>
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-          {quickActions.map((a: { href: string; label: string; icon: any; color: string }) => (
+          {quickActions.map((a: { href: string; label: string; icon: LucideIcon; color: string }) => (
             <Link key={a.href} href={a.href} className="group outline-none">
               <Card hoverable className="h-full rounded-[1.5rem] border-transparent bg-[var(--color-surface)] group-hover:bg-[var(--color-surface-2)] transition-colors">
                 <CardContent className="p-4 flex flex-col items-center justify-center gap-3 h-full">

@@ -17,8 +17,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     { className, variant = "primary", size = "md", asChild = false, loading = false, fullWidth = false, children, disabled, ...props },
     ref
   ) => {
-    const Comp = asChild ? Slot : "button"
-    
     // Base styles
     const baseStyles = "inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-semibold transition-all hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] disabled:pointer-events-none disabled:opacity-50"
     
@@ -39,22 +37,32 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       icon: "h-11 w-11",
     }
 
+    const classes = cn(
+      baseStyles,
+      variants[variant],
+      sizes[size],
+      fullWidth && "w-full",
+      className
+    );
+
+    if (asChild) {
+      return (
+        <Slot className={classes} ref={ref} {...props}>
+          {children}
+        </Slot>
+      )
+    }
+
     return (
-      <Comp
-        className={cn(
-          baseStyles,
-          variants[variant],
-          sizes[size],
-          fullWidth && "w-full",
-          className
-        )}
+      <button
+        className={classes}
         ref={ref}
         disabled={disabled || loading}
         {...props}
       >
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         {children}
-      </Comp>
+      </button>
     )
   }
 )

@@ -101,19 +101,19 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
 
   // ── Delete ──────────────────────────────────────────────────────
   const handleDelete = async (item: MediaItem) => {
-    if (!confirm('Delete this image permanently?')) return;
+    if (!confirm('Move this image to Trash?')) return;
     setDeletingId(item.id);
 
-    // Extract file name from URL
-    const fileName = item.url.split('/').pop();
+    const { error: dbErr } = await supabase
+      .from('media')
+      .update({ is_deleted: true, deleted_at: new Date().toISOString() })
+      .eq('id', item.id);
 
-    if (fileName) {
-      await supabase.storage.from('article-images').remove([fileName]);
+    if (dbErr) {
+      setError(`Delete failed: ${dbErr.message}`);
+    } else {
+      setItems((prev) => prev.filter((m) => m.id !== item.id));
     }
-
-    await supabase.from('media').delete().eq('id', item.id);
-
-    setItems((prev) => prev.filter((m) => m.id !== item.id));
     setDeletingId(null);
   };
 

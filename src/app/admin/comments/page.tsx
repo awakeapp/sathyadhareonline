@@ -55,7 +55,10 @@ async function deleteComment(formData: FormData) {
   if (!profile || !['admin', 'super_admin'].includes(profile.role)) return;
 
   const id = formData.get('id') as string;
-  await supabase.from('comments').delete().eq('id', id);
+  await supabase
+    .from('comments')
+    .update({ is_deleted: true, deleted_at: new Date().toISOString() })
+    .eq('id', id);
   
   await logAuditEvent(user.id, 'COMMENT_DELETED', { comment_id: id });
   
@@ -95,6 +98,7 @@ export default async function AdminCommentsPage() {
       created_at,
       articles ( title )
     `)
+    .eq('is_deleted', false)
     .order('created_at', { ascending: false });
 
   if (error) console.error('Error fetching comments:', error);

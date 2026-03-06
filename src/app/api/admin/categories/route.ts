@@ -66,7 +66,7 @@ export async function DELETE(req: NextRequest) {
 
   const { error: dbError } = await supabase
     .from('categories')
-    .delete()
+    .update({ is_deleted: true, deleted_at: new Date().toISOString() })
     .eq('id', id);
 
   if (dbError) {
