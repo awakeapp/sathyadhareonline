@@ -20,9 +20,9 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
     isPrivilegedRole &&
     !readerMode;
 
-  const activeNav = isAdminView 
-    ? (pathname.startsWith('/admin') ? ADMIN_NAV.slice(0, 5) : EDITOR_NAV)
-    : READER_NAV.slice(0, 5); // Max 5 items for bottom nav
+  const activeNav = (isAdminView 
+    ? (pathname.startsWith('/admin') ? ADMIN_NAV : EDITOR_NAV)
+    : READER_NAV).filter(item => !item.role || item.role === role).slice(0, 5); // Max 5 items for bottom nav
 
   if (isAuthPage) return null;
 

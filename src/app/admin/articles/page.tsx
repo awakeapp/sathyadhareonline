@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { logAuditEvent } from '@/lib/audit';
 import { DeleteArticleButton } from './DeleteArticleButton';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -108,6 +109,8 @@ export default async function ArticlesPage() {
 
     await supabaseAction.from('articles').update(updatePayload).eq('id', id);
 
+    await logAuditEvent(actionUser.id, 'ARTICLE_STATUS_CHANGED', { article_id: id, old_status: currentStatus, new_status: toStatus });
+
     revalidatePath('/admin/articles');
     revalidatePath('/');
     redirect('/admin/articles');
@@ -132,6 +135,8 @@ export default async function ArticlesPage() {
 
     await supabaseAction.from('articles').update({ is_deleted: true }).eq('id', id);
 
+    await logAuditEvent(actionUser.id, 'ARTICLE_DELETED', { article_id: id });
+
     revalidatePath('/admin/articles');
     revalidatePath('/');
     redirect('/admin/articles');
@@ -142,7 +147,10 @@ export default async function ArticlesPage() {
     const id = formData.get('id') as string;
     if (!id) return;
     const supabaseAction = await createClient();
+    const { data: { user } } = await supabaseAction.auth.getUser();
+    if (!user) return;
     await supabaseAction.from('articles').update({ is_deleted: false }).eq('id', id);
+    await logAuditEvent(user.id, 'ARTICLE_RESTORED', { article_id: id });
     revalidatePath('/admin/articles');
     redirect('/admin/articles');
   }
@@ -153,12 +161,16 @@ export default async function ArticlesPage() {
     const current = formData.get('current') as string;
     if (!id) return;
     const supabaseAction = await createClient();
+    const { data: { user } } = await supabaseAction.auth.getUser();
+    if (!user) return;
 
     if (current === 'true') {
       await supabaseAction.from('articles').update({ is_featured: false }).eq('id', id);
+      await logAuditEvent(user.id, 'ARTICLE_UNFEATURED', { article_id: id });
     } else {
       await supabaseAction.from('articles').update({ is_featured: false }).neq('id', id);
       await supabaseAction.from('articles').update({ is_featured: true }).eq('id', id);
+      await logAuditEvent(user.id, 'ARTICLE_FEATURED', { article_id: id });
     }
 
     revalidatePath('/admin/articles');

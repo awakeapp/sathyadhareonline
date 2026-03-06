@@ -12,27 +12,45 @@ export default async function EditorDashboard() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const { data: profile } = await supabase
-    .from('profiles').select('role, full_name').eq('id', user.id).single();
+  let profile: any = null;
+  const statsFallback = {
+    totalCount: 0, publishedCount: 0, draftCount: 0, reviewCount: 0,
+    recent: [] as any[]
+  };
 
-  if (!profile || profile.role !== 'editor') redirect('/login');
+  let pageData = statsFallback;
 
-  const name = profile.full_name ?? 'Editor';
+  try {
+    const { data: p } = await supabase
+      .from('profiles').select('role, full_name').eq('id', user.id).maybeSingle();
+    profile = p;
 
-  // ── Stats ────────────────────────────────────────────────────────
-  const responses = await Promise.all([
-    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('author_id', user.id).eq('is_deleted', false),
-    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('author_id', user.id).eq('status', 'published').eq('is_deleted', false),
-    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('author_id', user.id).eq('status', 'draft').eq('is_deleted', false),
-    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('author_id', user.id).eq('status', 'in_review').eq('is_deleted', false),
-    supabase.from('articles').select('id, title, status, updated_at, slug').eq('author_id', user.id).eq('is_deleted', false).order('updated_at', { ascending: false }).limit(5),
-  ]);
+    if (!profile || profile.role !== 'editor') redirect('/login');
 
-  const totalCount = responses[0].count ?? 0;
-  const publishedCount = responses[1].count ?? 0;
-  const draftCount = responses[2].count ?? 0;
-  const reviewCount = responses[3].count ?? 0;
-  const recent = responses[4].data || [];
+    // ── Stats with fetch settlement ─────────────────────────────────
+    const results = await Promise.allSettled([
+      supabase.from('articles').select('*', { count: 'exact', head: true }).eq('author_id', user.id).eq('is_deleted', false),
+      supabase.from('articles').select('*', { count: 'exact', head: true }).eq('author_id', user.id).eq('status', 'published').eq('is_deleted', false),
+      supabase.from('articles').select('*', { count: 'exact', head: true }).eq('author_id', user.id).eq('status', 'draft').eq('is_deleted', false),
+      supabase.from('articles').select('*', { count: 'exact', head: true }).eq('author_id', user.id).eq('status', 'in_review').eq('is_deleted', false),
+      supabase.from('articles').select('id, title, status, updated_at, slug').eq('author_id', user.id).eq('is_deleted', false).order('updated_at', { ascending: false }).limit(5),
+    ]);
+
+    const getVal = (idx: number) => (results[idx].status === 'fulfilled' ? (results[idx] as any).value : null);
+
+    pageData = {
+      totalCount: getVal(0)?.count ?? 0,
+      publishedCount: getVal(1)?.count ?? 0,
+      draftCount: getVal(2)?.count ?? 0,
+      reviewCount: getVal(3)?.count ?? 0,
+      recent: getVal(4)?.data || [],
+    };
+  } catch (err) {
+    console.error('Editor dashboard fetch error:', err);
+  }
+
+  const { totalCount, publishedCount, draftCount, reviewCount, recent } = pageData;
+  const name = profile?.full_name ?? 'Editor';
 
   const statusMeta: Record<string, { label: string; cls: string }> = {
     draft:     { label: 'Draft',      cls: 'bg-gray-500/10 text-[var(--color-muted)] border-gray-500/20' },
@@ -55,7 +73,7 @@ export default async function EditorDashboard() {
       <header className="mb-10 mt-4">
         <p className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-widest">Editor Workspace</p>
         <h1 className="text-2xl font-black tracking-tight mt-1 truncate flex items-center gap-2">
-          Welcome back, {name.split(' ')[0]} <Hand className="w-6 h-6 text-amber-500" />
+          Welcome back, {String(name).split(' ')[0]} <Hand className="w-6 h-6 text-amber-500" />
         </h1>
         <p className="text-sm text-[var(--color-muted)] mt-1 font-semibold">Here&apos;s your content overview for today.</p>
       </header>

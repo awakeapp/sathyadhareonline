@@ -1,7 +1,9 @@
 'use client';
 
-import { useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { Button } from '@/components/ui/Button';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from '@/components/ui/Modal';
+import { toast } from 'sonner';
 
 interface Props {
   articleId: string;
@@ -10,29 +12,57 @@ interface Props {
 }
 
 export function DeleteArticleButton({ articleId, articleTitle, deleteAction }: Props) {
+  const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  function handleClick() {
-    const confirmed = window.confirm(
-      `Delete "${articleTitle}"?\n\nThis will hide the article from the site. You can restore it later.`
-    );
-    if (!confirmed) return;
-
+  function handleDelete() {
     const fd = new FormData();
     fd.append('id', articleId);
-    startTransition(() => deleteAction(fd));
+    
+    startTransition(async () => {
+      try {
+        await deleteAction(fd);
+        toast.success(`Deleted "${articleTitle}" successfully.`);
+        setIsOpen(false);
+      } catch {
+        toast.error('Failed to delete article. Please try again.');
+      }
+    });
   }
 
   return (
-    <Button
-      type="button"
-      onClick={handleClick}
-      disabled={isPending}
-      variant="destructive"
-      size="sm"
-      className="w-full sm:w-auto"
-    >
-      {isPending ? 'Deleting…' : 'Delete'}
-    </Button>
+    <>
+      <Button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        disabled={isPending}
+        variant="destructive"
+        size="sm"
+        className="w-full sm:w-auto"
+      >
+        Delete
+      </Button>
+
+      <Modal open={isOpen} onOpenChange={setIsOpen}>
+        <ModalContent>
+          <ModalHeader>
+            <ModalTitle>Delete Article?</ModalTitle>
+            <ModalDescription>
+              This will hide <span className="font-bold text-white">&quot;{articleTitle}&quot;</span> from the site. 
+              You can restore it later from the admin panel if needed.
+            </ModalDescription>
+          </ModalHeader>
+          <ModalFooter>
+            <Button variant="outline" onClick={() => setIsOpen(false)} disabled={isPending}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} loading={isPending}>
+              Delete Article
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </>
   );
 }
+

@@ -1,6 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import Link from 'next/link';
+import { logAuditEvent } from '@/lib/audit';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { ChevronLeft, MessageSquare, CheckCircle2, X, Trash2 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,6 +22,9 @@ async function approveComment(formData: FormData) {
 
   const id = formData.get('id') as string;
   await supabase.from('comments').update({ status: 'approved' }).eq('id', id);
+  
+  await logAuditEvent(user.id, 'COMMENT_APPROVED', { comment_id: id });
+  
   revalidatePath('/admin/comments');
   redirect('/admin/comments');
 }
@@ -31,6 +39,9 @@ async function rejectComment(formData: FormData) {
 
   const id = formData.get('id') as string;
   await supabase.from('comments').update({ status: 'rejected' }).eq('id', id);
+  
+  await logAuditEvent(user.id, 'COMMENT_REJECTED', { comment_id: id });
+  
   revalidatePath('/admin/comments');
   redirect('/admin/comments');
 }
@@ -45,6 +56,9 @@ async function deleteComment(formData: FormData) {
 
   const id = formData.get('id') as string;
   await supabase.from('comments').delete().eq('id', id);
+  
+  await logAuditEvent(user.id, 'COMMENT_DELETED', { comment_id: id });
+  
   revalidatePath('/admin/comments');
   redirect('/admin/comments');
 }
@@ -99,26 +113,29 @@ export default async function AdminCommentsPage() {
       <div className="max-w-4xl mx-auto">
 
         {/* ── Header ──────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white leading-tight">Comment Moderation</h1>
-            <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
-              {pendingCount} pending · {comments?.length ?? 0} total
-            </p>
+        <div className="flex items-center justify-between mb-8 mt-4">
+          <div className="flex items-center gap-4">
+            <Button asChild variant="outline" size="icon" className="rounded-full w-10 h-10 border-[var(--color-border)] text-[var(--color-muted)]">
+              <Link href="/admin">
+                <ChevronLeft className="w-5 h-5" />
+              </Link>
+            </Button>
+            <div>
+              <h1 className="text-2xl font-black tracking-tight leading-tight">Comment Moderation</h1>
+              <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
+                {pendingCount} pending · {comments?.length ?? 0} total
+              </p>
+            </div>
           </div>
-          {pendingCount > 0 && (
-            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-500/20 text-amber-400 text-xs font-black border border-amber-500/30">
-              {pendingCount}
-            </span>
-          )}
         </div>
 
         {/* ── List ────────────────────────────────────────────────── */}
         {!comments || comments.length === 0 ? (
-          <div className="py-20 text-center text-[var(--color-muted)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl">
-            <p className="font-semibold text-white mb-1">No comments yet</p>
-            <p className="text-sm">Comments from readers will appear here for moderation.</p>
-          </div>
+          <Card className="py-20 text-center flex flex-col items-center bg-[var(--color-surface)] border-[var(--color-border)] border-dashed rounded-[2rem] shadow-none">
+            <MessageSquare className="w-12 h-12 mb-4 opacity-20 text-[var(--color-muted)]" />
+            <p className="font-bold mb-1 text-lg tracking-tight">No comments yet</p>
+            <p className="text-sm text-[var(--color-muted)]">Comments from readers will appear here for moderation.</p>
+          </Card>
         ) : (
           <div className="space-y-3">
             {comments.map((c) => {
@@ -126,19 +143,19 @@ export default async function AdminCommentsPage() {
               const articleTitle = (c.articles as { title?: string } | null)?.title ?? null;
 
               return (
-                <div
+                <Card
                   key={c.id}
-                  className={`bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-5 transition-all ${
-                    c.status !== 'pending' ? 'opacity-55' : ''
+                  className={`overflow-hidden transition-all duration-300 border-transparent bg-[var(--color-surface)] shadow-none rounded-3xl ${
+                    c.status !== 'pending' ? 'opacity-60' : ''
                   }`}
                 >
-                  <div className="flex items-start gap-4 flex-wrap">
+                  <CardContent className="p-5 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
 
                     {/* Left: comment info */}
                     <div className="flex-1 min-w-0 space-y-1.5">
                       {/* Author + status */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-bold text-white">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <span className="text-base font-bold text-white tracking-tight">
                           {c.guest_name || 'Registered User'}
                         </span>
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${statusColors[c.status] ?? 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
@@ -146,58 +163,69 @@ export default async function AdminCommentsPage() {
                         </span>
                       </div>
 
-                      {/* Article title (was UUID before) */}
-                      <p className="text-xs text-[var(--color-muted)]">
+                      {/* Article title */}
+                      <p className="text-xs text-[var(--color-muted)] font-medium">
                         On article:{' '}
                         {articleTitle ? (
-                          <span className="text-[#4f8ef7] font-semibold">{articleTitle}</span>
+                          <span className="text-[#4f8ef7]">{articleTitle}</span>
                         ) : (
                           <span className="font-mono text-[10px] opacity-50">{c.article_id}</span>
                         )}
-                        {' · '}
+                        <span className="mx-1.5">·</span>
                         {new Date(c.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                       </p>
 
                       {/* Comment body */}
-                      <p className="text-sm text-[var(--color-muted)] line-clamp-3 mt-1">{c.content}</p>
+                      <p className="text-sm text-[var(--color-muted)] line-clamp-3 mt-2 leading-relaxed bg-[var(--color-background)] rounded-xl py-2 px-3 border border-[var(--color-border)]/50">
+                        {c.content}
+                      </p>
                     </div>
 
                     {/* Right: action buttons */}
-                    <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
+                    <div className="flex flex-wrap sm:flex-col items-center sm:items-stretch gap-2 flex-shrink-0 w-full sm:w-auto mt-2 sm:mt-0 pt-3 border-t sm:border-t-0 border-[var(--color-border)] sm:pt-0">
                       {c.status === 'pending' && (
                         <>
-                          <form action={approveComment}>
+                          <form action={approveComment} className="flex-1 sm:flex-none">
                             <input type="hidden" name="id" value={c.id} />
-                            <button
+                            <Button
                               type="submit"
-                              className="px-3 py-1.5 text-xs font-bold tracking-wide text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-xl transition-colors uppercase"
+                              variant="outline"
+                              size="sm"
+                              className="w-full text-emerald-500 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 hover:text-emerald-500"
                             >
-                              ✓ Approve
-                            </button>
+                              <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+                              Approve
+                            </Button>
                           </form>
-                          <form action={rejectComment}>
+                          <form action={rejectComment} className="flex-1 sm:flex-none">
                             <input type="hidden" name="id" value={c.id} />
-                            <button
+                            <Button
                               type="submit"
-                              className="px-3 py-1.5 text-xs font-bold tracking-wide text-gray-400 bg-gray-500/10 hover:bg-gray-500/20 border border-gray-500/20 rounded-xl transition-colors uppercase"
+                              variant="outline"
+                              size="sm"
+                              className="w-full text-gray-400 border-gray-500/20 bg-gray-500/5 hover:bg-gray-500/10 hover:text-gray-400"
                             >
+                              <X className="w-3.5 h-3.5 mr-1" />
                               Reject
-                            </button>
+                            </Button>
                           </form>
                         </>
                       )}
-                      <form action={deleteComment}>
+                      <form action={deleteComment} className="flex-1 sm:flex-none">
                         <input type="hidden" name="id" value={c.id} />
-                        <button
+                        <Button
                           type="submit"
-                          className="px-3 py-1.5 text-xs font-bold tracking-wide text-red-400 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl transition-colors uppercase"
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-red-500 border-red-500/20 bg-red-500/5 hover:bg-red-500/10 hover:text-red-500"
                         >
+                          <Trash2 className="w-3.5 h-3.5 mr-1" />
                           Delete
-                        </button>
+                        </Button>
                       </form>
                     </div>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>

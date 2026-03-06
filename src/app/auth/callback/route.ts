@@ -54,6 +54,7 @@ export async function GET(request: NextRequest) {
           
           await supabase.from('profiles').insert({
             id: data.user.id,
+            email: data.user.email,
             full_name: fullName,
             avatar_url: avatarUrl,
             role: role,

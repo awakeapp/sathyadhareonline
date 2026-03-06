@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logAuditEvent } from '@/lib/audit';
 
 // ── Helper: verify caller is admin / super_admin ──────────────────────────────
 async function requireAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: 'Unauthorized', supabase: null };
+  if (!user) return { error: 'Unauthorized', supabase: null, user: null };
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -14,15 +15,15 @@ async function requireAdmin() {
     .single();
 
   if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
-    return { error: 'Forbidden', supabase: null };
+    return { error: 'Forbidden', supabase: null, user: null };
   }
-  return { error: null, supabase };
+  return { error: null, supabase, user };
 }
 
 // ── PATCH /api/admin/categories — update a category ─────────────────────────
 export async function PATCH(req: NextRequest) {
-  const { error, supabase } = await requireAdmin();
-  if (error || !supabase) {
+  const { error, supabase, user } = await requireAdmin();
+  if (error || !supabase || !user) {
     return NextResponse.json({ error }, { status: error === 'Unauthorized' ? 401 : 403 });
   }
 
@@ -43,13 +44,16 @@ export async function PATCH(req: NextRequest) {
   if (dbError) {
     return NextResponse.json({ error: dbError.message }, { status: 500 });
   }
+
+  await logAuditEvent(user.id, 'CATEGORY_UPDATED', { category_id: id, name, slug });
+  
   return NextResponse.json({ ok: true });
 }
 
 // ── DELETE /api/admin/categories — delete a category ────────────────────────
 export async function DELETE(req: NextRequest) {
-  const { error, supabase } = await requireAdmin();
-  if (error || !supabase) {
+  const { error, supabase, user } = await requireAdmin();
+  if (error || !supabase || !user) {
     return NextResponse.json({ error }, { status: error === 'Unauthorized' ? 401 : 403 });
   }
 
@@ -68,5 +72,8 @@ export async function DELETE(req: NextRequest) {
   if (dbError) {
     return NextResponse.json({ error: dbError.message }, { status: 500 });
   }
+
+  await logAuditEvent(user.id, 'CATEGORY_DELETED', { category_id: id });
+  
   return NextResponse.json({ ok: true });
 }

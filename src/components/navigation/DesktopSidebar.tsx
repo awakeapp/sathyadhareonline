@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ADMIN_NAV, EDITOR_NAV, READER_NAV } from './nav-items';
 import { useReaderMode } from '@/context/ReaderModeContext';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/Tooltip';
 
 interface SidebarProps {
@@ -23,9 +23,9 @@ export function DesktopSidebar({ role }: SidebarProps) {
     isPrivilegedRole &&
     !readerMode;
 
-  const activeNav = isAdminView 
+  const activeNav = (isAdminView 
     ? (pathname.startsWith('/admin') ? ADMIN_NAV : EDITOR_NAV)
-    : READER_NAV;
+    : READER_NAV).filter(item => !item.role || item.role === role);
 
   if (isAuthPage) return null;
 

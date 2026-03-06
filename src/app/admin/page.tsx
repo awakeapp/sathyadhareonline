@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Plus, Shapes, Users, Eye, FileText, Layers, Image as ImageIcon, Hand } from 'lucide-react';
+import { Plus, Shapes, Users, Eye, FileText, Hand, ScrollText, MessageSquare, History } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,48 +13,86 @@ export default async function AdminPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('full_name, role')
-    .eq('id', user.id)
-    .single();
+  let profile: { full_name: string | null; role: string } | null = null;
+  const metricsFallback = {
+    totalArticles: 0, totalViews: 0, totalUsers: 0, totalComments: 0,
+    pendingComments: 0, newUsersLast7Days: 0, articlesPublishedToday: 0,
+    lastAudit: null as { action: string; created_at: string } | null, 
+    recentUsers: [] as { id: string; avatar_url?: string; full_name?: string; email?: string }[], 
+    recentArticles: [] as { id: string; title: string; status: string }[],
+    totalCategories: 0
+  };
 
-  const isSuperAdmin = profile?.role === 'super_admin';
+  let pageData = metricsFallback;
 
-  // ── Real metrics ────────────────────────────────────────────
-  // ── Real metrics ────────────────────────────────────────────
-  const responses = await Promise.all([
-    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('is_deleted', false),
-    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'published').eq('is_deleted', false),
-    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'draft').eq('is_deleted', false),
-    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'in_review').eq('is_deleted', false),
-    supabase.from('article_views').select('*', { count: 'exact', head: true }),
-    supabase.from('categories').select('*', { count: 'exact', head: true }),
-    supabase.from('profiles').select('*', { count: 'exact', head: true }),
-    supabase.from('profiles').select('id, full_name, email, avatar_url').order('created_at', { ascending: false }).limit(5),
-    supabase.from('articles').select('id, title, status, published_at').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
-  ]);
+  try {
+    const { data: p } = await supabase
+      .from('profiles')
+      .select('full_name, role')
+      .eq('id', user.id)
+      .maybeSingle();
+    profile = p;
 
-  const totalArticles = responses[0].count ?? 0;
-  const publishedArticles = responses[1].count ?? 0;
-  const draftArticles = responses[2].count ?? 0;
-  const inReviewArticles = responses[3].count ?? 0;
-  const totalViews = responses[4].count ?? 0;
-  const totalCategories = responses[5].count ?? 0;
-  const totalUsers = responses[6].count ?? 0;
-  const recentUsers = responses[7].data || [];
-  const recentArticles = responses[8].data || [];
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    // ── Metrics fetch with settlement protection ────────────────
+    const results = await Promise.allSettled([
+      supabase.from('articles').select('*', { count: 'exact', head: true }).eq('is_deleted', false),
+      supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'published').eq('is_deleted', false),
+      supabase.from('article_views').select('*', { count: 'exact', head: true }),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }),
+      supabase.from('comments').select('*', { count: 'exact', head: true }),
+      supabase.from('comments').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', sevenDaysAgo.toISOString()),
+      supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'published').gte('published_at', startOfToday.toISOString()),
+      supabase.from('audit_logs').select('action, created_at').order('created_at', { ascending: false }).limit(1).maybeSingle(),
+      supabase.from('profiles').select('id, full_name, email, avatar_url').order('created_at', { ascending: false }).limit(5),
+      supabase.from('articles').select('id, title, status, published_at').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
+      supabase.from('categories').select('*', { count: 'exact', head: true }),
+    ]);
+
+    const getVal = (idx: number) => {
+      const res = results[idx];
+      return res.status === 'fulfilled' ? (res as PromiseFulfilledResult<any>).value : null;
+    };
+
+    pageData = {
+      totalArticles: getVal(0)?.count ?? 0,
+      totalViews: getVal(2)?.count ?? 0,
+      totalUsers: getVal(3)?.count ?? 0,
+      totalComments: getVal(4)?.count ?? 0,
+      pendingComments: getVal(5)?.count ?? 0,
+      newUsersLast7Days: getVal(6)?.count ?? 0,
+      articlesPublishedToday: getVal(7)?.count ?? 0,
+      lastAudit: getVal(8)?.data || null,
+      recentUsers: getVal(9)?.data || [],
+      recentArticles: getVal(10)?.data || [],
+      totalCategories: getVal(11)?.count ?? 0,
+    };
+  } catch (error) {
+    console.error('Critical Admin dashboard fetch error:', error);
+  }
+
+  const { 
+    totalArticles, totalViews, totalUsers, totalComments, 
+    pendingComments, newUsersLast7Days, articlesPublishedToday, 
+    lastAudit, recentUsers, recentArticles, totalCategories 
+  } = pageData;
 
   const initials = (profile?.full_name || user.email || 'A').charAt(0).toUpperCase();
+  const isSuperAdmin = profile?.role === 'super_admin';
 
   const quickActions = [
-    { href: '/admin/articles/new',  label: 'New Article',    icon: Plus, color: '#0047ff' },
-    { href: '/admin/articles',      label: 'All Articles',   icon: FileText, color: '#0047ff' },
-    { href: '/admin/categories',    label: 'Categories',     icon: Shapes, color: '#0047ff' },
-    { href: '/admin/series',        label: 'Series',         icon: Layers, color: '#0047ff' },
-    { href: '/admin/media',         label: 'Media Library',  icon: ImageIcon, color: '#0047ff' },
-    { href: '/admin/users',         label: 'Users & Roles',  icon: Users, color: '#0047ff' },
-  ];
+    { href: '/admin/articles/new',  label: 'New Article',    icon: Plus, color: 'bg-blue-600' },
+    { href: '/admin/articles',      label: 'All Articles',   icon: FileText, color: 'bg-blue-500' },
+    { href: '/admin/categories',    label: 'Categories',     icon: Shapes, color: 'bg-indigo-500' },
+    { href: '/admin/users',         label: 'Users & Roles',  icon: Users, color: 'bg-amber-500', superOnly: true },
+    { href: '/admin/comments',      label: 'Comments',       icon: MessageSquare, color: 'bg-emerald-500' },
+    { href: '/admin/audit-logs',    label: 'Audit Logs',     icon: ScrollText, color: 'bg-purple-600', superOnly: true },
+  ].filter(a => !a.superOnly || isSuperAdmin);
 
   const statusColor = (s: string) => {
     if (s === 'published') return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
@@ -71,7 +109,7 @@ export default async function AdminPage() {
         <div>
           <p className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-widest">Admin Panel</p>
           <h1 className="text-2xl font-black tracking-tight mt-1 flex items-center gap-2">
-            {profile?.full_name ? `Hi, ${profile.full_name.split(' ')[0]}` : 'Dashboard'}
+            {profile?.full_name ? `Hi, ${String(profile.full_name).split(' ')[0]}` : 'Dashboard'}
             {profile?.full_name && <Hand className="w-6 h-6 text-amber-500" />}
           </h1>
           <p className="text-xs text-[var(--color-muted)] mt-1 capitalize font-semibold">{profile?.role?.replace('_', ' ')}</p>
@@ -88,25 +126,83 @@ export default async function AdminPage() {
         </div>
       </header>
 
-      {/* ── Metrics row ──────────────────────────────────────── */}
-      <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--color-muted)] mb-4">Highlights</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-10">
+      {/* ── Metrics grid ───────────────────────────────────────── */}
+      <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--color-muted)] mb-4">Live Statistics</h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-10">
         {[
-          { label: 'Total',     value: totalArticles ?? 0,    sub: 'articles',  color: '#0047ff' },
-          { label: 'Published', value: publishedArticles ?? 0, sub: 'live',      color: '#10b981' },
-          { label: 'In Review', value: inReviewArticles ?? 0,  sub: 'pending',   color: '#f59e0b' },
-          { label: 'Draft',     value: draftArticles ?? 0,     sub: 'editing',   color: '#6b7280' },
-          { label: 'Views',     value: (totalViews ?? 0).toLocaleString(), sub: 'total', color: '#8b5cf6' },
-          { label: 'Users',     value: totalUsers ?? 0,        sub: 'registered', color: '#ec4899' },
-          { label: 'Categories', value: totalCategories ?? 0,  sub: 'active',    color: '#0047ff' },
-        ].map((m) => (
-          <Card key={m.label} hoverable className="rounded-[1.5rem]">
-            <CardContent className="p-4 flex flex-col gap-1 items-center justify-center text-center">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted)]">{m.label}</span>
-              <span className="text-2xl font-black tracking-tight" style={{ color: m.color }}>{m.value}</span>
-              <span className="text-[10px] text-[var(--color-muted)] font-semibold">{m.sub}</span>
-            </CardContent>
-          </Card>
+          { 
+            label: 'Content', 
+            icon: FileText,
+            color: 'text-blue-500',
+            href: '/admin/articles',
+            stats: [
+              { name: 'Total Articles', value: totalArticles },
+              { name: 'Published Today', value: articlesPublishedToday, highlight: true }
+            ] 
+          },
+          { 
+            label: 'Engagement', 
+            icon: Eye,
+            color: 'text-purple-500',
+            href: '/admin/categories',
+            stats: [
+              { name: 'Total Views', value: totalViews.toLocaleString() },
+              { name: 'Categories', value: totalCategories }
+            ] 
+          },
+          { 
+            label: 'Community', 
+            icon: Users,
+            color: 'text-amber-500',
+            href: '/admin/users',
+            stats: [
+              { name: 'Total Users', value: totalUsers },
+              { name: 'New (7 days)', value: newUsersLast7Days, highlight: true }
+            ] 
+          },
+          { 
+            label: 'Discussions', 
+            icon: MessageSquare,
+            color: 'text-emerald-500',
+            href: '/admin/comments',
+            stats: [
+              { name: 'Total Comments', value: totalComments },
+              { name: 'Pending', value: pendingComments, highlight: pendingComments > 0 }
+            ] 
+          },
+          { 
+            label: 'System', 
+            icon: History,
+            color: 'text-[var(--color-muted)]',
+            href: isSuperAdmin ? '/admin/audit-logs' : '#',
+            stats: [
+              { name: 'Last Event', value: lastAudit?.action?.split('_')[0] || 'Idle' },
+              { name: 'Activity', value: lastAudit ? new Date(lastAudit.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'None' }
+            ] 
+          },
+        ].map((group) => (
+          <Link key={group.label} href={group.href} className="outline-none block">
+            <Card hoverable className="h-full rounded-[2rem] border-transparent bg-[var(--color-surface)] shadow-none transition-transform hover:scale-[1.02] active:scale-[0.98]">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center opacity-80 ${group.color}`}>
+                    <group.icon className="w-4 h-4" />
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-muted)]">{group.label}</span>
+                </div>
+                <div className="space-y-3">
+                   {group.stats.map((s: { name: string; value: string | number; highlight?: boolean }) => (
+                     <div key={s.name}>
+                        <p className="text-2xl font-black tracking-tighter leading-none">{s.value}</p>
+                        <p className={`text-[10px] font-bold uppercase tracking-wider mt-1 ${s.highlight ? 'text-amber-500' : 'text-[var(--color-muted)]'}`}>
+                          {s.name}
+                        </p>
+                     </div>
+                   ))}
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
 
@@ -114,11 +210,11 @@ export default async function AdminPage() {
       <section className="mb-10">
         <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--color-muted)] mb-4">Quick Actions</h2>
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-          {quickActions.map((a) => (
+          {quickActions.map((a: { href: string; label: string; icon: any; color: string }) => (
             <Link key={a.href} href={a.href} className="group outline-none">
               <Card hoverable className="h-full rounded-[1.5rem] border-transparent bg-[var(--color-surface)] group-hover:bg-[var(--color-surface-2)] transition-colors">
                 <CardContent className="p-4 flex flex-col items-center justify-center gap-3 h-full">
-                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white" style={{ background: a.color }}>
+                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-white ${a.color}`}>
                     <a.icon className="w-5 h-5" />
                   </div>
                   <span className="text-[11px] font-bold text-center leading-tight">{a.label}</span>
@@ -139,7 +235,7 @@ export default async function AdminPage() {
             <Link href="/admin/articles" className="text-xs font-bold text-[var(--color-primary)] hover:underline">View all →</Link>
           </div>
           <div className="space-y-3">
-            {recentArticles?.map((a) => (
+            {recentArticles?.map((a: { id: string; title: string, status?: string }) => (
               <Link key={a.id} href={`/admin/articles/${a.id}/edit`} className="block group outline-none">
                 <Card hoverable className="rounded-2xl">
                   <div className="flex items-center justify-between gap-3 px-5 py-3.5">
@@ -166,7 +262,7 @@ export default async function AdminPage() {
             )}
           </div>
           <div className="flex gap-4 overflow-x-auto scrollbar-none pb-1">
-            {recentUsers?.map((u) => (
+            {recentUsers?.map((u: { id: string; avatar_url?: string, full_name?: string, email?: string }) => (
               <div key={u.id} className="shrink-0 flex flex-col items-center gap-2 w-[72px]">
                 <div className="w-14 h-14 rounded-full bg-[#ffe500] flex items-center justify-center text-black font-black text-xl overflow-hidden shadow-sm border-2 border-[var(--color-background)]">
                   {u.avatar_url

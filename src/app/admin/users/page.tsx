@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import Link from 'next/link';
+import { logAuditEvent } from '@/lib/audit';
 import { RoleSelect } from './RoleSelect';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -33,6 +34,9 @@ async function updateRole(formData: FormData) {
   if (!targetId || !ALLOWED_ROLES.includes(newRole)) return;
 
   await supabase.from('profiles').update({ role: newRole }).eq('id', targetId).neq('role', 'super_admin');
+  
+  await logAuditEvent(user.id, 'USER_ROLE_CHANGED', { target_user_id: targetId, new_role: newRole });
+  
   revalidatePath('/admin/users');
 }
 
@@ -62,7 +66,10 @@ async function inviteEditorAction(formData: FormData) {
     const { data: existing } = await supabase.from('profiles').select('id').eq('email', email).single();
     if (existing) {
       await supabase.from('profiles').update({ role, full_name: fullName || undefined }).eq('id', existing.id);
+      await logAuditEvent(user.id, 'USER_ROLE_CHANGED', { target_user_id: existing.id, new_role: role, note: 're-invited' });
     }
+  } else {
+    await logAuditEvent(user.id, 'USER_INVITED', { invited_email: email, role });
   }
 
   revalidatePath('/admin/users');
@@ -75,13 +82,25 @@ export default async function AdminUsersPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const { data: currentProfile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-  if (!currentProfile || currentProfile.role !== 'super_admin') redirect('/admin');
+  let users: any[] = [];
+  let currentProfile: any = null;
 
-  const { data: users } = await supabase
-    .from('profiles')
-    .select('id, full_name, email, role, created_at')
-    .order('created_at', { ascending: false });
+  try {
+    const { data: p } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
+    currentProfile = p;
+    if (!currentProfile || currentProfile.role !== 'super_admin') redirect('/admin');
+
+    const { data: u, error: fetchError } = await supabase
+      .from('profiles')
+      .select('*') // Select all to avoid column errors if 'email' is missing
+      .order('created_at', { ascending: false });
+    
+    if (!fetchError && u) {
+      users = u;
+    }
+  } catch (err) {
+    console.error('Admin users page fetch error:', err);
+  }
 
   const formatDate = (iso: string) =>
     new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });

@@ -1,6 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { logAuditEvent } from '@/lib/audit';
+import Link from 'next/link';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { ChevronLeft, Inbox, CheckCircle2, X } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,6 +44,8 @@ async function convertAction(formData: FormData) {
 
   await supabase.from('guest_submissions').update({ status: 'converted' }).eq('id', id);
 
+  await logAuditEvent(user.id, 'SUBMISSION_CONVERTED', { submission_id: id, title });
+
   revalidatePath('/admin/submissions');
   revalidatePath('/admin/articles');
   redirect('/admin/submissions');
@@ -56,6 +63,8 @@ async function rejectAction(formData: FormData) {
 
   const id = formData.get('id') as string;
   await supabase.from('guest_submissions').update({ status: 'rejected' }).eq('id', id);
+
+  await logAuditEvent(user.id, 'SUBMISSION_REJECTED', { submission_id: id });
 
   revalidatePath('/admin/submissions');
   redirect('/admin/submissions');
@@ -101,87 +110,99 @@ export default async function AdminSubmissionsPage() {
       <div className="max-w-3xl mx-auto">
 
         {/* ── Header ──────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white leading-tight">Guest Submissions</h1>
-            <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
-              {pendingCount} pending · {(submissions?.length ?? 0)} total
-            </p>
+        <div className="flex items-center justify-between mb-8 mt-4">
+          <div className="flex items-center gap-4">
+            <Button asChild variant="outline" size="icon" className="rounded-full w-10 h-10 border-[var(--color-border)] text-[var(--color-muted)]">
+              <Link href="/admin">
+                <ChevronLeft className="w-5 h-5" />
+              </Link>
+            </Button>
+            <div>
+              <h1 className="text-2xl font-black tracking-tight leading-tight">Guest Submissions</h1>
+              <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
+                {pendingCount} pending · {(submissions?.length ?? 0)} total
+              </p>
+            </div>
           </div>
-          {pendingCount > 0 && (
-            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-500/20 text-amber-400 text-xs font-black border border-amber-500/30">
-              {pendingCount}
-            </span>
-          )}
         </div>
 
         {/* ── List ────────────────────────────────────────────────── */}
         {!submissions || submissions.length === 0 ? (
-          <div className="py-20 text-center text-[var(--color-muted)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl">
-            <p className="font-semibold text-white mb-1">No submissions yet</p>
-            <p className="text-sm">Reader-submitted articles will appear here.</p>
-          </div>
+          <Card className="py-20 text-center flex flex-col items-center bg-[var(--color-surface)] border-[var(--color-border)] border-dashed rounded-[2rem] shadow-none">
+            <Inbox className="w-12 h-12 mb-4 opacity-20 text-[var(--color-muted)]" />
+            <p className="font-bold mb-1 text-lg tracking-tight">No submissions yet</p>
+            <p className="text-sm text-[var(--color-muted)]">Reader-submitted articles will appear here.</p>
+          </Card>
         ) : (
           <div className="space-y-4">
             {submissions.map((sub) => (
-              <div
+              <Card
                 key={sub.id}
-                className={`bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl p-6 shadow-lg transition-all ${
+                className={`overflow-hidden transition-all duration-300 border-transparent bg-[var(--color-surface)] shadow-none rounded-3xl ${
                   sub.status !== 'pending' ? 'opacity-60' : ''
                 }`}
               >
-                <div className="flex items-start justify-between gap-4 flex-wrap">
-                  <div className="flex-1 min-w-0">
+                <CardContent className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex-1 min-w-0 font-bold text-lg leading-tight tracking-tight flex flex-col gap-2">
+                    
                     {/* Title + status badge */}
-                    <div className="flex items-center gap-3 mb-2 flex-wrap">
-                      <h2 className="text-base font-bold text-white truncate">{sub.title}</h2>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${statusStyles[sub.status] ?? 'bg-gray-500/10 text-gray-400 border border-gray-500/20'}`}>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <h2 className="text-lg font-bold text-white tracking-tight truncate flex-1">{sub.title}</h2>
+                      <span className={`flex-shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${statusStyles[sub.status] ?? 'bg-gray-500/10 text-gray-400 border border-gray-500/20'}`}>
                         {sub.status}
                       </span>
                     </div>
+
                     {/* Author info */}
-                    <p className="text-sm text-[var(--color-muted)]">
+                    <p className="text-xs font-medium text-[var(--color-muted)]">
                       By <span className="font-semibold text-white">{sub.name}</span>
-                      {' · '}
-                      <a href={`mailto:${sub.email}`} className="text-[#4f8ef7] hover:underline">{sub.email}</a>
-                      {' · '}
+                      <span className="mx-1.5">·</span>
+                      <a href={`mailto:${sub.email}`} className="text-[#4f8ef7] hover:underline font-mono">{sub.email}</a>
+                      <span className="mx-1.5">·</span>
                       {new Date(sub.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </p>
+
                     {/* Content preview */}
                     {sub.content && (
-                      <p className="mt-3 text-sm text-[var(--color-muted)] line-clamp-3 whitespace-pre-wrap">
+                      <div className="mt-2 text-sm text-[var(--color-muted)] line-clamp-3 whitespace-pre-wrap leading-relaxed bg-[var(--color-background)] rounded-xl py-3 px-4 border border-[var(--color-border)]/50 font-serif">
                         {sub.content}
-                      </p>
+                      </div>
                     )}
                   </div>
 
                   {/* Actions — only for pending */}
                   {sub.status === 'pending' && (
-                    <div className="flex gap-2 flex-shrink-0 flex-wrap">
-                      <form action={convertAction}>
+                    <div className="flex flex-wrap sm:flex-col gap-2 flex-shrink-0 border-t sm:border-t-0 border-[var(--color-border)] pt-4 sm:pt-0 w-full sm:w-auto">
+                      <form action={convertAction} className="flex-1 sm:flex-none">
                         <input type="hidden" name="id"      value={sub.id} />
                         <input type="hidden" name="title"   value={sub.title} />
                         <input type="hidden" name="content" value={sub.content ?? ''} />
-                        <button
+                        <Button
                           type="submit"
-                          className="px-4 py-2 text-xs font-bold tracking-wide text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-xl transition-colors uppercase"
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-emerald-500 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 hover:text-emerald-500"
                         >
-                          ✓ Convert to Draft
-                        </button>
+                          <CheckCircle2 className="w-4 h-4 mr-1.5" />
+                          Convert to Draft
+                        </Button>
                       </form>
-                      <form action={rejectAction}>
+                      <form action={rejectAction} className="flex-1 sm:flex-none">
                         <input type="hidden" name="id" value={sub.id} />
-                        <button
+                        <Button
                           type="submit"
-                          className="px-4 py-2 text-xs font-bold tracking-wide text-red-400 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl transition-colors uppercase"
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-red-500 border-red-500/20 bg-red-500/5 hover:bg-red-500/10 hover:text-red-500"
                         >
-                          ✕ Reject
-                        </button>
+                          <X className="w-4 h-4 mr-1.5" />
+                          Reject
+                        </Button>
                       </form>
                     </div>
                   )}
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         )}
