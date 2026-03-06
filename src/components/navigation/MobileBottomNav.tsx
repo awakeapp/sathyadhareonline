@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { ADMIN_NAV, EDITOR_NAV, READER_NAV } from './nav-items';
 import { useReaderMode } from '@/context/ReaderModeContext';
 
@@ -11,6 +11,7 @@ interface MobileBottomNavProps {
 
 export default function MobileBottomNav({ role }: MobileBottomNavProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { readerMode, enableReaderMode } = useReaderMode();
 
   const isAuthPage = pathname === '/login' || pathname === '/signup';
@@ -53,7 +54,7 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
             return (
               <button
                 key={item.href}
-                onClick={() => enableReaderMode()}
+                onClick={() => { enableReaderMode(); router.push('/'); }}
                 className="tap-highlight flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all text-[var(--color-muted)] hover:text-[var(--color-text)] focus:outline-none"
               >
                 <div className="relative">

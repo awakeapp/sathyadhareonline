@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { ADMIN_NAV, EDITOR_NAV, READER_NAV } from './nav-items';
 import { useReaderMode } from '@/context/ReaderModeContext';
 import { useState } from 'react';
@@ -13,6 +13,7 @@ interface SidebarProps {
 
 export function DesktopSidebar({ role }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { readerMode, enableReaderMode } = useReaderMode();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -88,7 +89,7 @@ export function DesktopSidebar({ role }: SidebarProps) {
               <Tooltip key={item.href}>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={() => enableReaderMode()}
+                    onClick={() => { enableReaderMode(); router.push('/'); }}
                     className={`w-full flex items-center ${isCollapsed ? 'justify-center px-0' : 'px-3 gap-3'} py-3 rounded-xl transition-all hover:scale-[1.03] active:scale-95 ${
                       isActive
                         ? 'bg-amber-500/10 text-amber-500 font-bold'

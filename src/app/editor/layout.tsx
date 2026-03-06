@@ -22,8 +22,10 @@ export default async function EditorLayout({ children }: { children: React.React
   }
 
   // ── Defence-in-depth: only editors allowed here ─────────────────
+  // 1. Not authenticated at all → send to login
+  // 2. Authenticated but not an editor → send to reader home (not /login, to avoid re-auth loop)
   if (!profile || profile.role !== 'editor') {
-    redirect('/login');
+    redirect('/');
   }
 
   return (

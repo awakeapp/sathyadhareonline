@@ -53,15 +53,28 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
   useEffect(() => {
     const { data: authListener } = createClient().auth.onAuthStateChange((_event, session) => {
       setClientUser(session?.user || null);
-      // If user logs out, clear reader mode
+      // If user logs out, clear reader mode from localStorage (matches context storage)
       if (!session?.user) {
-        try { sessionStorage.removeItem('sathyadhare:readerMode') } catch {}
+        try { localStorage.removeItem('sathyadhare:readerMode') } catch {}
       }
     });
     return () => {
       authListener.subscription.unsubscribe();
     };
   }, []);
+
+  // ── Hydration guard for reader-mode UI ─────────────────────────────────────
+  // readerMode is read from localStorage on the client. During SSR/first render
+  // it is always `false`. We wait one frame after mount before trusting it, so
+  // the banner and return buttons don't flicker in/out on page load.
+  const [readerModeMounted, setReaderModeMounted] = useState(false);
+  useEffect(() => {
+    // requestAnimationFrame defers until after the browser has painted, ensuring
+    // the localStorage value has been read and React state is settled.
+    const id = requestAnimationFrame(() => setReaderModeMounted(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+  const safeReaderMode = readerModeMounted ? readerMode : false;
 
   useEffect(() => {
     const handleToggleMenu = () => setIsMenuOpen((prev) => !prev);
@@ -99,7 +112,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
   return (
     <>
       {/* ── Reader Mode Banner (only when privileged user is on reader side) ── */}
-      {isPrivilegedRole && isOnReaderSide && readerMode && (
+      {isPrivilegedRole && isOnReaderSide && safeReaderMode && (
         <div
           id="reader-mode-banner"
           className="fixed top-0 left-0 right-0 z-[200] flex items-center justify-center gap-3 px-4 py-2 text-xs font-bold"
@@ -128,9 +141,9 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
       <header
         className="fixed left-0 right-0 z-50 w-full transition-colors duration-300"
         style={{
-          top: (isPrivilegedRole && isOnReaderSide && readerMode) ? 'calc(32px + env(safe-area-inset-top, 0px))' : '0px',
+          top: (isPrivilegedRole && isOnReaderSide && safeReaderMode) ? 'calc(32px + env(safe-area-inset-top, 0px))' : '0px',
           background: isAdminRoute ? 'var(--color-surface)' : 'var(--color-background)',
-          paddingTop: (isPrivilegedRole && isOnReaderSide && readerMode) ? '0px' : 'env(safe-area-inset-top, 0px)',
+          paddingTop: (isPrivilegedRole && isOnReaderSide && safeReaderMode) ? '0px' : 'env(safe-area-inset-top, 0px)',
         }}
       >
         {/* ── Main bar ──────────────────────────────────────────────── */}
@@ -167,7 +180,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
             )}
 
             {/* ── Return to Dashboard button (reader side, reader mode active) ── */}
-            {isPrivilegedRole && isOnReaderSide && readerMode && (
+            {isPrivilegedRole && isOnReaderSide && safeReaderMode && (
               <button
                 id="return-dashboard-btn"
                 onClick={handleReturnToDashboard}
@@ -183,7 +196,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
             )}
 
             {/* ── Passive "Back to Dashboard" link (reader side, reader mode NOT active) ── */}
-            {isPrivilegedRole && isOnReaderSide && !readerMode && (
+            {isPrivilegedRole && isOnReaderSide && !safeReaderMode && (
               <Link
                 href={dashboardHref}
                 className="tap-highlight flex items-center gap-1.5 px-3 h-8 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all active:scale-95"
@@ -312,11 +325,13 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                       <Eye className="w-5 h-5 text-current" /> Switch to Reader Mode
                     </button>
 
-                    <Link href="/" onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-3 py-3 text-sm font-semibold text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors">
+                    <button
+                      onClick={() => { setIsMenuOpen(false); handleSwitchToReader(); }}
+                      className="flex items-center gap-3 py-3 text-sm font-semibold text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors text-left"
+                    >
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                       Back to Site
-                    </Link>
+                    </button>
                     <Link href="/logout" onClick={() => setIsMenuOpen(false)}
                       className="flex items-center gap-3 py-3 text-sm font-semibold text-red-400 hover:text-red-300 transition-colors">
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
@@ -364,7 +379,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
 
                       <div className="mt-5 flex flex-col gap-1">
                         {/* Privileged role in reader mode — show return + disable buttons */}
-                        {isPrivilegedRole && readerMode && (
+                        {isPrivilegedRole && safeReaderMode && (
                           <>
                             <button
                               onClick={() => { setIsMenuOpen(false); handleReturnToDashboard(); }}
@@ -375,7 +390,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                           </>
                         )}
                         {/* Privileged role NOT in reader mode — show passive link */}
-                        {isPrivilegedRole && !readerMode && (
+                        {isPrivilegedRole && !safeReaderMode && (
                           <Link
                             href={dashboardHref}
                             onClick={() => setIsMenuOpen(false)}

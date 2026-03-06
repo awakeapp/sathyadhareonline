@@ -23,9 +23,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const role = profile?.role;
 
-  // Route protection
+  // Route protection — two distinct cases:
+  // 1. Not authenticated at all → send to login
+  // 2. Authenticated but wrong role → send to reader home (not /login, to avoid re-auth loop)
   if (!role || (role !== 'admin' && role !== 'super_admin')) {
-    redirect('/login');
+    redirect('/');
   }
 
   return (
