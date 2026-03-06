@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { logAuditEvent } from '@/lib/audit';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { ChevronLeft, MessageSquare, CheckCircle2, X, Trash2 } from 'lucide-react';
+import { ChevronLeft, MessageSquare, CheckCircle2, X, Trash2, ShieldAlert } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,6 +41,23 @@ async function rejectComment(formData: FormData) {
   await supabase.from('comments').update({ status: 'rejected' }).eq('id', id);
   
   await logAuditEvent(user.id, 'COMMENT_REJECTED', { comment_id: id });
+  
+  revalidatePath('/admin/comments');
+  redirect('/admin/comments');
+}
+
+async function markSpam(formData: FormData) {
+  'use server';
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  if (!profile || !['admin', 'super_admin'].includes(profile.role)) return;
+
+  const id = formData.get('id') as string;
+  await supabase.from('comments').update({ status: 'rejected', is_spam: true }).eq('id', id);
+  
+  await logAuditEvent(user.id, 'COMMENT_MARKED_SPAM', { comment_id: id });
   
   revalidatePath('/admin/comments');
   redirect('/admin/comments');
@@ -95,6 +112,7 @@ export default async function AdminCommentsPage() {
       user_id,
       content,
       status,
+      is_spam,
       created_at,
       articles ( title )
     `)
@@ -162,9 +180,17 @@ export default async function AdminCommentsPage() {
                         <span className="text-base font-bold text-white tracking-tight">
                           {c.guest_name || 'Registered User'}
                         </span>
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${statusColors[c.status] ?? 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
-                          {c.status}
-                        </span>
+                        <div className="flex gap-2">
+                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${statusColors[c.status] ?? 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
+                             {c.status}
+                           </span>
+                           {c.is_spam && (
+                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-rose-500/10 text-rose-500 border border-rose-500/20 font-black uppercase tracking-wider">
+                               <ShieldAlert className="w-3 h-3" />
+                               Spam Filtered
+                             </span>
+                           )}
+                        </div>
                       </div>
 
                       {/* Article title */}
@@ -211,6 +237,18 @@ export default async function AdminCommentsPage() {
                             >
                               <X className="w-3.5 h-3.5 mr-1" />
                               Reject
+                            </Button>
+                          </form>
+                          <form action={markSpam} className="flex-1 sm:flex-none">
+                            <input type="hidden" name="id" value={c.id} />
+                            <Button
+                              type="submit"
+                              variant="outline"
+                              size="sm"
+                              className="w-full text-orange-400 border-orange-500/20 bg-orange-500/5 hover:bg-orange-500/10 hover:text-orange-400"
+                            >
+                              <ShieldAlert className="w-3.5 h-3.5 mr-1" />
+                              Spam
                             </Button>
                           </form>
                         </>
