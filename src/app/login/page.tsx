@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Newspaper, Globe, PenTool } from 'lucide-react'
+import { Newspaper, Globe, PenTool, ArrowRight, Mail, Lock, ShieldCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { getRedirectPath } from '@/lib/auth/redirectAfterLogin'
 
@@ -39,7 +39,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
 
-  // Detect theme from document class (set by TopHeader/localStorage)
+  // Detect theme
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
   useEffect(() => {
     const update = () =>
@@ -86,269 +86,170 @@ export default function LoginPage() {
       setError(oauthError.message)
       setGoogleLoading(false)
     }
-    // On success, Supabase redirects the browser — no further action needed.
   }
 
   return (
-    <main className="min-h-dvh flex items-stretch bg-[var(--color-background)]">
+    <main className="min-h-dvh flex items-center justify-center relative p-4 bg-[var(--color-background)] overflow-hidden">
+      {/* Background Decorative Elements */}
+      <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-[var(--color-accent)] opacity-[0.03] blur-[120px] rounded-full" />
+      <div className="absolute bottom-[-10%] right-[-5%] w-[45%] h-[45%] bg-[var(--color-primary)] opacity-[0.03] blur-[130px] rounded-full" />
+      
+      {/* Grid Pattern */}
+      <div 
+        className="absolute inset-0 opacity-[0.02]"
+        style={{
+          backgroundImage: 'radial-gradient(circle, var(--color-text) 1px, transparent 1px)',
+          backgroundSize: '40px 40px'
+        }}
+      />
 
-      {/* ══════════════════════════════════════════
-          LEFT — Branding Panel (md+)
-      ══════════════════════════════════════════ */}
-      <div className="hidden md:flex md:w-1/2 lg:w-[55%] flex-col items-center justify-center relative overflow-hidden select-none">
-        {/* Gradient base */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0b0b1f] via-[#0d1340] to-[#0a0022]" />
+      <div className="w-full max-w-[1000px] grid md:grid-cols-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[2.5rem] overflow-hidden shadow-2xl relative z-10 animate-fade-up">
+        
+        {/* Left Side: Branding & Info */}
+        <div className="hidden md:flex flex-col justify-between p-12 bg-gradient-to-br from-[#0f172a] to-[#1e1b4b] relative overflow-hidden">
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-10 right-10 w-24 h-24 border border-white/10 rounded-full" />
+            <div className="absolute bottom-20 left-10 w-40 h-40 border border-white/5 rounded-full" />
+          </div>
 
-        {/* Decorative glows */}
-        <div className="absolute top-[-120px] left-[-100px] w-[500px] h-[500px] rounded-full bg-[#ffe500]/10 blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-[-80px] right-[-80px] w-[400px] h-[400px] rounded-full bg-[#0047ff]/15 blur-[100px] pointer-events-none" />
+          <div className="relative z-10">
+            <Link href="/">
+              <img src="/logo-light.png" alt="Sathyadhare" className="h-8 object-contain mb-12 hover:scale-105 transition-transform" />
+            </Link>
+            
+            <h2 className="text-4xl font-black text-white leading-tight tracking-tight mb-6">
+              Empowering<br />
+              <span className="text-[var(--color-primary)]">Modern Voices</span><br />
+              in Journalism.
+            </h2>
+            
+            <p className="text-white/50 text-base leading-relaxed max-w-xs">
+              Join our community of readers and creators dedicated to deep storytelling and regional perspectives.
+            </p>
+          </div>
 
-        {/* Grid dot pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle, #ffffff 1px, transparent 1px)',
-            backgroundSize: '32px 32px',
-          }}
-        />
-
-        {/* Content */}
-        <div className="relative z-10 flex flex-col items-center text-center px-12 max-w-md">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/logo-light.png"
-            alt="Sathyadhare"
-            className="h-9 object-contain mb-10"
-          />
-
-          <h2 className="text-3xl lg:text-4xl font-black text-white leading-tight mb-4 tracking-tight">
-            Welcome back to<br />
-            <span className="text-[#ffe500]">Sathyadhare</span>
-          </h2>
-          <p className="text-white/50 text-sm leading-relaxed">
-            Your trusted source for meaningful journalism, curated stories, and perspectives that matter.
-          </p>
-
-          {/* Feature badges */}
-          <div className="mt-10 flex flex-col gap-3 w-full">
+          <div className="relative z-10 flex flex-col gap-4">
             {[
-              { icon: <Newspaper className="w-5 h-5" />, label: 'Breaking news & editorials' },
-              { icon: <Globe className="w-5 h-5" />, label: 'Regional & national coverage' },
-              { icon: <PenTool className="w-5 h-5" />, label: 'In-depth investigative reports' },
-            ].map((f, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-3 px-4 py-3 rounded-2xl text-left"
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
-              >
-                <div className="text-white drop-shadow-md">{f.icon}</div>
-                <span className="text-white/70 text-sm font-medium">{f.label}</span>
+              { icon: <Newspaper className="w-5 h-5" />, text: "Daily Digital News" },
+              { icon: <ShieldCheck className="w-5 h-5" />, text: "Verified Perspectives" },
+              { icon: <PenTool className="w-5 h-5" />, text: "Creative Editorials" }
+            ].map((item, idx) => (
+              <div key={idx} className="flex items-center gap-3 text-white/70 text-sm font-medium">
+                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center border border-white/10">
+                  {item.icon}
+                </div>
+                {item.text}
               </div>
             ))}
           </div>
         </div>
-      </div>
 
-      {/* ══════════════════════════════════════════
-          RIGHT — Form Panel
-      ══════════════════════════════════════════ */}
-      <div className="w-full md:w-1/2 lg:w-[45%] flex items-center justify-center p-5 sm:p-8">
-        <div className="w-full max-w-md animate-fade-up">
-
-          {/* Mobile-only logo */}
-          <div className="flex flex-col items-center mb-8 md:hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={logoSrc}
-              alt="Sathyadhare"
-              className="h-8 object-contain mb-5"
-              suppressHydrationWarning
-            />
+        {/* Right Side: Form */}
+        <div className="p-8 md:p-12 lg:p-16 flex flex-col justify-center bg-[var(--color-surface)]">
+          <div className="mb-10 block md:hidden">
+            <Link href="/">
+              <img src={logoSrc} alt="Sathyadhare" className="h-7 object-contain mx-auto" />
+            </Link>
           </div>
 
-          {/* Heading */}
-          <div className="mb-8">
-            <h1 className="text-2xl sm:text-3xl font-black text-[var(--color-text)] tracking-tight mb-1.5">
-              Sign in
-            </h1>
-            <p className="text-sm text-[var(--color-muted)]">
-              Enter your credentials to access your account
-            </p>
+          <div className="mb-10">
+            <h1 className="text-3xl font-black text-[var(--color-text)] tracking-tight mb-2">Welcome Back</h1>
+            <p className="text-[var(--color-muted)] text-sm">Securely sign in to your Sathyadhare account</p>
           </div>
 
-          {/* Error banner */}
           {error && (
-            <div
-              id="login-error-banner"
-              className="flex items-start gap-3 mb-5 px-4 py-3.5 rounded-2xl text-sm"
-              style={{
-                background: 'rgba(239,68,68,0.10)',
-                border: '1px solid rgba(239,68,68,0.25)',
-                color: '#f87171',
-              }}
-            >
-              <svg className="w-4 h-4 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-              </svg>
+            <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-3 animate-shake">
+              <ShieldCheck className="w-4 h-4 shrink-0" />
               {error}
             </div>
           )}
 
-          {/* ── Google OAuth button ── */}
+          {/* Google Login */}
           <button
-            id="google-login-btn"
-            type="button"
             onClick={handleGoogleLogin}
             disabled={googleLoading || loading}
-            className="w-full flex items-center justify-center gap-3 h-[52px] rounded-2xl font-semibold text-sm transition-all duration-200 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed mb-5"
-            style={{
-              background: 'var(--color-surface)',
-              border: '1.5px solid var(--color-border)',
-              color: 'var(--color-text)',
-            }}
+            className="w-full flex items-center justify-center gap-3 h-[56px] rounded-2xl font-bold text-sm bg-[var(--color-background)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-2)] active:scale-[0.98] transition-all disabled:opacity-50 mb-6"
           >
             {googleLoading ? (
-              <svg className="animate-spin w-4 h-4 text-[var(--color-muted)]" viewBox="0 0 24 24" fill="none">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
+              <div className="w-5 h-5 border-2 border-[var(--color-muted)] border-t-transparent rounded-full animate-spin" />
             ) : (
               <GoogleIcon />
             )}
-            <span>{googleLoading ? 'Redirecting…' : 'Continue with Google'}</span>
+            <span>Continue with Google</span>
           </button>
 
-          {/* Divider */}
-          <div className="flex items-center gap-3 mb-5">
+          <div className="flex items-center gap-4 mb-8">
             <div className="flex-1 h-px bg-[var(--color-border)]" />
-            <span className="text-xs text-[var(--color-muted)] font-medium uppercase tracking-wider">or sign in with email</span>
+            <span className="text-[10px] uppercase tracking-widest font-black text-[var(--color-muted)]">OR</span>
             <div className="flex-1 h-px bg-[var(--color-border)]" />
           </div>
 
-          {/* ── Email / Password form ── */}
-          <form onSubmit={handleLogin} className="flex flex-col gap-4" noValidate>
-
-            {/* Email */}
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="email" className="text-xs font-semibold text-[var(--color-muted)] uppercase tracking-widest">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                autoComplete="email"
-                autoFocus
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="
-                  w-full h-[52px] px-4 rounded-2xl text-sm text-[var(--color-text)]
-                  placeholder:text-[var(--color-muted)]/60
-                  bg-[var(--color-surface)]
-                  border border-[var(--color-border)]
-                  outline-none ring-0
-                  transition-all duration-200
-                  focus:border-[#0047ff] focus:ring-2 focus:ring-[#0047ff]/20
-                "
-              />
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-[10px] uppercase tracking-widest font-black text-[var(--color-muted)] ml-1">Email Address</label>
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)] group-focus-within:text-[var(--color-accent)] transition-colors">
+                  <Mail className="w-4 h-4" />
+                </div>
+                <input
+                  required
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  className="w-full h-14 pl-12 pr-4 rounded-2xl bg-[var(--color-background)] border border-[var(--color-border)] text-[var(--color-text)] placeholder:text-[var(--color-muted)]/40 focus:border-[var(--color-accent)] focus:ring-4 focus:ring-[var(--color-accent)]/10 outline-none transition-all font-medium text-sm"
+                />
+              </div>
             </div>
 
-            {/* Password */}
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <label htmlFor="password" className="text-xs font-semibold text-[var(--color-muted)] uppercase tracking-widest">
-                  Password
-                </label>
-                <button
-                  type="button"
-                  className="text-xs text-[#0047ff] dark:text-[#ffe500] font-semibold hover:underline transition-colors"
-                >
-                  Forgot password?
-                </button>
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center px-1">
+                <label className="text-[10px] uppercase tracking-widest font-black text-[var(--color-muted)]">Password</label>
+                <Link href="#" className="text-[10px] font-bold text-[var(--color-accent)] hover:underline uppercase tracking-wide">Forgot?</Link>
               </div>
-              <div className="relative">
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)] group-focus-within:text-[var(--color-accent)] transition-colors">
+                  <Lock className="w-4 h-4" />
+                </div>
                 <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
                   required
-                  autoComplete="current-password"
-                  placeholder="••••••••"
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="
-                    w-full h-[52px] pl-4 pr-12 rounded-2xl text-sm text-[var(--color-text)]
-                    placeholder:text-[var(--color-muted)]/60
-                    bg-[var(--color-surface)]
-                    border border-[var(--color-border)]
-                    outline-none ring-0
-                    transition-all duration-200
-                    focus:border-[#0047ff] focus:ring-2 focus:ring-[#0047ff]/20
-                  "
+                  placeholder="••••••••"
+                  className="w-full h-14 pl-12 pr-12 rounded-2xl bg-[var(--color-background)] border border-[var(--color-border)] text-[var(--color-text)] placeholder:text-[var(--color-muted)]/40 focus:border-[var(--color-accent)] focus:ring-4 focus:ring-[var(--color-accent)]/10 outline-none transition-all font-medium text-sm"
                 />
                 <button
                   type="button"
-                  tabIndex={-1}
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeClosed /> : <EyeOpen />}
                 </button>
               </div>
             </div>
 
-            {/* Submit */}
             <button
-              id="login-submit-btn"
               type="submit"
               disabled={loading || googleLoading}
-              className="
-                w-full h-[52px] rounded-2xl font-bold text-sm tracking-wide
-                transition-all duration-200 active:scale-[0.98]
-                disabled:opacity-60 disabled:cursor-not-allowed
-                flex items-center justify-center gap-2
-                mt-1
-              "
-              style={{
-                background: 'linear-gradient(135deg, #0047ff 0%, #0031c8 100%)',
-                color: '#ffffff',
-                boxShadow: '0 4px 20px rgba(0,71,255,0.35)',
-              }}
+              className="w-full h-14 rounded-2xl bg-[var(--color-accent)] text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-[var(--color-accent)]/30 hover:shadow-xl hover:shadow-[var(--color-accent)]/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 group"
             >
               {loading ? (
-                <>
-                  <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Signing in…
-                </>
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
-                'Sign In'
+                <>
+                  Connect <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </>
               )}
             </button>
           </form>
 
-          {/* Signup link */}
-          <p className="text-center mt-6 text-sm text-[var(--color-muted)]">
-            Don&apos;t have an account?{' '}
-            <Link
-              href="/signup"
-              className="font-bold text-[#0047ff] dark:text-[#ffe500] hover:underline transition-colors"
-            >
-              Create one
+          <p className="mt-8 text-center text-sm text-[var(--color-muted)] font-medium">
+            New here?{' '}
+            <Link href="/signup" className="text-[var(--color-accent)] font-black hover:underline underline-offset-4">
+              Create an account
             </Link>
           </p>
-
-          {/* Desktop logo (bottom watermark) */}
-          <div className="hidden md:flex justify-center mt-10 opacity-30">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo-light.png" alt="" className="h-5 object-contain" aria-hidden />
-          </div>
         </div>
       </div>
     </main>
