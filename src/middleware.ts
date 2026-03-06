@@ -70,8 +70,20 @@ export async function middleware(request: NextRequest) {
   if (protectedPrefix) {
     if (!user) return redirectWithCookies('/login')
 
-    const { data: profile } = await supabase
+    // SELECT BOTH: If 'status' column is missing (e.g. migration not applied), 
+    // the query will return an error and role will be null, triggering a redirect to /login.
+    const { data: firstTry } = await supabase
       .from('profiles').select('role, status').eq('id', user.id).single()
+
+    let profile: { role?: string; status?: string } | null = firstTry
+
+    // FALLBACK: If role is null but user exists, they might be missing the 'status' column.
+    // We try to fetch just the role to break the redirect loop.
+    if (!profile?.role) {
+      const { data: fallback } = await supabase
+        .from('profiles').select('role').eq('id', user.id).single()
+      profile = fallback
+    }
 
     const role = profile?.role as string | undefined
     const status = profile?.status as string | undefined
@@ -88,6 +100,7 @@ export async function middleware(request: NextRequest) {
 
   // 1b. Check status for non-protected routes too if logged in
   if (user && pathname !== '/suspended' && !pathname.startsWith('/auth') && pathname !== '/login') {
+    // Gracefully handle missing status column here too
     const { data: profile } = await supabase
       .from('profiles').select('status').eq('id', user.id).single()
     if (profile?.status === 'suspended' || profile?.status === 'banned') {
