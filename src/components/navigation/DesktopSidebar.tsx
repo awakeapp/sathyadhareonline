@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { SUPER_ADMIN_NAV, ADMIN_NAV, EDITOR_NAV, READER_NAV } from './nav-items';
 import { useReaderMode } from '@/context/ReaderModeContext';
 import { useState } from 'react';
+import { LayoutDashboard } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/Tooltip';
 
 interface SidebarProps {
@@ -14,7 +15,7 @@ interface SidebarProps {
 export function DesktopSidebar({ role }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { readerMode, enableReaderMode } = useReaderMode();
+  const { readerMode, enableReaderMode, disableReaderMode } = useReaderMode();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const isAuthPage = pathname === '/login' || pathname === '/signup';
@@ -24,9 +25,19 @@ export function DesktopSidebar({ role }: SidebarProps) {
     isPrivilegedRole &&
     !readerMode;
 
-  const activeNav = (isAdminView 
+  const activeNav = [...(isAdminView 
     ? (pathname.startsWith('/admin') ? (role === 'super_admin' ? SUPER_ADMIN_NAV : ADMIN_NAV) : EDITOR_NAV)
-    : READER_NAV);
+    : READER_NAV)];
+
+  if (!isAdminView && isPrivilegedRole && readerMode) {
+    activeNav.push({
+      name: `Back to ${role === 'editor' ? 'Editor' : 'Admin'}`,
+      href: role === 'editor' ? '/editor' : '/admin',
+      exact: true,
+      icon: LayoutDashboard,
+      isDashboardReturn: true,
+    });
+  }
 
   if (isAuthPage) return null;
 
@@ -103,6 +114,27 @@ export function DesktopSidebar({ role }: SidebarProps) {
                 {isCollapsed && (
                   <TooltipContent side="right">
                     <p>{item.name}</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            );
+          }
+
+          if ('isDashboardReturn' in item && item.isDashboardReturn) {
+            return (
+              <Tooltip key={item.href}>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => { disableReaderMode(); router.push(item.href); }}
+                    className={`w-full flex items-center ${isCollapsed ? 'justify-center px-0' : 'px-3 gap-3'} py-3 mt-4 rounded-xl transition-all hover:scale-[1.03] active:scale-95 bg-[#4f8ef7]/10 text-[#4f8ef7] hover:bg-[#4f8ef7]/20 font-bold shadow-sm border border-[#4f8ef7]/20`}
+                  >
+                    <item.icon size={20} className="text-[#4f8ef7]" />
+                    {!isCollapsed && <span className="text-sm truncate">{item.name}</span>}
+                  </button>
+                </TooltipTrigger>
+                {isCollapsed && (
+                  <TooltipContent side="right">
+                    <p>Back to Dashboard</p>
                   </TooltipContent>
                 )}
               </Tooltip>

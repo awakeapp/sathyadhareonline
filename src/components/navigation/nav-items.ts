@@ -8,6 +8,7 @@ export interface NavItem {
   highlight?: boolean;
   readerModeToggle?: boolean;
   isMoreToggle?: boolean;
+  isDashboardReturn?: boolean;
   role?: string;
 }
 

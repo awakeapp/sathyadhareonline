@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { SUPER_ADMIN_NAV, ADMIN_NAV, EDITOR_NAV, READER_NAV } from './nav-items';
 import { useReaderMode } from '@/context/ReaderModeContext';
+import { LayoutDashboard } from 'lucide-react';
 
 interface MobileBottomNavProps {
   role?: string | null;
@@ -12,7 +13,7 @@ interface MobileBottomNavProps {
 export default function MobileBottomNav({ role }: MobileBottomNavProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { readerMode, enableReaderMode } = useReaderMode();
+  const { readerMode, enableReaderMode, disableReaderMode } = useReaderMode();
 
   const isAuthPage = pathname === '/login' || pathname === '/signup';
   const isPrivilegedRole = role === 'super_admin' || role === 'admin' || role === 'editor';
@@ -21,9 +22,21 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
     isPrivilegedRole &&
     !readerMode;
 
-  const activeNav = (isAdminView 
+  const activeNavArray = [...(isAdminView 
     ? (pathname.startsWith('/admin') ? (role === 'super_admin' ? SUPER_ADMIN_NAV : ADMIN_NAV) : EDITOR_NAV)
-    : READER_NAV).slice(0, 5); // Max 5 items for bottom nav
+    : READER_NAV)];
+
+  if (!isAdminView && isPrivilegedRole && readerMode) {
+    activeNavArray.splice(-1, 1, {
+      name: role === 'editor' ? 'Editor' : 'Admin',
+      href: role === 'editor' ? '/editor' : '/admin',
+      exact: true,
+      icon: LayoutDashboard,
+      isDashboardReturn: true,
+    } as any);
+  }
+
+  const activeNav = activeNavArray.slice(0, 5); // Max 5 items for bottom nav
 
   if (isAuthPage) return null;
 
@@ -78,6 +91,23 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
                   <item.icon size={22} className="stroke-[2.2px]" />
                 </div>
                 <span className="text-[10px] font-semibold tracking-wide truncate">
+                  {item.name}
+                </span>
+              </button>
+            );
+          }
+
+          if ('isDashboardReturn' in item && item.isDashboardReturn) {
+            return (
+              <button
+                key="dashboard-return"
+                onClick={() => { disableReaderMode(); router.push(item.href); }}
+                className="tap-highlight flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all text-[#4f8ef7] focus:outline-none"
+              >
+                <div className="relative">
+                  <item.icon size={22} className="stroke-[2.2px]" />
+                </div>
+                <span className="text-[10px] font-bold tracking-wide truncate text-[#4f8ef7]">
                   {item.name}
                 </span>
               </button>
