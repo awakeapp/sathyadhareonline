@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { ADMIN_NAV, EDITOR_NAV, READER_NAV } from './nav-items';
+import { SUPER_ADMIN_NAV, ADMIN_NAV, EDITOR_NAV, READER_NAV } from './nav-items';
 import { useReaderMode } from '@/context/ReaderModeContext';
 import { useState } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/Tooltip';
@@ -25,8 +25,8 @@ export function DesktopSidebar({ role }: SidebarProps) {
     !readerMode;
 
   const activeNav = (isAdminView 
-    ? (pathname.startsWith('/admin') ? ADMIN_NAV : EDITOR_NAV)
-    : READER_NAV).filter(item => !item.role || item.role === role);
+    ? (pathname.startsWith('/admin') ? (role === 'super_admin' ? SUPER_ADMIN_NAV : ADMIN_NAV) : EDITOR_NAV)
+    : READER_NAV);
 
   if (isAuthPage) return null;
 

@@ -1,19 +1,26 @@
 'use client';
 
 import { useTransition, useState } from 'react';
+import { toast } from 'sonner';
 
 interface Props {
   articleId: string;
   initialSaved: boolean;
+  isAuthenticated: boolean;
   saveAction: (articleId: string) => Promise<void>;
   removeAction: (articleId: string) => Promise<void>;
 }
 
-export function BookmarkButton({ articleId, initialSaved, saveAction, removeAction }: Props) {
+export function BookmarkButton({ articleId, initialSaved, isAuthenticated, saveAction, removeAction }: Props) {
   const [saved, setSaved] = useState(initialSaved);
   const [isPending, startTransition] = useTransition();
 
   function toggle() {
+    if (!isAuthenticated) {
+      toast.error('Please login to save articles!');
+      return;
+    }
+
     const next = !saved;
     setSaved(next); // optimistic update
 

@@ -5,17 +5,12 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 import { logAuditEvent } from '@/lib/audit';
 
+import { verifyRole } from '@/lib/auth-server';
+
 const SUPER_ADMIN = 'super_admin';
 
 async function verifySuperAdmin() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Unauthorized');
-
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-  if (!profile || profile.role !== SUPER_ADMIN) {
-    throw new Error('Super Admin access required');
-  }
+  const { user } = await verifyRole(['super_admin']);
   return user;
 }
 

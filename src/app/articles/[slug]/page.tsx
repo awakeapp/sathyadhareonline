@@ -9,8 +9,8 @@ import HorizontalScroller from '@/components/ui/HorizontalScroller';
 import { ArticleViewTracker } from './ArticleViewTracker';
 import { BookmarkButton } from './BookmarkButton';
 import { revalidatePath } from 'next/cache';
-import { Card, CardContent } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
+import { Card } from '@/components/ui/Card';
+import { CommentBox } from './CommentBox';
 
 export const revalidate = 60;
 
@@ -211,14 +211,13 @@ export default async function ArticlePage({ params }: Props) {
             </span>
           </div>
 
-          {user && (
-            <BookmarkButton
-              articleId={article.id}
-              initialSaved={initialSaved}
-              saveAction={saveArticle}
-              removeAction={removeArticle}
-            />
-          )}
+          <BookmarkButton
+            articleId={article.id}
+            initialSaved={initialSaved}
+            isAuthenticated={!!user}
+            saveAction={saveArticle}
+            removeAction={removeArticle}
+          />
         </div>
       </header>
 
@@ -243,14 +242,7 @@ export default async function ArticlePage({ params }: Props) {
       />
 
       {/* Comment Section (Fake Input) */}
-      <Card className="w-full mb-12 shadow-none border-[var(--color-border)] rounded-2xl bg-[var(--color-surface)]">
-        <CardContent className="p-4 sm:p-5 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full bg-[var(--color-primary)] flex-shrink-0 flex items-center justify-center text-black font-black text-sm">
-            {user?.email?.charAt(0).toUpperCase() || '?'}
-          </div>
-          <Input placeholder="Leave a comment..." className="border-none bg-transparent shadow-none px-0 focus-visible:ring-0 placeholder:text-[var(--color-muted)] font-semibold" />
-        </CardContent>
-      </Card>
+      <CommentBox userInitial={user?.email?.charAt(0).toUpperCase() || '?'} isAuthenticated={!!user} />
 
       {/* Related Articles Scroller */}
       {related && related.length > 0 && (

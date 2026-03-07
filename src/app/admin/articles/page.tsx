@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { logAuditEvent } from '@/lib/audit';
+import { verifyRole } from '@/lib/auth-server';
 import { DeleteArticleButton } from './DeleteArticleButton';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -77,18 +78,16 @@ export default async function ArticlesPage() {
     if (!id || !toStatus) return;
 
     const supabaseAction = await createClient();
-    const { data: { user: actionUser } } = await supabaseAction.auth.getUser();
-    if (!actionUser) return;
+    let actionUser, actionRole;
+    try {
+      const { user, profile } = await verifyRole(['super_admin', 'admin', 'editor']);
+      actionUser = user;
+      actionRole = profile.role ?? 'reader';
+    } catch {
+      return;
+    }
 
-    // Re-verify role server-side — never trust formData
-    const { data: profile } = await supabaseAction
-      .from('profiles')
-      .select('role')
-      .eq('id', actionUser.id)
-      .single();
-
-    const actionRole = profile?.role ?? 'reader';
-    const actionAllowed = TRANSITIONS[actionRole] ?? [];
+    const actionAllowed = TRANSITIONS[actionRole as keyof typeof TRANSITIONS] ?? [];
 
     // Fetch current article status to validate the from→to transition
     const { data: article } = await supabaseAction
@@ -123,16 +122,13 @@ export default async function ArticlesPage() {
     if (!id) return;
 
     const supabaseAction = await createClient();
-    const { data: { user: actionUser } } = await supabaseAction.auth.getUser();
-    if (!actionUser) return;
-
-    const { data: profile } = await supabaseAction
-      .from('profiles')
-      .select('role')
-      .eq('id', actionUser.id)
-      .single();
-
-    if (!profile || !['admin', 'super_admin'].includes(profile.role)) return;
+    let actionUser;
+    try {
+      const { user } = await verifyRole(['super_admin', 'admin']);
+      actionUser = user;
+    } catch {
+      return;
+    }
 
     await supabaseAction
       .from('articles')
@@ -151,8 +147,13 @@ export default async function ArticlesPage() {
     const id = formData.get('id') as string;
     if (!id) return;
     const supabaseAction = await createClient();
-    const { data: { user } } = await supabaseAction.auth.getUser();
-    if (!user) return;
+    let user;
+    try {
+      const auth = await verifyRole(['super_admin', 'admin']);
+      user = auth.user;
+    } catch {
+      return;
+    }
     const { error: restoreError } = await supabaseAction
       .from('articles')
       .update({ is_deleted: false, deleted_at: null })
@@ -171,8 +172,13 @@ export default async function ArticlesPage() {
     const current = formData.get('current') as string;
     if (!id) return;
     const supabaseAction = await createClient();
-    const { data: { user } } = await supabaseAction.auth.getUser();
-    if (!user) return;
+    let user;
+    try {
+      const auth = await verifyRole(['super_admin', 'admin']);
+      user = auth.user;
+    } catch {
+      return;
+    }
 
     if (current === 'true') {
       await supabaseAction.from('articles').update({ is_featured: false }).eq('id', id);

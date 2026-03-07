@@ -3,14 +3,17 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { logAuditEvent } from '@/lib/audit';
+import { verifyRole } from '@/lib/auth-server';
 
 export async function saveSiteSettingsAction(settings: Record<string, unknown>) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: 'Unauthorized' };
-
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-  if (!profile || profile.role !== 'super_admin') return { error: 'Forbidden' };
+  let user;
+  try {
+    const auth = await verifyRole(['super_admin']);
+    user = auth.user;
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : 'Unauthorized' };
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { id, ...updatePayload } = settings;
@@ -41,11 +44,13 @@ export async function saveSiteSettingsAction(settings: Record<string, unknown>) 
 
 export async function saveEmailTemplateAction(templateId: string, name: string, subject: string, body: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: 'Unauthorized' };
-
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-  if (!profile || profile.role !== 'super_admin') return { error: 'Forbidden' };
+  let user;
+  try {
+    const auth = await verifyRole(['super_admin']);
+    user = auth.user;
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : 'Unauthorized' };
+  }
 
   let error;
   if (templateId) {

@@ -67,7 +67,10 @@ export default function LoginPage() {
       return
     }
 
-    const destination = await getRedirectPath(supabase, data.user.id)
+    const params = new URLSearchParams(window.location.search)
+    const returnTo = params.get('return_to')
+
+    const destination = await getRedirectPath(supabase, data.user.id, returnTo)
     window.location.href = destination
   }
 
@@ -76,10 +79,15 @@ export default function LoginPage() {
     setGoogleLoading(true)
     setError(null)
     const supabase = createClient()
+    const params = new URLSearchParams(window.location.search)
+    const returnTo = params.get('return_to')
+    const redirectToUrl = new URL(`${window.location.origin}/auth/callback`)
+    if (returnTo) redirectToUrl.searchParams.set('return_to', returnTo)
+
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: redirectToUrl.toString(),
       },
     })
     if (oauthError) {

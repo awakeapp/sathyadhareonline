@@ -46,12 +46,18 @@ export function ReaderModeProvider({ children }: { children: React.ReactNode }) 
   })
 
   const enableReaderMode = useCallback(() => {
-    try { localStorage.setItem(STORAGE_KEY, 'true') } catch {}
+    try { 
+      localStorage.setItem(STORAGE_KEY, 'true')
+      document.cookie = `${STORAGE_KEY}=true; path=/; max-age=31536000`
+    } catch {}
     setReaderMode(true)
   }, [])
 
   const disableReaderMode = useCallback(() => {
-    try { localStorage.removeItem(STORAGE_KEY) } catch {}
+    try { 
+      localStorage.removeItem(STORAGE_KEY) 
+      document.cookie = `${STORAGE_KEY}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`
+    } catch {}
     setReaderMode(false)
   }, [])
 
@@ -59,8 +65,13 @@ export function ReaderModeProvider({ children }: { children: React.ReactNode }) 
     setReaderMode((prev) => {
       const next = !prev
       try {
-        if (next) localStorage.setItem(STORAGE_KEY, 'true')
-        else localStorage.removeItem(STORAGE_KEY)
+        if (next) {
+          localStorage.setItem(STORAGE_KEY, 'true')
+          document.cookie = `${STORAGE_KEY}=true; path=/; max-age=31536000` // 1 year
+        } else {
+          localStorage.removeItem(STORAGE_KEY)
+          document.cookie = `${STORAGE_KEY}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`
+        }
       } catch {}
       return next
     })

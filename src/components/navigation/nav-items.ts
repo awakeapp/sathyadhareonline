@@ -11,16 +11,25 @@ export interface NavItem {
   role?: string;
 }
 
+export const SUPER_ADMIN_NAV: NavItem[] = [
+  { name: 'Dashboard', href: '/admin', exact: true, icon: LayoutDashboard },
+  { name: 'Articles', href: '/admin/articles', exact: false, icon: FileText },
+  { name: 'Categories', href: '/admin/categories', exact: false, icon: Library },
+  { name: 'Series', href: '/admin/series', exact: false, icon: Layers },
+  { name: 'Users', href: '/admin/users', exact: false, icon: Users },
+  { name: 'Financials', href: '/admin/financial', exact: false, icon: IndianRupee },
+  { name: 'Audit Logs', href: '/admin/audit-logs', exact: false, icon: ScrollText },
+  { name: 'Security', href: '/admin/security', exact: false, icon: Shield },
+  { name: 'Settings', href: '/admin/settings', exact: false, icon: Settings },
+  { name: 'Reader Mode', href: '/', exact: false, icon: Eye, readerModeToggle: true },
+];
+
 export const ADMIN_NAV: NavItem[] = [
   { name: 'Dashboard', href: '/admin', exact: true, icon: LayoutDashboard },
   { name: 'Articles', href: '/admin/articles', exact: false, icon: FileText },
   { name: 'Categories', href: '/admin/categories', exact: false, icon: Library },
   { name: 'Series', href: '/admin/series', exact: false, icon: Layers },
   { name: 'Users', href: '/admin/users', exact: false, icon: Users },
-  { name: 'Financials', href: '/admin/financial', exact: false, icon: IndianRupee, role: 'super_admin' },
-  { name: 'Audit Logs', href: '/admin/audit-logs', exact: false, icon: ScrollText, role: 'super_admin' },
-  { name: 'Security', href: '/admin/security', exact: false, icon: Shield, role: 'super_admin' },
-  { name: 'Settings', href: '/admin/settings', exact: false, icon: Settings, role: 'super_admin' },
   { name: 'Reader Mode', href: '/', exact: false, icon: Eye, readerModeToggle: true },
 ];
 

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { ADMIN_NAV, EDITOR_NAV, READER_NAV } from './nav-items';
+import { SUPER_ADMIN_NAV, ADMIN_NAV, EDITOR_NAV, READER_NAV } from './nav-items';
 import { useReaderMode } from '@/context/ReaderModeContext';
 
 interface MobileBottomNavProps {
@@ -22,8 +22,8 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
     !readerMode;
 
   const activeNav = (isAdminView 
-    ? (pathname.startsWith('/admin') ? ADMIN_NAV : EDITOR_NAV)
-    : READER_NAV).filter(item => !item.role || item.role === role).slice(0, 5); // Max 5 items for bottom nav
+    ? (pathname.startsWith('/admin') ? (role === 'super_admin' ? SUPER_ADMIN_NAV : ADMIN_NAV) : EDITOR_NAV)
+    : READER_NAV).slice(0, 5); // Max 5 items for bottom nav
 
   if (isAuthPage) return null;
 

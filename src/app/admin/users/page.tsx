@@ -60,7 +60,7 @@ export default async function AdminUsersPage() {
         </div>
       </div>
 
-      <UserManagementClient users={(users as UserProfile[]) || []} />
+      <UserManagementClient users={(users as UserProfile[]) || []} currentUserRole={profile.role} />
 
     </div>
   );

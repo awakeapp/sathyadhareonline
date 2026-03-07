@@ -2,10 +2,12 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { getRedirectUrl } from '@/lib/auth/redirectAfterLogin'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
+  const returnTo = searchParams.get('return_to') || searchParams.get('next')
 
   if (code) {
     const cookieStore = await cookies()
@@ -64,9 +66,7 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      let destination = '/'
-      if (role === 'super_admin' || role === 'admin') destination = '/admin'
-      else if (role === 'editor') destination = '/editor'
+      const destination = getRedirectUrl(role, returnTo)
 
       return NextResponse.redirect(new URL(destination, request.url))
     }

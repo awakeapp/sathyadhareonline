@@ -68,6 +68,12 @@ export async function middleware(request: NextRequest) {
   // 1. Check Protected Routes
   const protectedPrefix = Object.keys(ROUTE_ROLES).find(prefix => pathname.startsWith(prefix))
 
+  // Reader Mode Block
+  const isReaderModeActive = request.cookies.get('sathyadhare:readerMode')?.value === 'true'
+  if (isReaderModeActive && (pathname.startsWith('/admin') || pathname.startsWith('/editor'))) {
+    return redirectWithCookies('/')
+  }
+
   if (protectedPrefix) {
     if (!user) return redirectWithCookies('/login')
 

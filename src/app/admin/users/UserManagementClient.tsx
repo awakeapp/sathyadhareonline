@@ -40,7 +40,7 @@ const STATUS_META: Record<string, { label: string; color: string; icon: React.El
   banned:    { label: 'Banned',    color: 'text-red-500',     icon: Ban },
 };
 
-export default function UserManagementClient({ users: initialUsers }: { users: UserProfile[] }) {
+export default function UserManagementClient({ users: initialUsers, currentUserRole }: { users: UserProfile[], currentUserRole: string }) {
   const [isPending, startTransition] = useTransition();
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   
@@ -154,7 +154,7 @@ export default function UserManagementClient({ users: initialUsers }: { users: U
                    <option value="reader">Reader</option>
                    <option value="editor">Editor</option>
                    <option value="admin">Admin</option>
-                   <option value="super_admin">Super Admin</option>
+                   {currentUserRole === 'super_admin' && <option value="super_admin">Super Admin</option>}
                 </Select>
               </div>
             </div>
@@ -222,12 +222,15 @@ export default function UserManagementClient({ users: initialUsers }: { users: U
                     <option value="reader">Reader</option>
                     <option value="editor">Editor</option>
                     <option value="admin">Admin</option>
-                    <option value="super_admin">Super Admin</option>
+                    {currentUserRole === 'super_admin' && <option value="super_admin">Super Admin</option>}
                   </Select>
+                  {selectedUser.role === 'super_admin' && initialUsers.filter(u => u.role === 'super_admin' && u.status === 'active').length <= 1 && (
+                    <p className="text-xs text-amber-500 font-bold mt-2">Cannot demote the last active Super Admin.</p>
+                  )}
                 </div>
                 <ModalFooter>
                   <Button type="button" variant="outline" onClick={() => setShowEdit(false)}>Cancel</Button>
-                  <Button type="submit" loading={isPending}>Save Changes</Button>
+                  <Button type="submit" loading={isPending} disabled={selectedUser.role === 'super_admin' && initialUsers.filter(u => u.role === 'super_admin' && u.status === 'active').length <= 1}>Save Changes</Button>
                 </ModalFooter>
               </form>
             </>
@@ -251,8 +254,11 @@ export default function UserManagementClient({ users: initialUsers }: { users: U
                 <input type="hidden" name="userId" value={selectedUser.id} />
                 <ModalFooter>
                   <Button type="button" variant="outline" onClick={() => setShowDelete(false)} disabled={isPending}>Keep User</Button>
-                  <Button type="submit" variant="destructive" loading={isPending}>Yes, Delete Account</Button>
+                  <Button type="submit" variant="destructive" loading={isPending} disabled={selectedUser.role === 'super_admin' && initialUsers.filter(u => u.role === 'super_admin').length <= 1}>Yes, Delete Account</Button>
                 </ModalFooter>
+                {selectedUser.role === 'super_admin' && initialUsers.filter(u => u.role === 'super_admin').length <= 1 && (
+                  <p className="text-xs text-amber-500 font-bold mt-4 text-center">Cannot remove the last Super Admin.</p>
+                )}
               </form>
             </>
           )}
@@ -288,9 +294,12 @@ export default function UserManagementClient({ users: initialUsers }: { users: U
                     </label>
                   ))}
                 </div>
+                {selectedUser.role === 'super_admin' && initialUsers.filter(u => u.role === 'super_admin' && u.status === 'active').length <= 1 && selectedUser.status === 'active' && (
+                  <p className="text-xs text-amber-500 font-bold mt-2 text-center">Cannot suspend/ban the last active Super Admin.</p>
+                )}
                 <ModalFooter>
                   <Button type="button" variant="outline" onClick={() => setShowStatus(false)}>Cancel</Button>
-                  <Button type="submit" loading={isPending}>Update Status</Button>
+                  <Button type="submit" loading={isPending} disabled={selectedUser.role === 'super_admin' && initialUsers.filter(u => u.role === 'super_admin' && u.status === 'active').length <= 1 && selectedUser.status === 'active'}>Update Status</Button>
                 </ModalFooter>
               </form>
             </>
