@@ -63,8 +63,11 @@ export default function UserManagementClient({ users: initialUsers }: { users: U
     });
   }
 
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  const formatDate = (iso?: string | null) => {
+    if (!iso) return 'Unknown';
+    const d = new Date(iso);
+    return isNaN(d.getTime()) ? 'Unknown' : d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  };
 
   return (
     <div className="space-y-6">

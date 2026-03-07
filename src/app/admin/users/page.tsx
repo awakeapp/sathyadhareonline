@@ -26,13 +26,20 @@ export default async function AdminUsersPage() {
   if (!profile || profile.role !== 'super_admin') redirect('/admin');
 
   // Fetch all users with profile and status
-  const { data: users, error } = await supabase
+  const { data: fetchUsers, error } = await supabase
     .from('profiles')
-    .select('id, email, full_name, role, status, created_at')
-    .order('full_name', { ascending: true, nullsFirst: false });
+    .select('id, full_name, role, status, created_at')
+    .order('created_at', { ascending: false });
+    
+  let users = fetchUsers;
 
   if (error) {
-    console.error('Error fetching users:', error);
+    console.warn('Could not fetch with status (migration likely missing), falling back:', error.message);
+    const fallback = await supabase
+      .from('profiles')
+      .select('id, full_name, role, created_at')
+      .order('created_at', { ascending: false });
+    users = fallback.data?.map(u => ({ ...u, status: 'active' })) as UserProfile[];
   }
 
   return (

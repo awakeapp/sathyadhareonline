@@ -21,6 +21,7 @@ export const ADMIN_NAV: NavItem[] = [
   { name: 'Audit Logs', href: '/admin/audit-logs', exact: false, icon: ScrollText, role: 'super_admin' },
   { name: 'Security', href: '/admin/security', exact: false, icon: Shield, role: 'super_admin' },
   { name: 'Settings', href: '/admin/settings', exact: false, icon: Settings, role: 'super_admin' },
+  { name: 'Reader Mode', href: '/', exact: false, icon: Eye, readerModeToggle: true },
 ];
 
 export const EDITOR_NAV: NavItem[] = [

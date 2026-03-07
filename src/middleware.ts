@@ -2,9 +2,10 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 // Route access rules — middleware is the outermost gate
-const ROUTE_ROLES: Record<string, string[]> = {
+const ROUTE_ROLES: Record<string, string[] | '*'> = {
   '/admin':  ['super_admin', 'admin'],
   '/editor': ['editor'],
+  '/profile': '*',
 }
 
 export async function middleware(request: NextRequest) {
@@ -93,8 +94,10 @@ export async function middleware(request: NextRequest) {
       return redirectWithCookies('/suspended')
     }
 
-    if (!role || !allowed.includes(role)) {
-      return redirectWithCookies('/login')
+    if (allowed !== '*') {
+      if (!role || !allowed.includes(role)) {
+        return redirectWithCookies('/login')
+      }
     }
   }
 
