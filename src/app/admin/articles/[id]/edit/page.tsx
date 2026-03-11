@@ -150,7 +150,7 @@ export default async function EditArticlePage({
         initials={initials}
         icon1={Bell}
         icon2={ChevronLeft}
-        onIcon2Click={() => window.location.href = '/admin/articles'}
+        icon2Href="/admin/articles"
       />
       
       <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20 max-w-4xl mx-auto">

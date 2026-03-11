@@ -57,7 +57,7 @@ export default async function NewFridayMessagePage() {
         initials={initials}
         icon1={Bell}
         icon2={ChevronLeft}
-        onIcon2Click={() => window.location.href = '/admin/friday'}
+        icon2Href="/admin/friday"
       />
       
       <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20 max-w-3xl mx-auto">

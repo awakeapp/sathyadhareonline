@@ -157,6 +157,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
         </div>
       )}
 
+      {pathname === '/' && (
       <header
         className="fixed left-0 right-0 z-50 w-full transition-colors duration-300"
         style={{
@@ -467,6 +468,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
           </div>
         )}
       </header>
+      )}
     </>
   );
 }
