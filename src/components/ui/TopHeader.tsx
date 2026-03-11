@@ -96,14 +96,33 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
 
   // Handler: enable reader mode and navigate to reader homepage
   function handleSwitchToReader() {
-    enableReaderMode();
-    router.push('/');
+    // Store dashboard metadata so ReaderModeBar can display the return button
+    // without any server props (pure localStorage read on the reader page)
+    try {
+      const dashUrl   = dashboardHref
+      const dashLabel =
+        role === 'super_admin' ? 'Super Admin Dashboard' :
+        role === 'admin'       ? 'Admin Dashboard' : 'Editor Dashboard'
+      const color =
+        role === 'super_admin' ? '#7c3aed' :
+        role === 'admin'       ? '#0047ff' : '#6d28d9'
+      localStorage.setItem('sathyadhare:readerMode',     'true')
+      localStorage.setItem('sathyadhare:dashboardUrl',   dashUrl)
+      localStorage.setItem('sathyadhare:dashboardLabel', dashLabel)
+      localStorage.setItem('sathyadhare:dashboardColor', color)
+      document.cookie = `sathyadhare:readerMode=true; path=/; max-age=31536000`
+    } catch { /* ignore */ }
+    window.location.href = '/';
   }
 
   // Handler: disable reader mode and navigate to their dashboard
   function handleReturnToDashboard() {
-    disableReaderMode();
-    router.push(dashboardHref);
+    disableReaderMode()
+    try {
+      document.cookie = 'sathyadhare:readerMode=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+    } catch {}
+    // Hard navigate so fresh chunks and cleared readerMode are both in effect
+    window.location.href = dashboardHref
   }
 
   // Don't render nav chrome on auth pages
@@ -168,48 +187,32 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
               <button
                 id="switch-reader-mode-btn"
                 onClick={handleSwitchToReader}
-                className="tap-highlight flex items-center gap-1.5 px-3 h-8 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all active:scale-95"
-                style={{ background: 'rgba(255,229,0,0.12)', color: '#ffe500', border: '1px solid rgba(255,229,0,0.25)' }}
+                className="tap-highlight flex items-center gap-2 px-3.5 h-9 rounded-xl font-bold transition-all active:scale-95 hover:scale-105"
+                style={{ background: 'rgba(255,229,0,0.15)', color: '#ffe500', border: '1px solid rgba(255,229,0,0.35)' }}
                 title="Switch to Reader Mode"
               >
-                <svg viewBox="0 0 24 24" fill="currentColor" className="w-[14px] h-[14px] flex-shrink-0">
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 flex-shrink-0">
                   <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
                 </svg>
-                <span className="hidden sm:inline">Reader Mode</span>
+                <span className="text-[11px] uppercase tracking-widest">Reader Mode</span>
               </button>
             )}
 
-            {/* ── Return to Dashboard button (reader side, reader mode active) ── */}
-            {isPrivilegedRole && isOnReaderSide && safeReaderMode && (
+            {/* ── Return to Dashboard button — always visible for ALL privileged users on reader side ── */}
+            {isPrivilegedRole && isOnReaderSide && (
               <button
                 id="return-dashboard-btn"
                 onClick={handleReturnToDashboard}
-                className="tap-highlight flex items-center gap-1.5 px-3 h-8 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all active:scale-95"
-                style={{ background: 'rgba(0,71,255,0.15)', color: '#4f8ef7', border: '1px solid rgba(0,71,255,0.3)' }}
+                className="tap-highlight flex items-center gap-2 px-3.5 h-9 rounded-xl font-bold transition-all active:scale-95 hover:scale-105"
+                style={{ background: 'rgba(0,71,255,0.18)', color: '#4f8ef7', border: '1px solid rgba(0,71,255,0.35)' }}
                 title={`Return to ${dashboardLabel}`}
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-[14px] h-[14px] flex-shrink-0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 flex-shrink-0">
                   <path d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                <span className="hidden sm:inline">Back to Dashboard</span>
+                <span className="text-[11px] uppercase tracking-widest">Dashboard</span>
               </button>
             )}
-
-            {/* ── Passive "Back to Dashboard" link (reader side, reader mode NOT active) ── */}
-            {isPrivilegedRole && isOnReaderSide && !safeReaderMode && (
-              <Link
-                href={dashboardHref}
-                className="tap-highlight flex items-center gap-1.5 px-3 h-8 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all active:scale-95"
-                style={{ background: 'rgba(0,71,255,0.15)', color: '#4f8ef7', border: '1px solid rgba(0,71,255,0.3)' }}
-                title={`Back to ${dashboardLabel}`}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-[14px] h-[14px] flex-shrink-0">
-                  <path d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                <span className="hidden sm:inline">Admin Dashboard</span>
-              </Link>
-            )}
-
 
 
             {/* ── Profile / User Icon ─────────────────────────── */}
@@ -296,10 +299,10 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                       Media Library
                     </Link>
-                    <Link href="/admin/series" onClick={() => setIsMenuOpen(false)}
+                    <Link href="/admin/sequels" onClick={() => setIsMenuOpen(false)}
                       className="flex items-center gap-3 py-3 text-sm font-semibold text-[var(--color-text)] hover:text-[#ffe500] transition-colors">
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                      Series
+                      Sequels
                     </Link>
 
                     <div className="h-px bg-[var(--color-border)] my-2" />

@@ -27,7 +27,7 @@ export default function AnalyticsLoading() {
           ))}
         </div>
 
-        {/* Time Series Charts Skeleton */}
+        {/* Time Sequels Charts Skeleton */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {[1, 2, 3].map(i => (
             <Card key={i} className="rounded-[2rem] border-transparent bg-[var(--color-surface)] shadow-none h-[300px] animate-pulse">

@@ -68,11 +68,8 @@ export async function middleware(request: NextRequest) {
   // 1. Check Protected Routes
   const protectedPrefix = Object.keys(ROUTE_ROLES).find(prefix => pathname.startsWith(prefix))
 
-  // Reader Mode Block
-  const isReaderModeActive = request.cookies.get('sathyadhare:readerMode')?.value === 'true'
-  if (isReaderModeActive && (pathname.startsWith('/admin') || pathname.startsWith('/editor'))) {
-    return redirectWithCookies('/')
-  }
+  // NOTE: Reader mode is a UI concern only — middleware does not block access based on it.
+  // RBAC below already protects /admin and /editor by role.
 
   if (protectedPrefix) {
     if (!user) return redirectWithCookies('/login')

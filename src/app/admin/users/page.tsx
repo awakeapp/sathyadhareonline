@@ -28,7 +28,7 @@ export default async function AdminUsersPage() {
   // Fetch all users with profile and status
   const { data: fetchUsers, error } = await supabase
     .from('profiles')
-    .select('id, full_name, role, status, created_at')
+    .select('id, full_name, email, role, status, created_at')
     .order('created_at', { ascending: false });
     
   let users = fetchUsers;
@@ -37,7 +37,7 @@ export default async function AdminUsersPage() {
     console.warn('Could not fetch with status (migration likely missing), falling back:', error.message);
     const fallback = await supabase
       .from('profiles')
-      .select('id, full_name, role, created_at')
+      .select('id, full_name, email, role, created_at')
       .order('created_at', { ascending: false });
     users = fallback.data?.map(u => ({ ...u, status: 'active' })) as UserProfile[];
   }

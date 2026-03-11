@@ -41,7 +41,7 @@ export default function TrashManagerClient({
   const tabs: { id: TrashItem['type']; label: string; icon: React.ElementType; count: number }[] = [
     { id: 'article', label: 'Articles', icon: FileText, count: initialArticles.length },
     { id: 'category', label: 'Categories', icon: Shapes, count: initialCategories.length },
-    { id: 'sequel', label: 'Series', icon: Archive, count: initialSequels.length },
+    { id: 'sequel', label: 'Sequels', icon: Archive, count: initialSequels.length },
     { id: 'comment', label: 'Comments', icon: MessageSquare, count: initialComments.length },
   ];
 

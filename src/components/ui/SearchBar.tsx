@@ -12,7 +12,7 @@ interface SearchBarProps {
 
 export default function SearchBar({
   defaultValue = '',
-  placeholder = 'Search articles, topics, series…',
+  placeholder = 'Search articles, topics, sequels…',
   autoFocus = false,
 }: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);

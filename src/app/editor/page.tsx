@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import ReaderModeSwitch from '@/components/ReaderModeSwitch';
 import { SquarePen, FileText, ChevronRight, Eye, Hand } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -77,6 +78,9 @@ export default async function EditorDashboard() {
         </h1>
         <p className="text-sm text-[var(--color-muted)] mt-1 font-semibold">Here&apos;s your content overview for today.</p>
       </header>
+
+      {/* Reader Mode Switch — dedicated always-visible switching card */}
+      <ReaderModeSwitch role="editor" />
 
       {/* ── Stats row ──────────────────────────────────────── */}
       <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--color-muted)] mb-4">Your Progress</h2>

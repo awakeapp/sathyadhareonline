@@ -8,6 +8,7 @@ import MainWrapper from '@/components/MainWrapper'
 import { ReaderModeProvider } from '@/context/ReaderModeContext'
 import { ThemeProvider } from '@/providers/ThemeProvider'
 import NavigationWrapper from '@/components/navigation/NavigationWrapper'
+import DashboardReturnFab from '@/components/DashboardReturnFab'
 import { Toaster } from 'sonner'
 
 const dmSans = DM_Sans({
@@ -61,16 +62,21 @@ export default async function RootLayout({
   } | null = null
   if (user) {
     try {
-      const { data: p } = await supabase
+      const { data: p, error } = await supabase
         .from('profiles')
-        .select('role, full_name, avatar_url')
+        .select('role, full_name')
         .eq('id', user.id)
-        .single()
-      profile = p || null
+        .maybeSingle()
+      
+      console.log('LAYOUT DB FETCH -> p:', p, 'error:', error);
+
+      if (!error && p) profile = { ...p, avatar_url: null } as { role: string | null; full_name: string | null; avatar_url: string | null; }
     } catch (e) {
       console.error('Layout profile fetch error:', e)
     }
   }
+
+  console.log('LAYOUT RENDER -> User:', user?.id, 'Role:', profile?.role);
 
 
 
@@ -101,6 +107,20 @@ export default async function RootLayout({
             
             <InstallPrompt />
             <Toaster position="top-center" theme="system" richColors />
+
+            {/* ── Floating Return-to-Dashboard button (reader mode active) ── */}
+            <DashboardReturnFab
+              role={profile?.role || null}
+              dashboardHref={
+                profile?.role === 'super_admin' || profile?.role === 'admin' ? '/admin' :
+                profile?.role === 'editor' ? '/editor' : '/'
+              }
+              dashboardLabel={
+                profile?.role === 'super_admin' ? 'Super Admin Dashboard' :
+                profile?.role === 'admin'       ? 'Admin Dashboard' :
+                profile?.role === 'editor'      ? 'Editor Dashboard' : 'Dashboard'
+              }
+            />
           </ReaderModeProvider>
         </ThemeProvider>
       </body>

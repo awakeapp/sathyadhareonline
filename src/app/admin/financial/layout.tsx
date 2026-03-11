@@ -30,13 +30,13 @@ export default function FinancialLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* ── Nav Tabs ─────────────────────────────────────────────── */}
-        <Card className="rounded-[1.5rem] border-[var(--color-border)] bg-[var(--color-surface)] shadow-none p-2 mb-6 max-w-max">
-          <div className="flex gap-2">
+        <Card className="rounded-[1.5rem] border-[var(--color-border)] bg-[var(--color-surface)] shadow-none p-2 mb-6 w-full max-w-full overflow-x-auto sm:max-w-max scrollbar-hide">
+          <div className="flex gap-2 min-w-max">
             {tabs.map(tab => {
               const isActive = pathname === tab.href;
               return (
                 <Link key={tab.name} href={tab.href}
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                  className={`flex items-center whitespace-nowrap gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
                     isActive 
                     ? 'text-black bg-white shadow-xl' 
                     : 'text-[var(--color-muted)] hover:text-white hover:bg-white/5 shadow-none'

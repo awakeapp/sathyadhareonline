@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect } from 'react'
 
 /* ─────────────────────────────────────────────────────────────────────────────
    ReaderMode Context
@@ -35,15 +35,19 @@ const ReaderModeContext = createContext<ReaderModeContextValue>({
 })
 
 export function ReaderModeProvider({ children }: { children: React.ReactNode }) {
-  // Lazy initializer — runs once on mount, reads from localStorage safely
-  const [readerMode, setReaderMode] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false
+  // Always initialise as false so server and client agree (no hydration mismatch).
+  // A useEffect syncs the real value from localStorage after mount.
+  const [readerMode, setReaderMode] = useState<boolean>(false)
+
+  // Sync from localStorage after the component first mounts (client-side only).
+  // eslint-disable-next-line react-compiler/react-compiler
+  useEffect(() => {
     try {
-      return localStorage.getItem(STORAGE_KEY) === 'true'
-    } catch {
-      return false
-    }
-  })
+      if (localStorage.getItem(STORAGE_KEY) === 'true') {
+        setReaderMode(true)
+      }
+    } catch {/* ignore */}
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const enableReaderMode = useCallback(() => {
     try { 

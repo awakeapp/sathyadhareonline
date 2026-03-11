@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { useReaderMode } from '@/context/ReaderModeContext'
 import { useState, useEffect } from 'react'
+import ReaderModeBar from '@/components/ReaderModeBar'
 
 const AUTH_PATHS = ['/login', '/signup']
 
@@ -13,10 +14,7 @@ export default function MainWrapper({ children }: { children: React.ReactNode })
   const isAuthPage   = AUTH_PATHS.includes(pathname)
   const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/editor')
 
-  // ── Hydration guard ──────────────────────────────────────────────────────
-  // readerMode is read from localStorage which is unavailable during SSR.
-  // We wait one RAF after mount so bannerHeight stays in sync with TopHeader's
-  // safeReaderMode guard — both shift together, eliminating layout jump.
+  // Hydration guard — readerMode is false on server, may become true after mount
   const [mounted, setMounted] = useState(false)
   useEffect(() => {
     const id = requestAnimationFrame(() => setMounted(true))
@@ -24,8 +22,6 @@ export default function MainWrapper({ children }: { children: React.ReactNode })
   }, [])
   const safeReaderMode = mounted ? readerMode : false
 
-  // When a privileged user is in reader mode (on reader side), the banner
-  // pushes the header down by ~32px, so we need extra top padding.
   const bannerHeight = safeReaderMode && !isAdminRoute
     ? 'calc(32px + env(safe-area-inset-top, 0px))'
     : '0px'
@@ -43,6 +39,9 @@ export default function MainWrapper({ children }: { children: React.ReactNode })
         minHeight: '100dvh',
       }}
     >
+      {/* ReaderModeBar reads localStorage directly — no SSR/context/hydration issues */}
+      <ReaderModeBar />
+
       {children}
     </main>
   )

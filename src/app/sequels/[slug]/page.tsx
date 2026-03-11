@@ -73,7 +73,7 @@ export default async function SequelPage({ params }: { params: { slug: string } 
         <div className="absolute inset-x-0 bottom-0 p-8 md:p-12 lg:px-24">
           <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
             <span className="inline-block px-3 py-1 mb-4 rounded-full bg-indigo-500/20 text-indigo-200 text-sm font-semibold tracking-wider uppercase backdrop-blur-sm border border-indigo-500/30">
-              Article Series
+              Article Sequels
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight drop-shadow-md">
               {sequel.title}
@@ -99,7 +99,7 @@ export default async function SequelPage({ params }: { params: { slug: string } 
 
         <section className="mt-16">
           <div className="flex items-center gap-4 mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">Articles in this series</h2>
+            <h2 className="text-3xl font-bold text-gray-900">Articles in this sequels</h2>
             <div className="flex-1 h-px bg-gray-200"></div>
             <span className="px-4 py-1.5 bg-indigo-50 text-indigo-700 font-bold rounded-full text-sm">
               {safeArticles.length} Parts
@@ -109,7 +109,7 @@ export default async function SequelPage({ params }: { params: { slug: string } 
           <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[1.125rem] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-indigo-200 before:to-transparent">
             {safeArticles.length === 0 ? (
               <div className="text-center py-12 p-8 bg-white border border-gray-100 rounded-2xl shadow-sm italic text-gray-500 relative z-10">
-                This series doesn&apos;t have any published articles yet. Check back soon!
+                This sequels doesn&apos;t have any published articles yet. Check back soon!
               </div>
             ) : (
               safeArticles.map((article, index) => (

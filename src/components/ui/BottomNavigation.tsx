@@ -23,7 +23,7 @@ const READER_NAV: { label: string; href: string; exact: boolean; icon: React.Rea
     ),
   },
   {
-    label: 'Series',
+    label: 'Sequels',
     href: '/sequels',
     exact: false,
     icon: (
@@ -112,7 +112,7 @@ const ADMIN_NAV: { label: string; href: string; exact: boolean; icon: React.Reac
   },
   {
     label: 'More',
-    href: '/admin/series',
+    href: '/admin/sequels',
     exact: false,
     // 3-bar hamburger for admin too
     icon: (

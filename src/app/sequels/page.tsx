@@ -27,7 +27,7 @@ export default async function SequelsPage() {
 
       {!sequels && (
         <div className="text-center py-20 opacity-50">
-          <p className="text-sm font-bold tracking-widest uppercase">No series found</p>
+          <p className="text-sm font-bold tracking-widest uppercase">No sequels found</p>
         </div>
       )}
 

@@ -1,147 +1,217 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { SUPER_ADMIN_NAV, ADMIN_NAV, EDITOR_NAV, READER_NAV } from './nav-items';
+import { usePathname } from 'next/navigation';
 import { useReaderMode } from '@/context/ReaderModeContext';
-import { LayoutDashboard } from 'lucide-react';
+import {
+  LayoutDashboard, FileText, Users, MessageSquare,
+  Layers, Eye, Home, Search, Mic, Menu,
+  SquarePen, SlidersHorizontal,
+} from 'lucide-react';
 
 interface MobileBottomNavProps {
   role?: string | null;
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   Super Admin 4-tab spec:
+   Dashboard  → /admin
+   Articles   → /admin/articles
+   Manage     → /admin/manage  (dedicated landing page)
+   More       → /admin/more    (dedicated landing page)
+═══════════════════════════════════════════════════════════════════ */
+
+
+/* ── Main component ──────────────────────────────────────────────── */
 export default function MobileBottomNav({ role }: MobileBottomNavProps) {
   const pathname = usePathname();
-  const router = useRouter();
-  const { readerMode, enableReaderMode, disableReaderMode } = useReaderMode();
+  const { enableReaderMode } = useReaderMode();
 
-  const isAuthPage = pathname === '/login' || pathname === '/signup';
-  const isPrivilegedRole = role === 'super_admin' || role === 'admin' || role === 'editor';
-  
-  const isAdminView = (pathname.startsWith('/admin') || pathname.startsWith('/editor')) &&
-    isPrivilegedRole &&
-    !readerMode;
-
-  const activeNavArray = [...(isAdminView 
-    ? (pathname.startsWith('/admin') ? (role === 'super_admin' ? SUPER_ADMIN_NAV : ADMIN_NAV) : EDITOR_NAV)
-    : READER_NAV)];
-
-  if (!isAdminView && isPrivilegedRole && readerMode) {
-    activeNavArray.splice(-1, 1, {
-      name: role === 'editor' ? 'Editor' : 'Admin',
-      href: role === 'editor' ? '/editor' : '/admin',
-      exact: true,
-      icon: LayoutDashboard,
-      isDashboardReturn: true,
-    } as any);
-  }
-
-  const activeNav = activeNavArray.slice(0, 5); // Max 5 items for bottom nav
+  const isAuthPage  = pathname === '/login' || pathname === '/signup';
+  const isPrivileged = role === 'super_admin' || role === 'admin' || role === 'editor';
+  const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/editor');
+  const isAdminView  = isAdminRoute && isPrivileged;
 
   if (isAuthPage) return null;
 
-  const BG_COLOR = isAdminView ? 'var(--color-surface)' : 'var(--color-background)';
-  const BORDER_COLOR = 'var(--color-border)';
+  /* ──────────────────────────────────────────────────────────────
+     SUPER ADMIN — 4-tab Meta Business style nav
+  ────────────────────────────────────────────────────────────── */
+  if (isAdminView && role === 'super_admin') {
+    // Manage tab is active when on /admin/manage OR any section it links to
+    const manageGroupPaths = [
+      '/admin/manage', '/admin/users', '/admin/analytics',
+      '/admin/comments', '/admin/media', '/admin/categories',
+      '/admin/sequels', '/admin/audit-logs',
+    ];
+    const moreGroupPaths = [
+      '/admin/more', '/admin/settings', '/admin/email-templates',
+      '/admin/security', '/admin/financial',
+    ];
+    const isManageActive = manageGroupPaths.some(p =>
+      p === '/admin/manage' ? pathname === p || pathname.startsWith(p + '/') : pathname.startsWith(p)
+    );
+    const isMoreActive = moreGroupPaths.some(p =>
+      p === '/admin/more' ? pathname === p || pathname.startsWith(p + '/') : pathname.startsWith(p)
+    );
 
+    return (
+      <nav
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50"
+        style={{
+          background: 'var(--color-surface)',
+          borderTop: '1px solid var(--color-border)',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          boxShadow: '0 -2px 32px rgba(0,0,0,0.18)',
+        }}
+      >
+        <div className="flex items-stretch h-16 px-2">
+          {/* Tab 1 — Dashboard */}
+          <NavTabLink
+            href="/admin"
+            icon={LayoutDashboard}
+            label="Dashboard"
+            active={pathname === '/admin'}
+          />
+
+          {/* Tab 2 — Articles */}
+          <NavTabLink
+            href="/admin/articles"
+            icon={FileText}
+            label="Articles"
+            active={pathname.startsWith('/admin/articles')}
+          />
+
+          {/* Tab 3 — Manage (dedicated page) */}
+          <NavTabLink
+            href="/admin/manage"
+            icon={SlidersHorizontal}
+            label="Manage"
+            active={isManageActive}
+          />
+
+          {/* Tab 4 — More (dedicated page) */}
+          <NavTabLink
+            href="/admin/more"
+            icon={Menu}
+            label="More"
+            active={isMoreActive}
+          />
+        </div>
+      </nav>
+    );
+  }
+
+  /* ──────────────────────────────────────────────────────────────
+     REGULAR ADMIN nav
+  ────────────────────────────────────────────────────────────── */
+  if (isAdminView && role === 'admin') {
+    return (
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50"
+        style={{ background: 'var(--color-surface)', borderTop: '1px solid var(--color-border)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        <div className="flex items-stretch h-16 px-2">
+          {[
+            { label: 'Dashboard', href: '/admin',          icon: LayoutDashboard, exact: true  },
+            { label: 'Articles',  href: '/admin/articles', icon: FileText,        exact: false },
+            { label: 'Comments',  href: '/admin/comments', icon: MessageSquare,   exact: false },
+            { label: 'Users',     href: '/admin/users',    icon: Users,           exact: false },
+          ].map(tab => (
+            <NavTabLink key={tab.href} href={tab.href} icon={tab.icon} label={tab.label}
+              active={tab.exact ? pathname === tab.href : pathname.startsWith(tab.href)} />
+          ))}
+          <button onClick={() => { enableReaderMode(); window.location.href = '/'; }}
+            className="flex-1 flex flex-col items-center justify-center gap-1 h-full active:scale-90 focus:outline-none"
+            style={{ color: 'var(--color-muted)' }}>
+            <Eye size={22} /><span className="text-[10px] font-bold">Reader</span>
+          </button>
+        </div>
+      </nav>
+    );
+  }
+
+  /* ──────────────────────────────────────────────────────────────
+     EDITOR nav
+  ────────────────────────────────────────────────────────────── */
+  if (isAdminView && role === 'editor') {
+    return (
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50"
+        style={{ background: 'var(--color-surface)', borderTop: '1px solid var(--color-border)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        <div className="flex items-stretch h-16 px-2">
+          {[
+            { label: 'Dashboard', href: '/editor',               icon: LayoutDashboard, exact: true  },
+            { label: 'Articles',  href: '/editor/articles',      icon: FileText,        exact: false },
+            { label: 'Write',     href: '/editor/articles/new',  icon: SquarePen,       exact: false },
+          ].map(tab => (
+            <NavTabLink key={tab.href} href={tab.href} icon={tab.icon} label={tab.label}
+              active={tab.exact ? pathname === tab.href : pathname.startsWith(tab.href)} />
+          ))}
+          <button onClick={() => { enableReaderMode(); window.location.href = '/'; }}
+            className="flex-1 flex flex-col items-center justify-center gap-1 h-full active:scale-90 focus:outline-none"
+            style={{ color: 'var(--color-muted)' }}>
+            <Eye size={22} /><span className="text-[10px] font-bold">Reader</span>
+          </button>
+        </div>
+      </nav>
+    );
+  }
+
+  /* ──────────────────────────────────────────────────────────────
+     READER / GUEST nav
+  ────────────────────────────────────────────────────────────── */
   return (
-    <nav
-      aria-label="Bottom navigation"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-50 transition-colors duration-300"
-      style={{
-        background: BG_COLOR,
-        borderTop: `1px solid ${BORDER_COLOR}`,
-        paddingBottom: 'env(safe-area-inset-bottom)',
-        boxShadow: '0 -2px 20px rgba(0,0,0,0.1)',
-      }}
-    >
-      <div className="flex items-center justify-around h-16 px-2 sm:px-4">
-        {activeNav.map((item) => {
-          const isActive = item.exact 
-            ? pathname === item.href 
-            : pathname.startsWith(item.href) && item.href !== '/';
-            
-          const isHighlight = 'highlight' in item && item.highlight;
-          const activeColorClass = isAdminView ? 'text-[#4f8ef7]' : 'text-[#ffe500]';
-
-          if ('readerModeToggle' in item && item.readerModeToggle) {
-            return (
-              <button
-                key={item.href}
-                onClick={() => { enableReaderMode(); router.push('/'); }}
-                className="tap-highlight flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all text-[var(--color-muted)] hover:text-[var(--color-text)] focus:outline-none"
-              >
-                <div className="relative">
-                  <item.icon size={22} className="stroke-[2.2px]" />
-                </div>
-                <span className="text-[10px] font-semibold tracking-wide truncate">
-                  {item.name}
-                </span>
-              </button>
-            );
-          }
-
-          if ('isMoreToggle' in item && item.isMoreToggle) {
-            return (
-              <button
-                key={item.name}
-                onClick={() => window.dispatchEvent(new Event('toggle-drawer'))}
-                className="tap-highlight flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all text-[var(--color-muted)] hover:text-[var(--color-text)] focus:outline-none"
-              >
-                <div className="relative">
-                  <item.icon size={22} className="stroke-[2.2px]" />
-                </div>
-                <span className="text-[10px] font-semibold tracking-wide truncate">
-                  {item.name}
-                </span>
-              </button>
-            );
-          }
-
-          if ('isDashboardReturn' in item && item.isDashboardReturn) {
-            return (
-              <button
-                key="dashboard-return"
-                onClick={() => { disableReaderMode(); router.push(item.href); }}
-                className="tap-highlight flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all text-[#4f8ef7] focus:outline-none"
-              >
-                <div className="relative">
-                  <item.icon size={22} className="stroke-[2.2px]" />
-                </div>
-                <span className="text-[10px] font-bold tracking-wide truncate text-[#4f8ef7]">
-                  {item.name}
-                </span>
-              </button>
-            );
-          }
-
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`tap-highlight flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all focus:outline-none ${
-                isActive ? activeColorClass : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'
-              }`}
-            >
-              <div className="relative">
-                <item.icon size={22} className={`stroke-[2.2px] ${isHighlight ? 'text-violet-400' : ''}`} />
-                {isActive && (
-                  <span className={`absolute -top-1.5 -right-1.5 flex h-2.5 w-2.5 ${isHighlight ? 'hidden' : ''}`}>
-                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-40 ${
-                      isAdminView ? 'bg-[#4f8ef7]' : 'bg-[#ffe500]'
-                    }`}></span>
-                    <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
-                      isAdminView ? 'bg-[#4f8ef7]' : 'bg-[#ffe500]'
-                    }`}></span>
-                  </span>
-                )}
-              </div>
-              <span className={`text-[10px] font-semibold tracking-wide truncate ${isHighlight ? 'text-violet-400' : ''}`}>
-                {item.name}
-              </span>
-            </Link>
-          );
-        })}
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50"
+      style={{ background: 'var(--color-background)', borderTop: '1px solid var(--color-border)', paddingBottom: 'env(safe-area-inset-bottom)', boxShadow: '0 -2px 20px rgba(0,0,0,0.08)' }}>
+      <div className="flex items-stretch h-16 px-2">
+        {[
+          { label: 'Home',    href: '/',        icon: Home,   exact: true  },
+          { label: 'Sequels', href: '/sequels', icon: Layers, exact: false },
+          { label: 'Search',  href: '/search',  icon: Search, exact: false },
+          { label: 'Podcast', href: '/podcast', icon: Mic,    exact: false },
+        ].map(tab => (
+          <NavTabLink key={tab.href} href={tab.href} icon={tab.icon} label={tab.label}
+            active={tab.exact ? pathname === tab.href : pathname.startsWith(tab.href)}
+            accentColor="#ffe500" />
+        ))}
+        <button
+          onClick={() => window.dispatchEvent(new Event('toggle-drawer'))}
+          className="flex-1 flex flex-col items-center justify-center gap-1 h-full active:scale-90 focus:outline-none"
+          style={{ color: 'var(--color-muted)' }}
+        >
+          <Menu size={22} /><span className="text-[10px] font-bold">More</span>
+        </button>
       </div>
     </nav>
+  );
+}
+
+/* ── Helper: Link-based tab (shared) ─────────────────────────────── */
+function NavTabLink({
+  href, icon: Icon, label, active, accentColor = '#a78bfa', onTap,
+}: {
+  href: string;
+  icon: React.ComponentType<{ size?: number }>;
+  label: string;
+  active?: boolean;
+  accentColor?: string;
+  onTap?: () => void;
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onTap}
+      className="relative flex-1 flex flex-col items-center justify-center gap-1 h-full transition-all active:scale-90 focus:outline-none tap-highlight"
+      style={{ color: active ? accentColor : 'var(--color-muted)' }}
+    >
+      <div className="relative">
+        <Icon size={22} />
+        {active && (
+          <span
+            className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3.5 h-0.5 rounded-full"
+            style={{ background: accentColor }}
+          />
+        )}
+      </div>
+      <span className="text-[10px] font-bold tracking-wide">{label}</span>
+    </Link>
   );
 }

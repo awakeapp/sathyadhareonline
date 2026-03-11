@@ -1,50 +1,17 @@
 import { createClient } from '@/lib/supabase/server';
-import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { logAuditEvent } from '@/lib/audit';
-import { verifyRole } from '@/lib/auth-server';
-import { DeleteArticleButton } from './DeleteArticleButton';
-import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Plus, ChevronLeft, FileText, Sparkles, AlertCircle } from 'lucide-react';
+import { ChevronLeft, Plus } from 'lucide-react';
+import ArticlesClient from './ArticlesClient';
 
 export const dynamic = 'force-dynamic';
-
-// ── Status metadata ──────────────────────────────────────────────
-type ArticleStatus = 'draft' | 'in_review' | 'published' | 'archived';
-
-const STATUS_META: Record<ArticleStatus, { label: string; color: string }> = {
-  draft:      { label: 'Draft',      color: 'bg-gray-500/10 text-[var(--color-muted)] border-gray-500/20' },
-  in_review:  { label: 'In Review',  color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
-  published:  { label: 'Published',  color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
-  archived:   { label: 'Archived',   color: 'bg-purple-500/10 text-purple-500 border-purple-500/20' },
-};
-
-// Allowed role → transitions map
-// Admins:     in_review → published | in_review → archived | published → archived
-const TRANSITIONS: Record<string, { from: ArticleStatus[]; to: ArticleStatus; label: string; btnVariant: "primary" | "secondary" | "ghost" | "outline" | "destructive", customClass?: string }[]> = {
-  admin: [
-    { from: ['draft'], to: 'in_review', label: 'Submit for Review', btnVariant: 'outline', customClass: 'text-amber-500 hover:text-amber-500 bg-amber-500/5 hover:bg-amber-500/10 border-amber-500/20' },
-    { from: ['in_review'], to: 'published', label: 'Approve & Publish', btnVariant: 'outline', customClass: 'text-emerald-500 hover:text-emerald-500 bg-emerald-500/5 hover:bg-emerald-500/10 border-emerald-500/20' },
-    { from: ['in_review', 'published'], to: 'archived', label: 'Archive', btnVariant: 'outline', customClass: 'text-purple-500 hover:text-purple-500 bg-purple-500/5 hover:bg-purple-500/10 border-purple-500/20' },
-    { from: ['archived'], to: 'draft', label: 'Unarchive (Draft)', btnVariant: 'outline' },
-  ],
-  super_admin: [
-    { from: ['draft'], to: 'in_review', label: 'Submit for Review', btnVariant: 'outline', customClass: 'text-amber-500 hover:text-amber-500 bg-amber-500/5 hover:bg-amber-500/10 border-amber-500/20' },
-    { from: ['in_review'], to: 'published', label: 'Approve & Publish', btnVariant: 'outline', customClass: 'text-emerald-500 hover:text-emerald-500 bg-emerald-500/5 hover:bg-emerald-500/10 border-emerald-500/20' },
-    { from: ['in_review', 'published'], to: 'archived', label: 'Archive', btnVariant: 'outline', customClass: 'text-purple-500 hover:text-purple-500 bg-purple-500/5 hover:bg-purple-500/10 border-purple-500/20' },
-    { from: ['archived'], to: 'draft', label: 'Unarchive (Draft)', btnVariant: 'outline' },
-  ],
-};
 
 export default async function ArticlesPage() {
   const supabase = await createClient();
 
-  // ── Current user + role ──────────────────────────────────────
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // 1. Auth & Guard
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
   const { data: currentProfile } = await supabase
@@ -54,311 +21,83 @@ export default async function ArticlesPage() {
     .single();
 
   const role = currentProfile?.role ?? 'reader';
-  const canDelete = ['admin', 'super_admin'].includes(role);
-  const allowedTransitions = TRANSITIONS[role] ?? [];
+  if (!['admin', 'super_admin', 'editor'].includes(role)) {
+    redirect('/');
+  }
 
-  // ── Fetch articles ───────────────────────────────────────────
-  const articlesQuery = supabase
+  // 2. Fetch Data
+  
+  // A. Articles
+  const { data: articles, error } = await supabase
     .from('articles')
-    .select('id, title, status, is_deleted, is_featured, author_id')
-    .eq('is_deleted', false)
+    .select('id, title, slug, status, is_deleted, is_featured, created_at, published_at, author_id, category_id, profiles(full_name), categories(name)')
     .order('created_at', { ascending: false });
-
-  const { data: articles, error } = await articlesQuery;
 
   if (error) console.error('Error fetching articles:', error);
 
-  // ── Server Actions ───────────────────────────────────────────
+  // B. Views (Aggregated)
+  const { data: viewsData } = await supabase
+    .from('article_views')
+    .select('article_id');
+  
+  // Count views locally since Supabase JS doesn't easily aggregate dynamically
+  const viewsMap = new Map<string, number>();
+  viewsData?.forEach(v => {
+    viewsMap.set(v.article_id, (viewsMap.get(v.article_id) || 0) + 1);
+  });
 
-  // Generic status transition — server-side role enforcement
-  async function transitionStatusAction(formData: FormData) {
-    'use server';
-    const id        = formData.get('id') as string;
-    const toStatus  = formData.get('to') as ArticleStatus;
-    if (!id || !toStatus) return;
+  const mergedArticles = (articles || []).map(a => ({
+    ...a,
+    profiles: Array.isArray(a.profiles) ? a.profiles[0] : a.profiles,
+    categories: Array.isArray(a.categories) ? a.categories[0] : a.categories,
+    views: viewsMap.get(a.id) || 0
+  })) as unknown as import('./ArticlesClient').Article[];
 
-    const supabaseAction = await createClient();
-    let actionUser, actionRole;
-    try {
-      const { user, profile } = await verifyRole(['super_admin', 'admin', 'editor']);
-      actionUser = user;
-      actionRole = profile.role ?? 'reader';
-    } catch {
-      return;
-    }
+  // C. Users (Authors for filter)
+  const { data: users } = await supabase
+    .from('profiles')
+    .select('id, full_name')
+    .in('role', ['admin', 'super_admin', 'editor'])
+    .order('full_name');
 
-    const actionAllowed = TRANSITIONS[actionRole as keyof typeof TRANSITIONS] ?? [];
+  // D. Categories
+  const { data: categories } = await supabase
+    .from('categories')
+    .select('id, name')
+    .order('name');
 
-    // Fetch current article status to validate the from→to transition
-    const { data: article } = await supabaseAction
-      .from('articles')
-      .select('status')
-      .eq('id', id)
-      .single();
-
-    if (!article) return;
-
-    const currentStatus = article.status as ArticleStatus;
-    const isValid = actionAllowed.some(
-      (t) => t.to === toStatus && t.from.includes(currentStatus)
-    );
-    if (!isValid) return; // silently block unauthorised transition
-
-    const updatePayload: Record<string, unknown> = { status: toStatus };
-    if (toStatus === 'published') updatePayload.published_at = new Date().toISOString();
-
-    await supabaseAction.from('articles').update(updatePayload).eq('id', id);
-
-    await logAuditEvent(actionUser.id, 'ARTICLE_STATUS_CHANGED', { article_id: id, old_status: currentStatus, new_status: toStatus });
-
-    revalidatePath('/admin/articles');
-    revalidatePath('/');
-    redirect('/admin/articles');
-  }
-
-  async function deleteArticleAction(formData: FormData) {
-    'use server';
-    const id = formData.get('id') as string;
-    if (!id) return;
-
-    const supabaseAction = await createClient();
-    let actionUser;
-    try {
-      const { user } = await verifyRole(['super_admin', 'admin']);
-      actionUser = user;
-    } catch {
-      return;
-    }
-
-    await supabaseAction
-      .from('articles')
-      .update({ is_deleted: true, deleted_at: new Date().toISOString() })
-      .eq('id', id);
-
-    await logAuditEvent(actionUser.id, 'ARTICLE_DELETED', { article_id: id });
-
-    revalidatePath('/admin/articles');
-    revalidatePath('/');
-    redirect('/admin/articles');
-  }
-
-  async function restoreArticleAction(formData: FormData) {
-    'use server';
-    const id = formData.get('id') as string;
-    if (!id) return;
-    const supabaseAction = await createClient();
-    let user;
-    try {
-      const auth = await verifyRole(['super_admin', 'admin']);
-      user = auth.user;
-    } catch {
-      return;
-    }
-    const { error: restoreError } = await supabaseAction
-      .from('articles')
-      .update({ is_deleted: false, deleted_at: null })
-      .eq('id', id);
-
-    if (restoreError) throw restoreError;
-
-    await logAuditEvent(user.id, 'ARTICLE_RESTORED', { article_id: id });
-    revalidatePath('/admin/articles');
-    redirect('/admin/articles');
-  }
-
-  async function featureArticleAction(formData: FormData) {
-    'use server';
-    const id      = formData.get('id') as string;
-    const current = formData.get('current') as string;
-    if (!id) return;
-    const supabaseAction = await createClient();
-    let user;
-    try {
-      const auth = await verifyRole(['super_admin', 'admin']);
-      user = auth.user;
-    } catch {
-      return;
-    }
-
-    if (current === 'true') {
-      await supabaseAction.from('articles').update({ is_featured: false }).eq('id', id);
-      await logAuditEvent(user.id, 'ARTICLE_UNFEATURED', { article_id: id });
-    } else {
-      await supabaseAction.from('articles').update({ is_featured: false }).neq('id', id);
-      await supabaseAction.from('articles').update({ is_featured: true }).eq('id', id);
-      await logAuditEvent(user.id, 'ARTICLE_FEATURED', { article_id: id });
-    }
-
-    revalidatePath('/admin/articles');
-    revalidatePath('/');
-    redirect('/admin/articles');
-  }
-
-  // ── Render ───────────────────────────────────────────────────
   return (
-    <div className="font-sans antialiased max-w-3xl mx-auto py-2">
-      <div className="flex items-center justify-between mb-8 mt-4">
+    <div className="font-sans antialiased max-w-5xl mx-auto py-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 mt-4 px-2">
         <div className="flex items-center gap-4">
-          <Button asChild variant="outline" size="icon" className="rounded-full w-10 h-10 border-[var(--color-border)] text-[var(--color-muted)]">
+          <Button asChild variant="outline" size="icon" className="rounded-full w-10 h-10 border-[var(--color-border)] text-[var(--color-muted)] hover:text-white shrink-0 shadow-sm transition-colors">
             <Link href="/admin">
               <ChevronLeft className="w-5 h-5" />
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-black tracking-tight leading-tight">
-              Articles
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
+              Article Library
             </h1>
-            <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
-              {articles?.length || 0} Total · {role}
+            <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-1">
+              {mergedArticles.length} Total Documents · {role.replace('_', ' ')}
             </p>
           </div>
         </div>
-        <Button asChild className="rounded-full shadow-sm pr-5">
+        <Button asChild className="rounded-2xl h-11 px-6 font-black bg-[var(--color-primary)] text-black hover:bg-[#ffed4a] hover:scale-[1.02] shadow-lg shadow-[var(--color-primary)]/20 transition-all shrink-0">
           <Link href="/admin/articles/new">
-            <Plus className="w-5 h-5 mr-1" />
-            <span className="hidden sm:inline">New Article</span>
-            <span className="sm:hidden">New</span>
+            <Plus className="w-5 h-5 mr-1.5" />
+            <span>Create New Article</span>
           </Link>
         </Button>
       </div>
 
-      {/* ── Workflow legend ─────────────────────────────── */}
-      <div className="flex flex-wrap gap-2 mb-6 px-1">
-        {(Object.entries(STATUS_META) as [ArticleStatus, { label: string; color: string }][]).map(([key, meta]) => (
-          <span key={key} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${meta.color}`}>
-            {meta.label}
-          </span>
-        ))}
-      </div>
-
-      {!articles || articles.length === 0 ? (
-        <Card className="py-20 text-center flex flex-col items-center border-[var(--color-border)] border-dashed rounded-[2rem] shadow-none bg-[var(--color-surface)]">
-          <FileText className="w-12 h-12 mb-4 opacity-20 text-[var(--color-muted)]" />
-          <p className="font-bold mb-1 text-lg tracking-tight">No articles found</p>
-          <p className="text-sm text-[var(--color-muted)]">Create your first article to get started!</p>
-          <Button asChild className="mt-6 rounded-xl">
-             <Link href="/admin/articles/new">Write Article</Link>
-          </Button>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {articles.map((article) => {
-            const status = (article.status ?? 'draft') as ArticleStatus;
-            const statusMeta = STATUS_META[status] ?? STATUS_META.draft;
-
-            // Resolve which transition buttons this role can show for this article
-            const availableTransitions = allowedTransitions.filter(
-              (t) => t.from.includes(status) && !article.is_deleted
-            );
-
-            return (
-              <Card
-                key={article.id}
-                className={`overflow-hidden transition-all duration-300 ${
-                  article.is_deleted ? 'opacity-50 grayscale' : ''
-                } ${
-                  article.is_featured && !article.is_deleted ? 'border-[var(--color-primary)]/30 ring-1 ring-[var(--color-primary)]/30' : ''
-                } ${
-                  status === 'in_review' && !article.is_deleted ? 'border-amber-500/30' : ''
-                }`}
-              >
-                <CardContent className="p-5">
-                  {/* ── Title & badges ──────────────────────── */}
-                  <div className="mb-5">
-                    <div className="flex items-start gap-2.5 mb-2.5">
-                      {article.is_featured && (
-                        <span title="Featured" className="text-[var(--color-primary)] mt-0.5">
-                          <Sparkles className="w-5 h-5 fill-current" />
-                        </span>
-                      )}
-                      <h3 className="font-bold text-lg leading-tight tracking-tight flex-1">{article.title}</h3>
-                    </div>
-
-                    <div className="flex gap-2 items-center flex-wrap mt-2">
-                      {/* Status badge */}
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${statusMeta.color}`}>
-                        {statusMeta.label}
-                      </span>
-                      {article.is_deleted && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-500/10 text-red-500 border border-red-500/20">
-                          <AlertCircle className="w-3 h-3 mr-1" /> Deleted
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* ── Actions ─────────────────────────────── */}
-                  <div className="pt-4 border-t border-[var(--color-border)] flex flex-wrap gap-2 justify-end">
-
-                    {/* Edit — always visible (non-deleted) */}
-                    {!article.is_deleted && (
-                      <Button asChild variant="outline" size="sm" className="flex-1 sm:flex-none text-blue-500 hover:text-blue-500 hover:bg-blue-500/10 border-blue-500/20 bg-blue-500/5">
-                        <Link href={`/admin/articles/${article.id}/edit`}>
-                          Edit
-                        </Link>
-                      </Button>
-                    )}
-
-                    {/* ── Workflow transition buttons ──────── */}
-                    {availableTransitions.map((t) => (
-                      <form key={t.to} action={transitionStatusAction} className="flex-1 sm:flex-none">
-                        <input type="hidden" name="id"  value={article.id} />
-                        <input type="hidden" name="to"  value={t.to} />
-                        <Button
-                          type="submit"
-                          variant={t.btnVariant}
-                          size="sm"
-                          className={`w-full ${t.customClass || ''}`}
-                        >
-                          {t.label}
-                        </Button>
-                      </form>
-                    ))}
-
-                    {/* Feature / Unfeature — published only */}
-                    {status === 'published' && !article.is_deleted && (
-                      <form action={featureArticleAction} className="flex-1 sm:flex-none">
-                        <input type="hidden" name="id"      value={article.id} />
-                        <input type="hidden" name="current" value={String(article.is_featured)} />
-                        <Button
-                          type="submit"
-                          size="sm"
-                          variant={article.is_featured ? 'primary' : 'outline'}
-                          className={`w-full ${article.is_featured ? 'shadow-sm shadow-[var(--color-primary)]/20 text-black' : ''}`}
-                        >
-                          {article.is_featured ? 'Unfeature' : 'Feature'}
-                        </Button>
-                      </form>
-                    )}
-
-                    {/* Restore — soft-deleted only */}
-                    {article.is_deleted && (
-                      <form action={restoreArticleAction} className="flex-1 sm:flex-none">
-                        <input type="hidden" name="id" value={article.id} />
-                        <Button type="submit" variant="outline" size="sm" className="w-full text-sky-500 hover:text-sky-500 bg-sky-500/5 hover:bg-sky-500/10 border-sky-500/20">
-                          Restore
-                        </Button>
-                      </form>
-                    )}
-
-                    {/* Delete — admin/super_admin only, non-deleted only */}
-                    {canDelete && !article.is_deleted && (
-                      <div className="flex-1 sm:flex-none">
-                        <DeleteArticleButton
-                          articleId={article.id}
-                          articleTitle={article.title}
-                          deleteAction={deleteArticleAction}
-                        />
-                      </div>
-                    )}
-
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
+      <ArticlesClient 
+        articles={mergedArticles}
+        users={(users || []).map(u => ({ id: u.id, name: u.full_name || 'Unknown' }))}
+        categories={categories || []}
+        currentUserRole={role}
+      />
     </div>
   );
 }
