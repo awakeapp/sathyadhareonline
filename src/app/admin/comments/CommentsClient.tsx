@@ -2,9 +2,7 @@
 
 import { useState, useMemo, useTransition } from 'react';
 import Link from 'next/link';
-import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Input, Select } from '@/components/ui/Input';
 import { toast } from 'sonner';
 import { 
   updateCommentStatusAction, 
@@ -13,8 +11,12 @@ import {
   bulkDeleteCommentsAction 
 } from './actions';
 import { 
-  Search, CheckCircle2, X as RejectIcon, ShieldAlert, Trash2, MessageSquare, CheckSquare
+  Search, CheckCircle2, X as RejectIcon, ShieldAlert, Trash2, MessageSquare, CheckSquare, Clock, User
 } from 'lucide-react';
+import { 
+  PresenceCard, 
+  PresenceButton 
+} from '@/components/PresenceUI';
 
 interface CommentType {
   id: string;
@@ -38,35 +40,26 @@ export default function CommentsClient({
 }) {
   const [isPending, startTransition] = useTransition();
 
-  // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [articleFilter, setArticleFilter] = useState('all');
 
-  // Bulk
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  // Derived
   const filteredComments = useMemo(() => {
     return comments.filter(c => {
-      // 1. Search (guest name or content)
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const MatchName = c.guest_name?.toLowerCase().includes(query) || false;
         const MatchContent = c.content?.toLowerCase().includes(query) || false;
         if (!MatchName && !MatchContent) return false;
       }
-      
-      // 2. Status
       if (statusFilter !== 'all') {
          if (statusFilter === 'spam' && !c.is_spam) return false;
          if (statusFilter !== 'spam' && c.is_spam) return false;
          if (statusFilter !== 'spam' && c.status !== statusFilter) return false;
       }
-
-      // 3. Article
       if (articleFilter !== 'all' && c.article_id !== articleFilter) return false;
-
       return true;
     });
   }, [comments, searchQuery, statusFilter, articleFilter]);
@@ -90,142 +83,148 @@ export default function CommentsClient({
   };
 
   const handleBulkDelete = () => {
-    if (!confirm('Permanently wipe selected comments?')) return;
-    wrapAction(bulkDeleteCommentsAction(Array.from(selectedIds)), 'Comments deleted');
-  };
-
-  const statusColors: Record<string, string> = {
-    pending:  'bg-amber-500/10 text-amber-500 border-amber-500/20',
-    approved: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-    rejected: 'bg-red-500/10 text-red-500 border-red-500/20',
+    if (!confirm('Permanent wipe selected?')) return;
+    wrapAction(bulkDeleteCommentsAction(Array.from(selectedIds)), 'Removed');
   };
 
   return (
     <div className="space-y-6">
       
-      {/* ── Filter Bar ────────────────────────────────────────────── */}
-      <Card className="rounded-3xl shadow-none border-[var(--color-border)] bg-[var(--color-surface)]">
-        <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" />
-            <Input 
-               placeholder="Search user or content..." 
+      {/* ── Filter Engine ── */}
+      <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400" />
+            <input 
+               placeholder="Search registry..." 
                value={searchQuery}
                onChange={(e) => setSearchQuery(e.target.value)}
-               className="pl-9 h-11 w-full bg-black/20"
+               className="w-full h-14 pl-12 pr-4 rounded-2xl bg-white dark:bg-[#1b1929] border-none shadow-sm focus:ring-2 focus:ring-indigo-500/20 font-bold text-sm"
             />
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar flex-shrink-0">
-            <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-[140px] h-11 bg-black/20">
-              <option value="all">All Status</option>
+          <div className="flex gap-2">
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="h-14 px-4 rounded-2xl bg-white dark:bg-[#1b1929] border-none shadow-sm font-bold text-xs uppercase tracking-widest text-indigo-400 focus:ring-2 focus:ring-indigo-500/20">
+              <option value="all">Status: All</option>
               <option value="pending">Pending</option>
               <option value="approved">Approved</option>
               <option value="rejected">Rejected</option>
               <option value="spam">Spam</option>
-            </Select>
-            <Select value={articleFilter} onChange={(e) => setArticleFilter(e.target.value)} className="w-[180px] h-11 bg-black/20">
-              <option value="all">All Articles</option>
+            </select>
+            <select value={articleFilter} onChange={(e) => setArticleFilter(e.target.value)} className="h-14 px-4 rounded-2xl bg-white dark:bg-[#1b1929] border-none shadow-sm font-bold text-xs uppercase tracking-widest text-indigo-400 focus:ring-2 focus:ring-indigo-500/20 max-w-[150px]">
+              <option value="all">Articles: All</option>
               {articlesList.map(a => <option key={a.id} value={a.id}>{a.title}</option>)}
-            </Select>
+            </select>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </PresenceCard>
 
-      {/* ── Bulk Actions Bar ──────────────────────────────────────── */}
+      {/* ── Bulk Bar ── */}
       {selectedIds.size > 0 && (
-         <div className="sticky top-20 z-20 flex items-center justify-between p-4 bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/30 backdrop-blur-md rounded-2xl shadow-lg">
-            <div className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-[var(--color-primary)] text-black font-black text-xs flex items-center justify-center">
+         <div className="sticky top-24 z-30 flex items-center justify-between p-5 bg-[#5c4ae4] rounded-3xl shadow-2xl shadow-indigo-500/30 animate-in slide-in-from-top-4 duration-300">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-2xl bg-white/20 text-white font-black flex items-center justify-center">
                 {selectedIds.size}
               </div>
-              <span className="text-sm font-bold text-[var(--color-primary)]">comments selected</span>
+              <span className="text-sm font-black text-white uppercase tracking-[0.2em]">Intercepted Targets</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline" className="h-9 border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10" onClick={() => wrapAction(bulkUpdateCommentsAction(Array.from(selectedIds), 'approved'), 'Approved')} loading={isPending}>
-                Approve
-              </Button>
-              <Button size="sm" variant="outline" className="h-9 border-orange-500/30 text-orange-500 hover:bg-orange-500/10" onClick={() => wrapAction(bulkUpdateCommentsAction(Array.from(selectedIds), 'rejected', true), 'Marked as Spam')} loading={isPending}>
-                Spam
-              </Button>
-              <Button size="sm" variant="destructive" className="h-9" onClick={handleBulkDelete} loading={isPending}>
-                <Trash2 className="w-4 h-4 mr-1.5" /> Delete
-              </Button>
+            <div className="flex items-center gap-3">
+              <button onClick={() => wrapAction(bulkUpdateCommentsAction(Array.from(selectedIds), 'approved'), 'Cleaned & Approved')} className="h-11 px-6 rounded-xl bg-white/10 text-white hover:bg-white/20 font-black text-[10px] uppercase tracking-widest transition-all">Approve</button>
+              <button onClick={handleBulkDelete} className="w-11 h-11 rounded-xl bg-white text-[#5c4ae4] flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-xl">
+                 <Trash2 className="w-5 h-5" />
+              </button>
             </div>
          </div>
       )}
 
-      {/* ── List ──────────────────────────────────────────────────── */}
-      {filteredComments.length === 0 ? (
-        <Card className="py-20 text-center flex flex-col items-center bg-[var(--color-surface)] border-[var(--color-border)] border-dashed rounded-[2rem] shadow-none">
-          <MessageSquare className="w-12 h-12 mb-4 opacity-20 text-[var(--color-muted)]" />
-          <p className="font-bold mb-1 text-lg tracking-tight">No comments found</p>
-          <p className="text-sm text-[var(--color-muted)]">Try adjusting your filters.</p>
-        </Card>
-      ) : (
-        <div className="space-y-3">
-           {filteredComments.map(c => {
+      {/* ── Comment Stream ── */}
+      <div className="space-y-4">
+        {filteredComments.length === 0 ? (
+          <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
+            <MessageSquare className="w-16 h-16 mb-5 text-indigo-100" />
+            <p className="font-black text-xl text-gray-400 uppercase tracking-widest">No Communications</p>
+          </PresenceCard>
+        ) : (
+          filteredComments.map(c => {
              const isSelected = selectedIds.has(c.id);
+             const name = c.guest_name || c.profiles?.full_name || 'Anonymous Intelligence';
+             const isPendingStatus = c.status === 'pending';
+
              return (
-               <Card key={c.id} className={`overflow-hidden transition-all duration-300 border bg-[var(--color-surface)] shadow-none rounded-3xl ${isSelected ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5' : 'border-transparent hover:border-[var(--color-border)]'} ${c.status !== 'pending' ? 'opacity-80' : ''}`}>
-                 <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                   <button onClick={() => toggleSelect(c.id)} className={`w-5 h-5 rounded flex items-center justify-center shrink-0 border transition-colors mt-1 sm:mt-0 ${isSelected ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-black' : 'border-[var(--color-border)] text-transparent hover:border-white'}`}>
-                     <CheckSquare className="w-3.5 h-3.5" />
-                   </button>
-                   
-                   <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="text-sm font-bold text-white tracking-tight">
-                          {c.guest_name || c.profiles?.full_name || c.profiles?.email || 'Registered User'}
-                        </span>
-                        <div className="flex gap-2">
-                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${statusColors[c.status] ?? 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
-                             {c.status}
-                           </span>
-                           {c.is_spam && (
-                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] bg-rose-500/10 text-rose-500 border border-rose-500/20 font-black uppercase tracking-wider">
-                               <ShieldAlert className="w-3 h-3" /> Spam
+               <PresenceCard key={c.id} noPadding className={`group transition-all ${isSelected ? 'ring-2 ring-[#5c4ae4]' : ''} ${c.status !== 'pending' ? 'opacity-80' : ''}`}>
+                  <div className="p-5 flex flex-col md:flex-row gap-5">
+                    
+                    <div className="shrink-0 pt-1">
+                       <button onClick={() => toggleSelect(c.id)} className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${isSelected ? 'bg-[#5c4ae4] text-white shadow-lg' : 'bg-gray-50 dark:bg-white/5 text-gray-200 border-2 border-transparent hover:border-indigo-100'}`}>
+                          <CheckSquare className="w-5 h-5" />
+                       </button>
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                       <div className="flex flex-col md:flex-row md:items-center gap-2 mb-3">
+                          <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] shrink-0">
+                             <User className="w-5 h-5" />
+                          </div>
+                          <div>
+                             <p className="font-black text-[#1b1929] dark:text-white truncate">{name}</p>
+                             <div className="flex items-center gap-2 mt-0.5">
+                                <Clock className="w-3 h-3 text-gray-300" />
+                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">
+                                   {new Date(c.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                             </div>
+                          </div>
+                          <div className="md:ml-auto flex items-center gap-2">
+                             <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${
+                                c.status === 'approved' ? 'bg-emerald-50 text-emerald-500 border-emerald-100' :
+                                c.status === 'rejected' ? 'bg-rose-50 text-rose-500 border-rose-100' :
+                                'bg-amber-50 text-amber-500 border-amber-100'
+                             }`}>
+                                {c.status}
                              </span>
-                           )}
-                        </div>
-                      </div>
-                      
-                      <div className="text-[11px] text-[var(--color-muted)] font-medium mb-2 flex items-center gap-1.5 flex-wrap">
-                        <span>{new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' })}</span>
-                        <span className="opacity-50">·</span>
-                        <span className="truncate max-w-[200px]">On: <Link href={`/admin/articles/${c.article_id}/edit`} className="text-white hover:text-[var(--color-primary)] transition-colors">{c.articles?.title ?? c.article_id}</Link></span>
-                      </div>
+                             {c.is_spam && (
+                               <span className="px-3 py-1 rounded-lg text-[9px] bg-indigo-900/10 text-indigo-400 border border-indigo-500/10 font-black uppercase tracking-widest flex items-center gap-1">
+                                  <ShieldAlert className="w-3 h-3" /> SPAM
+                               </span>
+                             )}
+                          </div>
+                       </div>
 
-                      <p className="text-sm text-[var(--color-muted)] line-clamp-3 bg-black/20 rounded-xl py-2 px-3 border border-[var(--color-border)]/50 mr-4">
-                        {c.content}
-                      </p>
-                   </div>
+                       <div className="bg-gray-50 dark:bg-white/5 rounded-2xl p-4 mb-3 border-l-4 border-indigo-100 dark:border-indigo-500/20">
+                          <p className="text-sm font-medium leading-relaxed italic text-[#1b1929]/80 dark:text-white/80">
+                             "{c.content}"
+                          </p>
+                       </div>
 
-                   <div className="flex flex-wrap sm:flex-col items-center sm:items-stretch gap-2 flex-shrink-0 w-full sm:w-auto mt-2 sm:mt-0 pt-3 border-t sm:border-t-0 border-[var(--color-border)] sm:pt-0">
-                     {c.status !== 'approved' && (
-                       <Button size="sm" variant="outline" className="w-full h-8 text-emerald-500 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10" onClick={() => wrapAction(updateCommentStatusAction(c.id, 'approved'), 'Approved')} loading={isPending}>
-                         <CheckCircle2 className="w-3.5 h-3.5 sm:mr-1.5" /><span className="hidden sm:inline">Approve</span>
-                       </Button>
-                     )}
-                     {c.status !== 'rejected' && (
-                       <Button size="sm" variant="outline" className="w-full h-8 text-amber-500 border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10" onClick={() => wrapAction(updateCommentStatusAction(c.id, 'rejected'), 'Rejected')} loading={isPending}>
-                         <RejectIcon className="w-3.5 h-3.5 sm:mr-1.5" /><span className="hidden sm:inline">Reject</span>
-                       </Button>
-                     )}
-                     {!c.is_spam && (
-                       <Button size="sm" variant="outline" className="w-full h-8 text-orange-400 border-orange-500/20 bg-orange-500/5 hover:bg-orange-500/10" onClick={() => wrapAction(updateCommentStatusAction(c.id, 'rejected', true), 'Marked as Spam')} loading={isPending}>
-                         <ShieldAlert className="w-3.5 h-3.5 sm:mr-1.5" /><span className="hidden sm:inline">Spam</span>
-                       </Button>
-                     )}
-                     <Button size="sm" variant="outline" className="w-full h-8 text-red-500 border-red-500/20 bg-red-500/5 hover:bg-red-500/10" onClick={() => { if(confirm('Delete permanently?')) wrapAction(deleteCommentAction(c.id), 'Deleted') }} loading={isPending}>
-                       <Trash2 className="w-3.5 h-3.5 sm:mr-1.5" /><span className="hidden sm:inline">Delete</span>
-                     </Button>
-                   </div>
-                 </CardContent>
-               </Card>
+                       <div className="flex items-center gap-3">
+                          <span className="text-[10px] font-black text-gray-300 uppercase shrink-0">Origin</span>
+                          <Link href={`/admin/articles/${c.article_id}/edit`} className="text-[10px] font-black text-[#5c4ae4] uppercase tracking-widest hover:underline truncate">
+                             {c.articles?.title ?? 'Unknown Log'}
+                          </Link>
+                       </div>
+                    </div>
+
+                    <div className="shrink-0 flex md:flex-col gap-2 pt-1">
+                       {!c.is_spam && isPendingStatus && (
+                         <button onClick={() => wrapAction(updateCommentStatusAction(c.id, 'approved'), 'Access Granted')} className="w-12 h-12 rounded-xl bg-emerald-500 text-white flex items-center justify-center hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/20 transition-all">
+                            <CheckCircle2 className="w-6 h-6" />
+                         </button>
+                       )}
+                       {isPendingStatus && (
+                         <button onClick={() => wrapAction(updateCommentStatusAction(c.id, 'rejected'), 'Target Quarantined')} className="w-12 h-12 rounded-xl bg-orange-400 text-white flex items-center justify-center hover:scale-105 active:scale-95 shadow-lg shadow-orange-500/20 transition-all">
+                            <RejectIcon className="w-6 h-6" />
+                         </button>
+                       )}
+                       <button onClick={() => { if(confirm('Purge?')) wrapAction(deleteCommentAction(c.id), 'Expunged') }} className="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all">
+                          <Trash2 className="w-6 h-6" />
+                       </button>
+                    </div>
+
+                  </div>
+               </PresenceCard>
              );
-           })}
-        </div>
-      )}
+          })
+        )}
+      </div>
 
     </div>
   );

@@ -2,12 +2,23 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
+import { ChevronLeft, Bell, Layers, Check, Box, BookOpen } from 'lucide-react';
+import { 
+  PresenceWrapper, 
+  PresenceHeader,
+  PresenceCard,
+  PresenceButton 
+} from '@/components/PresenceUI';
 
-export default async function EditSequelPage({ params }: { params: { id: string } }) {
+export default async function EditSequelPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
 
-  // Fetch the sequel
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
+
+  const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).single();
+
   const { data: sequel, error: sequelError } = await supabase
     .from('sequels')
     .select('title, slug')
@@ -18,7 +29,6 @@ export default async function EditSequelPage({ params }: { params: { id: string 
     return notFound();
   }
 
-  // Fetch all published articles
   const { data: articles, error: articlesError } = await supabase
     .from('articles')
     .select('id, title, published_at')
@@ -30,7 +40,6 @@ export default async function EditSequelPage({ params }: { params: { id: string 
     console.error('Error fetching articles:', articlesError);
   }
 
-  // Fetch already attached articles for the specific sequel
   const { data: attachedArticles, error: attachedError } = await supabase
     .from('sequel_articles')
     .select('article_id, order_index')
@@ -41,28 +50,18 @@ export default async function EditSequelPage({ params }: { params: { id: string 
     console.error('Error fetching attached articles:', attachedError);
   }
 
-  // Create a fast lookup Set for defaultChecked values
   const attachedArticleIds = new Set(attachedArticles?.map(a => a.article_id) || []);
 
   async function updateSequelArticlesAction(formData: FormData) {
     'use server';
     const supabaseAction = await createClient();
-
-    // FormData.getAll returns them in the order they appear in the DOM
     const selectedArticleIds = formData.getAll('article_ids') as string[];
 
-    // 1. Delete existing sequel_articles for this sequel
-    const { error: deleteError } = await supabaseAction
+    await supabaseAction
       .from('sequel_articles')
       .delete()
       .eq('sequel_id', id);
 
-    if (deleteError) {
-      console.error('Error deleting existing attached articles:', deleteError);
-      return;
-    }
-
-    // 2. Insert new selected articles with correct order_index
     if (selectedArticleIds.length > 0) {
       const inserts = selectedArticleIds.map((articleId, index) => ({
         sequel_id: id,
@@ -70,14 +69,9 @@ export default async function EditSequelPage({ params }: { params: { id: string 
         order_index: index,
       }));
 
-      const { error: insertError } = await supabaseAction
+      await supabaseAction
         .from('sequel_articles')
         .insert(inserts);
-
-      if (insertError) {
-        console.error('Error inserting new attached articles:', insertError);
-        return;
-      }
     }
 
     revalidatePath('/admin/sequels');
@@ -87,68 +81,87 @@ export default async function EditSequelPage({ params }: { params: { id: string 
     redirect('/admin/sequels');
   }
 
+  const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
+
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-10">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Manage Articles</h1>
-          <p className="text-gray-500 mt-1">Sequel: <span className="font-medium text-gray-800">{sequel.title}</span></p>
+    <PresenceWrapper>
+      <PresenceHeader 
+        title="Presence"
+        roleLabel="Sequence Manager · Data Linking"
+        initials={initials}
+        icon1={Bell}
+        icon2={ChevronLeft}
+        onIcon2Click={() => window.location.href = '/admin/sequels'}
+      />
+      
+      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20 max-w-4xl mx-auto">
+        
+        <div className="flex items-center gap-5 mb-6">
+           <div className="w-12 h-12 rounded-2xl bg-[#5c4ae4] flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
+              <Layers className="w-6 h-6" />
+           </div>
+           <div>
+              <h2 className="text-2xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight">Manage Article Chain</h2>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Sequence: {sequel.title}</p>
+           </div>
         </div>
-        <Link 
-          href="/admin/sequels"
-          className="text-gray-600 hover:text-gray-900 font-medium bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition-colors"
-        >
-          Cancel
-        </Link>
-      </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <form action={updateSequelArticlesAction} className="p-8 space-y-8">
-          
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-800">Available Published Articles</h2>
-            <p className="text-sm text-gray-500">
-              Select the articles you want to include in this sequel. The selections are saved in the order they appear below.
-            </p>
+        <PresenceCard className="p-0 overflow-hidden">
+          <form action={updateSequelArticlesAction} className="p-10 space-y-10">
             
-            <div className="space-y-3 mt-4 max-h-[500px] overflow-y-auto p-4 border border-gray-100 rounded-lg">
-              {!articles || articles.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center py-8">No published articles found.</p>
-              ) : (
-                articles.map((article) => (
-                  <label 
-                    key={article.id} 
-                    className="flex items-start gap-4 cursor-pointer p-4 hover:bg-gray-50 rounded-xl border border-gray-100 shadow-sm transition-colors"
-                  >
-                    <input 
-                      type="checkbox" 
-                      name="article_ids" 
-                      value={article.id} 
-                      defaultChecked={attachedArticleIds.has(article.id)}
-                      className="mt-1 flex-shrink-0 h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 transition-colors"
-                    />
-                    <div>
-                      <span className="block text-base font-semibold text-gray-900">{article.title}</span>
-                      <span className="block text-sm text-gray-500 mt-1">
-                        Published on {new Date(article.published_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </label>
-                ))
-              )}
+            <div className="space-y-4">
+               <div className="flex items-center justify-between">
+                  <h3 className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Available Matrix Nodes</h3>
+                  <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest">Temporal Order Binding</span>
+               </div>
+               
+               <div className="space-y-3 max-h-[600px] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-indigo-100">
+                 {!articles || articles.length === 0 ? (
+                   <div className="py-20 text-center flex flex-col items-center">
+                      <BookOpen className="w-12 h-12 mb-4 text-indigo-100" />
+                      <p className="font-black text-gray-400 uppercase tracking-widest text-sm">No Published Nodes</p>
+                   </div>
+                 ) : (
+                   articles.map((article) => (
+                     <label 
+                       key={article.id} 
+                       className="group flex items-center gap-6 cursor-pointer p-6 bg-gray-50 dark:bg-white/5 rounded-2xl border-2 border-transparent hover:border-[#5c4ae4] transition-all"
+                     >
+                       <div className="relative">
+                          <input 
+                            type="checkbox" 
+                            name="article_ids" 
+                            value={article.id} 
+                            defaultChecked={attachedArticleIds.has(article.id)}
+                            className="peer sr-only"
+                          />
+                          <div className="w-8 h-8 rounded-lg bg-white border-2 border-indigo-100 peer-checked:bg-[#5c4ae4] peer-checked:border-[#5c4ae4] transition-all flex items-center justify-center">
+                             <Check className="w-5 h-5 text-white opacity-0 peer-checked:opacity-100 scale-50 peer-checked:scale-100 transition-all" />
+                          </div>
+                       </div>
+                       <div className="min-w-0">
+                         <span className="block text-lg font-black text-[#1b1929] dark:text-white uppercase tracking-tight group-hover:text-[#5c4ae4] transition-colors">{article.title}</span>
+                         <span className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
+                           Broadcasted · {new Date(article.published_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                         </span>
+                       </div>
+                     </label>
+                   ))
+                 )}
+               </div>
             </div>
-          </div>
 
-          <div className="pt-4 flex justify-end items-center gap-4 border-t border-gray-100">
-            <button 
-              type="submit" 
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-8 py-3 rounded-lg shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
-            >
-              Save Attached Articles
-            </button>
-          </div>
-        </form>
+            <div className="pt-10 border-t border-indigo-50 dark:border-white/5 flex justify-end">
+               <button 
+                type="submit" 
+                className="h-16 px-12 bg-[#5c4ae4] text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3"
+              >
+                <Check className="w-5 h-5" /> Synchronize Sequence
+              </button>
+            </div>
+          </form>
+        </PresenceCard>
       </div>
-    </div>
+    </PresenceWrapper>
   );
 }

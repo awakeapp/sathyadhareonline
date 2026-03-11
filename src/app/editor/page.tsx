@@ -1,10 +1,17 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Card, CardContent } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { SquarePen, FileText, ChevronRight, Eye, Bell } from 'lucide-react';
 import ReaderModeSwitch from '@/components/ReaderModeSwitch';
-import { SquarePen, FileText, ChevronRight, Eye, Hand } from 'lucide-react';
+import { 
+  PresenceWrapper, 
+  PresenceHeader, 
+  PresenceCard, 
+  PresenceStatCircle, 
+  PresenceActionTile, 
+  PresenceButton, 
+  PresenceSectionHeader 
+} from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +20,7 @@ export default async function EditorDashboard() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  let profile: any = null;
+  let profile: { full_name: string | null; role: string } | null = null;
   const statsFallback = {
     totalCount: 0, publishedCount: 0, draftCount: 0, reviewCount: 0,
     recent: [] as any[]
@@ -24,7 +31,7 @@ export default async function EditorDashboard() {
   try {
     const { data: p } = await supabase
       .from('profiles').select('role, full_name').eq('id', user.id).maybeSingle();
-    profile = p;
+    profile = p as any;
 
     if (!profile || profile.role !== 'editor') redirect('/login');
 
@@ -51,133 +58,91 @@ export default async function EditorDashboard() {
   }
 
   const { totalCount, publishedCount, draftCount, reviewCount, recent } = pageData;
-  const name = profile?.full_name ?? 'Editor';
 
-  const statusMeta: Record<string, { label: string; cls: string }> = {
-    draft:     { label: 'Draft',      cls: 'bg-gray-500/10 text-[var(--color-muted)] border-gray-500/20' },
-    in_review: { label: 'In Review',  cls: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
-    published: { label: 'Published',  cls: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
-    archived:  { label: 'Archived',   cls: 'bg-purple-500/10 text-purple-500 border-purple-500/20' },
-  };
-
-  const stats = [
-    { label: 'Total Articles', value: totalCount, color: '#8b5cf6' },
-    { label: 'Published',      value: publishedCount, color: '#10b981' },
-    { label: 'In Review',      value: reviewCount, color: '#f59e0b' },
-    { label: 'Drafts',         value: draftCount, color: '#6b7280' },
-  ];
+  const initials = (profile?.full_name || 'E').charAt(0).toUpperCase();
 
   return (
-    <div className="font-sans antialiased max-w-5xl mx-auto py-2">
+    <PresenceWrapper>
+      <PresenceHeader 
+        title="Presence"
+        roleLabel="Editor Workspace"
+        initials={initials}
+        icon1={Bell}
+        icon2={Eye}
+        onIcon2Click={() => window.location.href = '/'}
+      />
 
-      {/* ── Profile header ────────────────────────────────────── */}
-      <header className="mb-10 mt-4">
-        <p className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-widest">Editor Workspace</p>
-        <h1 className="text-2xl font-black tracking-tight mt-1 truncate flex items-center gap-2">
-          Welcome back, {String(name).split(' ')[0]} <Hand className="w-6 h-6 text-amber-500" />
-        </h1>
-        <p className="text-sm text-[var(--color-muted)] mt-1 font-semibold">Here&apos;s your content overview for today.</p>
-      </header>
-
-      {/* Reader Mode Switch — dedicated always-visible switching card */}
-      <ReaderModeSwitch role="editor" />
-
-      {/* ── Stats row ──────────────────────────────────────── */}
-      <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--color-muted)] mb-4">Your Progress</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
-        {stats.map((s) => (
-          <Card key={s.label} hoverable className="rounded-[1.5rem]">
-            <CardContent className="p-5 flex flex-col gap-1 items-center justify-center text-center">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted)]">{s.label}</span>
-              <span className="text-[28px] font-black tracking-tight" style={{ color: s.color }}>{s.value}</span>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* ── Quick Actions ────────────────────────────────────────── */}
-      <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--color-muted)] mb-4">Quick Actions</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-10">
-        <Link href="/editor/articles/new" className="group outline-none">
-          <Card hoverable className="h-full rounded-[1.5rem] bg-[var(--color-surface)] group-hover:bg-[var(--color-surface-2)] transition-colors border-transparent">
-            <CardContent className="p-5 flex items-center gap-4 h-full">
-              <div className="w-12 h-12 rounded-2xl bg-violet-600 border border-violet-500/20 flex items-center justify-center text-white shadow-lg shadow-violet-600/20 group-hover:scale-105 transition-transform">
-                <SquarePen className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm text-[var(--color-text)] truncate">Write New Article</p>
-                <p className="text-xs text-[var(--color-muted)] mt-0.5 truncate">Start a fresh draft</p>
-              </div>
-              <ChevronRight className="w-5 h-5 text-[var(--color-muted)] opacity-50 group-hover:translate-x-1 group-hover:opacity-100 transition-all" />
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/editor/articles" className="group outline-none">
-          <Card hoverable className="h-full rounded-[1.5rem] bg-[var(--color-surface)] group-hover:bg-[var(--color-surface-2)] transition-colors border-transparent">
-            <CardContent className="p-5 flex items-center gap-4 h-full">
-              <div className="w-12 h-12 rounded-2xl bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-primary)] shadow-sm group-hover:scale-105 transition-transform">
-                <FileText className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm text-[var(--color-text)] truncate">My Articles</p>
-                <p className="text-xs text-[var(--color-muted)] mt-0.5 truncate">Manage your {totalCount ?? 0} post{totalCount !== 1 ? 's' : ''}</p>
-              </div>
-              <ChevronRight className="w-5 h-5 text-[var(--color-muted)] opacity-50 group-hover:translate-x-1 group-hover:opacity-100 transition-all" />
-            </CardContent>
-          </Card>
-        </Link>
-      </div>
-
-      {/* ── Recent articles ──────────────────────────────────────── */}
-      <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--color-muted)] mb-4">Recent Activity</h2>
-      <Card hoverable className="rounded-3xl overflow-hidden mb-10 border-[var(--color-border)]">
-        {!recent || recent.length === 0 ? (
-          <div className="py-14 text-center">
-            <FileText className="w-10 h-10 mx-auto mb-3 opacity-20 text-[var(--color-muted)]" />
-            <p className="text-sm font-bold text-[var(--color-muted)]">No articles yet</p>
-            <p className="text-xs mt-1 text-[var(--color-muted)] opacity-70">Write your first article to get started</p>
+      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20">
+        <PresenceCard className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400">
+              <SquarePen className="w-6 h-6" />
+            </div>
+            <p className="font-bold text-gray-600 dark:text-gray-300">New Article</p>
           </div>
-        ) : (
-          <div className="divide-y divide-[var(--color-border)]">
-            {recent.map(a => {
-              const meta = statusMeta[a.status] ?? statusMeta.draft;
-              return (
-                <div key={a.id} className="flex items-center px-5 py-4 gap-3 hover:bg-[var(--color-surface)] transition-colors">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-[var(--color-text)] truncate group-hover:text-[var(--color-primary)] transition-colors">{a.title}</p>
-                    <p className="text-[11px] font-semibold text-[var(--color-muted)] mt-1">
-                      Updated {new Date(a.updated_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </p>
-                  </div>
-                  <span className={`flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${meta.cls}`}>
-                    {(meta as { label: string; cls: string }).label}
-                  </span>
-                  <Button asChild variant="outline" size="sm" className="hidden sm:flex rounded-full text-xs font-bold ml-2">
-                    <Link href={`/editor/articles/${a.id}/edit`}>
-                      Edit
-                    </Link>
-                  </Button>
-                  <Link href={`/editor/articles/${a.id}/edit`} className="sm:hidden p-2 text-[var(--color-primary)] ml-2 bg-[var(--color-primary)]/10 rounded-full">
-                     <SquarePen className="w-4 h-4" />
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </Card>
-
-      {/* ── Site link ─────────────────────────────────────────── */}
-      <div className="flex justify-center pb-8 border-t border-[var(--color-border)] pt-8">
-        <Button asChild variant="secondary" className="rounded-full shadow-sm pr-7 pl-6">
-          <Link href="/">
-            <Eye className="w-4 h-4 mr-2" />
-            View Reader Site
+          <Link href="/editor/articles/new">
+            <PresenceButton>Write</PresenceButton>
           </Link>
-        </Button>
-      </div>
+        </PresenceCard>
 
-    </div>
+        <PresenceCard>
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <span className="text-5xl font-black text-[#5c4ae4]">
+                {totalCount}
+                <FileText className="inline-block w-4 h-4 ml-1 mb-6 text-indigo-300" />
+              </span>
+              <div>
+                <p className="text-lg font-black leading-none">Total Articles</p>
+                <p className="text-xs font-bold text-gray-400 mt-1 uppercase tracking-wider">Your Progress</p>
+              </div>
+            </div>
+            <Link href="/editor/articles" className="w-10 h-10 rounded-full border border-gray-100 dark:border-white/10 flex items-center justify-center text-indigo-400 hover:bg-indigo-50 transition-colors">
+              <ChevronRight className="w-5 h-5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <PresenceStatCircle percent={Math.min(100, (publishedCount / (totalCount || 1)) * 100)} value={publishedCount} label="Published" color="#10b981" />
+            <PresenceStatCircle percent={Math.min(100, (reviewCount / (totalCount || 1)) * 100)} value={reviewCount} label="Review" color="#f59e0b" />
+            <PresenceStatCircle percent={Math.min(100, (draftCount / (totalCount || 1)) * 100)} value={draftCount} label="Drafts" color="#6b7280" />
+          </div>
+        </PresenceCard>
+
+        <PresenceCard className="grid grid-cols-2 gap-y-6">
+          <PresenceActionTile href="/editor/articles/new" icon={SquarePen} label="Write New" />
+          <PresenceActionTile href="/editor/articles" icon={FileText} label="My Articles" />
+        </PresenceCard>
+
+        <div className="pt-4">
+          <ReaderModeSwitch role="editor" />
+        </div>
+
+        <div className="pt-4">
+          <PresenceSectionHeader title="Recent Activity" action="See All" onActionClick={() => window.location.href = '/editor/articles'} />
+          <div className="space-y-3">
+            {recent.map((a) => (
+              <Link key={a.id} href={`/editor/articles/${a.id}/edit`}>
+                <PresenceCard className="flex items-center justify-between py-4 px-5 active:scale-[0.98] transition-transform">
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] shrink-0">
+                      <FileText className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-sm truncate">{a.title}</p>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">{(a.status || 'draft').replace('_', ' ')} · {new Date(a.updated_at).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-gray-300" />
+                </PresenceCard>
+              </Link>
+            ))}
+            {recent.length === 0 && (
+              <div className="py-10 text-center text-gray-400 font-bold text-sm">No recent activity</div>
+            )}
+          </div>
+        </div>
+      </div>
+    </PresenceWrapper>
   );
 }

@@ -1,6 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { ChevronLeft, Bell } from 'lucide-react';
 import RevenueClient from './RevenueClient';
+import { 
+  PresenceWrapper, 
+  PresenceHeader 
+} from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +15,7 @@ export default async function RevenuePage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).single();
   if (!profile || profile.role !== 'super_admin') redirect('/admin?error=unauthorized');
 
   const { data: txsData } = await supabase
@@ -29,8 +34,6 @@ export default async function RevenuePage() {
     totalRevenue += Number(t.amount);
   }
 
-  // Calculate MRR (naive approach: sum of active monthly plans)
-  // Get active plans and count active subscriptions. For now we mock it off recent transaction velocity since we don't have a rigid subscriptions state logic yet.
   const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
   const now = new Date().getTime();
   const recentValidTx = validTransactions.filter(t => new Date(t.created_at).getTime() > now - THIRTY_DAYS);
@@ -43,15 +46,30 @@ export default async function RevenuePage() {
     status: t.status,
     type: t.type,
     created_at: t.created_at,
-    userEmail: (t.profiles as { email?: string } | null)?.email || 'Unknown User',
-    planName: (t.subscription_plans as { name?: string } | null)?.name || 'Custom Payment'
+    userEmail: (t.profiles as any)?.email || 'Unknown Protocol',
+    planName: (t.subscription_plans as any)?.name || 'Direct Deposit'
   }));
 
+  const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
+
   return (
-    <RevenueClient 
-      totalRevenue={totalRevenue} 
-      mrr={mrr} 
-      transactions={mappedTransactions} 
-    />
+    <PresenceWrapper>
+      <PresenceHeader 
+        title="Presence"
+        roleLabel="Financial Intelligence · Capital Matrix"
+        initials={initials}
+        icon1={Bell}
+        icon2={ChevronLeft}
+        onIcon2Click={() => window.location.href = '/admin'}
+      />
+      
+      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20 max-w-5xl mx-auto">
+        <RevenueClient 
+          totalRevenue={totalRevenue} 
+          mrr={mrr} 
+          transactions={mappedTransactions} 
+        />
+      </div>
+    </PresenceWrapper>
   );
 }

@@ -2,16 +2,16 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
-import { Download, Users, Eye, MessageSquare, Layers, Calendar, Flame } from 'lucide-react';
+import { Download, Users, Eye, MessageSquare, Layers, Calendar, Flame, TrendingUp, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
 import { exportUsersCSVAction, exportContentPerformanceCSVAction, exportCategoryCSVAction } from './exports';
 import Link from 'next/link';
-
-// Custom lightweight date picker to avoid massive dependencies if react-day-picker acts up, 
-// using native inputs for custom dates for extreme reliability in admin panels.
+import { 
+  PresenceCard, 
+  PresenceButton 
+} from '@/components/PresenceUI';
 
 interface Props {
   startDate: string;
@@ -23,17 +23,17 @@ interface Props {
   totals: { articles: number; published: number; viewsInRange: number };
 }
 
-const COLORS = ['#0ea5e9', '#10b981', '#f59e0b', '#f43f5e', '#a855f7', '#06b6d4', '#84cc16'];
+const COLORS = ['#5c4ae4', '#2dd4bf', '#fbbf24', '#f43f5e', '#a855f7', '#06b6d4', '#84cc16'];
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-[#181623] border border-white/10 p-3 rounded-xl shadow-xl text-xs space-y-1 z-50">
-        <p className="font-bold text-white mb-2 pb-2 border-b border-white/10">{label}</p>
+      <div className="bg-white dark:bg-[#181623] border border-indigo-100 dark:border-white/10 p-4 rounded-2xl shadow-2xl space-y-2 z-50">
+        <p className="font-black text-[10px] uppercase tracking-widest text-gray-400 mb-2 border-b border-indigo-50 dark:border-white/10 pb-2">{label}</p>
         {payload.map((p: any) => (
-          <div key={p.name} className="flex justify-between gap-4">
-             <span style={{ color: p.color }}>{p.name}:</span>
-             <span className="font-bold text-white">{Number(p.value).toLocaleString()}</span>
+          <div key={p.name} className="flex justify-between gap-6 items-center">
+             <span className="text-[10px] font-black uppercase tracking-tight" style={{ color: p.color }}>{p.name}</span>
+             <span className="font-black text-sm text-[#1b1929] dark:text-white tabular-nums">{Number(p.value).toLocaleString()}</span>
           </div>
         ))}
       </div>
@@ -47,7 +47,6 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
   const [isExporting, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState<'overview' | 'content' | 'categories'>('overview');
 
-  // Manual Date States for Custom range
   const [isCustom, setIsCustom] = useState(false);
   const [customStart, setCustomStart] = useState(startDate.substring(0, 10));
   const [customEnd, setCustomEnd] = useState(endDate.substring(0, 10));
@@ -64,16 +63,15 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
   };
 
   const applyCustom = () => {
-    if (!customStart || !customEnd) return toast.error('Select valid dates');
+    if (!customStart || !customEnd) return toast.error('Check dates');
     const startD = new Date(customStart);
-    const endD = new Date(customEnd);
-    endD.setHours(23, 59, 59, 999);
-    router.push(`?start=${startD.toISOString()}&end=${endD.toISOString()}`);
+    const endSD = new Date(customEnd);
+    endSD.setHours(23, 59, 59, 999);
+    router.push(`?start=${startD.toISOString()}&end=${endSD.toISOString()}`);
   };
 
   const handleExport = (type: 'users' | 'content' | 'categories') => {
-    startTransition(() => {
-      (async () => {
+    startTransition(async () => {
         let res;
         if (type === 'users') res = await exportUsersCSVAction(startDate, endDate);
         else if (type === 'content') res = await exportContentPerformanceCSVAction(startDate, endDate);
@@ -89,327 +87,298 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
-          toast.success(`${res.filename} exported successfully.`);
+          toast.success(`Exported ${res.filename}`);
         }
-      })();
     });
   };
 
   return (
     <div className="space-y-6">
       
-      {/* ── Top Controls: Tabs & Date Range ──────────────────── */}
-      <div className="flex flex-col xl:flex-row gap-4 justify-between items-start xl:items-center bg-[var(--color-surface)] p-4 border border-[var(--color-border)] rounded-3xl">
-        
-        {/* Tabs */}
-        <div className="flex gap-2 w-full xl:w-auto overflow-x-auto hide-scrollbar">
-          {[
-            { id: 'overview', label: 'Overview' },
-            { id: 'content', label: 'Content Performance' },
-            { id: 'categories', label: 'Category Matrix' }
-          ].map(t => (
-            <button
-              key={t.id}
-              onClick={() => setActiveTab(t.id as any)}
-              className={`px-5 py-2.5 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${activeTab === t.id ? 'bg-[var(--color-primary)] text-black shadow-md' : 'text-[var(--color-muted)] hover:text-white hover:bg-white/5'}`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Date Picker Engine */}
-        <div className="flex flex-wrap items-center gap-3">
-           <div className="flex items-center gap-1 bg-black/20 p-1.5 rounded-[1.25rem] border border-[var(--color-border)]">
-              <button onClick={() => applyPreset(7)} className="px-4 py-1.5 rounded-xl text-xs font-bold transition-all text-[var(--color-muted)] hover:text-white hover:bg-white/5">7D</button>
-              <button onClick={() => applyPreset(30)} className="px-4 py-1.5 rounded-xl text-xs font-bold transition-all text-[var(--color-muted)] hover:text-white hover:bg-white/5">30D</button>
-              <button onClick={() => setIsCustom(!isCustom)} className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${isCustom ? 'bg-white/10 text-white' : 'text-[var(--color-muted)] hover:text-white hover:bg-white/5'}`}>
-                <Calendar className="w-3.5 h-3.5" /> Custom
+      {/* ── Discovery Controls ── */}
+      <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-4">
+        <div className="flex flex-col xl:flex-row gap-6 justify-between items-center">
+          
+          <div className="flex gap-2 bg-white dark:bg-[#1b1929] p-2 rounded-[2rem] shadow-sm">
+            {[
+              { id: 'overview', label: 'Overview' },
+              { id: 'content', label: 'Performance' },
+              { id: 'categories', label: 'Taxonomy' }
+            ].map(t => (
+              <button
+                key={t.id}
+                onClick={() => setActiveTab(t.id as any)}
+                className={`px-6 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === t.id ? 'bg-[#5c4ae4] text-white shadow-xl shadow-indigo-500/20' : 'text-gray-400 hover:text-[#5c4ae4]'}`}
+              >
+                {t.label}
               </button>
-           </div>
-           
-           {isCustom && (
-             <div className="flex items-center gap-2 animate-in fade-in zoom-in-95 duration-200 pl-2">
-                <input type="date" className="h-9 px-3 rounded-xl bg-black/20 border border-[var(--color-border)] text-xs text-white outline-none" value={customStart} onChange={e => setCustomStart(e.target.value)} />
-                <span className="text-[var(--color-muted)] text-xs font-bold">to</span>
-                <input type="date" className="h-9 px-3 rounded-xl bg-black/20 border border-[var(--color-border)] text-xs text-white outline-none" value={customEnd} onChange={e => setCustomEnd(e.target.value)} />
-                <Button size="sm" onClick={applyCustom} className="h-9 rounded-xl bg-[#ffe500] text-black hover:bg-[#ffe500]/90">Apply</Button>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+             <div className="flex items-center gap-1 bg-white dark:bg-[#1b1929] p-2 rounded-[2rem] shadow-sm">
+                <button onClick={() => applyPreset(7)} className="px-4 py-2 rounded-xl text-[10px] font-black text-gray-400 hover:text-[#5c4ae4] transition-all">7D</button>
+                <button onClick={() => applyPreset(30)} className="px-4 py-2 rounded-xl text-[10px] font-black text-gray-400 hover:text-[#5c4ae4] transition-all">30D</button>
+                <button onClick={() => setIsCustom(!isCustom)} className={`px-4 py-2 rounded-xl text-[10px] font-black flex items-center gap-2 transition-all ${isCustom ? 'bg-indigo-50 dark:bg-indigo-500/10 text-[#5c4ae4]' : 'text-gray-400 hover:text-[#5c4ae4]'}`}>
+                  <Calendar className="w-4 h-4" /> Range
+                </button>
              </div>
-           )}
-        </div>
-
-      </div>
-
-      {/* ── Content Render ────────────────────────────────────── */}
-      <div className="transition-all duration-300">
-        
-        {/* TAB 1: OVERVIEW */}
-        {activeTab === 'overview' && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* KPI Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-               <Card className="rounded-[2rem] border-transparent bg-indigo-500/10 shadow-none">
-                 <CardContent className="p-6">
-                   <p className="text-[10px] text-indigo-400 uppercase tracking-widest font-black mb-2">Total Views</p>
-                   <p className="text-3xl font-black tabular-nums text-white">{totals.viewsInRange.toLocaleString()}</p>
-                 </CardContent>
-               </Card>
-               <Card className="rounded-[2rem] border-transparent bg-emerald-500/10 shadow-none">
-                 <CardContent className="p-6">
-                   <p className="text-[10px] text-emerald-400 uppercase tracking-widest font-black mb-2">New Signups</p>
-                   <p className="text-3xl font-black tabular-nums text-white">{totalUsers.toLocaleString()}</p>
-                 </CardContent>
-               </Card>
-               <Card className="rounded-[2rem] border-transparent bg-amber-500/10 shadow-none">
-                 <CardContent className="p-6">
-                   <p className="text-[10px] text-amber-400 uppercase tracking-widest font-black mb-2">New Comments</p>
-                   <p className="text-3xl font-black tabular-nums text-white">{totalComments.toLocaleString()}</p>
-                 </CardContent>
-               </Card>
-               <div className="flex flex-col gap-2 justify-center ml-2">
-                 <Button variant="outline" className="w-full justify-start h-11 rounded-2xl bg-black/20 border-[var(--color-border)] text-[var(--color-muted)] hover:text-white" onClick={() => handleExport('users')} loading={isExporting}>
-                    <Download className="w-4 h-4 mr-2" /> Export Users CSV
-                 </Button>
-                 <Button variant="outline" className="w-full justify-start h-11 rounded-2xl bg-black/20 border-[var(--color-border)] text-[var(--color-muted)] hover:text-white" onClick={() => handleExport('content')} loading={isExporting}>
-                    <Download className="w-4 h-4 mr-2" /> Export Content CSV
-                 </Button>
+             
+             {isCustom && (
+               <div className="flex items-center gap-3 animate-in fade-in zoom-in-95 duration-300">
+                  <input type="date" className="h-12 px-4 rounded-2xl bg-white dark:bg-[#1b1929] border-none text-[11px] font-black text-indigo-400 shadow-sm outline-none" value={customStart} onChange={e => setCustomStart(e.target.value)} />
+                  <input type="date" className="h-12 px-4 rounded-2xl bg-white dark:bg-[#1b1929] border-none text-[11px] font-black text-indigo-400 shadow-sm outline-none" value={customEnd} onChange={e => setCustomEnd(e.target.value)} />
+                  <PresenceButton onClick={applyCustom} className="h-12 px-6 bg-[#5c4ae4]">Seek</PresenceButton>
                </div>
+             )}
+          </div>
+
+        </div>
+      </PresenceCard>
+
+      {/* ── Intelligence Render ── */}
+      <div className="transition-all duration-500">
+        
+        {activeTab === 'overview' && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-6 duration-700">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+               <PresenceCard className="relative overflow-hidden group">
+                  <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-3">Traffic Volume</p>
+                  <p className="text-4xl font-black text-[#1b1929] dark:text-white tabular-nums">{totals.viewsInRange.toLocaleString()}</p>
+                  <Eye className="absolute -right-4 -bottom-4 w-24 h-24 text-indigo-500/5 group-hover:scale-125 transition-transform duration-700" />
+               </PresenceCard>
+               <PresenceCard className="relative overflow-hidden group">
+                  <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-3">Network Growth</p>
+                  <p className="text-4xl font-black text-[#1b1929] dark:text-white tabular-nums">{totalUsers.toLocaleString()}</p>
+                  <Users className="absolute -right-4 -bottom-4 w-24 h-24 text-emerald-500/5 group-hover:scale-125 transition-transform duration-700" />
+               </PresenceCard>
+               <PresenceCard className="relative overflow-hidden group">
+                  <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-3">Interaction Log</p>
+                  <p className="text-4xl font-black text-[#1b1929] dark:text-white tabular-nums">{totalComments.toLocaleString()}</p>
+                  <MessageSquare className="absolute -right-4 -bottom-4 w-24 h-24 text-amber-500/5 group-hover:scale-125 transition-transform duration-700" />
+               </PresenceCard>
             </div>
 
-            {/* Growth Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-               <Card className="rounded-[2rem] border-[var(--color-border)] bg-[var(--color-surface)] shadow-none">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-2 mb-6">
-                      <Users className="w-5 h-5 text-emerald-400" />
-                      <h3 className="text-sm font-bold text-white uppercase tracking-wider">User Growth Engine</h3>
+               <PresenceCard>
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4]">
+                       <TrendingUp className="w-5 h-5" />
                     </div>
-                    <div className="h-[250px] w-full">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={timeSeries} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
-                          <defs>
-                            <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                              <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                          <XAxis dataKey="date" hide />
-                          <Tooltip content={<CustomTooltip />} />
-                          <Area type="stepAfter" dataKey="users" name="New Signups" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorUsers)" />
-                        </AreaChart>
-                      </ResponsiveContainer>
+                    <div>
+                       <h3 className="text-xs font-black text-[#1b1929] dark:text-white uppercase tracking-widest">Growth Velocity</h3>
+                       <p className="text-[9px] font-bold text-gray-400 uppercase">User acquisition timeline</p>
                     </div>
-                  </CardContent>
-               </Card>
+                  </div>
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={timeSeries}>
+                        <defs>
+                          <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#5c4ae4" stopOpacity={0.2}/>
+                            <stop offset="95%" stopColor="#5c4ae4" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="10 10" stroke="rgba(0,0,0,0.03)" vertical={false} />
+                        <XAxis dataKey="date" hide />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Area type="stepAfter" dataKey="users" name="New Logins" stroke="#5c4ae4" strokeWidth={4} fillOpacity={1} fill="url(#colorUsers)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+               </PresenceCard>
 
-               <Card className="rounded-[2rem] border-[var(--color-border)] bg-[var(--color-surface)] shadow-none">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-2 mb-6">
-                      <Eye className="w-5 h-5 text-indigo-400" />
-                      <h3 className="text-sm font-bold text-white uppercase tracking-wider">Platform Views Trajectory</h3>
+               <PresenceCard>
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4]">
+                       <BarChart3 className="w-5 h-5" />
                     </div>
-                    <div className="h-[250px] w-full">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={timeSeries} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
-                          <defs>
-                            <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
-                              <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                          <XAxis dataKey="date" hide />
-                          <Tooltip content={<CustomTooltip />} />
-                          <Area type="monotone" dataKey="views" name="Views" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorViews)" />
-                        </AreaChart>
-                      </ResponsiveContainer>
+                    <div>
+                       <h3 className="text-xs font-black text-[#1b1929] dark:text-white uppercase tracking-widest">Attention Span</h3>
+                       <p className="text-[9px] font-bold text-gray-400 uppercase">Impression distribution</p>
                     </div>
-                  </CardContent>
-               </Card>
+                  </div>
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={timeSeries}>
+                        <defs>
+                          <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#2dd4bf" stopOpacity={0.2}/>
+                            <stop offset="95%" stopColor="#2dd4bf" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="10 10" stroke="rgba(0,0,0,0.03)" vertical={false} />
+                        <XAxis dataKey="date" hide />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Area type="monotone" dataKey="views" name="Impressions" stroke="#2dd4bf" strokeWidth={4} fillOpacity={1} fill="url(#colorViews)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+               </PresenceCard>
             </div>
           </div>
         )}
 
-        {/* TAB 2: CONTENT PERFORMANCE */}
         {activeTab === 'content' && (
-           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-             <div className="flex justify-end mb-4">
-                <Button variant="outline" size="sm" onClick={() => handleExport('content')} disabled={isExporting} className="rounded-full text-xs h-9 bg-black/20 text-[#ffe500] border-[#ffe500]/30 hover:bg-[#ffe500]/10">
-                  <Download className="w-3.5 h-3.5 mr-1.5" /> Export full performance log
-                </Button>
-             </div>
-             
-             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-               <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl overflow-hidden p-6">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 pb-4 border-b border-white/5 gap-2">
-                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-400">
-                           <Flame className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h2 className="text-sm font-black text-white uppercase tracking-wider">Top by Views</h2>
-                          <p className="text-[10px] text-[var(--color-muted)] font-medium">Top 10 highest driving articles in period</p>
-                        </div>
-                     </div>
-                  </div>
-                  
-                  {topArticlesByViews.length === 0 ? (
-                    <div className="py-12 border-dashed border border-[var(--color-border)] rounded-2xl text-center text-[var(--color-muted)] font-semibold text-sm">No view data available</div>
-                  ) : (
-                    <div className="space-y-4">
-                      {topArticlesByViews.slice(0, 10).map((a, i) => {
-                        const maxViews = Math.max(...topArticlesByViews.map(x => x.count), 1);
-                        const pct = Math.round((a.count / maxViews) * 100);
-                        return (
-                          <div key={a.id} className="group relative">
-                             <div className="flex items-center gap-3 mb-1.5 relative z-10">
-                                <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black shrink-0 ${i === 0 ? 'bg-orange-500 text-black' : i === 1 ? 'bg-orange-500/50 text-white' : i === 2 ? 'bg-orange-500/20 text-orange-400' : 'bg-transparent text-[var(--color-muted)]'}`}>{i + 1}</span>
-                                <Link href={`/${a.slug}`} target="_blank" className="flex-1 font-bold text-sm truncate text-white group-hover:text-orange-400 transition-colors pointer-events-auto">{a.title}</Link>
-                                <span className="font-black tabular-nums text-sm text-white shrink-0">{a.count.toLocaleString()}</span>
-                             </div>
-                             <div className="pl-9 relative z-0">
-                                <div className="h-1.5 bg-black/30 rounded-full overflow-hidden">
-                                   <div className="h-full bg-orange-500/60 rounded-full transition-all duration-700" style={{ width: `${pct}%` }} />
-                                </div>
-                             </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-               </div>
+           <div className="animate-in fade-in slide-in-from-bottom-6 duration-700 space-y-6">
+              <div className="flex justify-end">
+                 <PresenceButton onClick={() => handleExport('content')} disabled={isExporting} className="bg-indigo-50 !text-[#5c4ae4] hover:bg-indigo-100 shadow-none">
+                   <Download className="w-5 h-5 mr-3" /> Export Performance Manifest
+                 </PresenceButton>
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <PresenceCard>
+                   <div className="flex items-center gap-4 mb-10 pb-6 border-b border-indigo-50 dark:border-white/5">
+                      <div className="w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center text-rose-500 shadow-lg shadow-rose-500/10">
+                         <Flame className="w-7 h-7" />
+                      </div>
+                      <div>
+                        <h2 className="text-base font-black text-[#1b1929] dark:text-white uppercase tracking-widest">High Velocity Content</h2>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Maximum impressions in specified cycle</p>
+                      </div>
+                   </div>
+                   
+                   <div className="space-y-6">
+                     {topArticlesByViews.length === 0 ? (
+                       <p className="text-center py-12 text-gray-300 font-black uppercase text-xs">No Data Synchronised</p>
+                     ) : (
+                       topArticlesByViews.map((a, i) => {
+                         const maxViews = Math.max(...topArticlesByViews.map(x => x.count), 1);
+                         const pct = (a.count / maxViews) * 100;
+                         return (
+                           <div key={a.id} className="group">
+                              <div className="flex items-center justify-between mb-2">
+                                 <Link href={`/${a.slug}`} target="_blank" className="font-black text-sm text-[#1b1929] dark:text-white group-hover:text-[#5c4ae4] transition-colors truncate max-w-[70%]">{a.title}</Link>
+                                 <span className="font-black tabular-nums text-sm text-gray-400 group-hover:text-[#5c4ae4] transition-all">{a.count.toLocaleString()}</span>
+                              </div>
+                              <div className="h-2 bg-gray-50 dark:bg-white/5 rounded-full overflow-hidden">
+                                 <div className="h-full bg-rose-400/80 rounded-full transition-all duration-1000 group-hover:bg-[#5c4ae4]" style={{ width: `${pct}%` }} />
+                              </div>
+                           </div>
+                         );
+                       })
+                     )}
+                   </div>
+                </PresenceCard>
 
-               <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl overflow-hidden p-6">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 pb-4 border-b border-white/5 gap-2">
-                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-sky-500/10 flex items-center justify-center text-sky-400">
-                           <MessageSquare className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h2 className="text-sm font-black text-white uppercase tracking-wider">Top by Comments</h2>
-                          <p className="text-[10px] text-[var(--color-muted)] font-medium">Top 10 most engaging articles in period</p>
-                        </div>
-                     </div>
-                  </div>
-                  
-                  {topArticlesByComments.length === 0 ? (
-                    <div className="py-12 border-dashed border border-[var(--color-border)] rounded-2xl text-center text-[var(--color-muted)] font-semibold text-sm">No comment data available</div>
-                  ) : (
-                    <div className="space-y-4">
-                      {topArticlesByComments.slice(0, 10).map((a, i) => {
-                        const maxComments = Math.max(...topArticlesByComments.map(x => x.count), 1);
-                        const pct = Math.round((a.count / maxComments) * 100);
-                        return (
-                          <div key={a.id} className="group relative">
-                             <div className="flex items-center gap-3 mb-1.5 relative z-10">
-                                <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black shrink-0 ${i === 0 ? 'bg-sky-500 text-black' : i === 1 ? 'bg-sky-500/50 text-white' : i === 2 ? 'bg-sky-500/20 text-sky-400' : 'bg-transparent text-[var(--color-muted)]'}`}>{i + 1}</span>
-                                <Link href={`/${a.slug}`} target="_blank" className="flex-1 font-bold text-sm truncate text-white group-hover:text-sky-400 transition-colors pointer-events-auto">{a.title}</Link>
-                                <span className="font-black tabular-nums text-sm text-white shrink-0">{a.count.toLocaleString()}</span>
-                             </div>
-                             <div className="pl-9 relative z-0">
-                                <div className="h-1.5 bg-black/30 rounded-full overflow-hidden">
-                                   <div className="h-full bg-sky-500/60 rounded-full transition-all duration-700" style={{ width: `${pct}%` }} />
-                                </div>
-                             </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-               </div>
-
-             </div>
+                <PresenceCard>
+                   <div className="flex items-center gap-4 mb-10 pb-6 border-b border-indigo-50 dark:border-white/5">
+                      <div className="w-14 h-14 rounded-2xl bg-[#5c4ae4]/10 flex items-center justify-center text-[#5c4ae4] shadow-lg shadow-indigo-500/10">
+                         <MessageSquare className="w-7 h-7" />
+                      </div>
+                      <div>
+                        <h2 className="text-base font-black text-[#1b1929] dark:text-white uppercase tracking-widest">Enagement Density</h2>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Highest interaction coefficients</p>
+                      </div>
+                   </div>
+                   
+                   <div className="space-y-6">
+                     {topArticlesByComments.length === 0 ? (
+                       <p className="text-center py-12 text-gray-300 font-black uppercase text-xs">No Data Synchronised</p>
+                     ) : (
+                       topArticlesByComments.map((a, i) => {
+                         const maxComments = Math.max(...topArticlesByComments.map(x => x.count), 1);
+                         const pct = (a.count / maxComments) * 100;
+                         return (
+                           <div key={a.id} className="group">
+                              <div className="flex items-center justify-between mb-2">
+                                 <Link href={`/${a.slug}`} target="_blank" className="font-black text-sm text-[#1b1929] dark:text-white group-hover:text-[#5c4ae4] transition-colors truncate max-w-[70%]">{a.title}</Link>
+                                 <span className="font-black tabular-nums text-sm text-gray-400 group-hover:text-[#5c4ae4] transition-all">{a.count.toLocaleString()}</span>
+                              </div>
+                              <div className="h-2 bg-gray-50 dark:bg-white/5 rounded-full overflow-hidden">
+                                 <div className="h-full bg-indigo-400/80 rounded-full transition-all duration-1000 group-hover:bg-[#5c4ae4]" style={{ width: `${pct}%` }} />
+                              </div>
+                           </div>
+                         );
+                       })
+                     )}
+                   </div>
+                </PresenceCard>
+              </div>
            </div>
         )}
 
-        {/* TAB 3: CATEGORY METRICS */}
         {activeTab === 'categories' && (
-           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 grid grid-cols-1 md:grid-cols-2 gap-6">
-             <Card className="rounded-[2rem] border-[var(--color-border)] bg-[var(--color-surface)] shadow-none">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-4">
-                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-fuchsia-500/10 flex items-center justify-center text-fuchsia-400">
-                           <Layers className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h2 className="text-sm font-black text-white uppercase tracking-wider">Volume Density</h2>
-                          <p className="text-[10px] text-[var(--color-muted)] font-medium">Article count distribution</p>
-                        </div>
-                     </div>
+           <div className="animate-in fade-in slide-in-from-bottom-6 duration-700 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <PresenceCard>
+                  <div className="flex items-center gap-4 mb-10 pb-6 border-b border-indigo-50 dark:border-white/5">
+                    <div className="w-14 h-14 rounded-2xl bg-fuchsia-50 dark:bg-fuchsia-500/10 flex items-center justify-center text-fuchsia-500">
+                       <Layers className="w-7 h-7" />
+                    </div>
+                    <div>
+                       <h2 className="text-base font-black text-[#1b1929] dark:text-white uppercase tracking-widest">Structural Mass</h2>
+                       <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Taxonomy volume distribution</p>
+                    </div>
                   </div>
                   
-                  {categoryStats.length === 0 ? (
-                    <div className="py-12 border-dashed border border-[var(--color-border)] rounded-2xl text-center text-[var(--color-muted)] font-semibold text-sm">No categories active.</div>
-                  ) : (
-                    <div className="space-y-4">
-                      {categoryStats.map((cat, i) => {
-                        const pct = Math.round((cat.count / maxCatCount) * 100);
-                        return (
-                          <div key={cat.id}>
-                            <div className="flex items-center justify-between mb-1.5">
-                              <span className="text-sm font-bold text-white">{cat.name}</span>
-                              <span className="text-xs font-black text-[var(--color-muted)] tabular-nums">{cat.count}</span>
-                            </div>
-                            <div className="h-2 bg-black/20 rounded-full overflow-hidden">
-                              <div className={`h-full rounded-full transition-all duration-700`}
-                                style={{ width: `${pct}%`, backgroundColor: COLORS[i % COLORS.length] }} />
-                            </div>
+                  <div className="space-y-6">
+                    {categoryStats.map((cat, i) => {
+                      const pct = (cat.count / maxCatCount) * 100;
+                      return (
+                        <div key={cat.id}>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-[11px] font-black uppercase text-gray-400">{cat.name}</span>
+                            <span className="text-xs font-black text-[#1b1929] dark:text-white tabular-nums">{cat.count} Units</span>
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </CardContent>
-             </Card>
+                          <div className="h-3 bg-gray-50 dark:bg-white/5 rounded-xl overflow-hidden">
+                            <div className="h-full rounded-xl transition-all duration-1000"
+                              style={{ width: `${pct}%`, backgroundColor: COLORS[i % COLORS.length] }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+              </PresenceCard>
 
-             <Card className="rounded-[2rem] border-[var(--color-border)] bg-[var(--color-surface)] shadow-none">
-                <CardContent className="p-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 border-b border-white/5 pb-4 gap-4">
-                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400">
-                           <Eye className="w-5 h-5" />
+              <PresenceCard>
+                  <div className="flex items-center justify-between mb-10 pb-6 border-b border-indigo-50 dark:border-white/5">
+                     <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                           <BarChart3 className="w-7 h-7" />
                         </div>
                         <div>
-                          <h2 className="text-sm font-black text-white uppercase tracking-wider">Traction Matrix</h2>
-                          <p className="text-[10px] text-[var(--color-muted)] font-medium">Views driving categories (Range)</p>
+                           <h2 className="text-base font-black text-[#1b1929] dark:text-white uppercase tracking-widest">Attention Matrix</h2>
+                           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Engagement by category (Live)</p>
                         </div>
                      </div>
-                     <Button variant="outline" size="sm" onClick={() => handleExport('categories')} disabled={isExporting} className="rounded-full text-xs h-9 bg-black/20 text-[#ffe500] border-[#ffe500]/30 hover:bg-[#ffe500]/10 shrink-0">
-                       <Download className="w-3.5 h-3.5 mr-1.5" /> CSV Export
-                     </Button>
+                     <PresenceButton onClick={() => handleExport('categories')} disabled={isExporting} className="bg-indigo-50 !text-[#5c4ae4] hover:bg-indigo-100 shadow-none h-11 px-5">
+                       <Download className="w-4 h-4" />
+                     </PresenceButton>
                   </div>
                   
-                  {categoryStats.every(c => c.views === 0) ? (
-                    <div className="py-12 border-dashed border border-[var(--color-border)] rounded-2xl text-center text-[var(--color-muted)] font-semibold text-sm">No category views in this range.</div>
-                  ) : (
-                    <div className="h-[300px] w-full relative">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={categoryStats.filter(c => c.views > 0).sort((a,b) => b.views - a.views)}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={70}
-                            outerRadius={100}
-                            paddingAngle={4}
-                            dataKey="views"
-                            nameKey="name"
-                            stroke="none"
-                            cornerRadius={5}
-                          >
-                            {categoryStats.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip content={<CustomTooltip />} />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                  )}
-                </CardContent>
-             </Card>
+                  <div className="h-[300px] w-full relative">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={categoryStats.filter(c => c.views > 0).sort((a,b) => b.views - a.views)}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={80}
+                          outerRadius={110}
+                          paddingAngle={8}
+                          dataKey="views"
+                          nameKey="name"
+                          stroke="none"
+                          cornerRadius={12}
+                        >
+                          {categoryStats.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip content={<CustomTooltip />} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="flex flex-wrap justify-center gap-4 mt-6">
+                     {categoryStats.slice(0, 5).map((cat, i) => (
+                       <div key={cat.id} className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                          <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">{cat.name}</span>
+                       </div>
+                     ))}
+                  </div>
+              </PresenceCard>
            </div>
         )}
 

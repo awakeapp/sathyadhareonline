@@ -2,11 +2,13 @@
 
 import { useState, useRef, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { toast } from 'sonner';
-import { Search, UploadCloud, Copy, Trash2, CheckCircle2, Image as ImageIcon, ChevronDown } from 'lucide-react';
+import { Search, UploadCloud, Copy, Trash2, CheckCircle2, Image as ImageIcon, ChevronDown, Wand2 } from 'lucide-react';
+import { 
+  PresenceCard, 
+  PresenceButton 
+} from '@/components/PresenceUI';
 
 interface MediaItem {
   id: string;
@@ -35,9 +37,7 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
 
   const supabase = createClient();
   const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-
-  // We fall back to the bucket "media" and if we can't we use article-images, but the prompt asked for "media".
-  const BUCKET_NAME = 'media'; // Using the requested bucket name
+  const BUCKET_NAME = 'media';
 
   const filteredItems = useMemo(() => {
     return items.filter(item => {
@@ -50,7 +50,6 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
   const visibleItems = filteredItems.slice(0, page * PAGE_SIZE);
   const hasMore = visibleItems.length < filteredItems.length;
 
-  // ── Upload ─────────────────────────────────────────────────────
   const handleFiles = useCallback(
     async (files: FileList | null) => {
       if (!files || files.length === 0) return;
@@ -64,13 +63,13 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
         const file = files[i];
 
         if (!file.type.startsWith('image/')) {
-          toast.error(`"${file.name}" is not an image file.`);
+          toast.error(`"${file.name}" is not an image.`);
           errCount++;
           continue;
         }
 
-        if (file.size > 5 * 1024 * 1024) {
-          toast.error(`"${file.name}" exceeds 5 MB limit.`);
+        if (file.size > 10 * 1024 * 1024) {
+          toast.error(`"${file.name}" exceeds 10MB.`);
           errCount++;
           continue;
         }
@@ -78,35 +77,15 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
         const ext = file.name.split('.').pop();
         const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
 
-        // Attempt upload to media bucket
         const { error: storageErr } = await supabase.storage
           .from(BUCKET_NAME)
           .upload(fileName, file, { cacheControl: '3600', upsert: false });
 
         if (storageErr) {
-           // Fallback if media bucket doesn't exist
-           const { error: fbErr } = await supabase.storage
-             .from('article-images')
-             .upload(fileName, file, { cacheControl: '3600', upsert: false });
-           
-           if (fbErr) {
-             toast.error(`Upload failed: ${fbErr.message}`);
-             errCount++;
-             continue;
-           } else {
-             // Successfully uploaded to fallback bucket
-             const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/article-images/${fileName}`;
-             const { data: row, error: dbErr } = await supabase
-               .from('media')
-               .insert({ url: publicUrl, uploaded_by: userId })
-               .select('id, url, uploaded_by, created_at')
-               .single();
-
-             if (dbErr) toast.error(`DB insert failed: ${dbErr.message}`);
-             else if (row) newItems.push(row);
-           }
+            toast.error(`Upload error: ${storageErr.message}`);
+            errCount++;
+            continue;
         } else {
-           // Success on primary media bucket
            const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${fileName}`;
            const { data: row, error: dbErr } = await supabase
                .from('media')
@@ -114,7 +93,7 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
                .select('id, url, uploaded_by, created_at')
                .single();
 
-           if (dbErr) toast.error(`DB insert failed: ${dbErr.message}`);
+           if (dbErr) toast.error(`DB Record Error: ${dbErr.message}`);
            else if (row) newItems.push(row);
         }
         
@@ -126,26 +105,23 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
       setUploadProgress(0);
       
       if (errCount === 0 && files.length > 0) {
-        toast.success(`${files.length} file(s) uploaded successfully!`);
+        toast.success(`Successfully uploaded ${files.length} asset(s)`);
       }
     },
     [supabase, userId, SUPABASE_URL]
   );
 
-  // ── Copy URL ────────────────────────────────────────────────────
   const handleCopy = async (item: MediaItem) => {
     await navigator.clipboard.writeText(item.url);
     setCopiedId(item.id);
-    toast.success('URL copied to clipboard');
+    toast.success('Asset URL copied');
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  // ── Delete ──────────────────────────────────────────────────────
   const handleDelete = async (item: MediaItem) => {
-    if (!confirm('Are you certain you want to delete this media?')) return;
+    if (!confirm('Permanent deletion? This cannot be undone.')) return;
     setDeletingId(item.id);
 
-    // Soft delete from DB (Storage file can be purged via cron or manual cleanup)
     const { error: dbErr } = await supabase
       .from('media')
       .update({ is_deleted: true, deleted_at: new Date().toISOString() })
@@ -154,7 +130,7 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
     if (dbErr) {
       toast.error(`Delete failed: ${dbErr.message}`);
     } else {
-      toast.success('Media removed successfully');
+      toast.success('Asset removed');
       setItems((prev) => prev.filter((m) => m.id !== item.id));
     }
     setDeletingId(null);
@@ -166,32 +142,30 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
     handleFiles(e.dataTransfer.files);
   };
 
-  const getFileName = (url: string) => url.split('/').pop() || 'Unknown File';
+  const getFileName = (url: string) => url.split('/').pop() || 'Untitled Asset';
 
   return (
     <div className="space-y-6">
        
-      {/* ── Search Bar ──────────────────────────────────────────────── */}
-      <Card className="rounded-3xl shadow-none border-[var(--color-border)] bg-[var(--color-surface)]">
-        <CardContent className="p-4 sm:p-5 flex items-center">
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" />
-            <Input 
-              placeholder="Search media by filename..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-11 w-full bg-black/20"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      {/* ── Search & Filter ── */}
+      <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none">
+        <div className="relative">
+          <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400" />
+          <input 
+            placeholder="Search cloud assets..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full h-14 pl-12 pr-4 rounded-2xl bg-white dark:bg-[#1b1929] border-none shadow-sm focus:ring-2 focus:ring-indigo-500/20 transition-all font-bold text-sm"
+          />
+        </div>
+      </PresenceCard>
 
-      {/* ── Upload Area ──────────────────────────────────────────────── */}
+      {/* ── Drag & Drop Upload ── */}
       <div
-        className={`relative border border-dashed rounded-[2rem] p-10 text-center transition-all duration-300 cursor-pointer group bg-[var(--color-surface)]
+        className={`relative border-2 border-dashed rounded-[2.5rem] p-12 text-center transition-all duration-300 cursor-pointer group bg-white dark:bg-[#1b1929]
           ${dragOver
-            ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 scale-[1.01]'
-            : 'border-[var(--color-border)] hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-primary)]/5'
+            ? 'border-[#5c4ae4] bg-indigo-50/50 dark:bg-indigo-500/10 scale-[1.01]'
+            : 'border-indigo-100 dark:border-white/5 hover:border-indigo-300'
           }
           ${uploading ? 'pointer-events-none opacity-80' : ''}`}
         onClick={() => !uploading && fileInputRef.current?.click()}
@@ -199,113 +173,98 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
       >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          multiple
-          className="hidden"
-          onChange={(e) => handleFiles(e.target.files)}
-        />
+        <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleFiles(e.target.files)} />
 
         {uploading ? (
-          <div className="flex flex-col items-center justify-center gap-5">
-            <div className="w-14 h-14 rounded-full border-4 border-[var(--color-primary)]/20 border-t-[var(--color-primary)] animate-spin" />
-            <div className="space-y-2 w-full max-w-sm">
-               <div className="flex justify-between text-xs font-bold text-white">
-                  <span>Uploading files...</span>
-                  <span className="tabular-nums">{uploadProgress}%</span>
-               </div>
-               <div className="w-full h-2.5 bg-black/40 rounded-full overflow-hidden">
-                 <div
-                   className="h-full bg-[var(--color-primary)] rounded-full transition-all duration-300"
-                   style={{ width: `${uploadProgress}%` }}
-                 />
-               </div>
+          <div className="flex flex-col items-center justify-center gap-6">
+            <div className="relative">
+               <div className="w-20 h-20 rounded-full border-4 border-indigo-100 border-t-[#5c4ae4] animate-spin" />
+               <div className="absolute inset-0 flex items-center justify-center font-black text-xs text-[#5c4ae4]">{uploadProgress}%</div>
             </div>
+            <p className="text-sm font-black uppercase tracking-widest text-[#5c4ae4]">Synchronising Assets...</p>
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-4">
-            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-inner
-              ${dragOver ? 'bg-[var(--color-primary)] text-black scale-110' : 'bg-black/20 border border-[var(--color-border)] text-[var(--color-muted)] group-hover:bg-[var(--color-primary)]/20 group-hover:text-[var(--color-primary)] group-hover:border-[var(--color-primary)]/30'}`}>
-               <UploadCloud className="w-8 h-8" />
+          <div className="flex flex-col items-center gap-5">
+            <div className={`w-20 h-20 rounded-3xl flex items-center justify-center transition-all duration-500 shadow-xl shadow-indigo-500/10
+              ${dragOver ? 'bg-[#5c4ae4] text-white scale-110 rotate-6' : 'bg-indigo-50 dark:bg-indigo-500/10 text-[#5c4ae4] group-hover:scale-105 group-hover:-rotate-3'}`}>
+               <UploadCloud className="w-10 h-10" />
             </div>
             <div>
-              <p className="text-base font-bold text-white transition-colors">
-                {dragOver ? 'Drop files now...' : 'Drag & Drop files or click to browse'}
+              <p className="text-xl font-black text-[#1b1929] dark:text-white">
+                {dragOver ? 'Release to Upload' : 'Deploy Assets to Cloud'}
               </p>
-              <p className="text-xs text-[var(--color-muted)] font-medium mt-1">Supports highly optimized formats (PNG, JPG, WEBP, GIF) up to 5MB</p>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-2">Maximum resolution supported · 10MB Limit</p>
             </div>
           </div>
         )}
       </div>
 
-      {/* ── Media Grid ──────────────────────────────────────────────── */}
+      {/* ── Assets Display ── */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between px-1">
-          <p className="text-xs text-[var(--color-muted)] font-bold uppercase tracking-widest">
-            {filteredItems.length} Result{filteredItems.length !== 1 ? 's' : ''} Found
-          </p>
+        <div className="flex items-center justify-between px-2">
+           <div>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                {filteredItems.length} Identified Assets
+              </p>
+           </div>
+           <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] font-black text-emerald-500 uppercase">Live connection</span>
+           </div>
         </div>
 
         {filteredItems.length === 0 ? (
-          <div className="py-24 text-center flex flex-col items-center justify-center gap-4 bg-[var(--color-surface)] border border-dashed border-[var(--color-border)] rounded-[2rem] shadow-none">
-            <ImageIcon className="w-12 h-12 opacity-20 text-[var(--color-muted)]" />
-            <div>
-              <p className="text-white font-bold text-lg">No media found</p>
-              <p className="text-[var(--color-muted)] text-sm mt-0.5">Start uploading or adjust your search.</p>
-            </div>
-          </div>
+          <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
+            <ImageIcon className="w-16 h-16 mb-5 text-indigo-100" />
+            <p className="font-black text-xl text-gray-400 uppercase tracking-widest">Vault is Empty</p>
+          </PresenceCard>
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {visibleItems.map((item) => {
                 const isCopied = copiedId === item.id;
-                const isDeleting = deletingId === item.id;
                 const fileName = getFileName(item.url);
 
                 return (
-                  <div
+                  <PresenceCard
                     key={item.id}
-                    className={`group relative bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl overflow-hidden transition-all duration-300 hover:border-[var(--color-muted)] hover:shadow-xl hover:shadow-black/20
-                      ${isDeleting ? 'opacity-40 scale-[0.98] pointer-events-none' : ''}`}
+                    noPadding
+                    className={`group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 active:scale-[0.98]
+                      ${deletingId === item.id ? 'opacity-40 grayscale' : ''}`}
                   >
-                    {/* Visual Preview */}
-                    <div className="aspect-[4/3] bg-black/20 relative overflow-hidden">
-                       <img
-                         src={item.url}
-                         alt="Media Preview"
-                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                         loading="lazy"
-                       />
+                    <div className="aspect-square relative overflow-hidden bg-gray-50 dark:bg-white/5">
+                       <img src={item.url} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
                        
-                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                       <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
                           <div className="flex gap-2">
-                            <Button size="sm" variant={isCopied ? "primary" : "secondary"} className={`flex-1 h-8 rounded-xl text-[10px] font-black tracking-wider uppercase transition-all ${isCopied ? 'bg-emerald-500 text-black hover:bg-emerald-400 border-none' : 'bg-white/90 text-black hover:bg-white border-none'}`} onClick={() => handleCopy(item)}>
-                               {isCopied ? <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> : <Copy className="w-3.5 h-3.5 mr-1" />}
-                               {isCopied ? 'Copied' : 'Copy'}
-                            </Button>
-                            <Button size="icon" variant="destructive" className="h-8 w-8 rounded-xl shrink-0" onClick={() => handleDelete(item)}>
-                               <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
+                             <button onClick={() => handleCopy(item)} className={`flex-1 h-9 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-wider transition-all shadow-lg ${isCopied ? 'bg-emerald-500 text-white' : 'bg-white text-black hover:bg-indigo-50'}`}>
+                                {isCopied ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                                {isCopied ? 'Copied' : 'Link'}
+                             </button>
+                             <button onClick={() => handleDelete(item)} className="w-9 h-9 rounded-xl bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 shadow-lg">
+                                <Trash2 className="w-4 h-4" />
+                             </button>
                           </div>
                        </div>
                     </div>
-
-                    {/* Meta Detail Area */}
-                    <div className="p-3 bg-[var(--color-surface)] relative z-10 border-t border-[var(--color-border)]">
-                       <p className="text-xs font-bold text-white truncate mb-1" title={fileName}>{fileName}</p>
-                       <p className="text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-widest">{new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                    <div className="p-3">
+                       <p className="text-[11px] font-black text-[#1b1929] dark:text-white truncate" title={fileName}>{fileName}</p>
+                       <div className="flex items-center justify-between mt-1">
+                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-tighter">
+                             {new Date(item.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                          </p>
+                          <Wand2 className="w-3 h-3 text-indigo-200" />
+                       </div>
                     </div>
-                  </div>
+                  </PresenceCard>
                 );
               })}
             </div>
 
             {hasMore && (
-              <div className="pt-6 pb-2 text-center">
-                <Button variant="outline" onClick={() => setPage(p => p + 1)} className="rounded-full h-10 px-6 border-[var(--color-border)] text-[var(--color-muted)] hover:text-white hover:bg-white/5">
-                  <ChevronDown className="w-4 h-4 mr-1.5" /> Load More Images
+              <div className="pt-8 text-center">
+                <Button variant="outline" onClick={() => setPage(p => p + 1)} className="rounded-2xl h-12 px-8 border-indigo-100 dark:border-white/5 text-gray-400 hover:text-[#5c4ae4] hover:bg-indigo-50 transition-all font-black uppercase tracking-widest text-[10px]">
+                  <ChevronDown className="w-4 h-4 mr-2" /> Decrypt more assets
                 </Button>
               </div>
             )}

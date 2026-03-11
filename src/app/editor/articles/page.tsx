@@ -1,33 +1,34 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Card, CardContent } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { ChevronLeft, Plus, Eye, Edit2, FileText, BarChart2 } from 'lucide-react';
+import { ChevronLeft, Plus, Eye, Edit2, FileText, BarChart2, Bell, Sparkles } from 'lucide-react';
+import { 
+  PresenceWrapper, 
+  PresenceHeader,
+  PresenceCard,
+  PresenceButton 
+} from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
 
-// Status badge metadata
-const STATUS_META: Record<string, { label: string; cls: string }> = {
-  draft:     { label: 'Draft',     cls: 'bg-gray-500/10 text-[var(--color-muted)] border-gray-500/20' },
-  in_review: { label: 'In Review', cls: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
-  published: { label: 'Published', cls: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
-  archived:  { label: 'Archived',  cls: 'bg-purple-500/10 text-purple-500 border-purple-500/20' },
+const STATUS_META: Record<string, { label: string; color: string }> = {
+  draft:     { label: 'Cold Draft',     color: '#94a3b8' },
+  in_review: { label: 'Awaiting Audit', color: '#f59e0b' },
+  published: { label: 'Broadcast Live', color: '#10b981' },
+  archived:  { label: 'Deep Storage',  color: '#8b5cf6' },
 };
 
 export default async function EditorArticlesPage() {
   const supabase = await createClient();
 
-  // Auth + role guard
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
   const { data: profile } = await supabase
-    .from('profiles').select('role').eq('id', user.id).single();
+    .from('profiles').select('full_name, role').eq('id', user.id).single();
 
   if (!profile || profile.role !== 'editor') redirect('/login');
 
-  // ── Articles scoped to this editor ──────────────────────────────
   const { data: articles, error } = await supabase
     .from('articles')
     .select('id, title, status, slug, updated_at, created_at')
@@ -37,8 +38,6 @@ export default async function EditorArticlesPage() {
 
   if (error) console.error('Error fetching articles:', error);
 
-  // ── View counts (join article_views) ────────────────────────────
-  // Fetch all view rows for this author's articles in one query
   const articleIds = (articles ?? []).map(a => a.id);
   let viewCounts: Record<string, number> = {};
 
@@ -53,112 +52,91 @@ export default async function EditorArticlesPage() {
     }
   }
 
+  const initials = (profile?.full_name || 'E').charAt(0).toUpperCase();
+
   return (
-    <div className="font-sans antialiased max-w-3xl mx-auto py-2">
-      {/* ── Header ──────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between mb-8 mt-4">
-        <div className="flex items-center gap-4">
-          <Button asChild variant="outline" size="icon" className="rounded-full w-10 h-10 border-[var(--color-border)] text-[var(--color-muted)]">
-            <Link href="/editor">
-              <ChevronLeft className="w-5 h-5" />
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl font-black tracking-tight leading-tight">My Articles</h1>
-            <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
-              {articles?.length ?? 0} article{articles?.length !== 1 ? 's' : ''}
-            </p>
+    <PresenceWrapper>
+      <PresenceHeader 
+        title="Presence"
+        roleLabel={`Editor Registry · ${articles?.length ?? 0} Nodes`}
+        initials={initials}
+        icon1={Bell}
+        icon2={Plus}
+        onIcon2Click={() => window.location.href = '/editor/articles/new'}
+      />
+      
+      <div className="px-5 -mt-12 pb-10 space-y-6 relative z-20 max-w-4xl mx-auto">
+        
+        {/* Workflow Legend */}
+        <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-5 flex flex-wrap gap-4 items-center justify-center">
+          {Object.entries(STATUS_META).map(([key, meta]) => (
+            <div key={key} className="flex items-center gap-2">
+               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: meta.color }} />
+               <span className="text-[10px] font-black uppercase tracking-widest text-indigo-300">{meta.label}</span>
+            </div>
+          ))}
+        </PresenceCard>
+
+        {/* Article Grid */}
+        {!articles || articles.length === 0 ? (
+          <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
+            <FileText className="w-16 h-16 mb-5 text-indigo-100" />
+            <p className="font-black text-xl text-gray-400 uppercase tracking-widest">Workspace Empty</p>
+            <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mt-2">Initialize your first narrative node</p>
+          </PresenceCard>
+        ) : (
+          <div className="space-y-4">
+            {articles.map(article => {
+              const status = article.status ?? 'draft';
+              const meta   = STATUS_META[status] || STATUS_META.draft;
+              const views  = viewCounts[article.id] ?? 0;
+
+              return (
+                <PresenceCard key={article.id} noPadding className="group overflow-hidden">
+                   <div className="flex items-stretch min-h-[100px]">
+                      {/* Status Strip */}
+                      <div className="w-2 shrink-0 transition-opacity group-hover:opacity-60" style={{ backgroundColor: meta.color }} />
+                      
+                      <div className="flex-1 p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                         <div className="flex items-center gap-5 min-w-0 flex-1">
+                            <div className="w-14 h-14 rounded-2xl bg-gray-50 dark:bg-white/5 flex items-center justify-center text-[#5c4ae4] shrink-0 shadow-inner group-hover:scale-110 transition-transform">
+                               <Sparkles className="w-7 h-7" />
+                            </div>
+                            <div className="min-w-0">
+                               <h2 className="text-xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight truncate group-hover:text-[#5c4ae4] transition-colors">{article.title}</h2>
+                               <div className="flex items-center gap-3 mt-1 flex-wrap">
+                                  <span className="px-3 py-1 rounded-lg bg-gray-50 text-[9px] font-black uppercase tracking-widest text-gray-400 border border-gray-100">
+                                    {meta.label}
+                                  </span>
+                                  <span className="flex items-center gap-1.5 text-[9px] font-black text-indigo-300 uppercase tracking-[0.2em]">
+                                     <BarChart2 className="w-3 h-3" /> {views.toLocaleString()} Intercepts
+                                  </span>
+                               </div>
+                            </div>
+                         </div>
+
+                         <div className="flex items-center gap-3 shrink-0">
+                            {status === 'published' && article.slug && (
+                              <Link href={`/articles/${article.slug}`} target="_blank">
+                                <button className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-all shadow-sm">
+                                   <Eye className="w-5 h-5" />
+                                </button>
+                              </Link>
+                            )}
+                            <Link href={`/editor/articles/${article.id}/edit`}>
+                               <PresenceButton className="px-8 h-12 bg-indigo-50 border-none text-[#5c4ae4] hover:bg-[#5c4ae4] hover:text-white font-black text-[10px] uppercase tracking-widest">
+                                  Modify Node
+                               </PresenceButton>
+                            </Link>
+                         </div>
+                      </div>
+                   </div>
+                </PresenceCard>
+              );
+            })}
           </div>
-        </div>
-        <Button asChild className="rounded-full shadow-sm pr-5">
-          <Link href="/editor/articles/new">
-            <Plus className="w-5 h-5 mr-1" />
-            <span className="hidden sm:inline">New Article</span>
-            <span className="sm:hidden">New</span>
-          </Link>
-        </Button>
+        )}
       </div>
-
-      {/* ── Workflow legend ──────────────────────────────────────── */}
-      <div className="flex flex-wrap gap-2 mb-6 px-1">
-        {Object.entries(STATUS_META).map(([key, meta]) => (
-          <span key={key} className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${meta.cls}`}>
-            {meta.label}
-          </span>
-        ))}
-      </div>
-
-      {/* ── Article list ─────────────────────────────────────────── */}
-      {!articles || articles.length === 0 ? (
-        <Card className="py-20 text-center flex flex-col items-center bg-[var(--color-surface)] border-[var(--color-border)] border-dashed rounded-[2rem] shadow-none">
-          <FileText className="w-12 h-12 mb-4 opacity-20 text-[var(--color-muted)]" />
-          <p className="font-bold mb-1 text-lg tracking-tight">No articles yet</p>
-          <p className="text-sm text-[var(--color-muted)]">Create your first article to get started.</p>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {articles.map(article => {
-            const status = article.status ?? 'draft';
-            const meta   = STATUS_META[status] ?? STATUS_META.draft;
-            const views  = viewCounts[article.id] ?? 0;
-
-            return (
-              <Card key={article.id} hoverable className="rounded-3xl border-transparent bg-[var(--color-surface)] shadow-none flex p-1 items-stretch">
-                {/* Status indicator bar */}
-                <div className={`w-1.5 self-stretch rounded-full flex-shrink-0 my-3 ml-3 ${
-                  status === 'published' ? 'bg-emerald-500' :
-                  status === 'in_review' ? 'bg-amber-500' :
-                  status === 'archived'  ? 'bg-purple-500' :
-                  'bg-[var(--color-muted)]/20'
-                }`} />
-
-                <CardContent className="flex-1 p-5 pl-4 flex flex-col sm:flex-row gap-4 sm:items-center min-w-0">
-                  {/* Main info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start gap-3 mb-2 flex-wrap">
-                      <h3 className="font-bold text-lg leading-tight tracking-tight">{article.title}</h3>
-                      <span className={`flex-shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border mt-0.5 ${meta.cls}`}>
-                        {meta.label}
-                      </span>
-                    </div>
-
-                    {/* Meta row: updated + views */}
-                    <div className="flex items-center gap-2 text-[12px] text-[var(--color-muted)] font-semibold mt-1">
-                      <span>
-                        Updated {new Date(article.updated_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                      </span>
-                      <span className="w-1 h-1 bg-[var(--color-border)] rounded-full hidden sm:block" />
-                      <span className="flex items-center gap-1.5 bg-[var(--color-surface-2)] px-2 py-0.5 rounded-md">
-                        <BarChart2 className="w-3.5 h-3.5" />
-                        {views.toLocaleString()} view{views !== 1 ? 's' : ''}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    {/* View in reader (only if published or has slug) */}
-                    {article.slug && status === 'published' && (
-                      <Button asChild variant="outline" size="sm" className="hidden sm:flex text-[var(--color-muted)] hover:text-[var(--color-text)] bg-transparent border-[var(--color-border)]">
-                        <Link href={`/articles/${article.slug}`} target="_blank">
-                          <Eye className="w-4 h-4 sm:mr-1.5" />
-                          <span className="hidden sm:inline">View</span>
-                        </Link>
-                      </Button>
-                    )}
-                    <Button asChild variant="outline" size="sm" className="w-full sm:w-auto text-blue-500 border-blue-500/20 bg-blue-500/5 hover:bg-blue-500/10 hover:text-blue-500">
-                      <Link href={`/editor/articles/${article.id}/edit`}>
-                        <Edit2 className="w-4 h-4 sm:mr-1.5" />
-                        <span className="hidden sm:inline">Edit</span>
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-    </div>
+    </PresenceWrapper>
   );
 }

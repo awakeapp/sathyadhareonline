@@ -2,12 +2,14 @@
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Input, Select } from '@/components/ui/Input';
 import { toast } from 'sonner';
 import { createSequelAction, updateSequelAction, deleteSequelAction } from './actions';
-import { Settings, Pen, Trash2, Layers, Search, Image as ImageIcon, X } from 'lucide-react';
+import { Settings, Pen, Trash2, Layers, Search, Image as ImageIcon, X, Box } from 'lucide-react';
+import { 
+  PresenceCard, 
+  PresenceButton 
+} from '@/components/PresenceUI';
 
 interface Sequel {
   id: string;
@@ -22,11 +24,9 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
   const [isPending, startTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Modal State
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   
-  // Form State
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [bannerUrl, setBannerUrl] = useState('');
@@ -53,7 +53,7 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
   };
 
   const handleSave = () => {
-    if (!title) return toast.error('Title is required');
+    if (!title) return toast.error('Check Title');
     
     startTransition(async () => {
       let res;
@@ -66,129 +66,137 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
       if (res?.error) {
         toast.error(res.error);
       } else {
-        toast.success(editingId ? 'Sequel updated' : 'Sequel created');
+        toast.success('Matrix Modified');
         setShowModal(false);
       }
     });
   };
 
   const handleDelete = (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete the sequel "${name}"?`)) return;
+    if (!confirm(`Wipe "${name}"?`)) return;
     startTransition(async () => {
       const res = await deleteSequelAction(id);
       if (res?.error) toast.error(res.error);
-      else toast.success('Sequel deleted');
+      else toast.success('Removed');
     });
   };
 
   return (
     <div className="space-y-6">
       
-      {/* ── Toolbar ────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between bg-[var(--color-surface)] p-4 rounded-3xl border border-[var(--color-border)]">
-        <div className="relative flex-1 max-w-md">
-           <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" />
-           <Input 
-             placeholder="Search sequels..." 
-             value={searchQuery}
-             onChange={(e) => setSearchQuery(e.target.value)}
-             className="pl-10 h-11 w-full bg-black/20"
-           />
+      {/* ── Filter Bar ── */}
+      <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400" />
+            <input 
+               placeholder="Search registry..." 
+               value={searchQuery}
+               onChange={(e) => setSearchQuery(e.target.value)}
+               className="w-full h-14 pl-12 pr-4 rounded-2xl bg-white dark:bg-[#1b1929] border-none shadow-sm focus:ring-2 focus:ring-indigo-500/20 font-bold text-sm"
+            />
+          </div>
+          <PresenceButton onClick={openCreate} className="h-14 px-8 bg-[#5c4ae4] font-black tracking-widest text-[10px] uppercase shadow-xl shadow-indigo-500/20">
+             New Collection
+          </PresenceButton>
         </div>
-        <Button onClick={openCreate} className="h-11 rounded-xl px-6 font-bold shadow-md shrink-0 bg-[var(--color-primary)] text-black hover:bg-[var(--color-primary)]/90">
-           Create New Sequel
-        </Button>
-      </div>
+      </PresenceCard>
 
-      {/* ── Grid ──────────────────────────────────────────────────── */}
+      {/* ── Grid Matrix ── */}
       {filteredSequels.length === 0 ? (
-        <Card className="py-24 text-center border-dashed border-[var(--color-border)] rounded-[2rem] shadow-none bg-[var(--color-surface)]">
-          <Layers className="w-12 h-12 mx-auto mb-4 opacity-20 text-[var(--color-muted)]" />
-          <h3 className="font-bold text-lg text-white">No sequels found</h3>
-          <p className="text-sm text-[var(--color-muted)] mt-1">Create your first sequel to group articles together.</p>
-        </Card>
+        <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
+          <Layers className="w-16 h-16 mb-5 text-indigo-100" />
+          <p className="font-black text-xl text-gray-400 uppercase tracking-widest">No Sequences</p>
+        </PresenceCard>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredSequels.map(s => (
-             <Card key={s.id} className="overflow-hidden border border-[var(--color-border)] rounded-3xl bg-[var(--color-surface)] group shadow-none hover:border-[var(--color-primary)]/40 transition-all duration-300">
-                {/* Visual Header */}
-                <div className="h-32 bg-black/30 relative flex items-center justify-center overflow-hidden border-b border-[var(--color-border)]">
+             <PresenceCard key={s.id} noPadding className="group overflow-hidden">
+                <div className="h-40 bg-gray-50 dark:bg-white/5 relative flex items-center justify-center overflow-hidden">
                    {s.banner_image ? (
-                     <img src={s.banner_image} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                     <img src={s.banner_image} alt={s.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                    ) : (
-                     <ImageIcon className="w-8 h-8 opacity-20 text-[var(--color-muted)]" />
+                     <ImageIcon className="w-10 h-10 opacity-20 text-indigo-300" />
                    )}
-                   <div className="absolute top-2 right-2">
-                     <span className={`inline-flex px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider backdrop-blur-md border ${
-                       s.status === 'published' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-black/40 text-[var(--color-muted)] border-white/10'
+                   <div className="absolute top-4 right-4">
+                     <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest backdrop-blur-md border ${
+                       s.status === 'published' ? 'bg-emerald-500/80 text-white border-white/20' : 'bg-black/60 text-white/60 border-white/10'
                      }`}>
                         {s.status}
                      </span>
                    </div>
                 </div>
 
-                <CardContent className="p-5 flex flex-col justify-between" style={{ minHeight: '140px' }}>
-                   <div>
-                     <h3 className="text-lg font-bold text-white leading-tight tracking-tight mb-1.5 truncate" title={s.title}>{s.title}</h3>
-                     <p className="text-sm text-[var(--color-muted)] line-clamp-2 leading-relaxed h-10">
-                        {s.description || 'No description provided.'}
-                     </p>
-                   </div>
+                <div className="p-6">
+                   <h3 className="text-lg font-black text-[#1b1929] dark:text-white mb-2 truncate">{s.title}</h3>
+                   <p className="text-xs font-medium text-gray-400 line-clamp-2 h-10 leading-relaxed italic">
+                      {s.description || 'No description provided.'}
+                   </p>
                    
-                   <div className="flex items-center gap-2 mt-4 pt-4 border-t border-[var(--color-border)]">
-                     <Button variant="outline" size="sm" asChild className="flex-1 h-9 rounded-xl border-emerald-500/30 text-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10 hover:text-emerald-400">
-                        <Link href={`/admin/sequels/${s.id}/edit`}>
-                           <Layers className="w-3.5 h-3.5 mr-1.5" /> 
-                           {s.article_count} Article{s.article_count !== 1 ? 's' : ''}
-                        </Link>
-                     </Button>
-                     <Button variant="outline" size="sm" className="h-9 px-3 rounded-xl border-blue-500/30 text-blue-400 bg-blue-500/5 hover:bg-blue-500/10" onClick={() => openEdit(s)}>
-                        <Pen className="w-3.5 h-3.5" />
-                     </Button>
-                     <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl border-red-500/30 text-red-500 bg-red-500/5 hover:bg-red-500/10 shrink-0" onClick={() => handleDelete(s.id, s.title)} loading={isPending}>
-                        <Trash2 className="w-3.5 h-3.5" />
-                     </Button>
+                   <div className="flex items-center gap-3 mt-6 pt-6 border-t border-indigo-50 dark:border-white/5">
+                     <Link href={`/admin/sequels/${s.id}/edit`} className="flex-1 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-[#5c4ae4] hover:bg-[#5c4ae4] hover:text-white transition-all font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
+                        <Box className="w-4 h-4" /> {s.article_count} Units
+                     </Link>
+                     <button className="w-12 h-12 rounded-xl bg-white dark:bg-[#1b1929] text-gray-400 hover:text-[#5c4ae4] shadow-sm flex items-center justify-center" onClick={() => openEdit(s)}>
+                        <Pen className="w-5 h-5" />
+                     </button>
+                     <button className="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm flex items-center justify-center" onClick={() => handleDelete(s.id, s.title)}>
+                        <Trash2 className="w-5 h-5" />
+                     </button>
                    </div>
-                </CardContent>
-             </Card>
+                </div>
+             </PresenceCard>
           ))}
         </div>
       )}
 
-      {/* ── Modal ─────────────────────────────────────────────────── */}
+      {/* ── MODAL ── */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-           <Card className="w-full max-w-lg bg-[#181623] border-[var(--color-border)] shadow-2xl rounded-3xl animate-in zoom-in-95 duration-200">
-              <div className="flex items-center justify-between p-6 border-b border-[var(--color-border)]">
-                 <h2 className="text-xl font-black text-white">{editingId ? 'Edit Sequel' : 'Create New Sequel'}</h2>
-                 <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 text-[var(--color-muted)] hover:text-white" onClick={() => setShowModal(false)}>
-                    <X className="w-4 h-4" />
-                 </Button>
-              </div>
-              <CardContent className="p-6 space-y-4">
-                 <div className="space-y-1.5">
-                   <label className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider">Sequel Title</label>
-                   <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Chronicles of Reality" className="bg-black/20" />
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#1b1929]/80 backdrop-blur-xl animate-in fade-in duration-300">
+           <div className="w-full max-w-lg bg-white dark:bg-[#181623] rounded-[2.5rem] shadow-2xl animate-in zoom-in-95 duration-300">
+              <div className="p-8 border-b border-indigo-50 dark:border-white/5 flex items-center justify-between">
+                 <div>
+                    <h2 className="text-2xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight">{editingId ? 'Modify Sequence' : 'Create Node'}</h2>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Registry Entry System</p>
                  </div>
-                 <div className="space-y-1.5">
-                   <label className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider">Description</label>
-                   <textarea 
-                     value={description} onChange={e => setDescription(e.target.value)} 
-                     placeholder="Brief overview of this sequel collection..." 
-                     className="w-full px-4 py-3 rounded-xl border border-[var(--color-border)] focus:ring-2 focus:ring-[var(--color-primary)] transition-shadow text-white bg-black/20 placeholder-white/20 resize-y"
-                     rows={3}
+                 <button className="w-10 h-10 rounded-full bg-gray-50 dark:bg-white/5 text-gray-400 flex items-center justify-center" onClick={() => setShowModal(false)}>
+                    <X className="w-5 h-5" />
+                 </button>
+              </div>
+              
+              <div className="p-8 space-y-6">
+                 <div className="space-y-2">
+                   <label className="text-[10px] font-black uppercase tracking-widest text-[#5c4ae4]">Identification Label</label>
+                   <input 
+                     value={title} 
+                     onChange={e => setTitle(e.target.value)} 
+                     placeholder="e.g. Volume I: The Genesis" 
+                     className="w-full h-12 px-5 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-sm font-bold shadow-inner" 
                    />
                  </div>
-                 <div className="space-y-1.5">
-                   <label className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider">Cover Image URL</label>
-                   <Input value={bannerUrl} onChange={e => setBannerUrl(e.target.value)} placeholder="https://..." className="bg-black/20" />
-                   <p className="text-[10px] text-[var(--color-muted)]">Upload an image in the Media Library to get a public URL.</p>
+                 <div className="space-y-2">
+                   <label className="text-[10px] font-black uppercase tracking-widest text-[#5c4ae4]">Narrative Overview</label>
+                   <textarea 
+                     value={description} onChange={e => setDescription(e.target.value)} 
+                     placeholder="Collection summary..." 
+                     className="w-full p-5 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-sm font-bold shadow-inner placeholder-gray-300 resize-none h-24"
+                   />
                  </div>
-                 <Button onClick={handleSave} className="w-full h-12 rounded-xl text-black font-bold mt-4" loading={isPending}>
-                   {editingId ? 'Save Changes' : 'Create Sequel'}
-                 </Button>
-              </CardContent>
-           </Card>
+                 <div className="space-y-2">
+                   <label className="text-[10px] font-black uppercase tracking-widest text-[#5c4ae4]">Visual Banner (Asset URL)</label>
+                   <input 
+                     value={bannerUrl} 
+                     onChange={e => setBannerUrl(e.target.value)} 
+                     placeholder="https://..." 
+                     className="w-full h-12 px-5 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-sm font-bold shadow-inner" 
+                   />
+                 </div>
+                 
+                 <PresenceButton onClick={handleSave} className="w-full h-14 bg-[#5c4ae4] font-black tracking-widest text-xs uppercase shadow-xl shadow-indigo-500/20" loading={isPending}>
+                    {editingId ? 'Synchronize Data' : 'Initialize Node'}
+                 </PresenceButton>
+              </div>
+           </div>
         </div>
       )}
 

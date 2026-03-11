@@ -1,9 +1,25 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
+import { ChevronLeft, Bell, Sparkles, Send } from 'lucide-react';
+import { 
+  PresenceWrapper, 
+  PresenceHeader,
+  PresenceCard,
+  PresenceButton 
+} from '@/components/PresenceUI';
 
-export default function NewFridayMessagePage() {
+export default async function NewFridayMessagePage() {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name, role')
+    .eq('id', user.id)
+    .single();
 
   async function createMessageAction(formData: FormData) {
     'use server';
@@ -31,66 +47,74 @@ export default function NewFridayMessagePage() {
     redirect('/admin/friday');
   }
 
+  const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
+
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-10">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">New Friday Message</h1>
-        <Link 
-          href="/admin/friday"
-          className="text-gray-600 hover:text-gray-900 font-medium bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition-colors"
-        >
-          Cancel
-        </Link>
+    <PresenceWrapper>
+      <PresenceHeader 
+        title="Presence"
+        roleLabel="Temporal Dispatch · Friday Node"
+        initials={initials}
+        icon1={Bell}
+        icon2={ChevronLeft}
+        onIcon2Click={() => window.location.href = '/admin/friday'}
+      />
+      
+      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20 max-w-3xl mx-auto">
+        <PresenceCard className="p-0 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+           <div className="p-10 border-b border-indigo-50 dark:border-white/5 bg-indigo-50/10 flex items-center gap-5">
+              <div className="w-14 h-14 rounded-2xl bg-[#5c4ae4] flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
+                 <Sparkles className="w-8 h-8" />
+              </div>
+              <div>
+                 <h2 className="text-2xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight">Initialize Message</h2>
+                 <p className="text-[10px] font-black text-[#5c4ae4] uppercase tracking-widest mt-1">New communication node deployment</p>
+              </div>
+           </div>
+
+           <form action={createMessageAction} className="p-10 space-y-10">
+              <div className="space-y-3">
+                <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Dispatch Title</label>
+                <input 
+                  type="text" 
+                  name="title" 
+                  placeholder="e.g. Jummah Reflection - Week 42"
+                  className="w-full h-16 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-md font-bold shadow-inner" 
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Visual Asset (URL)</label>
+                <input 
+                  type="text" 
+                  name="image_url" 
+                  placeholder="https://images.unsplash.com/..."
+                  className="w-full h-16 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-sm font-bold shadow-inner" 
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Manifest Message</label>
+                <textarea 
+                  name="message_text" 
+                  rows={8}
+                  placeholder="The spiritual essence of this communication..."
+                  className="w-full p-8 rounded-[2rem] bg-gray-50 dark:bg-[#1b1929] border-none text-md font-bold shadow-inner text-[#1b1929] dark:text-white leading-relaxed resize-none focus:ring-0"
+                />
+                <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest text-right">Encoded spiritual data packet</p>
+              </div>
+
+              <div className="flex justify-end pt-4 border-t border-indigo-50 dark:border-white/5">
+                 <button 
+                  type="submit" 
+                  className="h-16 px-12 bg-[#5c4ae4] text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-3"
+                >
+                  <Send className="w-5 h-5" /> Deploy Node
+                </button>
+              </div>
+           </form>
+        </PresenceCard>
       </div>
-
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <form action={createMessageAction} className="p-8 space-y-8">
-          
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="title" className="block text-sm font-semibold text-gray-700">Title</label>
-              <input 
-                type="text" 
-                id="title" 
-                name="title" 
-                placeholder="e.g., Jummah Mubarak - Week 1"
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-900 placeholder-gray-400"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="image_url" className="block text-sm font-semibold text-gray-700">Image URL</label>
-              <input 
-                type="text" 
-                id="image_url" 
-                name="image_url" 
-                placeholder="e.g., https://example.com/jummah.jpg"
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-900 placeholder-gray-400"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="message_text" className="block text-sm font-semibold text-gray-700">Message Text</label>
-              <textarea 
-                id="message_text" 
-                name="message_text" 
-                rows={6}
-                placeholder="Write your Friday greetings or reflection here..."
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-900 placeholder-gray-400 resize-y"
-              />
-            </div>
-          </div>
-
-          <div className="pt-4 flex justify-end items-center gap-4 border-t border-gray-100">
-            <button 
-              type="submit" 
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-8 py-3 rounded-lg shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
-            >
-              Create Message
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    </PresenceWrapper>
   );
 }

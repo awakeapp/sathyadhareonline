@@ -2,10 +2,13 @@
 
 import { useState, useTransition } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { Input, Textarea, Label } from '@/components/ui/Input';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from '@/components/ui/Modal';
-import { Mail, Download, Trash2, CheckCircle2, AlertCircle, Users } from 'lucide-react';
+import { Mail, Download, Trash2, CheckCircle2, AlertCircle, Users, SendPulse, X } from 'lucide-react';
+import { 
+  PresenceCard, 
+  PresenceButton 
+} from '@/components/PresenceUI';
 
 interface Subscriber { id: string; email: string; created_at: string; }
 
@@ -23,7 +26,6 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  // ── Export CSV ────────────────────────────────────────────────
   function handleExport() {
     const header = 'Email,Subscribed';
     const rows = subs.map(s =>
@@ -39,7 +41,6 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
     URL.revokeObjectURL(url);
   }
 
-  // ── Remove (unsubscribe) ────────────────────────────────────
   async function handleRemove(sub: Subscriber) {
     if (!confirm(`Unsubscribe ${sub.email}?`)) return;
     setRemovingId(sub.id);
@@ -54,13 +55,12 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
         setSubs(prev => prev.filter(s => s.id !== sub.id));
       } else {
         const j = await res.json();
-        alert(j.error ?? 'Failed to remove subscriber');
+        alert(j.error ?? 'Atomic Rejection');
       }
       setRemovingId(null);
     });
   }
 
-  // ── Send newsletter ─────────────────────────────────────────
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
     if (!subject.trim() || !body.trim()) return;
@@ -81,108 +81,138 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
     } else {
       const j = await res.json();
       setSendStatus('error');
-      setErrorMsg(j.error ?? 'Send failed');
+      setErrorMsg(j.error ?? 'Transmission Failed');
     }
   }
 
   return (
     <div className="space-y-6">
-      {/* ── Action bar ──────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center gap-3">
-        <Button onClick={() => setShowCompose(true)} className="rounded-full shadow-sm pr-5">
-          <Mail className="w-5 h-5 mr-1" />
-          <span className="font-bold text-sm">Compose Newsletter</span>
-        </Button>
-        <Button variant="outline" onClick={handleExport} className="rounded-full border-[var(--color-border)] text-[var(--color-muted)] hover:text-white transition-colors">
-          <Download className="w-4 h-4 mr-2" />
-          <span className="font-semibold text-sm">Export CSV</span>
-        </Button>
-      </div>
-
-      {/* ── Subscriber list ─────────────────────────────────────── */}
-      {subs.length === 0 ? (
-        <Card className="py-20 text-center flex flex-col items-center bg-[var(--color-surface)] border-[var(--color-border)] border-dashed rounded-[2rem] shadow-none">
-          <Users className="w-12 h-12 mb-4 opacity-20 text-[var(--color-muted)]" />
-          <p className="font-bold mb-1 text-lg tracking-tight">No subscribers yet</p>
-          <p className="text-sm text-[var(--color-muted)]">Readers who sign up for the newsletter will appear here.</p>
-        </Card>
-      ) : (
-        <Card className="bg-[var(--color-surface)] border-transparent rounded-[2rem] overflow-hidden shadow-none">
-          <div className="px-5 py-4 border-b border-[var(--color-border)] flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-muted)]">
-              {subs.length} Active Subscriber{subs.length !== 1 ? 's' : ''}
-            </p>
+      
+      {/* ── BROADCAST BAR ── */}
+      <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-5">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+             <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4]">
+                <Mail className="w-6 h-6" />
+             </div>
+             <div>
+                <h2 className="text-xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight">Signal Broadcast</h2>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-0.5">Control direct communication nodes</p>
+             </div>
           </div>
-          <div className="divide-y divide-[var(--color-border)]">
+          <div className="flex gap-3">
+            <PresenceButton onClick={() => setShowCompose(true)} className="bg-[#5c4ae4] font-black tracking-widest text-[10px] uppercase shadow-xl shadow-indigo-500/20">
+               Compose Dispatch
+            </PresenceButton>
+            <PresenceButton onClick={handleExport} className="bg-white dark:bg-[#1b1929] !text-gray-400 hover:!text-[#5c4ae4] shadow-sm">
+               <Download className="w-5 h-5" />
+            </PresenceButton>
+          </div>
+        </div>
+      </PresenceCard>
+
+      {/* ── RECEIVER NETWORK ── */}
+      <PresenceCard noPadding>
+        <div className="p-8 border-b border-indigo-50 dark:border-white/5 flex items-center justify-between">
+           <div>
+              <h3 className="text-sm font-black text-[#1b1929] dark:text-white uppercase tracking-widest">Active Receivers</h3>
+              <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest mt-1">Verified communication channels</p>
+           </div>
+           <Users className="w-6 h-6 text-indigo-100" />
+        </div>
+        
+        {subs.length === 0 ? (
+          <div className="py-24 text-center flex flex-col items-center">
+             <Users className="w-16 h-16 mb-5 text-indigo-100" />
+             <p className="font-black text-xl text-gray-400 uppercase tracking-widest">Network Empty</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-indigo-50 dark:divide-white/5">
             {subs.map(sub => (
-              <div key={sub.id} className={`flex items-center px-5 py-4 transition-all ${removingId === sub.id ? 'opacity-40' : 'hover:bg-white/[0.02]'}`}>
+              <div key={sub.id} className={`flex items-center px-8 py-6 transition-all ${removingId === sub.id ? 'opacity-40 grayscale' : 'hover:bg-gray-50/30 dark:hover:bg-white/5'}`}>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">{sub.email}</p>
-                  <p className="text-xs text-[var(--color-muted)] mt-0.5">
-                    Subscribed {new Date(sub.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}
+                  <p className="text-sm font-black text-[#1b1929] dark:text-white truncate uppercase tracking-tight">{sub.email}</p>
+                  <p className="text-[10px] font-black text-gray-300 mt-1 uppercase tracking-widest">
+                    Link Established · {new Date(sub.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                   </p>
                 </div>
-                <Button
+                <button
                   onClick={() => handleRemove(sub)}
                   disabled={!!removingId || isPending}
-                  variant="outline"
-                  size="sm"
-                  className="ml-4 flex-shrink-0 text-red-500 border-red-500/20 bg-red-500/5 hover:bg-red-500/10 hover:text-red-500"
+                  className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm flex items-center justify-center shrink-0"
                 >
-                  <Trash2 className="w-3.5 h-3.5 mr-1" />
-                  {removingId === sub.id ? 'Removing…' : 'Remove'}
-                </Button>
+                  <Trash2 className="w-5 h-5" />
+                </button>
               </div>
             ))}
           </div>
-        </Card>
+        )}
+      </PresenceCard>
+
+      {/* ── DISPATCH MODAL ── */}
+      {showCompose && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#1b1929]/80 backdrop-blur-xl animate-in fade-in duration-300">
+           <div className="w-full max-w-2xl bg-white dark:bg-[#181623] rounded-[3rem] shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
+              <div className="p-10 border-b border-indigo-50 dark:border-white/5 flex items-center justify-between bg-indigo-50/30">
+                 <div>
+                    <h2 className="text-2xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight">Signal Dispatch</h2>
+                    <p className="text-[10px] font-black text-[#5c4ae4] uppercase tracking-widest mt-1">Targeting {subs.length} active nodes</p>
+                 </div>
+                 <button className="w-12 h-12 rounded-full bg-white dark:bg-[#1b1929] text-gray-400 flex items-center justify-center shadow-sm" onClick={() => setShowCompose(false)}>
+                    <X className="w-6 h-6" />
+                 </button>
+              </div>
+              
+              <form onSubmit={handleSend} className="p-10 space-y-8">
+                 <div className="space-y-3">
+                   <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Communication Subject</label>
+                   <input 
+                     value={subject} 
+                     onChange={e => setSubject(e.target.value)} 
+                     required 
+                     placeholder="Broadcasting: System Update..." 
+                     className="w-full h-14 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-sm font-bold shadow-inner" 
+                   />
+                 </div>
+                 <div className="space-y-3">
+                   <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Manifest Message</label>
+                   <textarea 
+                     value={body} 
+                     onChange={e => setBody(e.target.value)} 
+                     required 
+                     rows={10} 
+                     placeholder="Write the transmission content..." 
+                     className="w-full p-6 rounded-[2rem] bg-gray-50 dark:bg-[#1b1929] border-none text-sm font-bold shadow-inner placeholder-gray-300 resize-none"
+                   />
+                   <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest text-right">UTF-8 Plaintext Protocol Only</p>
+                 </div>
+
+                 <div className="flex flex-col gap-4">
+                   {sendStatus === 'error' && (
+                     <div className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-rose-50 text-rose-500 text-xs font-black uppercase tracking-widest">
+                       <AlertCircle className="w-5 h-5" /> {errorMsg}
+                     </div>
+                   )}
+                   {sendStatus === 'sent' && (
+                     <div className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-emerald-50 text-emerald-500 text-xs font-black uppercase tracking-widest">
+                       <CheckCircle2 className="w-5 h-5" /> Transmission Acknowledged
+                     </div>
+                   )}
+                   
+                   <PresenceButton 
+                     type="submit" 
+                     className="w-full h-16 bg-[#5c4ae4] font-black tracking-[0.2em] text-xs uppercase shadow-2xl shadow-indigo-500/20" 
+                     loading={sendStatus === 'sending'} 
+                     disabled={sendStatus === 'sending' || sendStatus === 'sent'}
+                   >
+                     {sendStatus === 'sent' ? 'DISPATCHED' : 'INITIALIZE BROADCAST'}
+                   </PresenceButton>
+                 </div>
+              </form>
+           </div>
+        </div>
       )}
 
-      {/* ══ COMPOSE MODAL ════════════════════════════════════════════ */}
-      <Modal open={showCompose} onOpenChange={(open) => {
-        if (!open && sendStatus !== 'sending') setShowCompose(false);
-      }}>
-        <ModalContent>
-          <ModalHeader>
-            <ModalTitle>Compose Newsletter</ModalTitle>
-            <ModalDescription>Sending to {subs.length} subscriber{subs.length !== 1 ? 's' : ''}</ModalDescription>
-          </ModalHeader>
-
-          <form onSubmit={handleSend} className="grid gap-4 py-4">
-            <div>
-              <Label>Subject</Label>
-              <Input value={subject} onChange={e => setSubject(e.target.value)} required placeholder="Your newsletter subject line" />
-            </div>
-            <div>
-              <Label>Message Body</Label>
-              <Textarea value={body} onChange={e => setBody(e.target.value)} required rows={8} placeholder="Write your newsletter content here…" className="resize-none" />
-              <p className="text-[10px] text-[var(--color-muted)] mt-1">Plain text only. This will be sent as a plain email.</p>
-            </div>
-
-            {sendStatus === 'error' && (
-              <div className="flex items-center gap-2 text-red-400 text-sm font-semibold">
-                <AlertCircle className="w-4 h-4" />
-                {errorMsg}
-              </div>
-            )}
-            {sendStatus === 'sent' && (
-              <div className="flex items-center gap-2 text-emerald-400 text-sm font-semibold">
-                <CheckCircle2 className="w-4 h-4" />
-                Newsletter sent successfully!
-              </div>
-            )}
-          </form>
-
-          <ModalFooter>
-             <Button type="button" variant="ghost" onClick={() => setShowCompose(false)} disabled={sendStatus === 'sending'}>
-               Cancel
-             </Button>
-             <Button onClick={handleSend} type="submit" variant="primary" loading={sendStatus === 'sending'} disabled={sendStatus === 'sending' || sendStatus === 'sent'}>
-               {sendStatus === 'sent' ? '✓ Sent' : 'Send'}
-             </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
     </div>
   );
 }

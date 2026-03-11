@@ -2,12 +2,25 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { ChevronLeft, Plus, Calendar, Settings, Eye } from 'lucide-react';
+import { ChevronLeft, Plus, Calendar, Settings, Eye, Bell, Sparkles } from 'lucide-react';
+import { 
+  PresenceWrapper, 
+  PresenceHeader,
+  PresenceCard 
+} from '@/components/PresenceUI';
 
 export default async function FridayMessagesPage() {
   const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name, role')
+    .eq('id', user.id)
+    .single();
 
   const { data: messages, error } = await supabase
     .from('friday_messages')
@@ -25,14 +38,10 @@ export default async function FridayMessagesPage() {
 
     const supabaseAction = await createClient();
 
-    const { error: preciseResetError } = await supabaseAction
+    await supabaseAction
       .from('friday_messages')
       .update({ is_published: false })
       .eq('is_published', true);
-
-    if (preciseResetError) {
-       console.error('Error resetting publish statuses:', preciseResetError);
-    }
 
     const { error: updateError } = await supabaseAction
       .from('friday_messages')
@@ -48,82 +57,71 @@ export default async function FridayMessagesPage() {
     redirect('/admin/friday');
   }
 
-  return (
-    <div className="font-sans antialiased max-w-3xl mx-auto py-2">
-      <div className="flex items-center justify-between mb-8 mt-4">
-        <div className="flex items-center gap-4">
-          <Button asChild variant="outline" size="icon" className="rounded-full w-10 h-10 border-[var(--color-border)] text-[var(--color-muted)]">
-            <Link href="/admin">
-              <ChevronLeft className="w-5 h-5" />
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl font-black tracking-tight leading-tight">Friday Messages</h1>
-            <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
-              {messages?.length || 0} messages
-            </p>
-          </div>
-        </div>
-        <Button asChild className="rounded-full shadow-sm pr-5">
-          <Link href="/admin/friday/new">
-            <Plus className="w-5 h-5 mr-1" />
-            <span className="hidden sm:inline">New Message</span>
-            <span className="sm:hidden">New</span>
-          </Link>
-        </Button>
-      </div>
+  const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
 
-      {!messages || messages.length === 0 ? (
-        <Card className="py-20 text-center flex flex-col items-center bg-[var(--color-surface)] border-[var(--color-border)] border-dashed rounded-[2rem] shadow-none">
-          <Calendar className="w-12 h-12 mb-4 opacity-20 text-[var(--color-muted)]" />
-          <p className="font-bold mb-1 text-lg tracking-tight">No messages found</p>
-          <p className="text-sm text-[var(--color-muted)]">Create your first Friday message</p>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-           {messages.map((msg) => (
-             <Card key={msg.id} hoverable className="rounded-3xl border-transparent bg-[var(--color-surface)] shadow-none">
-               <CardContent className="p-5 flex flex-col sm:flex-row gap-4 items-center justify-between">
-                 
-                 <div className="flex-1 min-w-0 font-bold text-lg truncate tracking-tight text-white flex items-center gap-3">
-                   {msg.title || 'Untitled Message'}
-                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
-                     msg.is_published 
-                       ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
-                       : 'bg-gray-500/10 text-[var(--color-muted)] border-gray-500/20'
-                   }`}>
-                     {msg.is_published ? 'Published' : 'Draft'}
-                   </span>
+  return (
+    <PresenceWrapper>
+      <PresenceHeader 
+        title="Presence"
+        roleLabel={`Friday Dispatch · ${messages?.length || 0} Nodes`}
+        initials={initials}
+        icon1={Bell}
+        icon2={Plus}
+        onIcon2Click={() => window.location.href = '/admin/friday/new'}
+      />
+      
+      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20 max-w-4xl mx-auto">
+        {!messages || messages.length === 0 ? (
+          <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
+            <Calendar className="w-16 h-16 mb-5 text-indigo-100" />
+            <p className="font-black text-xl text-gray-400 uppercase tracking-widest">Temporal Void</p>
+            <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mt-2">No Friday communications detected</p>
+          </PresenceCard>
+        ) : (
+          <div className="space-y-4">
+             {messages.map((msg) => (
+               <PresenceCard key={msg.id} noPadding className="group">
+                 <div className="p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                   <div className="flex items-center gap-5 min-w-0 flex-1">
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform ${msg.is_published ? 'bg-emerald-50 text-emerald-500' : 'bg-gray-50 dark:bg-white/5 text-gray-400'}`}>
+                         <Sparkles className="w-7 h-7" />
+                      </div>
+                      <div className="min-w-0">
+                         <h2 className="text-xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight truncate hover:text-[#5c4ae4] transition-colors">{msg.title || 'Untitled Message'}</h2>
+                         <div className="flex items-center gap-2 mt-1">
+                            <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${
+                              msg.is_published 
+                                ? 'bg-emerald-50 text-emerald-500 border-emerald-100' 
+                                : 'bg-gray-50 text-gray-300 border-indigo-50'
+                            }`}>
+                              {msg.is_published ? 'Active Relay' : 'Cold Storage'}
+                            </span>
+                         </div>
+                      </div>
+                   </div>
+                   
+                   <div className="flex items-center gap-3 shrink-0">
+                      {!msg.is_published && (
+                        <form action={publishMessageAction}>
+                          <input type="hidden" name="id" value={msg.id} />
+                          <button
+                            type="submit"
+                            className="h-12 px-8 rounded-xl bg-[#5c4ae4] text-white font-black text-[10px] uppercase tracking-widest shadow-xl shadow-indigo-500/20 hover:scale-105 active:scale-95 transition-all"
+                          >
+                            Activate Relay
+                          </button>
+                        </form>
+                      )}
+                      <button disabled className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-white/5 text-gray-300 flex items-center justify-center cursor-not-allowed">
+                         <Settings className="w-6 h-6" />
+                      </button>
+                   </div>
                  </div>
-                 
-                 <div className="flex items-center gap-2 flex-shrink-0">
-                    {!msg.is_published && (
-                      <form action={publishMessageAction} className="flex-1 sm:flex-none">
-                        <input type="hidden" name="id" value={msg.id} />
-                        <Button
-                          type="submit"
-                          variant="outline"
-                          size="sm"
-                          className="w-full text-emerald-500 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 hover:text-emerald-500"
-                        >
-                          <Eye className="w-4 h-4 mr-1.5" />
-                          Publish
-                        </Button>
-                      </form>
-                    )}
-                    <Button variant="outline" size="sm" asChild className="flex-1 sm:flex-none text-blue-500 border-blue-500/20 bg-blue-500/5 hover:bg-blue-500/10 hover:text-blue-500" disabled>
-                       <Link href={`/admin/friday/${msg.id}/edit`}>
-                         <Settings className="w-4 h-4 mr-1.5" />
-                         Edit
-                       </Link>
-                    </Button>
-                 </div>
-                 
-               </CardContent>
-             </Card>
-           ))}
-        </div>
-      )}
-    </div>
+               </PresenceCard>
+             ))}
+          </div>
+        )}
+      </div>
+    </PresenceWrapper>
   );
 }

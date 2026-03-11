@@ -1,9 +1,12 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Bell } from 'lucide-react';
 import UserManagementClient from './UserManagementClient';
+import { 
+  PresenceWrapper, 
+  PresenceHeader 
+} from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +25,7 @@ export default async function AdminUsersPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
+  const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).maybeSingle();
   if (!profile || profile.role !== 'super_admin') redirect('/admin');
 
   const { createAdminClient } = await import('@/lib/supabase/admin');
@@ -67,26 +70,22 @@ export default async function AdminUsersPage() {
   // Sort by created_at desc
   users.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
+  const initials  = (profile?.full_name || user.email || 'A').charAt(0).toUpperCase();
+
   return (
-    <div className="font-sans antialiased max-w-4xl mx-auto py-2 px-4 pb-20">
-
-      {/* ── Header ─────────────────────────────────────────── */}
-      <div className="flex items-center gap-4 mb-8 mt-4">
-        <Button asChild variant="outline" size="icon" className="rounded-full w-10 h-10 border-[var(--color-border)] text-[var(--color-muted)]">
-          <Link href="/admin">
-            <ChevronLeft className="w-5 h-5" />
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-2xl font-black tracking-tight leading-tight">Master User Management</h1>
-          <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
-            {users?.length || 0} Registered Accounts · Access Control
-          </p>
-        </div>
+    <PresenceWrapper>
+      <PresenceHeader 
+        title="Presence"
+        roleLabel="User Management · Master Control"
+        initials={initials}
+        icon1={Bell}
+        icon2={ChevronLeft}
+        onIcon2Click={() => window.location.href = '/admin'}
+      />
+      
+      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20">
+        <UserManagementClient users={(users as UserProfile[]) || []} currentUserRole={profile.role} />
       </div>
-
-      <UserManagementClient users={(users as UserProfile[]) || []} currentUserRole={profile.role} />
-
-    </div>
+    </PresenceWrapper>
   );
 }

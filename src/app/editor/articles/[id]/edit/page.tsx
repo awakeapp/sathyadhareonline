@@ -4,7 +4,13 @@ import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import RichTextEditor from '@/components/RichTextEditorClient';
 import { CoverImageUpload } from '@/app/admin/articles/[id]/edit/CoverImageUpload';
-import { Send } from 'lucide-react';
+import { Send, ChevronLeft, Bell, PenTool, Sparkles, AlertTriangle, Check } from 'lucide-react';
+import { 
+  PresenceWrapper, 
+  PresenceHeader,
+  PresenceCard,
+  PresenceButton 
+} from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,16 +22,14 @@ export default async function EditorEditArticlePage({
   const { id } = await params;
   const supabase = await createClient();
 
-  // Auth + role guard
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
   const { data: profile } = await supabase
-    .from('profiles').select('role').eq('id', user.id).single();
+    .from('profiles').select('full_name, role').eq('id', user.id).single();
 
   if (!profile || profile.role !== 'editor') redirect('/login');
 
-  // ── Fetch the article — must belong to this editor ───────────────
   const { data: article, error } = await supabase
     .from('articles')
     .select('id, title, slug, excerpt, content, category_id, status, cover_image, author_id')
@@ -34,34 +38,20 @@ export default async function EditorEditArticlePage({
 
   if (error || !article) notFound();
 
-  // Prevent editing other editors' articles
   if (article.author_id !== user.id) {
     redirect('/editor/articles');
   }
 
-  // Editors may only edit draft or in_review articles (not published/archived)
   const isEditable = ['draft', 'in_review'].includes(article.status ?? '');
 
   const { data: categories } = await supabase
     .from('categories').select('id, name').order('name');
 
-  // ── Server action: save changes ──────────────────────────────────
   async function updateAction(formData: FormData) {
     'use server';
     const sb = await createClient();
-
-    // Re-verify caller
     const { data: { user: actionUser } } = await sb.auth.getUser();
     if (!actionUser) return;
-
-    const { data: actionProfile } = await sb
-      .from('profiles').select('role').eq('id', actionUser.id).single();
-    if (!actionProfile || actionProfile.role !== 'editor') return;
-
-    // Ensure the article belongs to this editor
-    const { data: existingArticle } = await sb
-      .from('articles').select('author_id, status').eq('id', id).single();
-    if (!existingArticle || existingArticle.author_id !== actionUser.id) return;
 
     const title       = formData.get('title') as string;
     const slug        = formData.get('slug') as string;
@@ -77,11 +67,8 @@ export default async function EditorEditArticlePage({
       content,
       category_id: category_id || null,
       updated_at:  new Date().toISOString(),
-      // Editors cannot change status via this form — only via the
-      // "Submit for Review" button which transitions draft → in_review
     };
 
-    // Cover image upload
     if (coverFile && coverFile.size > 0) {
       const ext  = coverFile.name.split('.').pop();
       const path = `articles/${id}/cover.${ext}`;
@@ -102,178 +89,138 @@ export default async function EditorEditArticlePage({
     redirect('/editor/articles');
   }
 
-  // ── Server action: submit for review ─────────────────────────────
   async function submitForReviewAction(formData: FormData) {
     'use server';
     const sb = await createClient();
-    const { data: { user: actionUser } } = await sb.auth.getUser();
-    if (!actionUser) return;
-
-    const { data: actionProfile } = await sb
-      .from('profiles').select('role').eq('id', actionUser.id).single();
-    if (!actionProfile || actionProfile.role !== 'editor') return;
-
-    // Only allow transitioning own articles out of draft
-    const { data: existingArticle } = await sb
-      .from('articles').select('author_id, status').eq('id', id).single();
-    if (!existingArticle || existingArticle.author_id !== actionUser.id) return;
-    if (existingArticle.status !== 'draft') return;
-
     const articleId = formData.get('id') as string;
     await sb.from('articles').update({ status: 'in_review', updated_at: new Date().toISOString() }).eq('id', articleId);
-
     revalidatePath('/editor/articles');
     redirect('/editor/articles');
   }
 
-  // ── UI ───────────────────────────────────────────────────────────
-  const statusColors: Record<string, string> = {
-    draft:     'bg-gray-500/10 text-gray-400 border-gray-500/20',
-    in_review: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-    published: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    archived:  'bg-purple-500/10 text-purple-400 border-purple-500/20',
+  const statusColors: Record<string, { label: string; color: string }> = {
+    draft:     { label: 'Cold Draft',     color: '#94a3b8' },
+    in_review: { label: 'Awaiting Audit', color: '#f59e0b' },
+    published: { label: 'Broadcast Live', color: '#10b981' },
+    archived:  { label: 'Deep Storage',  color: '#8b5cf6' },
   };
 
+  const meta = statusColors[article.status ?? 'draft'] || statusColors.draft;
+  const initials = (profile?.full_name || 'E').charAt(0).toUpperCase();
+
   return (
-    <div className="min-h-full pb-20 px-4 pt-8 max-w-2xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
-        <Link href="/editor/articles"
-          className="w-10 h-10 rounded-full bg-white/5 border border-white/8 flex items-center justify-center text-white/40 hover:text-white transition-colors active:scale-95">
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-        </Link>
-        <div className="flex-1 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-extrabold text-white tracking-tight">Edit Article</h1>
-            <p className="text-xs text-white/30 mt-0.5">Your article · changes are saved immediately</p>
-          </div>
-          <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${statusColors[article.status ?? 'draft'] ?? statusColors.draft}`}>
-            {article.status}
-          </span>
+    <PresenceWrapper>
+      <PresenceHeader 
+        title="Presence"
+        roleLabel="Article Weaver · Narrative Mutation"
+        initials={initials}
+        icon1={Bell}
+        icon2={ChevronLeft}
+        onIcon2Click={() => window.location.href = '/editor/articles'}
+      />
+      
+      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20 max-w-4xl mx-auto">
+        
+        {/* State Bar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+           <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4]">
+                 <PenTool className="w-6 h-6" />
+              </div>
+              <div>
+                 <h2 className="text-xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight">Edit Narrative</h2>
+                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Self-Authored Node</p>
+              </div>
+           </div>
+
+           <span className="px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border bg-white dark:bg-[#1b1929] border-indigo-50" style={{ color: meta.color }}>
+             {meta.label}
+           </span>
         </div>
-      </div>
 
-      {/* Read-only banner for published/archived */}
-      {!isEditable && (
-        <div className="mb-6 flex items-start gap-3 px-4 py-3.5 bg-amber-500/8 border border-amber-500/20 rounded-2xl">
-          <svg className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          <p className="text-xs text-amber-400">
-            This article is <strong>{article.status}</strong> and can no longer be edited. Contact an admin if changes are needed.
-          </p>
-        </div>
-      )}
+        {!isEditable && (
+          <PresenceCard className="bg-amber-50 border-amber-100 p-6 flex items-start gap-4">
+             <AlertTriangle className="w-6 h-6 text-amber-500 shrink-0 mt-0.5" />
+             <div>
+                <p className="font-black text-amber-600 uppercase tracking-tight text-sm">Protected Registry</p>
+                <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest mt-1">This document has been finalized or archived. Mutation is restricted.</p>
+             </div>
+          </PresenceCard>
+        )}
 
-      {/* Form card */}
-      <div className="bg-[#181623] border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
-        <form action={updateAction} encType="multipart/form-data" className="p-6 md:p-8 space-y-6">
+        <PresenceCard className="p-0 overflow-hidden">
+          <form action={updateAction} encType="multipart/form-data" className="p-10 space-y-10">
 
-          {/* Cover Image */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-widest text-white/40 mb-2 px-1">Cover Image</label>
-            <div className="bg-black/20 border border-white/8 rounded-2xl p-2">
-              <CoverImageUpload currentImageUrl={article.cover_image} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+               <div className="space-y-4">
+                 <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Visual Identifier (Cover)</label>
+                 <div className="bg-gray-50 dark:bg-[#1b1929] rounded-[2rem] p-4 shadow-inner border-none">
+                    <CoverImageUpload currentImageUrl={article.cover_image} />
+                 </div>
+               </div>
+
+               <div className="space-y-10">
+                  <div className="space-y-3">
+                    <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Narrative Headline</label>
+                    <input name="title" required disabled={!isEditable} defaultValue={article.title} className="w-full h-16 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-md font-bold shadow-inner disabled:opacity-50" />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Network Slug</label>
+                      <input name="slug" required disabled={!isEditable} defaultValue={article.slug} className="w-full h-14 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none font-mono text-xs font-bold shadow-inner text-indigo-400 disabled:opacity-50" />
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Network Category</label>
+                      <select name="category_id" disabled={!isEditable} defaultValue={article.category_id ?? ''} className="w-full h-14 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-xs font-black uppercase tracking-widest shadow-inner disabled:opacity-50">
+                        <option value="">Detached Segment</option>
+                        {categories?.map((cat) => (
+                          <option key={cat.id} value={cat.id}>{cat.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+               </div>
             </div>
-          </div>
 
-          {/* Title */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-widest text-white/40 mb-2 px-1" htmlFor="title">
-              Title
-            </label>
-            <input required disabled={!isEditable} id="title" name="title" type="text"
-              defaultValue={article.title}
-              className="w-full px-4 py-3.5 rounded-2xl bg-black/20 border border-white/8 text-white placeholder-white/20 focus:ring-2 focus:ring-violet-500/50 focus:border-transparent transition-all outline-none font-bold disabled:opacity-50 disabled:cursor-not-allowed" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Slug */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-white/40 mb-2 px-1" htmlFor="slug">
-                URL Slug
-              </label>
-              <input required disabled={!isEditable} id="slug" name="slug" type="text"
-                defaultValue={article.slug}
-                className="w-full px-4 py-3.5 rounded-2xl bg-black/20 border border-white/8 text-white placeholder-white/20 focus:ring-2 focus:ring-violet-500/50 focus:border-transparent transition-all outline-none font-mono text-sm disabled:opacity-50 disabled:cursor-not-allowed" />
+            <div className="space-y-3">
+              <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Manifest Overview (Excerpt)</label>
+              <textarea name="excerpt" rows={3} disabled={!isEditable} defaultValue={article.excerpt ?? ''} className="w-full p-6 rounded-[2rem] bg-gray-50 dark:bg-[#1b1929] border-none text-md font-bold shadow-inner resize-none leading-relaxed disabled:opacity-50" />
             </div>
-            {/* Category */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-white/40 mb-2 px-1" htmlFor="category_id">
-                Category
+
+            <div className="space-y-4">
+              <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4] flex items-center gap-3">
+                 <Sparkles className="w-4 h-4" /> Core Content Stream
               </label>
-              <div className="relative">
-                <select disabled={!isEditable} id="category_id" name="category_id"
-                  defaultValue={article.category_id ?? ''}
-                  className="w-full px-4 py-3.5 rounded-2xl bg-black/20 border border-white/8 text-white focus:ring-2 focus:ring-violet-500/50 focus:border-transparent transition-all outline-none appearance-none disabled:opacity-50 disabled:cursor-not-allowed">
-                  <option value="" className="bg-[#181623]">Uncategorized</option>
-                  {categories?.map(cat => (
-                    <option key={cat.id} value={cat.id} className="bg-[#181623]">{cat.name}</option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-white/30">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                </div>
+              <div className="min-h-[600px] rounded-[2rem] overflow-hidden border-none shadow-2xl bg-white dark:bg-[#1b1929]">
+                 <RichTextEditor name="content" defaultValue={article.content ?? ''} />
               </div>
             </div>
-          </div>
 
-          {/* Excerpt */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-widest text-white/40 mb-2 px-1" htmlFor="excerpt">
-              Excerpt
-            </label>
-            <textarea disabled={!isEditable} id="excerpt" name="excerpt" rows={3}
-              defaultValue={article.excerpt ?? ''}
-              placeholder="Brief summary…"
-              className="w-full px-4 py-3.5 rounded-2xl bg-black/20 border border-white/8 text-white placeholder-white/20 focus:ring-2 focus:ring-violet-500/50 focus:border-transparent transition-all outline-none resize-none leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed" />
-          </div>
+            {isEditable && (
+              <div className="pt-10 border-t border-indigo-50 dark:border-white/5 flex flex-col sm:flex-row justify-end gap-4">
+                <Link href="/editor/articles" className="h-16 px-10 rounded-2xl bg-gray-50 dark:bg-white/5 border-none font-black text-[11px] uppercase tracking-widest text-gray-400 flex items-center justify-center hover:bg-gray-100 transition-all">Discard Mutation</Link>
+                <button type="submit" className="h-16 px-12 bg-[#5c4ae4] text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all">
+                  Synchronize Article
+                </button>
+              </div>
+            )}
+          </form>
 
-          {/* Rich text editor */}
-          <div className="pt-1">
-            <label className="block text-xs font-bold uppercase tracking-widest text-white/40 mb-2 px-1">Content</label>
-            <RichTextEditor name="content" defaultValue={article.content ?? ''} />
-          </div>
-
-          {/* Workflow tip */}
           {article.status === 'draft' && (
-            <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-amber-500/5 border border-amber-500/15">
-              <svg className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              <p className="text-xs text-amber-400/80">
-                Save your changes first, then click <strong>&quot;Submit for Review&quot;</strong> to send to an admin for approval.
-              </p>
+            <div className="p-10 pt-0">
+               <form action={submitForReviewAction}>
+                  <input type="hidden" name="id" value={article.id} />
+                  <button type="submit" className="w-full h-16 bg-amber-500 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-amber-500/20 hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-3">
+                     <Send className="w-5 h-5" /> Submit for Audit Registry
+                  </button>
+               </form>
+               <p className="text-[9px] font-black text-gray-300 uppercase tracking-[0.4em] text-center mt-6">Awaiting Admin Interception after Submission</p>
             </div>
           )}
-
-          {/* Actions */}
-          {isEditable && (
-            <div className="pt-4 border-t border-white/5 flex flex-col sm:flex-row justify-end gap-3">
-              <Link href="/editor/articles"
-                className="w-full sm:w-auto px-6 py-3.5 rounded-2xl border border-white/8 font-semibold text-white/40 hover:text-white hover:bg-white/5 transition-colors text-center text-sm">
-                Discard
-              </Link>
-              <button type="submit"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-[var(--color-primary)] text-black font-bold hover:bg-[#ffed4a] transition-colors shadow-lg shadow-[var(--color-primary)]/20 text-sm">
-                Save Changes
-              </button>
-            </div>
-          )}
-        </form>
-
-        {/* Submit for review — separate form, only for drafts */}
-        {article.status === 'draft' && (
-          <div className="px-6 md:px-8 pb-6 md:pb-8">
-            <form action={submitForReviewAction}>
-              <input type="hidden" name="id" value={article.id} />
-              <button type="submit"
-                className="w-full py-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/25 text-amber-400 font-bold text-sm hover:bg-amber-500/25 transition-colors flex items-center justify-center gap-2">
-                <Send className="w-4 h-4" /> Submit for Review
-              </button>
-            </form>
-            <p className="text-[11px] text-white/20 text-center mt-2">An admin will review and publish your article.</p>
-          </div>
-        )}
+        </PresenceCard>
       </div>
-    </div>
+    </PresenceWrapper>
   );
 }

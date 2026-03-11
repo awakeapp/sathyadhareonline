@@ -4,8 +4,14 @@ import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import RichTextEditor from '@/components/RichTextEditorClient';
 import { CoverImageUpload } from './CoverImageUpload';
-import { Star, ChevronLeft } from 'lucide-react';
+import { Star, ChevronLeft, Bell, PenTool, Sparkles, Send } from 'lucide-react';
 import { logAuditEvent } from '@/lib/audit';
+import { 
+  PresenceWrapper, 
+  PresenceHeader,
+  PresenceCard,
+  PresenceButton 
+} from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +27,7 @@ export default async function EditArticlePage({
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).single();
   const role = profile?.role || 'reader';
 
   // Fetch article data
@@ -33,7 +39,7 @@ export default async function EditArticlePage({
 
   if (articleError || !article) {
     notFound();
-    return null; // For TypeScript
+    return null; 
   }
 
   // Fetch categories for dropdown
@@ -56,7 +62,6 @@ export default async function EditArticlePage({
     const is_featured = formData.get('is_featured') === 'on';
     const coverFile   = formData.get('cover_image') as File | null;
     
-    // Check role again securely via action context
     const { data: { user: actionUser } } = await supabaseAction.auth.getUser();
     if (!actionUser) return;
     const { data: actionProfile } = await supabaseAction.from('profiles').select('role').eq('id', actionUser.id).single();
@@ -64,9 +69,8 @@ export default async function EditArticlePage({
 
     let targetStatus = formData.get('status') as string;
 
-    // Server-side guard: Editors cannot publish or archive
     if (actionRole === 'editor' && ['published', 'archived'].includes(targetStatus)) {
-      targetStatus = 'in_review'; // Force to review status
+      targetStatus = 'in_review'; 
     }
 
     const updateData: Record<string, unknown> = {
@@ -80,7 +84,7 @@ export default async function EditArticlePage({
       updated_at: new Date().toISOString(),
       published_at: targetStatus === 'published' && article?.status !== 'published' 
                       ? new Date().toISOString() 
-                      : (targetStatus !== 'published' ? null : article?.published_at), // retain previous if still published else null
+                      : (targetStatus !== 'published' ? null : article?.published_at),
     };
 
     if (is_featured) {
@@ -136,125 +140,152 @@ export default async function EditArticlePage({
     redirect('/admin/articles');
   }
 
+  const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
+
   return (
-    <div className="min-h-screen pb-24 px-4 pt-6 bg-[var(--color-background)] font-sans antialiased text-white safe-area-pb">
-      <div className="max-w-2xl mx-auto">
+    <PresenceWrapper>
+      <PresenceHeader 
+        title="Presence"
+        roleLabel="Article Weaver · Data Mutation"
+        initials={initials}
+        icon1={Bell}
+        icon2={ChevronLeft}
+        onIcon2Click={() => window.location.href = '/admin/articles'}
+      />
+      
+      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20 max-w-4xl mx-auto">
         
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
-          <Link href="/admin/articles" className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:text-white transition-colors">
-            <ChevronLeft className="w-5 h-5" />
-          </Link>
-          <div className="flex-1 flex items-center justify-between">
-            <h1 className="text-2xl font-bold tracking-tight text-white leading-tight">Edit Article</h1>
-            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
-              <div className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+        {/* State Bar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+           <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4]">
+                 <PenTool className="w-6 h-6" />
+              </div>
+              <div>
+                 <h2 className="text-xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight">Edit Narrative</h2>
+                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Registry-ID: {id.slice(0, 8)}</p>
+              </div>
+           </div>
+
+           <div className="flex items-center gap-3">
+              <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${
                 article.status === 'published' 
-                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' 
+                  ? 'bg-emerald-50 border-emerald-100 text-emerald-500' 
                   : article.status === 'in_review'
-                  ? 'bg-amber-500/10 border-amber-500/20 text-amber-500'
-                  : 'bg-orange-500/10 border-orange-500/20 text-orange-500'
+                  ? 'bg-amber-50 border-amber-100 text-amber-500'
+                  : 'bg-orange-50 border-orange-100 text-orange-500'
               }`}>
                 {article.status.replace('_', ' ')}
-              </div>
+              </span>
               {['admin', 'super_admin'].includes(role) && article.status !== 'published' && (
                 <form action={publishNowAction}>
-                  <button type="submit" className="text-[10px] font-black uppercase tracking-widest bg-emerald-500 text-black px-3 py-1 rounded-full hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/20">
-                    Publish Now
+                  <button type="submit" className="h-10 px-6 bg-emerald-500 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-xl shadow-xl shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
+                     <Send className="w-4 h-4" /> Publish Now
                   </button>
                 </form>
               )}
-            </div>
-          </div>
+           </div>
         </div>
 
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl overflow-hidden shadow-2xl">
-          <form action={updateArticleAction} encType="multipart/form-data" className="p-6 md:p-8 space-y-6">
+        <PresenceCard className="p-0 overflow-hidden">
+          <form action={updateArticleAction} encType="multipart/form-data" className="p-10 space-y-10">
             
             {['admin', 'super_admin'].includes(role) && (
-              <div className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${
-                article.is_featured ? 'border-[var(--color-primary)]/40 bg-[var(--color-primary)]/5' : 'border-[var(--color-border)] bg-black/20'
+              <div className={`flex items-center justify-between p-6 rounded-[2rem] border-2 transition-all ${
+                article.is_featured ? 'border-[#5c4ae4] bg-indigo-50/50' : 'border-indigo-50 bg-gray-50'
               }`}>
-                <div className="flex items-center gap-3">
-                  <Star className={`w-6 h-6 ${article.is_featured ? 'text-[var(--color-primary)]' : 'opacity-40'}`} fill={article.is_featured ? "currentColor" : "none"} />
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${article.is_featured ? 'bg-[#5c4ae4] text-white shadow-lg shadow-indigo-500/50' : 'bg-white text-gray-300 shadow-sm'}`}>
+                    <Star className="w-6 h-6" fill={article.is_featured ? "currentColor" : "none"} />
+                  </div>
                   <div>
-                    <p className="text-sm font-bold text-white leading-tight">Feature on Homepage</p>
-                    <p className="text-[11px] text-[var(--color-muted)] mt-0.5">Displays as hero banner.</p>
+                    <h3 className="text-sm font-black text-[#1b1929] dark:text-white uppercase tracking-tight">Highlight Priority</h3>
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">Prime Visibility Allocation</p>
                   </div>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer ml-2">
+                <label className="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" name="is_featured" defaultChecked={article.is_featured ?? false} className="sr-only peer" />
-                  <div className="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-[var(--color-primary)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
+                  <div className="w-14 h-8 bg-gray-200 rounded-full peer peer-checked:bg-[#5c4ae4] after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:after:translate-x-6" />
                 </label>
               </div>
             )}
 
-            <div>
-              <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-2 px-1">Cover Image</label>
-              <div className="bg-black/20 border border-[var(--color-border)] rounded-2xl p-2">
-                <CoverImageUpload currentImageUrl={article.cover_image} />
-              </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+               <div className="space-y-4">
+                 <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Visual Identifier (Cover)</label>
+                 <div className="bg-gray-50 dark:bg-[#1b1929] rounded-[2rem] p-4 shadow-inner border-none">
+                    <CoverImageUpload currentImageUrl={article.cover_image} />
+                 </div>
+               </div>
+
+               <div className="space-y-10">
+                  <div className="space-y-3">
+                    <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Narrative Headline</label>
+                    <input name="title" required defaultValue={article.title} placeholder="The Core Statement..." className="w-full h-16 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-md font-bold shadow-inner" />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Network Slug</label>
+                      <input name="slug" required defaultValue={article.slug} className="w-full h-14 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none font-mono text-xs font-bold shadow-inner text-indigo-400" />
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Protocol Status</label>
+                      <select name="status" defaultValue={article.status} className="w-full h-14 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-xs font-black uppercase tracking-widest shadow-inner accent-[#5c4ae4]">
+                        {role === 'editor' ? (
+                          <>
+                            <option value="draft">Cold Draft</option>
+                            <option value="in_review">Awaiting Audit</option>
+                          </>
+                        ) : (
+                          <>
+                            <option value="draft">Cold Draft</option>
+                            <option value="in_review">Awaiting Audit</option>
+                            <option value="published">Broadcast Live</option>
+                            <option value="archived">Deep Storage</option>
+                          </>
+                        )}
+                      </select>
+                    </div>
+                  </div>
+               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-2 px-1">Headline</label>
-              <input name="title" required defaultValue={article.title} className="w-full px-4 py-3.5 rounded-2xl bg-black/20 border border-[var(--color-border)] text-white placeholder-gray-500 focus:ring-2 focus:ring-[var(--color-primary)] outline-none font-bold" />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-2 px-1">URL Slug</label>
-                <input name="slug" required defaultValue={article.slug} className="w-full px-4 py-3.5 rounded-2xl bg-black/20 border border-[var(--color-border)] text-white font-mono text-sm outline-none" />
-              </div>
-              
-              <div>
-                <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-2 px-1">Visibility</label>
-                <select name="status" defaultValue={article.status} className="w-full px-4 py-3.5 rounded-2xl bg-black/20 border border-[var(--color-border)] text-white outline-none">
-                  {role === 'editor' ? (
-                    <>
-                      <option value="draft">Draft</option>
-                      <option value="in_review">In Review</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="draft">Draft</option>
-                      <option value="in_review">In Review</option>
-                      <option value="published">Published</option>
-                      <option value="archived">Archived</option>
-                    </>
-                  )}
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-2 px-1">Category</label>
-              <select name="category_id" defaultValue={article.category_id ?? ''} className="w-full px-4 py-3.5 rounded-2xl bg-black/20 border border-[var(--color-border)] text-white outline-none">
-                <option value="">Uncategorized Collection</option>
+            <div className="space-y-3">
+              <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Network Category</label>
+              <select name="category_id" defaultValue={article.category_id ?? ''} className="w-full h-16 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-xs font-black uppercase tracking-widest shadow-inner">
+                <option value="">Detached Segment</option>
                 {categories?.map((cat) => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
               </select>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-2 px-1">Brief Summary</label>
-              <textarea name="excerpt" rows={3} defaultValue={article.excerpt ?? ''} className="w-full px-4 py-3.5 rounded-2xl bg-black/20 border border-[var(--color-border)] text-white outline-none resize-none leading-relaxed" />
+            <div className="space-y-3">
+              <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Manifest Overview (Excerpt)</label>
+              <textarea name="excerpt" rows={3} defaultValue={article.excerpt ?? ''} placeholder="Condensed narrative summary..." className="w-full p-6 rounded-[2rem] bg-gray-50 dark:bg-[#1b1929] border-none text-md font-bold shadow-inner resize-none leading-relaxed" />
             </div>
 
-            <div className="pt-2">
-              <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-2 px-1">Content</label>
-              <RichTextEditor name="content" defaultValue={article.content ?? ''} />
+            <div className="space-y-4">
+              <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4] flex items-center gap-3">
+                 <Sparkles className="w-4 h-4" /> Core Content Stream
+              </label>
+              <div className="min-h-[600px] rounded-[2rem] overflow-hidden border-none shadow-2xl bg-white dark:bg-[#1b1929]">
+                 <RichTextEditor name="content" defaultValue={article.content ?? ''} />
+              </div>
             </div>
 
-            <div className="pt-6 mt-6 border-t border-[var(--color-border)] flex flex-col sm:flex-row justify-end gap-3">
-              <Link href="/admin/articles" className="w-full sm:w-auto px-6 py-4 rounded-2xl border border-[var(--color-border)] font-semibold text-[var(--color-muted)] hover:text-white text-center">Discard</Link>
-              <button type="submit" className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[var(--color-primary)] text-black font-bold hover:bg-[#ffed4a] transition-colors shadow-lg shadow-[var(--color-primary)]/20 text-center">Save Changes</button>
+            <div className="pt-10 border-t border-indigo-50 dark:border-white/5 flex flex-col sm:flex-row justify-end gap-4">
+              <Link href="/admin/articles" className="h-16 px-10 rounded-2xl bg-gray-50 dark:bg-white/5 border-none font-black text-[11px] uppercase tracking-widest text-gray-400 flex items-center justify-center hover:bg-gray-100 transition-all">Discard Mutation</Link>
+              <button type="submit" className="h-16 px-12 bg-[#5c4ae4] text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all">
+                Synchronize Article
+              </button>
             </div>
             
           </form>
-        </div>
+        </PresenceCard>
       </div>
-    </div>
+    </PresenceWrapper>
   );
 }

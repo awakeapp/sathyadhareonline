@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Input, Select } from '@/components/ui/Input';
 import { toast } from 'sonner';
 import { createApiKeyAction, deleteApiKeyAction, getLoginHistoryAction } from './actions';
 import { Key, Shield, Clock, AlertTriangle, MonitorSmartphone, Plus, Eye, KeyRound, Check, X, Search, Calendar, ChevronLeft, ChevronRight, User } from 'lucide-react';
+import { 
+  PresenceCard, 
+  PresenceButton 
+} from '@/components/PresenceUI';
 
 interface ApiKey {
   id: string;
@@ -35,18 +37,15 @@ export default function SecurityClient({
   const [isPending, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState<'keys' | 'logins'>('keys');
 
-  // Keys State
   const [keys, setKeys] = useState(initialKeys);
   const [isCreatingKey, setIsCreatingKey] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
   const [newKeyPerms, setNewKeyPerms] = useState<Set<string>>(new Set(['read:articles']));
   const [generatedKey, setGeneratedKey] = useState<string | null>(null);
 
-  // Logins State
   const [logins, setLogins] = useState<LoginEvent[]>([]);
   const [isLoadingLogins, setIsLoadingLogins] = useState(false);
   
-  // Login Filtering
   const [searchEmail, setSearchEmail] = useState('');
   const [loginPage, setLoginPage] = useState(1);
   const loginsPerPage = 20;
@@ -55,7 +54,7 @@ export default function SecurityClient({
     if (activeTab === 'logins' && logins.length === 0 && !isLoadingLogins) {
       setIsLoadingLogins(true);
       getLoginHistoryAction().then(res => {
-        if (res.error) toast.error('Failed to load login history: ' + res.error);
+        if (res.error) toast.error('History Extraction Failed');
         if (res.data) setLogins(res.data);
         setIsLoadingLogins(false);
       });
@@ -70,8 +69,8 @@ export default function SecurityClient({
   };
 
   const handleCreateKey = () => {
-    if (!newKeyName.trim()) return toast.error('API Key name is required');
-    if (newKeyPerms.size === 0) return toast.error('At least one permission is required');
+    if (!newKeyName.trim()) return toast.error('Missing ID Label');
+    if (newKeyPerms.size === 0) return toast.error('Perms Required');
 
     startTransition(async () => {
       const res = await createApiKeyAction(newKeyName, Array.from(newKeyPerms));
@@ -82,17 +81,18 @@ export default function SecurityClient({
         setGeneratedKey(res.rawKey);
         setNewKeyName('');
         setIsCreatingKey(false);
+        toast.success('Key Forged');
       }
     });
   };
 
   const handleRevokeKey = (id: string) => {
-    if (!confirm('This action cannot be undone. Any application relying on this key will instantly fail. Revoke key?')) return;
+    if (!confirm('Authorize Permanent Revocation?')) return;
     startTransition(async () => {
       const res = await deleteApiKeyAction(id);
       if (res.error) toast.error(res.error);
       else {
-        toast.success('API Key securely revoked and deleted from the vault.');
+        toast.success('Key Purged');
         setKeys(prev => prev.filter(k => k.id !== id));
       }
     });
@@ -100,10 +100,9 @@ export default function SecurityClient({
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success('Copied to clipboard');
+    toast.success('Copy Successful');
   };
 
-  // Derived Logins based on search and pagination
   const filteredLogins = logins.filter(l => l.email?.toLowerCase().includes(searchEmail.toLowerCase()));
   const totalLoginsCount = filteredLogins.length;
   const paginatedLogins = filteredLogins.slice((loginPage - 1) * loginsPerPage, loginPage * loginsPerPage);
@@ -112,153 +111,171 @@ export default function SecurityClient({
   return (
     <div className="space-y-6">
 
-      {/* Tabs */}
-      <div className="flex gap-2 w-full overflow-x-auto hide-scrollbar bg-[var(--color-surface)] p-2 rounded-2xl border border-[var(--color-border)]">
-        {[
-          { id: 'keys', label: 'Developer API Vault', icon: Key },
-          { id: 'logins', label: 'Authentication Forensics', icon: Shield },
-        ].map(t => {
-          const Icon = t.icon;
-          return (
-            <button
-              key={t.id}
-              onClick={() => setActiveTab(t.id as any)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all flex-1 justify-center sm:flex-none ${activeTab === t.id ? 'bg-[var(--color-primary)] text-black shadow-md' : 'text-[var(--color-muted)] hover:text-white hover:bg-white/5'}`}
-            >
-              <Icon className="w-4 h-4 shrink-0" />
-              {t.label}
-            </button>
-          );
-        })}
-      </div>
+      {/* ── Protocol Selectors ── */}
+      <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-2">
+        <div className="flex gap-2 w-full overflow-x-auto hide-scrollbar">
+          {[
+            { id: 'keys', label: 'Cryptographic Vault', icon: Key },
+            { id: 'logins', label: 'Forensic Timeline', icon: Shield },
+          ].map(t => {
+            const Icon = t.icon;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setActiveTab(t.id as any)}
+                className={`flex items-center gap-3 px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex-1 justify-center ${activeTab === t.id ? 'bg-[#5c4ae4] text-white shadow-xl shadow-indigo-500/20' : 'text-indigo-400 hover:text-[#5c4ae4] hover:bg-white dark:hover:bg-white/5'}`}
+              >
+                <Icon className="w-4 h-4" />
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
+      </PresenceCard>
 
       {activeTab === 'keys' && (
-        <div className="space-y-6 animate-in fade-in zoom-in-95 duration-200">
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
            
-           {/* API Key Modal Form Inline Layer */}
            {isCreatingKey && (
-             <Card className="rounded-[2rem] shadow-none border-[var(--color-border)] bg-[var(--color-surface)] border-l-4 border-l-[var(--color-primary)]">
-               <CardContent className="p-6 md:p-8 space-y-6 relative">
-                 <button onClick={() => setIsCreatingKey(false)} className="absolute top-6 right-6 w-8 h-8 flex items-center justify-center text-[var(--color-muted)] hover:text-white bg-white/5 rounded-full hover:bg-white/10 transition-colors">
-                   <X className="w-4 h-4" />
-                 </button>
-                 <div>
-                   <h2 className="text-xl font-black text-white flex items-center gap-2"><KeyRound className="w-5 h-5 text-[var(--color-primary)]" /> Forge New Key</h2>
-                   <p className="text-sm text-[var(--color-muted)] mt-1">Generate a scalable programmatic access token.</p>
-                 </div>
-                 
-                 <div className="space-y-6 border-t border-[var(--color-border)] pt-6">
-                   <div className="space-y-1.5">
-                     <label className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider">Application or Token Reference Name</label>
-                     <Input value={newKeyName} onChange={e => setNewKeyName(e.target.value)} className="bg-black/20 font-bold" placeholder="e.g. Vercel Staging Webhooks" />
+             <PresenceCard className="bg-white dark:bg-[#181623] border-l-8 border-l-[#5c4ae4] p-8 space-y-8 relative overflow-hidden">
+                <div className="absolute right-[-20px] top-[-20px] opacity-[0.03] rotate-12">
+                   <KeyRound className="w-48 h-48 text-[#5c4ae4]" />
+                </div>
+                <div className="flex items-center justify-between relative z-10">
+                   <div>
+                      <h2 className="text-2xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight">Forge Access Token</h2>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">High-Privilege Authorization Vector</p>
+                   </div>
+                   <button onClick={() => setIsCreatingKey(false)} className="w-10 h-10 rounded-full bg-gray-50 dark:bg-white/5 text-gray-400 flex items-center justify-center">
+                      <X className="w-5 h-5" />
+                   </button>
+                </div>
+                
+                <div className="space-y-8 relative z-10">
+                   <div className="space-y-3">
+                     <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Identity Label</label>
+                     <input 
+                       value={newKeyName} 
+                       onChange={e => setNewKeyName(e.target.value)} 
+                       placeholder="e.g. CORE_SYSTEM_API" 
+                       className="w-full h-14 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-sm font-bold shadow-inner" 
+                     />
                    </div>
 
-                   <div className="space-y-3">
-                      <label className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider">Grant Permissions</label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                   <div className="space-y-4">
+                      <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Protocol Permissions</label>
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                         {[
-                          { id: 'read:articles', label: 'Read Articles' },
-                          { id: 'write:articles', label: 'Write Articles' },
-                          { id: 'read:users', label: 'Read Profiles' },
-                          { id: 'manage:billing', label: 'Billing Hooks' }
+                          { id: 'read:articles', label: 'Index Articles' },
+                          { id: 'write:articles', label: 'Mutate Data' },
+                          { id: 'read:users', label: 'Intercept Profiles' },
+                          { id: 'manage:billing', label: 'Control Capital' }
                         ].map(p => {
                            const active = newKeyPerms.has(p.id);
                            return (
-                             <label key={p.id} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${active ? 'bg-[var(--color-primary)]/10 border-[var(--color-primary)] text-[var(--color-primary)]' : 'bg-black/20 border-[var(--color-border)] text-[var(--color-muted)] hover:text-white hover:border-white/20'}`}>
-                               <input type="checkbox" checked={active} onChange={() => togglePermission(p.id)} className="hidden" />
-                               <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${active ? 'border-[var(--color-primary)] bg-[var(--color-primary)]' : 'border-[var(--color-muted)]'}`}>
-                                 {active && <Check className="w-2.5 h-2.5 text-black" />}
-                               </div>
-                               <span className="text-xs font-bold uppercase tracking-wide">{p.label}</span>
-                             </label>
+                             <button
+                               key={p.id}
+                               onClick={() => togglePermission(p.id)}
+                               className={`flex items-center gap-3 p-4 rounded-2xl transition-all border-2 text-left ${active ? 'bg-indigo-50 border-[#5c4ae4] text-[#5c4ae4]' : 'bg-white dark:bg-[#1b1929] border-transparent text-gray-400'}`}
+                             >
+                                <div className={`w-3 h-3 rounded-full border-2 ${active ? 'bg-[#5c4ae4] border-[#5c4ae4] shadow-lg shadow-indigo-500/50' : 'border-gray-200'}`}></div>
+                                <span className="text-[10px] font-black uppercase tracking-widest">{p.label}</span>
+                             </button>
                            );
                         })}
                       </div>
                    </div>
 
-                   <div className="pt-2">
-                      <Button onClick={handleCreateKey} loading={isPending} className="h-11 px-8 rounded-xl font-bold bg-[var(--color-primary)] text-black hover:bg-[var(--color-primary)]/90 shadow-md">
-                        Generate Token Securely
-                      </Button>
-                   </div>
-                 </div>
-               </CardContent>
-             </Card>
+                   <PresenceButton onClick={handleCreateKey} loading={isPending} className="w-full h-16 bg-[#5c4ae4] font-black tracking-[0.2em] text-xs uppercase shadow-2xl shadow-indigo-500/20">
+                      Initialize Key Forging
+                   </PresenceButton>
+                </div>
+             </PresenceCard>
            )}
 
-           {/* Show Generated Token Warning */}
            {generatedKey && (
-             <Card className="rounded-[2rem] shadow-none border-red-500/30 bg-red-500/5 overflow-hidden animate-in fade-in slide-in-from-bottom-4 relative">
-                <div className="absolute top-0 left-0 bottom-0 w-1 bg-red-500"></div>
-                <CardContent className="p-6 md:p-8">
-                  <div className="flex items-start gap-4">
-                     <AlertTriangle className="w-6 h-6 text-red-400 shrink-0 mt-1" />
-                     <div className="space-y-4 w-full">
-                       <div>
-                         <h3 className="font-black text-red-500 text-lg">Critical Token Exposure</h3>
-                         <p className="text-sm font-medium text-red-400/80 mt-1">
-                           This is the exclusive time we can show you the raw private key. We store an irreversible hash in the data vault. Ensure you copy it correctly immediately.
-                         </p>
-                       </div>
-                       
-                       <div className="flex items-center justify-between p-4 bg-black/50 border border-red-500/30 rounded-xl">
-                          <code className="text-[#a0a0b0] font-mono text-sm break-all font-bold pr-4">{generatedKey}</code>
-                          <Button variant="outline" onClick={() => copyToClipboard(generatedKey)} className="h-9 px-4 shrink-0 rounded-lg text-red-400 border-red-500/50 hover:bg-red-500/20 bg-transparent font-bold">Copy Key</Button>
-                       </div>
+             <PresenceCard className="bg-rose-50 border-none p-10 space-y-8 animate-in zoom-in-95 duration-500 relative overflow-hidden">
+                <div className="absolute top-0 left-0 bottom-0 w-2 bg-rose-500"></div>
+                <div className="flex items-center gap-5">
+                   <div className="w-14 h-14 rounded-2xl bg-rose-500 text-white flex items-center justify-center shadow-xl shadow-rose-500/20">
+                      <AlertTriangle className="w-8 h-8" />
+                   </div>
+                   <div>
+                      <h3 className="text-2xl font-black text-rose-600 uppercase tracking-tighter">Raw Key Intercepted</h3>
+                      <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mt-1">One-time exposure event detected</p>
+                   </div>
+                </div>
 
-                       <Button onClick={() => setGeneratedKey(null)} className="h-9 bg-red-500 hover:bg-red-600 font-bold text-white rounded-xl shadow-md">I have secured my token securely</Button>
-                     </div>
-                  </div>
-                </CardContent>
-             </Card>
+                <div className="p-8 rounded-[2rem] bg-black/5 flex flex-col items-center gap-6">
+                   <code className="text-xl font-mono text-rose-500 font-black break-all text-center tracking-widest">
+                      {generatedKey}
+                   </code>
+                   <PresenceButton onClick={() => copyToClipboard(generatedKey)} className="bg-rose-500 shadow-xl shadow-rose-500/20 text-xs px-10">
+                      Secure to Clipboard
+                   </PresenceButton>
+                </div>
+
+                <div className="flex justify-center">
+                   <button onClick={() => setGeneratedKey(null)} className="text-[10px] font-black text-rose-300 uppercase underline tracking-[0.3em]">I have secured this asset</button>
+                </div>
+             </PresenceCard>
            )}
 
            {!isCreatingKey && !generatedKey && (
-             <div className="flex justify-between items-center bg-[var(--color-surface)] p-4 rounded-3xl border border-[var(--color-border)] gap-4">
-               <div>
-                 <h2 className="text-sm font-black text-white uppercase tracking-wider">Current Live Authorities</h2>
-                 <p className="text-[10px] text-[var(--color-muted)] font-bold mt-1">Applications executing transactions</p>
-               </div>
-               <Button onClick={() => setIsCreatingKey(true)} className="h-10 px-5 rounded-xl font-bold bg-[var(--color-primary)] text-black hover:bg-[var(--color-primary)]/90 flex shrink-0">
-                 <Plus className="w-4 h-4 mr-1.5" /> Forge Key
-               </Button>
-             </div>
+             <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-6">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div>
+                    <h2 className="text-sm font-black text-[#1b1929] dark:text-white uppercase tracking-[0.2em]">Active Cipher Nodes</h2>
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">Authorized system access points</p>
+                  </div>
+                  <PresenceButton onClick={() => setIsCreatingKey(true)} className="bg-[#5c4ae4] shadow-xl shadow-indigo-500/20 px-8">
+                    <Plus className="w-5 h-5 mr-3" /> Forge New Node
+                  </PresenceButton>
+                </div>
+             </PresenceCard>
            )}
 
            <div className="grid gap-4">
              {keys.map(k => (
-               <div key={k.id} className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[2rem] p-6 flex flex-col md:flex-row gap-6 md:items-center justify-between group hover:border-[var(--color-primary)]/30 transition-all">
-                  <div className="flex items-center gap-4 flex-1">
-                     <div className="w-12 h-12 rounded-2xl bg-black/40 border-2 border-dashed border-[var(--color-border)] flex items-center justify-center shrink-0 text-[var(--color-muted)] group-hover:border-[var(--color-primary)] group-hover:text-[var(--color-primary)] transition-colors">
-                       <Key className="w-5 h-5" />
+               <PresenceCard key={k.id} noPadding className="group overflow-hidden">
+                  <div className="p-8 flex flex-col md:flex-row gap-8 items-start md:items-center">
+                     <div className="w-16 h-16 rounded-[1.5rem] bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] shrink-0 shadow-inner group-hover:scale-110 transition-transform">
+                        <Key className="w-8 h-8" />
                      </div>
-                     <div>
-                       <h3 className="font-bold text-lg text-white mb-1 flex items-center gap-2">
-                         {k.name}
-                         <span className="text-[10px] uppercase font-black tracking-widest px-2 py-0.5 rounded-full bg-white/5 text-[var(--color-muted)] border border-white/10">{k.prefix}••••••••••</span>
-                       </h3>
-                       <div className="flex flex-wrap items-center gap-3 text-xs text-[var(--color-muted)] font-medium">
-                         <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> Created: {new Date(k.created_at).toLocaleDateString()}</span>
-                         <span className="flex items-center gap-1"><MonitorSmartphone className="w-3 h-3" /> Last Active: {k.last_used_at ? new Date(k.last_used_at).toLocaleDateString() : 'Never used'}</span>
-                       </div>
+                     <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-4 mb-3">
+                           <h3 className="text-xl font-black text-[#1b1929] dark:text-white truncate uppercase tracking-tight">{k.name}</h3>
+                           <span className="px-3 py-1 rounded-lg bg-gray-50 dark:bg-white/5 text-[10px] font-black text-gray-300 uppercase tracking-widest border border-indigo-50">{k.prefix}••••</span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-6">
+                           <div className="flex items-center gap-3">
+                              <Calendar className="w-4 h-4 text-indigo-300" />
+                              <span className="text-[10px] font-black text-gray-400 uppercase">Deployed · {new Date(k.created_at).toLocaleDateString()}</span>
+                           </div>
+                           <div className="flex items-center gap-3">
+                              <Clock className="w-4 h-4 text-indigo-300" />
+                              <span className="text-[10px] font-black text-gray-400 uppercase">Pulse · {k.last_used_at ? new Date(k.last_used_at).toLocaleDateString() : 'Zero Activity'}</span>
+                           </div>
+                        </div>
+                     </div>
+                     <div className="flex md:flex-col gap-3 shrink-0">
+                        <div className="flex gap-1.5 flex-wrap justify-end">
+                           {k.permissions.map(p => (
+                             <span key={p} className="px-3 py-1 rounded-lg bg-[#5c4ae4]/5 text-[#5c4ae4] text-[9px] font-black uppercase tracking-widest border border-indigo-50">{p.split(':')[0]}</span>
+                           ))}
+                        </div>
+                        <button onClick={() => handleRevokeKey(k.id)} className="h-11 px-8 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition-all font-black text-[10px] uppercase tracking-widest shadow-sm">
+                           Purge
+                        </button>
                      </div>
                   </div>
-
-                  <div className="flex items-center gap-4">
-                     <div className="flex flex-wrap gap-1.5">
-                       {k.permissions.map(p => (
-                         <span key={p} className="px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-wider bg-black/40 text-[var(--color-primary)] border border-white/5">{p}</span>
-                       ))}
-                     </div>
-                     <div className="w-px h-8 bg-white/10 mx-2 hidden md:block"></div>
-                     <Button variant="outline" size="sm" onClick={() => handleRevokeKey(k.id)} loading={isPending} className="h-9 px-4 rounded-xl text-red-500 border-red-500/30 hover:bg-red-500/10 shrink-0">Revoke</Button>
-                  </div>
-               </div>
+               </PresenceCard>
              ))}
-             {keys.length === 0 && (
-               <div className="py-20 text-center border-dashed border border-[var(--color-border)] rounded-[2rem] text-sm font-bold text-[var(--color-muted)] bg-[var(--color-surface)]">
-                 No cryptographic authorities configured yet.
-               </div>
+             {keys.length === 0 && !isCreatingKey && (
+               <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
+                  <KeyRound className="w-16 h-16 mb-5 text-indigo-100" />
+                  <p className="font-black text-xl text-gray-400 uppercase tracking-widest">Vault Empty</p>
+               </PresenceCard>
              )}
            </div>
 
@@ -266,89 +283,91 @@ export default function SecurityClient({
       )}
 
       {activeTab === 'logins' && (
-        <div className="space-y-6 animate-in fade-in zoom-in-95 duration-200">
-          
-          <Card className="rounded-[2rem] shadow-none border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
-             
-             {/* Login Filter Row */}
-             <div className="p-4 bg-black/20 border-b border-[var(--color-border)] flex flex-col sm:flex-row items-center gap-4">
-                <div className="relative flex-1 w-full text-sm">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" />
-                  <Input 
-                    placeholder="Search by target email pattern..." 
-                    value={searchEmail}
-                    onChange={e => { setSearchEmail(e.target.value); setLoginPage(1); }}
-                    className="pl-9 h-11 w-full bg-black/40 border-[var(--color-border)] rounded-xl"
-                  />
-                </div>
-                <div className="text-xs font-bold text-[var(--color-muted)] tracking-wider uppercase bg-black/40 px-4 py-2.5 rounded-xl border border-[var(--color-border)]">
-                  Tracking {totalLoginsCount} Network Vectors
-                </div>
-             </div>
-
-             <div className="overflow-x-auto">
-               <table className="w-full text-left text-sm whitespace-nowrap">
-                 <thead>
-                   <tr className="border-b border-white/5 bg-black/40">
-                     <th className="px-5 py-4 font-black text-[var(--color-muted)] uppercase tracking-wider text-[10px]">Vector Date</th>
-                     <th className="px-5 py-4 font-black text-[var(--color-muted)] uppercase tracking-wider text-[10px]">Target Authority</th>
-                     <th className="px-5 py-4 font-black text-[var(--color-muted)] uppercase tracking-wider text-[10px]">Client Origin</th>
-                     <th className="px-5 py-4 font-black text-[var(--color-muted)] uppercase tracking-wider text-[10px] text-right">User Agent Topology</th>
-                   </tr>
-                 </thead>
-                 <tbody className="divide-y divide-white/5">
-                   {isLoadingLogins ? (
-                      <tr>
-                        <td colSpan={4} className="py-16 text-center">
-                          <div className="w-6 h-6 rounded-full border-2 border-t-[var(--color-primary)] border-[var(--color-primary)]/20 animate-spin mx-auto"></div>
-                          <p className="mt-3 text-[10px] uppercase font-bold tracking-widest text-[var(--color-muted)]">Scanning Authentication Traces...</p>
-                        </td>
-                      </tr>
-                   ) : paginatedLogins.length === 0 ? (
-                      <tr>
-                        <td colSpan={4} className="py-16 text-center">
-                          <p className="text-sm font-bold text-[var(--color-muted)]">No authentication traces detected in logs.</p>
-                        </td>
-                      </tr>
-                   ) : (
-                      paginatedLogins.map(login => (
-                        <tr key={login.log_id} className="hover:bg-white/5 transition-colors group">
-                           <td className="px-5 py-4 text-xs tabular-nums text-[var(--color-muted)] font-medium">
-                             {new Date(login.created_at).toLocaleString()}
-                           </td>
-                           <td className="px-5 py-4 text-xs font-bold">
-                             <div className="flex items-center gap-2">
-                               <User className="w-3.5 h-3.5 text-blue-400 opacity-60" />
-                               <span>{login.email}</span>
-                               <span className="text-[9px] uppercase tracking-widest text-[var(--color-muted)] px-2 py-0.5 rounded border border-white/10 bg-black/20">{login.role || 'reader'}</span>
-                             </div>
-                           </td>
-                           <td className="px-5 py-4 text-xs font-mono text-[#a0a0b0]">
-                             {login.ip_address}
-                           </td>
-                           <td className="px-5 py-4 text-[10px] text-[var(--color-muted)] text-right font-medium max-w-[250px] truncate overflow-hidden">
-                             {login.user_agent || 'Unknown Payload Header'}
-                           </td>
-                        </tr>
-                      ))
-                   )}
-                 </tbody>
-               </table>
-             </div>
-             
-             {/* Pagination Bottom */}
-             {totalPages > 1 && (
-               <div className="p-4 bg-black/20 border-t border-[var(--color-border)] flex items-center justify-between gap-4">
-                 <span className="text-xs text-[var(--color-muted)] font-bold tracking-wider">
-                   Displaying cluster {loginPage} of {totalPages}
-                 </span>
-                 <div className="flex gap-2">
-                    <Button variant="outline" size="icon" disabled={loginPage === 1} onClick={() => setLoginPage(loginPage - 1)} className="w-8 h-8 rounded-lg bg-[var(--color-surface)] border-[var(--color-border)]"><ChevronLeft className="w-4 h-4" /></Button>
-                    <Button variant="outline" size="icon" disabled={loginPage >= totalPages} onClick={() => setLoginPage(loginPage + 1)} className="w-8 h-8 rounded-lg bg-[var(--color-surface)] border-[var(--color-border)]"><ChevronRight className="w-4 h-4" /></Button>
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+           
+           <PresenceCard noPadding>
+              <div className="p-8 border-b border-indigo-50 dark:border-white/5 flex flex-col md:flex-row items-center gap-6">
+                 <div className="relative flex-1 w-full">
+                   <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-300" />
+                   <input 
+                     placeholder="Filter target identity..." 
+                     value={searchEmail}
+                     onChange={e => { setSearchEmail(e.target.value); setLoginPage(1); }}
+                     className="w-full h-14 pl-12 pr-4 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-sm font-bold shadow-inner"
+                   />
                  </div>
-               </div>
-             )}
-          </Card>
+                 <div className="px-8 py-4 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-[10px] font-black text-[#5c4ae4] uppercase tracking-widest border border-indigo-100">
+                   Detected Traces: {totalLoginsCount}
+                 </div>
+              </div>
+
+              <div className="overflow-x-auto min-h-[400px]">
+                <table className="w-full text-left text-xs whitespace-nowrap">
+                  <thead>
+                    <tr className="bg-gray-50/50 dark:bg-white/5 border-b border-indigo-50 dark:border-white/5 font-black uppercase tracking-widest text-[#5c4ae4]">
+                      <th className="px-8 py-5 text-[10px]">Temporal Event</th>
+                      <th className="px-8 py-5 text-[10px]">Target Subject</th>
+                      <th className="px-8 py-5 text-[10px]">Vector Origin (IP)</th>
+                      <th className="px-8 py-5 text-[10px] text-right">Environment ID</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-indigo-50 dark:divide-white/5">
+                    {isLoadingLogins ? (
+                       <tr>
+                         <td colSpan={4} className="py-24 text-center">
+                           <div className="w-12 h-12 rounded-2xl border-4 border-indigo-100 border-t-[#5c4ae4] animate-spin mx-auto mb-4"></div>
+                           <p className="text-gray-300 font-black uppercase tracking-widest text-[10px]">Decoding Traces...</p>
+                         </td>
+                       </tr>
+                    ) : paginatedLogins.length === 0 ? (
+                       <tr>
+                         <td colSpan={4} className="py-24 text-center">
+                           <Shield className="w-16 h-16 text-indigo-100 mx-auto mb-5" />
+                           <p className="font-black text-xl text-gray-400 uppercase tracking-widest">No Events Found</p>
+                         </td>
+                       </tr>
+                    ) : (
+                       paginatedLogins.map(login => (
+                         <tr key={login.log_id} className="group transition-all hover:bg-gray-50/30 dark:hover:bg-white/5">
+                            <td className="px-8 py-6 font-black tabular-nums text-gray-400">
+                              {new Date(login.created_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                            </td>
+                            <td className="px-8 py-6">
+                              <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-white/5 flex items-center justify-center text-indigo-400">
+                                   <User className="w-5 h-5" />
+                                </div>
+                                <div>
+                                   <p className="font-black text-[#1b1929] dark:text-white uppercase tracking-tight">{login.email}</p>
+                                   <span className="text-[9px] font-black text-indigo-300 uppercase mt-0.5 tracking-widest">{login.role || 'reader'}</span>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-8 py-6 font-mono font-black text-indigo-400 text-[11px]">
+                              {login.ip_address}
+                            </td>
+                            <td className="px-8 py-6 text-[10px] font-bold text-gray-300 text-right max-w-[250px] truncate italic">
+                              {login.user_agent || 'Zero Signal Header'}
+                            </td>
+                         </tr>
+                       ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              
+              {totalPages > 1 && (
+                <div className="p-8 bg-gray-50/30 dark:bg-white/5 border-t border-indigo-50 dark:border-white/5 flex items-center justify-between">
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                    Cluster {loginPage} <span className="mx-2 text-indigo-100">|</span> Total {totalPages}
+                  </span>
+                  <div className="flex gap-3">
+                     <button disabled={loginPage === 1} onClick={() => setLoginPage(loginPage - 1)} className="w-12 h-12 rounded-xl bg-white dark:bg-[#1b1929] text-gray-300 hover:text-[#5c4ae4] disabled:opacity-20 shadow-sm flex items-center justify-center"><ChevronLeft className="w-6 h-6" /></button>
+                     <button disabled={loginPage >= totalPages} onClick={() => setLoginPage(loginPage + 1)} className="w-12 h-12 rounded-xl bg-white dark:bg-[#1b1929] text-gray-300 hover:text-[#5c4ae4] disabled:opacity-20 shadow-sm flex items-center justify-center"><ChevronRight className="w-6 h-6" /></button>
+                  </div>
+                </div>
+              )}
+           </PresenceCard>
 
         </div>
       )}

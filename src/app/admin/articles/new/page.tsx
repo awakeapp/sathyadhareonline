@@ -2,6 +2,13 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import RichTextEditor from '@/components/RichTextEditorClient';
+import { ChevronLeft, Bell, PenTool, Sparkles, Send, Box, FileText } from 'lucide-react';
+import { 
+  PresenceWrapper, 
+  PresenceHeader,
+  PresenceCard,
+  PresenceButton 
+} from '@/components/PresenceUI';
 
 export default async function NewArticlePage() {
   const supabase = await createClient();
@@ -12,7 +19,7 @@ export default async function NewArticlePage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('full_name, role')
     .eq('id', user.id)
     .single();
   const role = profile?.role || 'reader';
@@ -47,7 +54,6 @@ export default async function NewArticlePage() {
       .single();
     const actionRole = actionProfile?.role || 'reader';
 
-    // Role-based status determination
     let status = 'draft';
     if (actionRole === 'editor') {
       if (action_type === 'submit') status = 'in_review';
@@ -56,7 +62,6 @@ export default async function NewArticlePage() {
       else if (action_type === 'submit') status = 'in_review';
     }
 
-    // Insert article first to get the ID
     const { data: inserted, error: insertError } = await supabaseAction
       .from('articles')
       .insert({
@@ -78,13 +83,12 @@ export default async function NewArticlePage() {
       return;
     }
 
-    // Upload cover image if provided
     if (coverFile && coverFile.size > 0) {
       const ext = coverFile.name.split('.').pop();
       const path = `articles/${inserted.id}/cover.${ext}`;
       const { error: uploadError } = await supabaseAction.storage
         .from('article-images')
-        .upload(path, coverFile, { upsert: true });
+        .upload(path, coverFile, { upsert: true, contentType: coverFile.type });
 
       if (!uploadError) {
         const { data: urlData } = supabaseAction.storage
@@ -95,96 +99,97 @@ export default async function NewArticlePage() {
           .from('articles')
           .update({ cover_image: urlData.publicUrl })
           .eq('id', inserted.id);
-      } else {
-        console.error('Cover upload error:', uploadError);
       }
     }
 
     redirect('/admin/articles');
   }
 
+  const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
+
   return (
-    <div className="min-h-screen pb-24 px-4 pt-6 bg-[var(--color-background)] font-sans antialiased text-white safe-area-pb">
-      <div className="max-w-2xl mx-auto">
-        <div className="flex items-center gap-3 mb-8">
-          <Link href="/admin/articles" className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:text-white transition-colors active:scale-95">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-          </Link>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Create Article</h1>
+    <PresenceWrapper>
+      <PresenceHeader 
+        title="Presence"
+        roleLabel="Article Weaver · Creation Matrix"
+        initials={initials}
+        icon1={Bell}
+        icon2={ChevronLeft}
+        onIcon2Click={() => window.location.href = '/admin/articles'}
+      />
+      
+      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20 max-w-4xl mx-auto">
+        
+        <div className="flex items-center gap-5 mb-6">
+           <div className="w-12 h-12 rounded-2xl bg-[#5c4ae4] flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
+              <FileText className="w-6 h-6" />
+           </div>
+           <div>
+              <h2 className="text-2xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight">Birth of Narrative</h2>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Initializing new document sequence</p>
+           </div>
         </div>
 
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl overflow-hidden shadow-2xl">
-          <form action={createArticleAction} encType="multipart/form-data" className="p-6 md:p-8 space-y-6">
+        <PresenceCard className="p-0 overflow-hidden">
+          <form action={createArticleAction} encType="multipart/form-data" className="p-10 space-y-10">
 
-            {/* Title */}
-            <div>
-              <label className="block text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider mb-2 px-1" htmlFor="title">Title</label>
-              <input required id="title" name="title" type="text" placeholder="The Title of Your Article"
-                className="w-full px-4 py-3.5 rounded-2xl bg-black/20 border border-[var(--color-border)] text-white placeholder-gray-500 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all outline-none" />
+            <div className="space-y-3">
+              <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Narrative Headline</label>
+              <input required name="title" type="text" placeholder="The Core Statement..."
+                className="w-full h-16 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-md font-bold shadow-inner" />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Slug */}
-              <div>
-                <label className="block text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider mb-2 px-1" htmlFor="slug">Slug URL</label>
-                <input required id="slug" name="slug" type="text" placeholder="article-slug"
-                  className="w-full px-4 py-3.5 rounded-2xl bg-black/20 border border-[var(--color-border)] text-white placeholder-gray-500 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all outline-none font-mono text-sm" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <div className="space-y-3">
+                <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Network Slug</label>
+                <input required name="slug" type="text" placeholder="article-slug-vector"
+                  className="w-full h-14 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none font-mono text-xs font-bold shadow-inner text-indigo-400" />
               </div>
 
-              {/* Author Name */}
-              <div>
-                <label className="block text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider mb-2 px-1" htmlFor="author_name">Author</label>
-                <input required id="author_name" name="author_name" type="text" placeholder="Display Author"
-                  className="w-full px-4 py-3.5 rounded-2xl bg-black/20 border border-[var(--color-border)] text-white placeholder-gray-500 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all outline-none" />
+              <div className="space-y-3">
+                <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Author Identity</label>
+                <input required name="author_name" type="text" placeholder="Dispaly Identity" defaultValue={profile?.full_name || ''}
+                  className="w-full h-14 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-sm font-bold shadow-inner" />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Category */}
-              <div>
-                <label className="block text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider mb-2 px-1" htmlFor="category_id">Category</label>
-                <div className="relative">
-                  <select id="category_id" name="category_id"
-                    className="w-full px-4 py-3.5 rounded-2xl bg-black/20 border border-[var(--color-border)] text-white focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all outline-none appearance-none">
-                    <option value="" className="bg-[#181623]">Select Category</option>
-                    {categories?.map((cat) => (
-                      <option key={cat.id} value={cat.id} className="bg-[#181623]">{cat.name}</option>
-                    ))}
-                  </select>
-                  <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-[var(--color-muted)]">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                  </div>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <div className="space-y-3">
+                <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Network Category</label>
+                <select name="category_id"
+                  className="w-full h-16 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-xs font-black uppercase tracking-widest shadow-inner accent-[#5c4ae4]">
+                  <option value="">Detached Segment</option>
+                  {categories?.map((cat) => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
               </div>
 
-              {/* Cover Image */}
-              <div>
-                <label className="block text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider mb-2 px-1" htmlFor="cover_image">
-                  Cover <span className="font-normal opacity-50 capitalize lowercase">(optional)</span>
-                </label>
-                <input id="cover_image" name="cover_image" type="file" accept="image/*"
-                  className="w-full text-sm text-[var(--color-muted)] file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:bg-[var(--color-primary)]/10 file:text-[var(--color-primary)] file:font-semibold hover:file:bg-[var(--color-primary)]/20 transition-all bg-black/20 border border-[var(--color-border)] rounded-2xl py-1 px-1 cursor-pointer" />
+              <div className="space-y-3">
+                <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Visual Identifier (Cover)</label>
+                <input name="cover_image" type="file" accept="image/*"
+                  className="w-full h-16 px-6 py-4 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none shadow-inner text-xs font-black text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-[#5c4ae4] file:text-white file:text-[10px] file:uppercase file:tracking-widest" />
               </div>
             </div>
 
-            {/* Excerpt */}
-            <div>
-              <label className="block text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider mb-2 px-1" htmlFor="excerpt">Excerpt</label>
-              <textarea required id="excerpt" name="excerpt" rows={3} placeholder="Brief summary of the article..."
-                className="w-full px-4 py-3.5 rounded-2xl bg-black/20 border border-[var(--color-border)] text-white placeholder-gray-500 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all outline-none resize-none leading-relaxed" />
+            <div className="space-y-3">
+              <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Manifest Overview (Excerpt)</label>
+              <textarea required name="excerpt" rows={3} placeholder="Condensed narrative summary..."
+                className="w-full p-6 rounded-[2rem] bg-gray-50 dark:bg-[#1b1929] border-none text-md font-bold shadow-inner resize-none leading-relaxed" />
             </div>
 
-            <div className="pt-2">
-              <label className="block text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider mb-2 px-1">Content</label>
-              <RichTextEditor name="content" />
+            <div className="space-y-4">
+              <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4] flex items-center gap-3">
+                 <Sparkles className="w-4 h-4" /> Core Content Stream
+              </label>
+              <div className="min-h-[600px] rounded-[2rem] overflow-hidden border-none shadow-2xl bg-white dark:bg-[#1b1929]">
+                 <RichTextEditor name="content" />
+              </div>
             </div>
 
-            {/* Actions */}
-            <div className="pt-6 mt-6 border-t border-[var(--color-border)] flex flex-col sm:flex-row justify-end gap-3">
+            <div className="pt-10 border-t border-indigo-50 dark:border-white/5 flex flex-col sm:flex-row justify-end gap-4">
               <Link href="/admin/articles"
-                className="w-full px-6 py-4 rounded-2xl border border-[var(--color-border)] font-semibold text-[var(--color-muted)] hover:text-white hover:bg-white/5 transition-colors text-center">
+                className="h-16 px-10 rounded-2xl bg-gray-50 dark:bg-white/5 border-none font-black text-[11px] uppercase tracking-widest text-gray-400 flex items-center justify-center hover:bg-gray-100 transition-all">
                 Cancel
               </Link>
               
@@ -192,9 +197,9 @@ export default async function NewArticlePage() {
                 type="submit" 
                 name="action_type" 
                 value="draft"
-                className="w-full px-6 py-4 rounded-2xl bg-white/5 border border-[var(--color-border)] text-white font-bold hover:bg-white/10 transition-colors text-center"
+                className="h-16 px-8 rounded-2xl bg-white dark:bg-[#1b1929] text-[#1b1929] dark:text-white border-2 border-indigo-50 font-black text-[10px] uppercase tracking-widest hover:border-[#5c4ae4] transition-all"
               >
-                Save Draft
+                Save Cold Draft
               </button>
 
               {role === 'editor' ? (
@@ -202,25 +207,25 @@ export default async function NewArticlePage() {
                   type="submit" 
                   name="action_type" 
                   value="submit"
-                  className="w-full px-8 py-4 rounded-2xl bg-amber-500 text-black font-bold hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20 text-center"
+                  className="h-16 px-10 rounded-2xl bg-amber-500 text-white font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all"
                 >
-                  Submit for Review
+                  Submit for Audit
                 </button>
               ) : (
                 <button 
                   type="submit" 
                   name="action_type" 
                   value="publish"
-                  className="w-full px-8 py-4 rounded-2xl bg-[var(--color-primary)] text-black font-bold hover:bg-[#ffed4a] transition-colors shadow-lg shadow-[var(--color-primary)]/20 text-center"
+                  className="h-16 px-12 bg-[#5c4ae4] text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3"
                 >
-                  Publish Now
+                  <Send className="w-5 h-5" /> Deploy Broadcast
                 </button>
               )}
             </div>
             
           </form>
-        </div>
+        </PresenceCard>
       </div>
-    </div>
+    </PresenceWrapper>
   );
 }

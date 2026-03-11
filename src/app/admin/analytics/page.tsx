@@ -1,10 +1,12 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Bell } from 'lucide-react';
 import AnalyticsClient from './AnalyticsClient';
 import { differenceInDays, parseISO, isValid } from 'date-fns';
+import { 
+  PresenceWrapper, 
+  PresenceHeader 
+} from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,24 +17,22 @@ export default async function AnalyticsPage({
 }) {
   const supabase = await createClient();
 
-  // ── Auth guard ──────────────────────────────────────────────────
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
   const { data: profile } = await supabase
-    .from('profiles').select('role').eq('id', user.id).single();
+    .from('profiles').select('full_name, role').eq('id', user.id).single();
 
   if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
     redirect('/admin?error=unauthorized');
   }
 
-  // ── Date Range ───────────────────────────────────────────────────
   const params = await searchParams;
   const startParam = typeof params.start === 'string' ? params.start : null;
   const endParam = typeof params.end === 'string' ? params.end : null;
 
-  let endDate = new Date(); // now
-  let startDate = new Date(endDate.getTime() - 30 * 86400000); // 30 days ago default
+  let endDate = new Date(); 
+  let startDate = new Date(endDate.getTime() - 30 * 86400000); 
 
   if (startParam && isValid(parseISO(startParam))) startDate = parseISO(startParam);
   if (endParam && isValid(parseISO(endParam))) endDate = parseISO(endParam);
@@ -47,14 +47,12 @@ export default async function AnalyticsPage({
   const endISO = endDate.toISOString();
   const daysDiff = Math.max(1, Math.min(differenceInDays(endDate, startDate) + 1, 365));
 
-  // ── Headline metrics (Global) ────────────────────────────────────
   const { count: totalArticles } = await supabase
     .from('articles').select('*', { count: 'exact', head: true }).eq('is_deleted', false);
   const { count: publishedArticles } = await supabase
     .from('articles').select('*', { count: 'exact', head: true })
     .eq('status', 'published').eq('is_deleted', false);
 
-  // ── Time Series Data (Range) ─────────────────────────────────────
   const [
     { data: viewRows },
     { data: userRows },
@@ -89,10 +87,7 @@ export default async function AnalyticsPage({
   const timeSeries = mapTimeSeries();
   const rangeViews = timeSeries.reduce((acc, curr) => acc + curr.views, 0);
 
-  // ── Top articles by views (Range) ────────────────────────────────
   const viewCounts: Record<string, number> = {};
-
-  // To fix `viewRows` query for Top Articles and aggregations, we refetch just the IDs since we missed them above.
   const { data: viewDataWithIds } = await supabase.from('article_views').select('article_id').gte('created_at', startISO).lte('created_at', endISO);
   
   for (const row of viewDataWithIds ?? []) {
@@ -106,7 +101,6 @@ export default async function AnalyticsPage({
     topArticlesByViews = (data ?? []).sort((a, b) => (viewCounts[b.id] ?? 0) - (viewCounts[a.id] ?? 0));
   }
 
-  // ── Top articles by comments (Range) ─────────────────────────────
   const { data: commentDataWithIds } = await supabase.from('comments').select('article_id').gte('created_at', startISO).lte('created_at', endISO).eq('is_deleted', false);
   const commentCounts: Record<string, number> = {};
   for (const row of commentDataWithIds ?? []) {
@@ -120,7 +114,6 @@ export default async function AnalyticsPage({
     topArticlesByComments = (data ?? []).sort((a, b) => (commentCounts[b.id] ?? 0) - (commentCounts[a.id] ?? 0));
   }
 
-  // ── Category breakdown (Global + Range Views) ────────────────────
   const { data: catArticles } = await supabase
     .from('articles')
     .select('id, category_id, categories(id, name)')
@@ -129,7 +122,7 @@ export default async function AnalyticsPage({
 
   const catMap: Record<string, { id: string; name: string; count: number; views: number }> = {};
   for (const row of catArticles ?? []) {
-    const cat = row.categories as { id?: string; name?: string } | null;
+    const cat = row.categories as any;
     if (!cat?.name || !cat?.id) continue;
     
     if (!catMap[cat.id]) catMap[cat.id] = { id: cat.id, name: cat.name, count: 0, views: 0 };
@@ -138,25 +131,20 @@ export default async function AnalyticsPage({
   }
   const categoryStats = Object.values(catMap).sort((a, b) => b.count - a.count);
 
+  const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
+
   return (
-    <div className="min-h-screen pb-24 px-4 pt-6 bg-[var(--color-background)] font-sans antialiased text-white safe-area-pb">
-      <div className="max-w-6xl mx-auto space-y-6">
-
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-4">
-          <Button asChild variant="outline" size="icon" className="rounded-full w-10 h-10 border-[var(--color-border)] text-[var(--color-muted)] shrink-0">
-            <Link href="/admin">
-              <ChevronLeft className="w-5 h-5" />
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-3xl font-black tracking-tight text-white leading-tight">Analytics Engine</h1>
-            <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
-              Platform Performance Overview
-            </p>
-          </div>
-        </div>
-
+    <PresenceWrapper>
+      <PresenceHeader 
+        title="Presence"
+        roleLabel="Analytics Intelligence · Range Discovery"
+        initials={initials}
+        icon1={Bell}
+        icon2={ChevronLeft}
+        onIcon2Click={() => window.location.href = '/admin'}
+      />
+      
+      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20">
         <AnalyticsClient
           startDate={startISO}
           endDate={endISO}
@@ -170,8 +158,7 @@ export default async function AnalyticsPage({
             viewsInRange: rangeViews
           }}
         />
-
       </div>
-    </div>
+    </PresenceWrapper>
   );
 }

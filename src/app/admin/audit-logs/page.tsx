@@ -1,22 +1,23 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Bell } from 'lucide-react';
 import AuditLogsClient from './AuditLogsClient';
+import { 
+  PresenceWrapper, 
+  PresenceHeader 
+} from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AuditLogsPage() {
   const supabase = await createClient();
 
-  // ── Auth guard ───────────────────────────────────────────────────────────
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('full_name, role')
     .eq('id', user.id)
     .single();
 
@@ -24,10 +25,6 @@ export default async function AuditLogsPage() {
     redirect('/admin?error=unauthorized');
   }
 
-  // ── Fetch User List for Select Dropdown ──────────────────────────────
-  // Fetch profiles that have performed at least one action, or just fetch all admins/super_admins.
-  // Easiest is to fetch all profiles as the dropdown options, mapping id & email/name.
-  
   const { data: profiles, error } = await supabase
     .from('profiles')
     .select('id, full_name, email')
@@ -43,27 +40,22 @@ export default async function AuditLogsPage() {
     console.error('Error fetching users for audit logs:', error);
   }
 
-  // We could fetch total count purely for the header, but AuditLogsClient loads it dynamically.
-  // We'll just pass down the user list for the filter.
-  
-  return (
-    <div className="font-sans antialiased max-w-7xl mx-auto py-2 px-4 pb-24">
-      {/* ── Header ──────────────────────────────────────────────── */}
-      <div className="flex items-center gap-4 mb-8 mt-4">
-        <Button asChild variant="outline" size="icon" className="rounded-full w-10 h-10 border-[var(--color-border)] text-[var(--color-muted)] shrink-0">
-          <Link href="/admin">
-            <ChevronLeft className="w-5 h-5" />
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-2xl font-black tracking-tight leading-tight">System Audit Matrix</h1>
-          <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
-            Immutable Activity Timeline
-          </p>
-        </div>
-      </div>
+  const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
 
-      <AuditLogsClient usersList={usersList} />
-    </div>
+  return (
+    <PresenceWrapper>
+      <PresenceHeader 
+        title="Presence"
+        roleLabel="Security Protocol · Audit Matrix"
+        initials={initials}
+        icon1={Bell}
+        icon2={ChevronLeft}
+        onIcon2Click={() => window.location.href = '/admin'}
+      />
+      
+      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20">
+        <AuditLogsClient usersList={usersList} />
+      </div>
+    </PresenceWrapper>
   );
 }

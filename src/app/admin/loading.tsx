@@ -1,68 +1,40 @@
 export default function AdminLoading() {
   return (
-    <div className="font-sans antialiased max-w-5xl mx-auto px-1 py-2 pb-28 animate-pulse">
-      {/* Hero Header Skeleton */}
-      <div className="relative overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-6 mb-6 mt-2 h-[140px]" />
-
-      {/* Overview Skeleton */}
-      <div className="mb-4 flex items-center justify-between">
-        <div className="h-4 w-32 bg-[var(--color-surface)] rounded-md" />
-      </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 h-[120px]" />
-        ))}
-      </div>
-
-      {/* Quick Actions Skeleton */}
-      <div className="mb-4 flex items-center justify-between">
-        <div className="h-4 w-24 bg-[var(--color-surface)] rounded-md" />
-      </div>
-      <div className="grid grid-cols-4 sm:grid-cols-5 gap-3 mb-8">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 h-[100px]" />
-        ))}
-      </div>
-
-      {/* Main Content Areas Skeleton */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="lg:col-span-2 space-y-2">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="h-4 w-32 bg-[var(--color-surface)] rounded-md" />
-          </div>
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] h-16 w-full" />
-          ))}
-          <div className="mt-8">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="h-4 w-40 bg-[var(--color-surface)] rounded-md" />
+    <div className="font-sans antialiased min-h-screen pb-28 animate-pulse bg-gray-50/50 dark:bg-transparent">
+      {/* Presence Header Skeleton */}
+      <div className="h-44 bg-[#1b1929] relative overflow-hidden flex items-center px-8 border-b border-white/5">
+         <div className="flex items-center justify-between w-full max-w-[1400px] mx-auto">
+            <div className="flex items-center gap-6">
+               <div className="w-16 h-16 rounded-2xl bg-white/5" />
+               <div className="space-y-3">
+                  <div className="h-6 w-48 bg-white/10 rounded-lg" />
+                  <div className="h-3 w-32 bg-white/5 rounded-md" />
+               </div>
             </div>
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] h-[240px] w-full" />
-          </div>
+            <div className="flex items-center gap-4">
+               <div className="w-12 h-12 rounded-2xl bg-white/5" />
+               <div className="w-12 h-12 rounded-2xl bg-white/5" />
+               <div className="w-12 h-12 rounded-full bg-white/10 ml-4" />
+            </div>
+         </div>
+      </div>
+
+      <div className="px-5 -mt-8 pb-10 space-y-8 relative z-20 max-w-[1400px] mx-auto">
+        {/* Attendance Card Skeleton */}
+        <div className="h-28 bg-white dark:bg-[#181623] rounded-[2.5rem] shadow-sm border border-indigo-50 dark:border-white/5 p-8" />
+
+        {/* Status Card Skeleton */}
+        <div className="h-64 bg-white dark:bg-[#181623] rounded-[2.5rem] shadow-sm border border-indigo-50 dark:border-white/5 p-8" />
+
+        {/* Real-time Analytics Skeleton */}
+        <div className="grid grid-cols-3 gap-6">
+          <div className="h-44 bg-white dark:bg-[#181623] rounded-[2.5rem] shadow-sm border border-indigo-50 dark:border-white/5" />
+          <div className="h-44 bg-white dark:bg-[#181623] rounded-[2.5rem] shadow-sm border border-indigo-50 dark:border-white/5" />
+          <div className="h-44 bg-white dark:bg-[#181623] rounded-[2.5rem] shadow-sm border border-indigo-50 dark:border-white/5" />
         </div>
 
-        <div className="space-y-6">
-          <div>
-            <div className="mb-4 flex items-center justify-between">
-              <div className="h-4 w-24 bg-[var(--color-surface)] rounded-md" />
-            </div>
-            <div className="space-y-2">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] h-16 w-full" />
-              ))}
-            </div>
-          </div>
-          <div>
-            <div className="mb-4 flex items-center justify-between">
-              <div className="h-4 w-32 bg-[var(--color-surface)] rounded-md" />
-            </div>
-            <div className="space-y-2">
-              {[1, 2, 3, 4].map((i) => (
-                 <div key={i} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] h-[100px] w-full" />
-              ))}
-            </div>
-          </div>
-        </div>
+        {/* Action Grid Skeleton */}
+        <div className="h-[400px] bg-white dark:bg-[#181623] rounded-[2.5rem] shadow-sm border border-indigo-50 dark:border-white/5" />
       </div>
     </div>
   );

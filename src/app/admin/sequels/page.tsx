@@ -1,22 +1,23 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Bell } from 'lucide-react';
 import SequelsClient from './SequelsClient';
+import { 
+  PresenceWrapper, 
+  PresenceHeader 
+} from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
 
 export default async function SequelsPage() {
   const supabase = await createClient();
 
-  // ── Auth guard ───────────────────────────────────────────────────────────
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('full_name, role')
     .eq('id', user.id)
     .single();
 
@@ -24,7 +25,6 @@ export default async function SequelsPage() {
     redirect('/admin?error=unauthorized');
   }
 
-  // ── Data Fetching ────────────────────────────────────────────────────────
   const { data: sequels, error } = await supabase
     .from('sequels')
     .select('id, title, description, banner_image, status')
@@ -35,9 +35,6 @@ export default async function SequelsPage() {
     console.error('Error fetching sequels:', error);
   }
 
-  const list = sequels || [];
-
-  // Fetch article counts for all sequels
   const { data: countsData } = await supabase
     .from('sequel_articles')
     .select('sequel_id');
@@ -47,29 +44,27 @@ export default async function SequelsPage() {
     countsRecord[row.sequel_id] = (countsRecord[row.sequel_id] || 0) + 1;
   }
 
-  const sequelsWithCounts = list.map(s => ({
+  const sequelsWithCounts = (sequels || []).map(s => ({
     ...s,
     article_count: countsRecord[s.id] || 0,
   }));
 
-  return (
-    <div className="font-sans antialiased max-w-6xl mx-auto py-2 px-4 pb-24">
-      {/* ── Header ──────────────────────────────────────────────── */}
-      <div className="flex items-center gap-4 mb-8 mt-4">
-        <Button asChild variant="outline" size="icon" className="rounded-full w-10 h-10 border-[var(--color-border)] text-[var(--color-muted)] shrink-0">
-          <Link href="/admin">
-            <ChevronLeft className="w-5 h-5" />
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-2xl font-black tracking-tight leading-tight">Sequels Engine</h1>
-          <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
-            {sequelsWithCounts.length} active collections
-          </p>
-        </div>
-      </div>
+  const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
 
-      <SequelsClient initialSequels={sequelsWithCounts} />
-    </div>
+  return (
+    <PresenceWrapper>
+      <PresenceHeader 
+        title="Presence"
+        roleLabel={`Sequels · ${sequelsWithCounts.length} Distributed Nodes`}
+        initials={initials}
+        icon1={Bell}
+        icon2={ChevronLeft}
+        onIcon2Click={() => window.location.href = '/admin'}
+      />
+      
+      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20">
+        <SequelsClient initialSequels={sequelsWithCounts} />
+      </div>
+    </PresenceWrapper>
   );
 }

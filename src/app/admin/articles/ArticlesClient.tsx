@@ -2,18 +2,21 @@
 
 import { useState, useMemo, useTransition } from 'react';
 import Link from 'next/link';
-import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Input, Select } from '@/components/ui/Input';
 import {
   FileText, Sparkles, Edit2, Share, Trash2,
-  RefreshCcw, Eye, Star, CheckSquare, Search, Hash, User, Calendar
+  RefreshCcw, Eye, Star, CheckSquare, Search, Tag, Calendar, Plus, ChevronRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   bulkDeleteArticles, bulkUpdateStatus,
   restoreArticleAction, featureArticleAction, deleteArticleAction
 } from './actions';
+import { 
+  PresenceCard, 
+  PresenceButton, 
+  PresenceSectionHeader 
+} from '@/components/PresenceUI';
 
 export type Article = {
   id: string;
@@ -56,11 +59,9 @@ export default function ArticlesClient({
   // Derived state
   const filteredArticles = useMemo(() => {
     return articles.filter(a => {
-      // Normalise nullable DB values
       const status    = a.status    ?? 'draft';
       const isDeleted = a.is_deleted === true;
 
-      // 1. Search — Unicode/Kannada-safe
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
         const inTitle = (a.title ?? '').toLowerCase().includes(q);
@@ -68,7 +69,6 @@ export default function ArticlesClient({
         if (!inTitle && !inSlug) return false;
       }
 
-      // 2. Status filter
       if (statusFilter !== 'all') {
         if (statusFilter === 'deleted') {
           if (!isDeleted) return false;
@@ -77,13 +77,10 @@ export default function ArticlesClient({
           if (status !== statusFilter) return false;
         }
       } else {
-        if (isDeleted) return false; // hide deleted from 'all'
+        if (isDeleted) return false;
       }
 
-      // 3. Author
       if (authorFilter !== 'all' && a.author_id !== authorFilter) return false;
-
-      // 4. Category
       if (categoryFilter !== 'all' && a.category_id !== categoryFilter) return false;
 
       return true;
@@ -117,71 +114,80 @@ export default function ArticlesClient({
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <PresenceSectionHeader title="Article Library" />
+        <Link href="/admin/articles/new">
+          <PresenceButton className="bg-[#5c4ae4] shadow-indigo-500/20 hover:bg-[#4534c7]">
+            <Plus className="w-4 h-4 mr-2" /> New Article
+          </PresenceButton>
+        </Link>
+      </div>
 
-      {/* ── Filters ─────────────────────────────────────── */}
-      <Card className="rounded-3xl shadow-none border-[var(--color-border)] bg-[var(--color-surface)]">
-        <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row gap-3">
+      <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none">
+        <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" />
-            <Input
-              placeholder="Search articles by title or slug…"
+            <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400" />
+            <input
+              placeholder="Search articles..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-11 w-full bg-black/20"
+              className="w-full h-12 pl-11 pr-4 rounded-2xl bg-white dark:bg-[#1b1929] border-none shadow-sm focus:ring-2 focus:ring-indigo-500/20 transition-all font-bold text-sm"
             />
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar flex-shrink-0">
-            <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-[140px] h-11 bg-black/20">
+          <div className="flex gap-2 overflow-x-auto pb-1 md:pb-0 hide-scrollbar shrink-0">
+             <select 
+              value={statusFilter} 
+              onChange={(e) => setStatusFilter(e.target.value)} 
+              className="h-12 px-4 rounded-2xl bg-white dark:bg-[#1b1929] border-none shadow-sm font-bold text-xs focus:ring-2 focus:ring-indigo-500/20"
+            >
               <option value="all">All Status</option>
               <option value="published">Published</option>
               <option value="draft">Draft</option>
               <option value="in_review">In Review</option>
               {canManage && <option value="archived">Archived</option>}
               {canManage && <option value="deleted">Trash</option>}
-            </Select>
-            <Select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="w-[140px] h-11 bg-black/20">
-              <option value="all">All Categories</option>
+            </select>
+            <select 
+              value={categoryFilter} 
+              onChange={(e) => setCategoryFilter(e.target.value)} 
+              className="h-12 px-4 rounded-2xl bg-white dark:bg-[#1b1929] border-none shadow-sm font-bold text-xs focus:ring-2 focus:ring-indigo-500/20"
+            >
+              <option value="all">Categories</option>
               {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </Select>
-            <Select value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)} className="w-[140px] h-11 bg-black/20">
-              <option value="all">All Authors</option>
-              {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-            </Select>
+            </select>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </PresenceCard>
 
-      {/* ── Bulk Actions Bar ─────────────────────────────── */}
       {selectedIds.size > 0 && canManage && (
-        <div className="sticky top-20 z-20 flex items-center justify-between p-4 bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/30 backdrop-blur-md rounded-2xl shadow-lg animate-in slide-in-from-top-4">
+        <div className="sticky top-4 z-50 flex items-center justify-between p-4 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-2 border-indigo-500/20 rounded-[2rem] shadow-2xl animate-in fade-in slide-in-from-top-4">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-[var(--color-primary)] text-black font-black text-xs flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-indigo-500 text-white font-black text-xs flex items-center justify-center">
               {selectedIds.size}
             </div>
-            <span className="text-sm font-bold text-[var(--color-primary)]">articles selected</span>
+            <span className="text-sm font-black text-indigo-500 uppercase tracking-widest">selected</span>
           </div>
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" className="h-9 border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10" onClick={() => wrapAction(bulkUpdateStatus(Array.from(selectedIds), 'published'), 'Articles published')} loading={isPending}>
+            <Button size="sm" variant="outline" className="h-9 rounded-xl border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10 font-bold" onClick={() => wrapAction(bulkUpdateStatus(Array.from(selectedIds), 'published'), 'Articles published')} loading={isPending}>
               Publish
             </Button>
-            <Button size="sm" variant="outline" className="h-9 border-amber-500/30 text-amber-500 hover:bg-amber-500/10" onClick={() => wrapAction(bulkUpdateStatus(Array.from(selectedIds), 'draft'), 'Reverted to draft')} loading={isPending}>
+            <Button size="sm" variant="outline" className="h-9 rounded-xl border-amber-500/30 text-amber-500 hover:bg-amber-500/10 font-bold" onClick={() => wrapAction(bulkUpdateStatus(Array.from(selectedIds), 'draft'), 'Reverted to draft')} loading={isPending}>
               Draft
             </Button>
-            <Button size="sm" variant="destructive" className="h-9" onClick={handleBulkDelete} loading={isPending}>
+            <Button size="sm" variant="destructive" className="h-9 rounded-xl font-bold" onClick={handleBulkDelete} loading={isPending}>
               <Trash2 className="w-4 h-4 mr-1.5" /> Delete
             </Button>
           </div>
         </div>
       )}
 
-      {/* ── List ────────────────────────────────────────── */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         {filteredArticles.length === 0 ? (
-          <Card className="py-20 text-center flex flex-col items-center border-[var(--color-border)] border-dashed rounded-[2rem] shadow-none bg-[var(--color-surface)]">
-            <FileText className="w-12 h-12 mb-4 opacity-20 text-[var(--color-muted)]" />
-            <p className="font-bold mb-1 text-lg tracking-tight">No articles found</p>
-            <p className="text-sm text-[var(--color-muted)]">Try adjusting your filters.</p>
-          </Card>
+          <PresenceCard className="py-20 text-center flex flex-col items-center border-dashed border-2 border-indigo-100">
+            <FileText className="w-16 h-16 mb-4 text-indigo-100" />
+            <p className="font-black text-xl tracking-tight text-gray-400">No articles found</p>
+            <p className="text-sm text-gray-400/60 mt-2 font-bold uppercase tracking-widest">Adjust your search or filters</p>
+          </PresenceCard>
         ) : (
           filteredArticles.map(a => {
             const isSelected = selectedIds.has(a.id);
@@ -190,86 +196,75 @@ export default function ArticlesClient({
             const isFeatured = a.is_featured === true;
 
             return (
-              <Card key={a.id} className={`rounded-3xl border transition-all duration-300 group ${isSelected ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5' : 'border-transparent bg-[var(--color-surface)] hover:border-[var(--color-border)]'} ${isDeleted ? 'opacity-50 grayscale' : ''}`}>
-                <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-
+              <PresenceCard key={a.id} noPadding className={`group transition-all duration-300 ${isSelected ? 'ring-2 ring-indigo-500 bg-indigo-50/50' : 'hover:shadow-md'} ${isDeleted ? 'opacity-50 grayscale' : ''}`}>
+                <div className="p-5 flex flex-col md:flex-row items-start md:items-center gap-5">
+                  
                   {canManage && !isDeleted && (
-                    <button onClick={() => toggleSelect(a.id)} className={`w-5 h-5 rounded flex items-center justify-center shrink-0 border transition-colors mt-1 sm:mt-0 ${isSelected ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-black' : 'border-[var(--color-border)] text-transparent hover:border-white'}`}>
+                    <button 
+                      onClick={() => toggleSelect(a.id)} 
+                      className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border-2 transition-all ${isSelected ? 'bg-[#5c4ae4] border-[#5c4ae4] text-white' : 'border-gray-100 dark:border-white/10 text-transparent hover:border-indigo-300'}`}
+                    >
                       <CheckSquare className="w-3.5 h-3.5" />
                     </button>
                   )}
 
-                  {/* Title and metadata */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2.5 mb-1.5">
-                      {isFeatured && <Star className="w-4 h-4 text-[var(--color-primary)] flex-shrink-0" fill="currentColor" />}
-                      <Link href={`/admin/articles/${a.id}/edit`} className="font-bold text-[15px] sm:text-base leading-tight truncate hover:text-[#a78bfa] transition-colors">{a.title}</Link>
-                      {isDeleted && (
-                        <span className="shrink-0 text-[9px] font-black uppercase text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-full">Deleted</span>
-                      )}
+                    <div className="flex items-center gap-3 mb-2">
+                       {isFeatured && <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" />}
+                       <Link href={`/admin/articles/${a.id}/edit`} className="font-black text-lg md:text-xl tracking-tight truncate hover:text-[#5c4ae4] transition-colors">{a.title}</Link>
                     </div>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-[var(--color-muted)] font-medium">
-                      <span className="flex items-center gap-1.5 min-w-0">
-                        <User className="w-3 h-3 flex-shrink-0" />
-                        <span className="truncate max-w-[120px]">{a.profiles?.full_name || 'Anonymous'}</span>
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Hash className="w-3 h-3 flex-shrink-0" />
-                        <span className="truncate max-w-[100px]">{a.categories?.name || 'Uncategorized'}</span>
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Calendar className="w-3 h-3 flex-shrink-0" />
-                        {a.published_at ? new Date(a.published_at).toLocaleDateString() : 'Unpublished'}
-                      </span>
-                      <span className="flex items-center gap-1.5 text-sky-400">
-                        <Eye className="w-3 h-3 flex-shrink-0" />
-                        {a.views?.toLocaleString() || 0}
-                      </span>
+                    
+                    <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                      <div className="flex items-center gap-2">
+                         <div className="w-5 h-5 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center text-[8px] font-black text-gray-500">
+                           {(a.profiles?.full_name || 'A').charAt(0)}
+                         </div>
+                         <span className="text-xs font-bold text-gray-400 truncate max-w-[120px]">{a.profiles?.full_name || 'Anonymous'}</span>
+                      </div>
 
-                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${
-                        status === 'published' ? 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5' :
-                        status === 'in_review' ? 'text-amber-500 border-amber-500/20 bg-amber-500/5' :
-                        status === 'archived'  ? 'text-purple-500 border-purple-500/20 bg-purple-500/5' :
-                        'text-gray-400 border-gray-500/20 bg-gray-500/5'
+                      <div className="flex items-center gap-2">
+                        <Tag className="w-3.5 h-3.5 text-indigo-300" />
+                        <span className="text-xs font-bold text-gray-400">{a.categories?.name || 'Uncategorized'}</span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-3.5 h-3.5 text-indigo-300" />
+                        <span className="text-xs font-bold text-gray-400">{a.published_at ? new Date(a.published_at).toLocaleDateString() : 'Draft'}</span>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-lg">
+                        <Eye className="w-3 h-3" />
+                        <span className="text-[10px] font-black">{a.views?.toLocaleString() || 0}</span>
+                      </div>
+
+                      <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.1em] border-2 shadow-sm ${
+                        status === 'published' ? 'text-emerald-500 border-emerald-50 bg-emerald-50/50' :
+                        status === 'in_review' ? 'text-amber-500 border-amber-50 bg-amber-50/50' :
+                        'text-gray-400 border-gray-50 bg-gray-50/50'
                       }`}>
                         {status.replace('_', ' ')}
                       </span>
                     </div>
                   </div>
 
-                  {/* Actions */}
-                  <div className="w-full sm:w-auto flex flex-wrap gap-2 pt-3 sm:pt-0 border-t sm:border-t-0 border-[var(--color-border)] justify-end">
-
-                    <Button asChild variant="outline" size="icon" className="h-8 w-8 rounded-lg shrink-0">
-                      <Link href={`/${a.slug}`} target="_blank" title="View Article"><Share className="w-3.5 h-3.5" /></Link>
-                    </Button>
-
-                    {!isDeleted && (
-                      <Button asChild variant="outline" size="icon" className="h-8 w-8 rounded-lg shrink-0 text-[#a78bfa] border-[#a78bfa]/30 hover:bg-[#a78bfa]/10">
-                        <Link href={`/admin/articles/${a.id}/edit`}><Edit2 className="w-3.5 h-3.5" /></Link>
-                      </Button>
-                    )}
-
-                    {!isDeleted && canManage && status === 'published' && (
-                      <Button variant={isFeatured ? 'primary' : 'outline'} size="icon" className={`h-8 w-8 rounded-lg shrink-0 ${isFeatured ? 'shadow-sm text-black' : ''}`} onClick={() => wrapAction(featureArticleAction(a.id, isFeatured), isFeatured ? 'Unfeatured' : 'Featured')} loading={isPending}>
-                        <Sparkles className="w-3.5 h-3.5" />
-                      </Button>
-                    )}
-
-                    {!isDeleted && canManage && (
-                      <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg shrink-0 text-red-500 border-red-500/20 hover:bg-red-500/10" onClick={() => { if (confirm('Delete article?')) wrapAction(deleteArticleAction(a.id), 'Deleted'); }} loading={isPending}>
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    )}
-
-                    {isDeleted && canManage && (
-                      <Button variant="outline" size="sm" className="h-8 rounded-lg text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/10" onClick={() => wrapAction(restoreArticleAction(a.id), 'Restored')} loading={isPending}>
-                        <RefreshCcw className="w-3.5 h-3.5 mr-1.5" /> Restore
-                      </Button>
+                  <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
+                    <Link href={`/${a.slug}`} target="_blank" className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-400 hover:text-indigo-400 transition-colors">
+                      <Eye className="w-5 h-5" />
+                    </Link>
+                    <Link href={`/admin/articles/${a.id}/edit`} className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] hover:bg-[#5c4ae4] hover:text-white transition-all shadow-sm">
+                      <Edit2 className="w-5 h-5" />
+                    </Link>
+                    {canManage && (
+                      <button 
+                        onClick={() => { if (confirm('Delete?')) wrapAction(deleteArticleAction(a.id), 'Deleted'); }}
+                         className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
                     )}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </PresenceCard>
             );
           })
         )}
