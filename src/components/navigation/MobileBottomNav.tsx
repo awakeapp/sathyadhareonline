@@ -206,9 +206,11 @@ function NavTabLink({
       href={href}
       prefetch={true}
       onClick={() => {
-        // Vibrate for physical feedback if supported
-        if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-           window.navigator.vibrate(50);
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('transition_type', 'slide-up');
+          if (window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate(50);
+          }
         }
         if (onTap) onTap();
       }}

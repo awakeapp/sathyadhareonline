@@ -168,6 +168,14 @@ export default function BottomNavigation({ role }: BottomNavigationProps) {
             <Link
               key={item.label}
               href={item.href}
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  sessionStorage.setItem('transition_type', 'slide-up');
+                  if (window.navigator && window.navigator.vibrate) {
+                    window.navigator.vibrate(50);
+                  }
+                }
+              }}
               className="relative flex flex-col items-center justify-center flex-1 gap-[3px] tap-highlight transition-all active:scale-95"
             >
               {/* Active indicator — thin top bar (WhatsApp style) */}

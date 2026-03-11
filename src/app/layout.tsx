@@ -10,6 +10,8 @@ import { ThemeProvider } from '@/providers/ThemeProvider'
 import NavigationWrapper from '@/components/navigation/NavigationWrapper'
 import DashboardReturnFab from '@/components/DashboardReturnFab'
 import { Toaster } from 'sonner'
+import { RippleEffect } from '@/components/RippleEffect'
+import { PageTransition } from '@/components/PageTransition'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -101,10 +103,13 @@ export default async function RootLayout({
                 <TopHeader user={user} role={profile?.role || null} profile={profile} />
 
                 {/* ─────────── PAGE CONTENT ─────────── */}
-                <MainWrapper>{children}</MainWrapper>
+                <PageTransition>
+                  <MainWrapper>{children}</MainWrapper>
+                </PageTransition>
               </div>
             </div>
             
+            <RippleEffect />
             <InstallPrompt />
             <Toaster position="top-center" theme="system" richColors />
 
