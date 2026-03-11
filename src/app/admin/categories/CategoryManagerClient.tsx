@@ -166,7 +166,7 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
            <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50">Active Taxonomy</h2>
            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Structure & Navigation</p>
         </div>
-        <PresenceButton onClick={() => setCreateOpen(true)} className="h-11 px-6 bg-[#5c4ae4]">
+        <PresenceButton onClick={() => setCreateOpen(true)} className="h-11 px-6 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900">
            <Plus className="w-5 h-5 mr-2" strokeWidth={1.25} /> New Category
         </PresenceButton>
       </div>
@@ -176,7 +176,7 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
           <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
             <FolderOpen className="w-16 h-16 mb-5 text-indigo-100" />
             <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">No Categories</p>
-            <PresenceButton onClick={() => setCreateOpen(true)} className="mt-8 bg-indigo-50 !text-[#5c4ae4] hover:bg-indigo-100 shadow-none">
+            <PresenceButton onClick={() => setCreateOpen(true)} className="mt-8 bg-indigo-50 !text-zinc-900 dark:text-zinc-50 hover:bg-indigo-100 shadow-none">
               Initialise Taxonomy
             </PresenceButton>
           </PresenceCard>
@@ -190,10 +190,10 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
                   <div className="p-5 flex flex-col md:flex-row items-center gap-4">
                      
                      <div className="flex flex-col gap-1 shrink-0">
-                        <button onClick={() => move(idx, -1)} disabled={idx === 0 || reordering} className="w-9 h-9 rounded-xl bg-zinc-50 dark:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-[#5c4ae4] disabled:opacity-20 transition-all">
+                        <button onClick={() => move(idx, -1)} disabled={idx === 0 || reordering} className="w-9 h-9 rounded-xl bg-zinc-50 dark:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-zinc-900 dark:text-zinc-50 disabled:opacity-20 transition-all">
                            <ChevronUp className="w-5 h-5" strokeWidth={1.25} />
                         </button>
-                        <button onClick={() => move(idx, 1)} disabled={idx === cats.length - 1 || reordering} className="w-9 h-9 rounded-xl bg-zinc-50 dark:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-[#5c4ae4] disabled:opacity-20 transition-all">
+                        <button onClick={() => move(idx, 1)} disabled={idx === cats.length - 1 || reordering} className="w-9 h-9 rounded-xl bg-zinc-50 dark:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-zinc-900 dark:text-zinc-50 disabled:opacity-20 transition-all">
                            <ChevronDown className="w-5 h-5" strokeWidth={1.25} />
                         </button>
                      </div>
@@ -218,7 +218,7 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
                      </div>
 
                      <div className="flex items-center gap-3 shrink-0 pt-2 md:pt-0">
-                        <button onClick={() => openEdit(cat)} className="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] hover:bg-[#5c4ae4] hover:text-white transition-all">
+                        <button onClick={() => openEdit(cat)} className="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50 hover:bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:text-white transition-all">
                            <Edit2 className="w-5 h-5" strokeWidth={1.25} />
                         </button>
                         <button onClick={() => setDeleteTarget(cat)} className="w-11 h-11 rounded-xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-all">
@@ -255,7 +255,7 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
              </div>
              <ModalFooter>
                 <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
-                <Button onClick={handleCreate} disabled={!createName.trim() || isPending} className="bg-[#5c4ae4] text-white">Create Category</Button>
+                <Button onClick={handleCreate} disabled={!createName.trim() || isPending} className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white">Create Category</Button>
              </ModalFooter>
           </div>
         </ModalContent>
@@ -282,7 +282,7 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
              </div>
              <ModalFooter>
                 <Button variant="outline" onClick={() => setEditTarget(null)}>Cancel</Button>
-                <Button onClick={handleUpdate} disabled={isPending} className="bg-[#5c4ae4] text-white">Save Changes</Button>
+                <Button onClick={handleUpdate} disabled={isPending} className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white">Save Changes</Button>
              </ModalFooter>
           </div>
         </ModalContent>

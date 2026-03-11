@@ -119,7 +119,7 @@ export default function CommentsClient({
 
       {/* ── Bulk Bar ── */}
       {selectedIds.size > 0 && (
-         <div className="sticky top-24 z-30 flex items-center justify-between p-5 bg-[#5c4ae4] rounded-3xl shadow-2xl shadow-indigo-500/30 animate-in slide-in-from-top-4 duration-300">
+         <div className="sticky top-24 z-30 flex items-center justify-between p-5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-3xl shadow-2xl shadow-indigo-500/30 animate-in slide-in-from-top-4 duration-300">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-2xl bg-white/20 text-white font-black flex items-center justify-center">
                 {selectedIds.size}
@@ -128,7 +128,7 @@ export default function CommentsClient({
             </div>
             <div className="flex items-center gap-3">
               <button onClick={() => wrapAction(bulkUpdateCommentsAction(Array.from(selectedIds), 'approved'), 'Cleaned & Approved')} className="h-11 px-6 rounded-xl bg-white/10 text-white hover:bg-white/20 font-black text-[10px] uppercase tracking-widest transition-all">Approve</button>
-              <button onClick={handleBulkDelete} className="w-11 h-11 rounded-xl bg-white text-[#5c4ae4] flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-xl">
+              <button onClick={handleBulkDelete} className="w-11 h-11 rounded-xl bg-white text-zinc-900 dark:text-zinc-50 flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-xl">
                  <Trash2 className="w-5 h-5" strokeWidth={1.25} />
               </button>
             </div>
@@ -153,14 +153,14 @@ export default function CommentsClient({
                   <div className="p-5 flex flex-col md:flex-row gap-4">
                     
                     <div className="shrink-0 pt-1">
-                       <button onClick={() => toggleSelect(c.id)} className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${isSelected ? 'bg-[#5c4ae4] text-white shadow-lg' : 'bg-zinc-50 dark:bg-white/5 text-zinc-300 border-2 border-transparent hover:border-indigo-100'}`}>
+                       <button onClick={() => toggleSelect(c.id)} className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${isSelected ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white shadow-lg' : 'bg-zinc-50 dark:bg-white/5 text-zinc-300 border-2 border-transparent hover:border-indigo-100'}`}>
                           <CheckSquare className="w-5 h-5" strokeWidth={1.25} />
                        </button>
                     </div>
 
                     <div className="flex-1 min-w-0">
                        <div className="flex flex-col md:flex-row md:items-center gap-2 mb-3">
-                          <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] shrink-0">
+                          <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50 shrink-0">
                              <User className="w-5 h-5" strokeWidth={1.25} />
                           </div>
                           <div>
@@ -194,7 +194,7 @@ export default function CommentsClient({
 
                        <div className="flex items-center gap-3">
                           <span className="text-[10px] font-black text-zinc-400 uppercase shrink-0">Origin</span>
-                          <Link href={`/admin/articles/${c.article_id}/edit`} className="text-[10px] font-black text-[#5c4ae4] uppercase tracking-widest hover:underline truncate">
+                          <Link href={`/admin/articles/${c.article_id}/edit`} className="text-[10px] font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-widest hover:underline truncate">
                              {c.articles?.title ?? 'Unknown Log'}
                           </Link>
                        </div>

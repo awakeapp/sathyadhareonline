@@ -2,7 +2,7 @@ export default function AdminLoading() {
   return (
     <div className="font-sans antialiased min-h-screen pb-28 animate-pulse bg-gray-50/50 dark:bg-transparent">
       {/* Presence Header Skeleton */}
-      <div className="h-44 bg-[#1b1929] relative overflow-hidden flex items-center px-8 border-b border-white/5">
+      <div className="h-44 bg-zinc-950 relative overflow-hidden flex items-center px-8 border-b border-white/5">
          <div className="flex items-center justify-between w-full max-w-[1400px] mx-auto">
             <div className="flex items-center gap-6">
                <div className="w-16 h-16 rounded-2xl bg-white/5" />

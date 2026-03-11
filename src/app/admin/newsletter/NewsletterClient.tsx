@@ -90,7 +90,7 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
       <PresenceCard className="bg-zinc-50 dark:bg-white/5 border-none p-5">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-             <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4]">
+             <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50">
                 <Mail className="w-6 h-6" strokeWidth={1.25} />
              </div>
              <div>
@@ -99,10 +99,10 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
              </div>
           </div>
           <div className="flex gap-3">
-            <PresenceButton onClick={() => setShowCompose(true)} className="bg-[#5c4ae4] font-black tracking-widest text-[10px] uppercase shadow-xl shadow-indigo-500/20">
+            <PresenceButton onClick={() => setShowCompose(true)} className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black tracking-widest text-[10px] uppercase shadow-xl shadow-indigo-500/20">
                Compose Dispatch
             </PresenceButton>
-            <PresenceButton onClick={handleExport} className="bg-white dark:bg-zinc-950 !text-zinc-500 hover:!text-[#5c4ae4] shadow-sm">
+            <PresenceButton onClick={handleExport} className="bg-white dark:bg-zinc-950 !text-zinc-500 hover:!text-zinc-900 dark:text-zinc-50 shadow-sm">
                <Download className="w-5 h-5" strokeWidth={1.25} />
             </PresenceButton>
           </div>
@@ -149,12 +149,12 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
 
       {/* ── DISPATCH MODAL ── */}
       {showCompose && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#1b1929]/80 backdrop-blur-xl animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-zinc-950/80 backdrop-blur-xl animate-in fade-in duration-300">
            <div className="w-full max-w-2xl bg-white dark:bg-[#181623] rounded-[3rem] shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
               <div className="p-10 border-b border-indigo-50 dark:border-white/5 flex items-center justify-between bg-indigo-50/30">
                  <div>
                     <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Signal Dispatch</h2>
-                    <p className="text-[10px] font-black text-[#5c4ae4] uppercase tracking-widest mt-1">Targeting {subs.length} active nodes</p>
+                    <p className="text-[10px] font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-widest mt-1">Targeting {subs.length} active nodes</p>
                  </div>
                  <button className="w-12 h-12 rounded-full bg-white dark:bg-zinc-950 text-zinc-500 flex items-center justify-center shadow-sm" onClick={() => setShowCompose(false)}>
                     <X className="w-6 h-6" strokeWidth={1.25} />
@@ -163,7 +163,7 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
               
               <form onSubmit={handleSend} className="p-10 flex flex-col gap-4">
                  <div className="space-y-3">
-                   <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Communication Subject</label>
+                   <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Communication Subject</label>
                    <input 
                      value={subject} 
                      onChange={e => setSubject(e.target.value)} 
@@ -173,7 +173,7 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
                    />
                  </div>
                  <div className="space-y-3">
-                   <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Manifest Message</label>
+                   <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Manifest Message</label>
                    <textarea 
                      value={body} 
                      onChange={e => setBody(e.target.value)} 
@@ -199,7 +199,7 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
                    
                    <PresenceButton 
                      type="submit" 
-                     className="w-full h-16 bg-[#5c4ae4] font-black tracking-[0.2em] text-xs uppercase shadow-2xl shadow-indigo-500/20" 
+                     className="w-full h-16 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black tracking-[0.2em] text-xs uppercase shadow-2xl shadow-indigo-500/20" 
                      loading={sendStatus === 'sending'} 
                      disabled={sendStatus === 'sending' || sendStatus === 'sent'}
                    >

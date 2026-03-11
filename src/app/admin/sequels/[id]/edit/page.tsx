@@ -97,7 +97,7 @@ export default async function EditSequelPage({ params }: { params: Promise<{ id:
       <div className="p-4 flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
         
         <div className="flex items-center gap-5 mb-6">
-           <div className="w-12 h-12 rounded-2xl bg-[#5c4ae4] flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
+           <div className="w-12 h-12 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
               <Layers className="w-6 h-6" strokeWidth={1.25} />
            </div>
            <div>
@@ -111,7 +111,7 @@ export default async function EditSequelPage({ params }: { params: Promise<{ id:
             
             <div className="space-y-4">
                <div className="flex items-center justify-between">
-                  <h3 className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Available Matrix Nodes</h3>
+                  <h3 className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Available Matrix Nodes</h3>
                   <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Temporal Order Binding</span>
                </div>
                
@@ -125,7 +125,7 @@ export default async function EditSequelPage({ params }: { params: Promise<{ id:
                    articles.map((article) => (
                      <label 
                        key={article.id} 
-                       className="group flex items-center gap-6 cursor-pointer p-6 bg-zinc-50 dark:bg-white/5 rounded-2xl border-2 border-transparent hover:border-[#5c4ae4] transition-all"
+                       className="group flex items-center gap-6 cursor-pointer p-6 bg-zinc-50 dark:bg-white/5 rounded-2xl border-2 border-transparent hover:border-zinc-900 dark:border-white transition-all"
                      >
                        <div className="relative">
                           <input 
@@ -135,12 +135,12 @@ export default async function EditSequelPage({ params }: { params: Promise<{ id:
                             defaultChecked={attachedArticleIds.has(article.id)}
                             className="peer sr-only"
                           />
-                          <div className="w-8 h-8 rounded-lg bg-white border-2 border-indigo-100 peer-checked:bg-[#5c4ae4] peer-checked:border-[#5c4ae4] transition-all flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-lg bg-white border-2 border-indigo-100 peer-checked:bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 peer-checked:border-zinc-900 dark:border-white transition-all flex items-center justify-center">
                              <Check className="w-5 h-5 text-white opacity-0 peer-checked:opacity-100 scale-50 peer-checked:scale-100 transition-all" strokeWidth={1.25} />
                           </div>
                        </div>
                        <div className="min-w-0">
-                         <span className="block text-lg font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight group-hover:text-[#5c4ae4] transition-colors">{article.title}</span>
+                         <span className="block text-lg font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight group-hover:text-zinc-900 dark:text-zinc-50 transition-colors">{article.title}</span>
                          <span className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">
                            Broadcasted · {new Date(article.published_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                          </span>
@@ -154,7 +154,7 @@ export default async function EditSequelPage({ params }: { params: Promise<{ id:
             <div className="pt-10 border-t border-indigo-50 dark:border-white/5 flex justify-end">
                <button 
                 type="submit" 
-                className="h-16 px-12 bg-[#5c4ae4] text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3"
+                className="h-16 px-12 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3"
               >
                 <Check className="w-5 h-5" strokeWidth={1.25} /> Synchronize Sequence
               </button>

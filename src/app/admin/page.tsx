@@ -145,7 +145,7 @@ export default async function AdminPage() {
         <PresenceCard>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
-              <span className="text-4xl sm:text-5xl font-black text-[#5c4ae4]">
+              <span className="text-4xl sm:text-5xl font-black text-zinc-900 dark:text-zinc-50">
                 {new Date().getDate()}
                 <Library className="inline-block w-4 h-4 ml-1 mb-6 text-indigo-300" strokeWidth={1.25} />
               </span>
@@ -173,7 +173,7 @@ export default async function AdminPage() {
               ].map((d, i) => (
                 <div key={i} className="flex flex-col items-center gap-2">
                   <span className="text-[10px] font-black text-zinc-500">{d.day}</span>
-                  <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${d.active ? 'bg-[#5c4ae4] border-[#5c4ae4] text-white' : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-gray-700'}`}>
+                  <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${d.active ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white text-white' : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-gray-700'}`}>
                     {d.active && <CheckCircle className="w-4 h-4" strokeWidth={1.25} />}
                   </div>
                 </div>
@@ -235,7 +235,7 @@ export default async function AdminPage() {
               <Link key={a.id} href={`/admin/articles/${a.id}/edit`}>
                 <PresenceCard className="flex items-center justify-between py-3 px-4 active:scale-[0.98] transition-transform">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50 shrink-0">
                       <FileText className="w-5 h-5" strokeWidth={1.25} />
                     </div>
                     <div className="min-w-0">

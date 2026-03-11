@@ -135,10 +135,10 @@ export default function UserManagementClient({ users: initialUsers, currentUserR
       
       {/* ── Action Bar ────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row gap-4 mb-2">
-        <PresenceButton onClick={() => setShowInvite(true)} className="flex-1 h-14 bg-[#5c4ae4] shadow-indigo-500/20">
+        <PresenceButton onClick={() => setShowInvite(true)} className="flex-1 h-14 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-indigo-500/20">
           <Mail className="w-5 h-5 mr-3" strokeWidth={1.25} /> Invite Team Member
         </PresenceButton>
-        <PresenceButton onClick={() => setShowCreate(true)} className="flex-1 h-14 bg-white !text-[#5c4ae4] border-2 border-indigo-50 shadow-none hover:bg-indigo-50">
+        <PresenceButton onClick={() => setShowCreate(true)} className="flex-1 h-14 bg-white !text-zinc-900 dark:text-zinc-50 border-2 border-indigo-50 shadow-none hover:bg-indigo-50">
           <UserPlus className="w-5 h-5 mr-3" strokeWidth={1.25} /> Manual Creation
         </PresenceButton>
       </div>
@@ -217,7 +217,7 @@ export default function UserManagementClient({ users: initialUsers, currentUserR
                    </div>
 
                    <div className="flex items-center gap-3 shrink-0">
-                      <button onClick={() => { setSelectedUser(u); setShowEdit(true); }} className="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] hover:bg-[#5c4ae4] hover:text-white transition-all shadow-sm">
+                      <button onClick={() => { setSelectedUser(u); setShowEdit(true); }} className="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50 hover:bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:text-white transition-all shadow-sm">
                         <Edit2 className="w-5 h-5" strokeWidth={1.25} />
                       </button>
                       <button onClick={() => { setSelectedUser(u); setShowStatus(true); }} className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all shadow-sm ${u.status !== 'active' ? 'bg-amber-500 text-white' : 'bg-zinc-50 dark:bg-white/5 text-zinc-500 hover:text-amber-500'}`}>
@@ -296,7 +296,7 @@ export default function UserManagementClient({ users: initialUsers, currentUserR
             </div>
             <ModalFooter>
                <Button type="button" variant="outline" onClick={() => setShowInvite(false)}>Cancel</Button>
-               <Button type="submit" loading={isPending} className="bg-[#5c4ae4] text-white">Send Invitation</Button>
+               <Button type="submit" loading={isPending} className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white">Send Invitation</Button>
             </ModalFooter>
           </form>
         </ModalContent>
@@ -383,7 +383,7 @@ export default function UserManagementClient({ users: initialUsers, currentUserR
                     { val: 'suspended', label: 'Suspended', desc: 'Temporary login restriction.', icon: Slash, col: 'text-amber-500' },
                     { val: 'banned',    label: 'Banned',    desc: 'Permanent restriction from login.', icon: Ban, col: 'text-red-500' },
                   ].map((s) => (
-                    <label key={s.val} className={`group flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${selectedUser.status === s.val ? 'bg-indigo-50/30 border-[#5c4ae4]' : 'border-zinc-100 dark:border-white/5 hover:border-indigo-200'}`}>
+                    <label key={s.val} className={`group flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${selectedUser.status === s.val ? 'bg-indigo-50/30 border-zinc-900 dark:border-white' : 'border-zinc-100 dark:border-white/5 hover:border-indigo-200'}`}>
                       <input type="radio" name="status" value={s.val} defaultChecked={selectedUser.status === s.val} className="sr-only" />
                       <div className={`w-10 h-10 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-100 dark:border-white/10 flex items-center justify-center transition-colors group-hover:scale-110 ${s.col}`}>
                         <s.icon className="w-5 h-5" />

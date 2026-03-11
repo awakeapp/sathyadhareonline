@@ -158,7 +158,7 @@ export default async function EditArticlePage({
         {/* State Bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4]">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50">
                  <PenTool className="w-6 h-6" strokeWidth={1.25} />
               </div>
               <div>
@@ -192,10 +192,10 @@ export default async function EditArticlePage({
             
             {['admin', 'super_admin'].includes(role) && (
               <div className={`flex items-center justify-between p-6 rounded-[2rem] border-2 transition-all ${
-                article.is_featured ? 'border-[#5c4ae4] bg-indigo-50/50' : 'border-indigo-50 bg-gray-50'
+                article.is_featured ? 'border-zinc-900 dark:border-white bg-indigo-50/50' : 'border-indigo-50 bg-gray-50'
               }`}>
                 <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${article.is_featured ? 'bg-[#5c4ae4] text-white shadow-lg shadow-indigo-500/50' : 'bg-white text-zinc-400 shadow-sm'}`}>
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${article.is_featured ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white shadow-lg shadow-indigo-500/50' : 'bg-white text-zinc-400 shadow-sm'}`}>
                     <Star className="w-6 h-6" strokeWidth={1.25} fill={article.is_featured ? "currentColor" : "none"} />
                   </div>
                   <div>
@@ -205,14 +205,14 @@ export default async function EditArticlePage({
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" name="is_featured" defaultChecked={article.is_featured ?? false} className="sr-only peer" />
-                  <div className="w-14 h-8 bg-gray-200 rounded-full peer peer-checked:bg-[#5c4ae4] after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:after:translate-x-6" />
+                  <div className="w-14 h-8 bg-gray-200 rounded-full peer peer-checked:bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:after:translate-x-6" />
                 </label>
               </div>
             )}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                <div className="space-y-4">
-                 <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Visual Identifier (Cover)</label>
+                 <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Visual Identifier (Cover)</label>
                  <div className="bg-zinc-50 dark:bg-zinc-950 rounded-[2rem] p-4 shadow-inner border-none">
                     <CoverImageUpload currentImageUrl={article.cover_image} />
                  </div>
@@ -220,18 +220,18 @@ export default async function EditArticlePage({
 
                <div className="space-y-10">
                   <div className="space-y-3">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Narrative Headline</label>
+                    <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Narrative Headline</label>
                     <input name="title" required defaultValue={article.title} placeholder="The Core Statement..." className="w-full h-16 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-md font-bold shadow-inner" />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">
-                      <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Network Slug</label>
+                      <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Network Slug</label>
                       <input name="slug" required defaultValue={article.slug} className="w-full h-14 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none font-mono text-xs font-bold shadow-inner text-indigo-400" />
                     </div>
                     
                     <div className="space-y-3">
-                      <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Protocol Status</label>
+                      <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Protocol Status</label>
                       <select name="status" defaultValue={article.status} className="w-full h-14 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-xs font-black uppercase tracking-widest shadow-inner accent-[#5c4ae4]">
                         {role === 'editor' ? (
                           <>
@@ -253,7 +253,7 @@ export default async function EditArticlePage({
             </div>
 
             <div className="space-y-3">
-              <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Network Category</label>
+              <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Network Category</label>
               <select name="category_id" defaultValue={article.category_id ?? ''} className="w-full h-16 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-xs font-black uppercase tracking-widest shadow-inner">
                 <option value="">Detached Segment</option>
                 {categories?.map((cat) => (
@@ -263,12 +263,12 @@ export default async function EditArticlePage({
             </div>
 
             <div className="space-y-3">
-              <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Manifest Overview (Excerpt)</label>
+              <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Manifest Overview (Excerpt)</label>
               <textarea name="excerpt" rows={3} defaultValue={article.excerpt ?? ''} placeholder="Condensed narrative summary..." className="w-full p-6 rounded-[2rem] bg-zinc-50 dark:bg-zinc-950 border-none text-md font-bold shadow-inner resize-none leading-relaxed" />
             </div>
 
             <div className="space-y-4">
-              <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4] flex items-center gap-3">
+              <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50 flex items-center gap-3">
                  <Sparkles className="w-4 h-4" strokeWidth={1.25} /> Core Content Stream
               </label>
               <div className="min-h-[600px] rounded-[2rem] overflow-hidden border-none shadow-2xl bg-white dark:bg-zinc-950">
@@ -278,7 +278,7 @@ export default async function EditArticlePage({
 
             <div className="pt-10 border-t border-indigo-50 dark:border-white/5 flex flex-col sm:flex-row justify-end gap-4">
               <Link href="/admin/articles" className="h-16 px-10 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-black text-[11px] uppercase tracking-widest text-zinc-500 flex items-center justify-center hover:bg-gray-100 transition-all">Discard Mutation</Link>
-              <button type="submit" className="h-16 px-12 bg-[#5c4ae4] text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all">
+              <button type="submit" className="h-16 px-12 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all">
                 Synchronize Article
               </button>
             </div>

@@ -116,7 +116,7 @@ export default function ArticlesClient({
       <div className="flex items-center justify-between gap-4">
         <PresenceSectionHeader title="Article Library" />
         <Link href="/admin/articles/new">
-          <PresenceButton className="bg-[#5c4ae4] shadow-indigo-500/20 hover:bg-[#4534c7]">
+          <PresenceButton className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-indigo-500/20 hover:bg-[#4534c7]">
             <Plus className="w-4 h-4 mr-2" strokeWidth={1.25} /> New Article
           </PresenceButton>
         </Link>
@@ -201,7 +201,7 @@ export default function ArticlesClient({
                   {canManage && !isDeleted && (
                     <button 
                       onClick={() => toggleSelect(a.id)} 
-                      className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border-2 transition-all ${isSelected ? 'bg-[#5c4ae4] border-[#5c4ae4] text-white' : 'border-zinc-100 dark:border-white/10 text-transparent hover:border-indigo-300'}`}
+                      className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border-2 transition-all ${isSelected ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white text-white' : 'border-zinc-100 dark:border-white/10 text-transparent hover:border-indigo-300'}`}
                     >
                       <CheckSquare className="w-3.5 h-3.5" strokeWidth={1.25} />
                     </button>
@@ -210,7 +210,7 @@ export default function ArticlesClient({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2">
                        {isFeatured && <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" strokeWidth={1.25} />}
-                       <Link href={`/admin/articles/${a.id}/edit`} className="font-black text-lg md:text-xl tracking-tight truncate hover:text-[#5c4ae4] transition-colors">{a.title}</Link>
+                       <Link href={`/admin/articles/${a.id}/edit`} className="font-black text-lg md:text-xl tracking-tight truncate hover:text-zinc-900 dark:text-zinc-50 transition-colors">{a.title}</Link>
                     </div>
                     
                     <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
@@ -250,7 +250,7 @@ export default function ArticlesClient({
                     <Link href={`/${a.slug}`} target="_blank" className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-indigo-400 transition-colors">
                       <Eye className="w-5 h-5" strokeWidth={1.25} />
                     </Link>
-                    <Link href={`/admin/articles/${a.id}/edit`} className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] hover:bg-[#5c4ae4] hover:text-white transition-all shadow-sm">
+                    <Link href={`/admin/articles/${a.id}/edit`} className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50 hover:bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:text-white transition-all shadow-sm">
                       <Edit2 className="w-5 h-5" strokeWidth={1.25} />
                     </Link>
                     {canManage && (

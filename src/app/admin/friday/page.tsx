@@ -87,7 +87,7 @@ export default async function FridayMessagesPage() {
                          <Sparkles className="w-7 h-7" strokeWidth={1.25} />
                       </div>
                       <div className="min-w-0">
-                         <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight truncate hover:text-[#5c4ae4] transition-colors">{msg.title || 'Untitled Message'}</h2>
+                         <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight truncate hover:text-zinc-900 dark:text-zinc-50 transition-colors">{msg.title || 'Untitled Message'}</h2>
                          <div className="flex items-center gap-2 mt-1">
                             <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${
                               msg.is_published 
@@ -106,7 +106,7 @@ export default async function FridayMessagesPage() {
                           <input type="hidden" name="id" value={msg.id} />
                           <button
                             type="submit"
-                            className="h-12 px-8 rounded-xl bg-[#5c4ae4] text-white font-black text-[10px] uppercase tracking-widest shadow-xl shadow-indigo-500/20 hover:scale-105 active:scale-95 transition-all"
+                            className="h-12 px-8 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white font-black text-[10px] uppercase tracking-widest shadow-xl shadow-indigo-500/20 hover:scale-105 active:scale-95 transition-all"
                           >
                             Activate Relay
                           </button>

@@ -63,18 +63,18 @@ export default async function NewFridayMessagePage() {
       <div className="p-4 flex flex-col gap-4 relative z-20 max-w-3xl mx-auto">
         <PresenceCard className="p-0 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
            <div className="p-10 border-b border-indigo-50 dark:border-white/5 bg-indigo-50/10 flex items-center gap-5">
-              <div className="w-14 h-14 rounded-2xl bg-[#5c4ae4] flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
+              <div className="w-14 h-14 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
                  <Sparkles className="w-8 h-8" strokeWidth={1.25} />
               </div>
               <div>
                  <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Initialize Message</h2>
-                 <p className="text-[10px] font-black text-[#5c4ae4] uppercase tracking-widest mt-1">New communication node deployment</p>
+                 <p className="text-[10px] font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-widest mt-1">New communication node deployment</p>
               </div>
            </div>
 
            <form action={createMessageAction} className="p-10 space-y-10">
               <div className="space-y-3">
-                <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Dispatch Title</label>
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Dispatch Title</label>
                 <input 
                   type="text" 
                   name="title" 
@@ -84,7 +84,7 @@ export default async function NewFridayMessagePage() {
               </div>
 
               <div className="space-y-3">
-                <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Visual Asset (URL)</label>
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Visual Asset (URL)</label>
                 <input 
                   type="text" 
                   name="image_url" 
@@ -94,7 +94,7 @@ export default async function NewFridayMessagePage() {
               </div>
 
               <div className="space-y-3">
-                <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Manifest Message</label>
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Manifest Message</label>
                 <textarea 
                   name="message_text" 
                   rows={8}
@@ -107,7 +107,7 @@ export default async function NewFridayMessagePage() {
               <div className="flex justify-end pt-4 border-t border-indigo-50 dark:border-white/5">
                  <button 
                   type="submit" 
-                  className="h-16 px-12 bg-[#5c4ae4] text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-3"
+                  className="h-16 px-12 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-3"
                 >
                   <Send className="w-5 h-5" strokeWidth={1.25} /> Deploy Node
                 </button>

@@ -65,7 +65,7 @@ export default function PlansClient({ initialPlans }: { initialPlans: Plan[] }) 
       <PresenceCard className="bg-zinc-50 dark:bg-white/5 border-none p-5">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-             <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4]">
+             <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50">
                 <ShieldCheck className="w-6 h-6" strokeWidth={1.25} />
              </div>
              <div>
@@ -73,7 +73,7 @@ export default function PlansClient({ initialPlans }: { initialPlans: Plan[] }) 
                 <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-0.5">Capital Structuring & Permissioning</p>
              </div>
           </div>
-          <PresenceButton onClick={() => handleEdit(null)} className="h-14 px-8 bg-[#5c4ae4] font-black tracking-widest text-[10px] uppercase shadow-xl shadow-indigo-500/20">
+          <PresenceButton onClick={() => handleEdit(null)} className="h-14 px-8 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black tracking-widest text-[10px] uppercase shadow-xl shadow-indigo-500/20">
              <Plus className="w-5 h-5 mr-3" strokeWidth={1.25} /> Initialize New Tier
           </PresenceButton>
         </div>
@@ -82,7 +82,7 @@ export default function PlansClient({ initialPlans }: { initialPlans: Plan[] }) 
       {/* ── Plan Matrix ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {plans.map(plan => (
-          <PresenceCard key={plan.id} noPadding className={`group relative overflow-hidden flex flex-col h-full border-2 transition-all duration-500 ${!plan.is_active ? 'opacity-40 grayscale blur-[1px]' : 'hover:border-[#5c4ae4]'}`}>
+          <PresenceCard key={plan.id} noPadding className={`group relative overflow-hidden flex flex-col h-full border-2 transition-all duration-500 ${!plan.is_active ? 'opacity-40 grayscale blur-[1px]' : 'hover:border-zinc-900 dark:border-white'}`}>
             {!plan.is_active && (
               <div className="absolute inset-0 bg-white/10 dark:bg-black/20 z-10 flex items-center justify-center">
                 <span className="bg-rose-500 text-white font-black uppercase tracking-[0.3em] px-8 py-3 rounded-2xl text-[10px] shadow-2xl rotate-[-15deg]">
@@ -92,7 +92,7 @@ export default function PlansClient({ initialPlans }: { initialPlans: Plan[] }) 
             )}
             
             <div className="p-4 pb-0 flex-1">
-               <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] mb-8 shadow-inner group-hover:scale-110 transition-transform">
+               <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50 mb-8 shadow-inner group-hover:scale-110 transition-transform">
                   <Box className="w-7 h-7" strokeWidth={1.25} />
                </div>
                <h3 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight mb-2">{plan.name}</h3>
@@ -104,7 +104,7 @@ export default function PlansClient({ initialPlans }: { initialPlans: Plan[] }) 
                <div className="space-y-4 mb-10">
                  {plan.features.map((f, i) => (
                    <div key={i} className="flex items-start gap-4">
-                     <div className="w-5 h-5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] shrink-0 mt-0.5">
+                     <div className="w-5 h-5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50 shrink-0 mt-0.5">
                         <Check className="w-3 h-3" strokeWidth={1.25} />
                      </div>
                      <p className="text-[11px] font-black text-zinc-500 uppercase tracking-widest leading-relaxed">{f}</p>
@@ -114,7 +114,7 @@ export default function PlansClient({ initialPlans }: { initialPlans: Plan[] }) 
             </div>
 
             <div className="p-4 pt-0 mt-auto flex items-center gap-3 relative z-20">
-               <button onClick={() => handleEdit(plan)} className="flex-1 h-12 rounded-2xl bg-indigo-50 hover:bg-[#5c4ae4] hover:text-white dark:bg-indigo-500/10 text-[#5c4ae4] font-black text-[10px] uppercase tracking-widest transition-all shadow-sm">
+               <button onClick={() => handleEdit(plan)} className="flex-1 h-12 rounded-2xl bg-indigo-50 hover:bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:text-white dark:bg-indigo-500/10 text-zinc-900 dark:text-zinc-50 font-black text-[10px] uppercase tracking-widest transition-all shadow-sm">
                   Modify Node
                </button>
                <button onClick={() => handleDelete(plan.id)} className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm flex items-center justify-center">
@@ -127,12 +127,12 @@ export default function PlansClient({ initialPlans }: { initialPlans: Plan[] }) 
 
       {/* ── TIER MODAL ── */}
       {isEditing && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#1b1929]/80 backdrop-blur-xl animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-zinc-950/80 backdrop-blur-xl animate-in fade-in duration-300">
            <div className="w-full max-w-xl bg-white dark:bg-[#181623] rounded-[3rem] shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
               <form onSubmit={handleSave}>
                  <div className="p-10 border-b border-indigo-50 dark:border-white/5 flex items-center justify-between bg-indigo-50/20">
                     <div className="flex items-center gap-4">
-                       <div className="w-12 h-12 rounded-2xl bg-[#5c4ae4] flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
+                       <div className="w-12 h-12 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
                           <Settings className="w-6 h-6" strokeWidth={1.25} />
                        </div>
                        <div>
@@ -150,11 +150,11 @@ export default function PlansClient({ initialPlans }: { initialPlans: Plan[] }) 
                     
                     <div className="grid grid-cols-2 gap-8">
                        <div className="space-y-3">
-                          <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Identity Label</label>
+                          <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Identity Label</label>
                           <input name="name" defaultValue={editingPlan?.name || ''} required className="w-full h-14 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-sm font-bold shadow-inner" placeholder="e.g. ULTIMATE" />
                        </div>
                        <div className="space-y-3">
-                          <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Temporal Cycle</label>
+                          <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Temporal Cycle</label>
                           <select name="interval" defaultValue={editingPlan?.interval || 'month'} required className="w-full h-14 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-[10px] font-black uppercase tracking-widest shadow-inner accent-[#5c4ae4]">
                              <option value="month">Monthly</option>
                              <option value="year">Annually</option>
@@ -164,12 +164,12 @@ export default function PlansClient({ initialPlans }: { initialPlans: Plan[] }) 
                     </div>
 
                     <div className="space-y-3">
-                       <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Capital Valuation (₹)</label>
-                       <input name="price" type="number" step="0.01" defaultValue={editingPlan?.price || ''} required className="w-full h-14 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none font-mono text-lg font-black shadow-inner text-[#1b1929]" placeholder="0.00" />
+                       <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Capital Valuation (₹)</label>
+                       <input name="price" type="number" step="0.01" defaultValue={editingPlan?.price || ''} required className="w-full h-14 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none font-mono text-lg font-black shadow-inner text-zinc-900" placeholder="0.00" />
                     </div>
 
                     <div className="space-y-3">
-                       <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Privilege Manifest (One per line)</label>
+                       <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Privilege Manifest (One per line)</label>
                        <textarea name="features" defaultValue={editingPlan?.features.join('\n') || ''} required rows={5} className="w-full p-6 rounded-[2rem] bg-zinc-50 dark:bg-zinc-950 border-none text-[11px] font-black uppercase tracking-widest leading-relaxed shadow-inner resize-none focus:ring-0" placeholder="e.g. UNLIMITED SEQUEL ACCESS" />
                     </div>
 
@@ -188,7 +188,7 @@ export default function PlansClient({ initialPlans }: { initialPlans: Plan[] }) 
                  </div>
 
                  <div className="p-10 bg-gray-50/50 border-t border-indigo-50 flex justify-end">
-                    <PresenceButton type="submit" className="h-16 px-12 bg-[#5c4ae4] text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20">
+                    <PresenceButton type="submit" className="h-16 px-12 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20">
                        Commit Tier Data
                     </PresenceButton>
                  </div>

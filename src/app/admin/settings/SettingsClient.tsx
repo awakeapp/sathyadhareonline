@@ -72,8 +72,8 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-4 px-5 py-4 rounded-[1.25rem] text-left transition-all whitespace-nowrap md:whitespace-normal
                   ${isActive 
-                    ? 'bg-[#5c4ae4] text-white shadow-xl shadow-indigo-500/20' 
-                    : 'bg-white dark:bg-zinc-950 text-zinc-500 hover:text-[#5c4ae4] hover:bg-indigo-50 dark:hover:bg-indigo-500/10'}`}
+                    ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white shadow-xl shadow-indigo-500/20' 
+                    : 'bg-white dark:bg-zinc-950 text-zinc-500 hover:text-zinc-900 dark:text-zinc-50 hover:bg-indigo-50 dark:hover:bg-indigo-500/10'}`}
               >
                 <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-white' : 'text-zinc-400'}`} />
                 <span className="font-black text-sm uppercase tracking-wider">{tab.label}</span>
@@ -189,7 +189,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                           const toggleName = label.charAt(0).toUpperCase() + label.slice(1);
                           const isActive = features[key];
                           return (
-                            <label key={key} className={`cursor-pointer group flex items-center justify-between p-6 rounded-[1.5rem] border-2 transition-all ${isActive ? 'bg-indigo-50/50 dark:bg-indigo-500/10 border-indigo-100 dark:border-[#5c4ae4]/30' : 'bg-white dark:bg-zinc-950 border-gray-50 dark:border-white/5'}`}>
+                            <label key={key} className={`cursor-pointer group flex items-center justify-between p-6 rounded-[1.5rem] border-2 transition-all ${isActive ? 'bg-indigo-50/50 dark:bg-indigo-500/10 border-indigo-100 dark:border-zinc-900 dark:border-white/30' : 'bg-white dark:bg-zinc-950 border-gray-50 dark:border-white/5'}`}>
                               <div className="space-y-1">
                                 <span className="font-black text-sm uppercase tracking-tight block">{toggleName}</span>
                                 <div className="flex items-center gap-2">
@@ -200,7 +200,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                                 </div>
                               </div>
                               <input type="checkbox" checked={isActive} onChange={(e) => setFeatures({ ...features, [key]: e.target.checked })} className="hidden" />
-                              <div className={`w-12 h-7 shrink-0 rounded-full transition-all flex items-center p-1 cursor-pointer ${isActive ? 'bg-[#5c4ae4]' : 'bg-gray-100 dark:bg-white/5'}`}>
+                              <div className={`w-12 h-7 shrink-0 rounded-full transition-all flex items-center p-1 cursor-pointer ${isActive ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900' : 'bg-gray-100 dark:bg-white/5'}`}>
                                  <div className={`h-5 w-5 bg-white rounded-full shadow-lg transition-all ${isActive ? 'translate-x-5' : 'translate-x-0'}`} />
                               </div>
                             </label>
@@ -257,13 +257,13 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
              {isPending && (
                 <div className="flex items-center gap-2">
                    <div className="w-4 h-4 rounded-full border-2 border-indigo-50 border-t-[#5c4ae4] animate-spin" />
-                   <span className="text-[10px] font-bold uppercase text-[#5c4ae4]">Synchronising...</span>
+                   <span className="text-[10px] font-bold uppercase text-zinc-900 dark:text-zinc-50">Synchronising...</span>
                 </div>
              )}
              <PresenceButton 
                onClick={handleSave} 
                disabled={isPending}
-               className="h-14 px-12 bg-[#5c4ae4] shadow-2xl shadow-indigo-500/30"
+               className="h-14 px-12 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-2xl shadow-indigo-500/30"
              >
                 <Save className="w-5 h-5 mr-3" strokeWidth={1.25} /> Deploy Config
              </PresenceButton>

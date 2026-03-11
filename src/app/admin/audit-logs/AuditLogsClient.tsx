@@ -100,7 +100,7 @@ export default function AuditLogsClient({
           
           <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
              <div className="space-y-2">
-               <label className="text-[10px] font-black uppercase tracking-widest text-[#5c4ae4]">Target Action</label>
+               <label className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Target Action</label>
                <div className="relative">
                  <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-300" strokeWidth={1.25} />
                  <input 
@@ -113,7 +113,7 @@ export default function AuditLogsClient({
              </div>
 
              <div className="space-y-2">
-               <label className="text-[10px] font-black uppercase tracking-widest text-[#5c4ae4]">Actor Identity</label>
+               <label className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Actor Identity</label>
                <div className="relative">
                  <User className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-300" strokeWidth={1.25} />
                  <select 
@@ -130,7 +130,7 @@ export default function AuditLogsClient({
              </div>
              
              <div className="space-y-2">
-               <label className="text-[10px] font-black uppercase tracking-widest text-[#5c4ae4]">Chronology Start</label>
+               <label className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Chronology Start</label>
                <div className="relative">
                  <Calendar className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-300" strokeWidth={1.25} />
                  <input 
@@ -143,7 +143,7 @@ export default function AuditLogsClient({
              </div>
 
              <div className="space-y-2">
-               <label className="text-[10px] font-black uppercase tracking-widest text-[#5c4ae4]">Chronology End</label>
+               <label className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Chronology End</label>
                <div className="relative">
                  <Calendar className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-300" strokeWidth={1.25} />
                  <input 
@@ -156,7 +156,7 @@ export default function AuditLogsClient({
              </div>
           </div>
 
-          <PresenceButton type="submit" className="h-12 px-8 bg-[#5c4ae4] font-black text-[10px] uppercase tracking-widest shadow-xl shadow-indigo-500/20" loading={isPending}>
+          <PresenceButton type="submit" className="h-12 px-8 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black text-[10px] uppercase tracking-widest shadow-xl shadow-indigo-500/20" loading={isPending}>
              Initiate Scan
           </PresenceButton>
         </form>
@@ -167,7 +167,7 @@ export default function AuditLogsClient({
         <div className="overflow-x-auto min-h-[400px]">
            <table className="w-full text-left text-xs whitespace-nowrap">
              <thead>
-               <tr className="bg-gray-50/50 dark:bg-white/5 border-b border-indigo-50 dark:border-white/5 font-black uppercase tracking-widest text-[#5c4ae4]">
+               <tr className="bg-gray-50/50 dark:bg-white/5 border-b border-indigo-50 dark:border-white/5 font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">
                  <th className="px-4 py-5 text-[10px]">Temporal Index</th>
                  <th className="px-4 py-5 text-[10px]">Primary Actor</th>
                  <th className="px-4 py-5 text-[10px]">Protocol Action</th>
@@ -208,12 +208,12 @@ export default function AuditLogsClient({
                          </td>
                          <td className="px-4 py-5">
                            <div className="flex items-center gap-3">
-                             <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] font-black text-xs shrink-0">
+                             <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50 font-black text-xs shrink-0">
                                {actorInitial}
                              </div>
                              <div>
                                <p className="font-black text-zinc-900 dark:text-zinc-50 text-sm">{actorName}</p>
-                               {profile?.role && <span className="text-[9px] font-black uppercase tracking-widest text-[#5c4ae4] opacity-60 block mt-1">{profile.role}</span>}
+                               {profile?.role && <span className="text-[9px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50 opacity-60 block mt-1">{profile.role}</span>}
                              </div>
                            </div>
                          </td>
@@ -229,7 +229,7 @@ export default function AuditLogsClient({
                            {hasDetails ? (
                              <button 
                                onClick={() => toggleExpand(log.id)}
-                               className={`h-9 px-5 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all ${isExpanded ? 'bg-[#5c4ae4] text-white shadow-lg' : 'bg-white dark:bg-zinc-950 text-zinc-500 hover:text-[#5c4ae4] shadow-sm'}`}
+                               className={`h-9 px-5 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all ${isExpanded ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white shadow-lg' : 'bg-white dark:bg-zinc-950 text-zinc-500 hover:text-zinc-900 dark:text-zinc-50 shadow-sm'}`}
                              >
                                 <Eye className="w-3 h-3 inline mr-2" strokeWidth={1.25} /> {isExpanded ? 'Retract' : 'Analyze'}
                              </button>
@@ -241,9 +241,9 @@ export default function AuditLogsClient({
                        {isExpanded && hasDetails && (
                          <tr className="bg-white/40 dark:bg-black/40">
                            <td colSpan={4} className="px-4 py-6 font-mono text-[11px] relative">
-                             <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#5c4ae4]"></div>
+                             <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"></div>
                              <div className="flex gap-4">
-                                <FileJson className="w-5 h-5 text-[#5c4ae4] mt-1 shrink-0" strokeWidth={1.25} />
+                                <FileJson className="w-5 h-5 text-zinc-900 dark:text-zinc-50 mt-1 shrink-0" strokeWidth={1.25} />
                                 <pre className="p-4 rounded-2xl bg-[#0d0c13] text-indigo-300 overflow-x-auto w-full shadow-2xl border border-white/5 border-l-4 border-l-indigo-500/50">
                                   {JSON.stringify(log.details, null, 2)}
                                 </pre>
@@ -266,7 +266,7 @@ export default function AuditLogsClient({
              <select 
                value={limit} 
                onChange={(e) => { setLimit(Number(e.target.value)); setPage(1); }} 
-               className="h-10 px-4 rounded-xl bg-white dark:bg-zinc-950 border-none shadow-sm text-[10px] font-black text-[#5c4ae4]"
+               className="h-10 px-4 rounded-xl bg-white dark:bg-zinc-950 border-none shadow-sm text-[10px] font-black text-zinc-900 dark:text-zinc-50"
              >
                <option value={10}>10</option>
                <option value={20}>20</option>
@@ -283,17 +283,17 @@ export default function AuditLogsClient({
                 <button 
                   onClick={() => setPage(Math.max(1, page - 1))} 
                   disabled={page <= 1 || isPending}
-                  className="w-11 h-11 rounded-xl bg-white dark:bg-zinc-950 text-zinc-400 hover:text-[#5c4ae4] disabled:opacity-30 shadow-sm border-none flex items-center justify-center transition-all"
+                  className="w-11 h-11 rounded-xl bg-white dark:bg-zinc-950 text-zinc-400 hover:text-zinc-900 dark:text-zinc-50 disabled:opacity-30 shadow-sm border-none flex items-center justify-center transition-all"
                 >
                   <ChevronLeft className="w-5 h-5" strokeWidth={1.25} />
                 </button>
-                <div className="w-11 h-11 flex items-center justify-center font-black text-xs text-white bg-[#5c4ae4] rounded-xl shadow-lg shadow-indigo-500/20">
+                <div className="w-11 h-11 flex items-center justify-center font-black text-xs text-white bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl shadow-lg shadow-indigo-500/20">
                   {page}
                 </div>
                 <button 
                   onClick={() => setPage(Math.min(totalPages, page + 1))} 
                   disabled={page >= totalPages || isPending}
-                  className="w-11 h-11 rounded-xl bg-white dark:bg-zinc-950 text-zinc-400 hover:text-[#5c4ae4] disabled:opacity-30 shadow-sm border-none flex items-center justify-center transition-all"
+                  className="w-11 h-11 rounded-xl bg-white dark:bg-zinc-950 text-zinc-400 hover:text-zinc-900 dark:text-zinc-50 disabled:opacity-30 shadow-sm border-none flex items-center justify-center transition-all"
                 >
                   <ChevronRight className="w-5 h-5" strokeWidth={1.25} />
                 </button>

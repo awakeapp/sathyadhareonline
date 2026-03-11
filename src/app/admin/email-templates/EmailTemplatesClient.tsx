@@ -63,7 +63,7 @@ export default function EmailTemplatesClient({ initialTemplates }: { initialTemp
             <PresenceCard key={t.id} noPadding className="group cursor-pointer overflow-hidden" onClick={() => openEdit(t)}>
               <div className="p-4">
                 <div className="flex items-start justify-between mb-6">
-                  <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-[#5c4ae4] flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">
+                  <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-zinc-900 dark:text-zinc-50 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">
                     <Mail className="w-7 h-7" strokeWidth={1.25} />
                   </div>
                   <div className="w-10 h-10 rounded-full bg-zinc-50 dark:bg-white/5 flex items-center justify-center text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -101,17 +101,17 @@ export default function EmailTemplatesClient({ initialTemplates }: { initialTemp
                 </button>
                 <div>
                    <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">{editingTemplate.name.replace(/_/g, ' ')} Node</h2>
-                   <p className="text-[10px] font-black text-[#5c4ae4] uppercase tracking-widest mt-1">Direct Communication Reconfiguration</p>
+                   <p className="text-[10px] font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-widest mt-1">Direct Communication Reconfiguration</p>
                 </div>
              </div>
-             <PresenceButton onClick={handleSave} loading={isPending} className="bg-[#5c4ae4] shadow-xl shadow-indigo-500/20 px-10">
+             <PresenceButton onClick={handleSave} loading={isPending} className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-xl shadow-indigo-500/20 px-10">
                <Check className="w-5 h-5 mr-3" strokeWidth={1.25} /> Synchronize Matrix
              </PresenceButton>
           </div>
 
           <div className="p-10 space-y-10">
              <div className="space-y-3">
-               <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Identity Dispatch Subject</label>
+               <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Identity Dispatch Subject</label>
                <input 
                  value={subject} 
                  onChange={(e) => setSubject(e.target.value)} 
@@ -121,7 +121,7 @@ export default function EmailTemplatesClient({ initialTemplates }: { initialTemp
 
              <div className="grid gap-10 lg:grid-cols-2">
                <div className="space-y-4">
-                 <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4] flex items-center gap-3">
+                 <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50 flex items-center gap-3">
                    <Terminal className="w-4 h-4" strokeWidth={1.25} /> Protocol Buffer (HTML)
                  </label>
                  <textarea
@@ -133,7 +133,7 @@ export default function EmailTemplatesClient({ initialTemplates }: { initialTemp
                </div>
                
                <div className="space-y-4">
-                 <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4] flex items-center gap-3">
+                 <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50 flex items-center gap-3">
                    <Layout className="w-4 h-4" strokeWidth={1.25} /> Visual Intercept (Preview)
                  </label>
                  <div className="w-full h-[500px] rounded-[2rem] bg-gray-100 dark:bg-white p-10 overflow-hidden shadow-2xl relative">
@@ -147,7 +147,7 @@ export default function EmailTemplatesClient({ initialTemplates }: { initialTemp
              </div>
 
              <div className="p-4 rounded-[2rem] bg-zinc-50 dark:bg-white/5 border-none">
-               <h4 className="text-[10px] font-black uppercase text-[#5c4ae4] tracking-[0.3em] mb-4">Injection Pointers</h4>
+               <h4 className="text-[10px] font-black uppercase text-zinc-900 dark:text-zinc-50 tracking-[0.3em] mb-4">Injection Pointers</h4>
                <div className="flex flex-wrap gap-3">
                  {["{{name}}", "{{email}}", "{{reset_link}}", "{{invite_link}}", "{{role}}"].map(v => (
                    <span key={v} className="px-4 py-2 rounded-xl bg-white dark:bg-zinc-950 text-[10px] font-black text-indigo-400 shadow-sm border border-indigo-50">

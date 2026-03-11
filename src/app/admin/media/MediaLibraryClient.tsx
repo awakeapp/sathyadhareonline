@@ -164,7 +164,7 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
       <div
         className={`relative border-2 border-dashed rounded-[2.5rem] p-12 text-center transition-all duration-300 cursor-pointer group bg-white dark:bg-zinc-950
           ${dragOver
-            ? 'border-[#5c4ae4] bg-indigo-50/50 dark:bg-indigo-500/10 scale-[1.01]'
+            ? 'border-zinc-900 dark:border-white bg-indigo-50/50 dark:bg-indigo-500/10 scale-[1.01]'
             : 'border-indigo-100 dark:border-white/5 hover:border-indigo-300'
           }
           ${uploading ? 'pointer-events-none opacity-80' : ''}`}
@@ -179,14 +179,14 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
           <div className="flex flex-col items-center justify-center gap-4">
             <div className="relative">
                <div className="w-20 h-20 rounded-full border-4 border-indigo-100 border-t-[#5c4ae4] animate-spin" />
-               <div className="absolute inset-0 flex items-center justify-center font-black text-xs text-[#5c4ae4]">{uploadProgress}%</div>
+               <div className="absolute inset-0 flex items-center justify-center font-black text-xs text-zinc-900 dark:text-zinc-50">{uploadProgress}%</div>
             </div>
-            <p className="text-sm font-black uppercase tracking-widest text-[#5c4ae4]">Synchronising Assets...</p>
+            <p className="text-sm font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Synchronising Assets...</p>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-4">
             <div className={`w-20 h-20 rounded-3xl flex items-center justify-center transition-all duration-500 shadow-xl shadow-indigo-500/10
-              ${dragOver ? 'bg-[#5c4ae4] text-white scale-110 rotate-6' : 'bg-indigo-50 dark:bg-indigo-500/10 text-[#5c4ae4] group-hover:scale-105 group-hover:-rotate-3'}`}>
+              ${dragOver ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white scale-110 rotate-6' : 'bg-indigo-50 dark:bg-indigo-500/10 text-zinc-900 dark:text-zinc-50 group-hover:scale-105 group-hover:-rotate-3'}`}>
                <UploadCloud className="w-10 h-10" />
             </div>
             <div>
@@ -263,7 +263,7 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
 
             {hasMore && (
               <div className="pt-8 text-center">
-                <Button variant="outline" onClick={() => setPage(p => p + 1)} className="rounded-2xl h-12 px-8 border-indigo-100 dark:border-white/5 text-zinc-500 hover:text-[#5c4ae4] hover:bg-indigo-50 transition-all font-black uppercase tracking-widest text-[10px]">
+                <Button variant="outline" onClick={() => setPage(p => p + 1)} className="rounded-2xl h-12 px-8 border-indigo-100 dark:border-white/5 text-zinc-500 hover:text-zinc-900 dark:text-zinc-50 hover:bg-indigo-50 transition-all font-black uppercase tracking-widest text-[10px]">
                   <ChevronDown className="w-4 h-4 mr-2" strokeWidth={1.25} /> Decrypt more assets
                 </Button>
               </div>

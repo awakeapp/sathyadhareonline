@@ -121,7 +121,7 @@ export default async function NewArticlePage() {
       <div className="p-4 flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
         
         <div className="flex items-center gap-5 mb-6">
-           <div className="w-12 h-12 rounded-2xl bg-[#5c4ae4] flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
+           <div className="w-12 h-12 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
               <FileText className="w-6 h-6" strokeWidth={1.25} />
            </div>
            <div>
@@ -134,20 +134,20 @@ export default async function NewArticlePage() {
           <form action={createArticleAction} encType="multipart/form-data" className="p-10 space-y-10">
 
             <div className="space-y-3">
-              <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Narrative Headline</label>
+              <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Narrative Headline</label>
               <input required name="title" type="text" placeholder="The Core Statement..."
                 className="w-full h-16 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-md font-bold shadow-inner" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <div className="space-y-3">
-                <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Network Slug</label>
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Network Slug</label>
                 <input required name="slug" type="text" placeholder="article-slug-vector"
                   className="w-full h-14 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none font-mono text-xs font-bold shadow-inner text-indigo-400" />
               </div>
 
               <div className="space-y-3">
-                <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Author Identity</label>
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Author Identity</label>
                 <input required name="author_name" type="text" placeholder="Dispaly Identity" defaultValue={profile?.full_name || ''}
                   className="w-full h-14 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-sm font-bold shadow-inner" />
               </div>
@@ -155,7 +155,7 @@ export default async function NewArticlePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <div className="space-y-3">
-                <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Network Category</label>
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Network Category</label>
                 <select name="category_id"
                   className="w-full h-16 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-xs font-black uppercase tracking-widest shadow-inner accent-[#5c4ae4]">
                   <option value="">Detached Segment</option>
@@ -166,20 +166,20 @@ export default async function NewArticlePage() {
               </div>
 
               <div className="space-y-3">
-                <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Visual Identifier (Cover)</label>
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Visual Identifier (Cover)</label>
                 <input name="cover_image" type="file" accept="image/*"
-                  className="w-full h-16 px-6 py-4 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none shadow-inner text-xs font-black text-zinc-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-[#5c4ae4] file:text-white file:text-[10px] file:uppercase file:tracking-widest" />
+                  className="w-full h-16 px-6 py-4 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none shadow-inner text-xs font-black text-zinc-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 file:text-white file:text-[10px] file:uppercase file:tracking-widest" />
               </div>
             </div>
 
             <div className="space-y-3">
-              <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Manifest Overview (Excerpt)</label>
+              <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Manifest Overview (Excerpt)</label>
               <textarea required name="excerpt" rows={3} placeholder="Condensed narrative summary..."
                 className="w-full p-6 rounded-[2rem] bg-zinc-50 dark:bg-zinc-950 border-none text-md font-bold shadow-inner resize-none leading-relaxed" />
             </div>
 
             <div className="space-y-4">
-              <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4] flex items-center gap-3">
+              <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50 flex items-center gap-3">
                  <Sparkles className="w-4 h-4" strokeWidth={1.25} /> Core Content Stream
               </label>
               <div className="min-h-[600px] rounded-[2rem] overflow-hidden border-none shadow-2xl bg-white dark:bg-zinc-950">
@@ -197,7 +197,7 @@ export default async function NewArticlePage() {
                 type="submit" 
                 name="action_type" 
                 value="draft"
-                className="h-16 px-8 rounded-2xl bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 border-2 border-indigo-50 font-black text-[10px] uppercase tracking-widest hover:border-[#5c4ae4] transition-all"
+                className="h-16 px-8 rounded-2xl bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 border-2 border-indigo-50 font-black text-[10px] uppercase tracking-widest hover:border-zinc-900 dark:border-white transition-all"
               >
                 Save Cold Draft
               </button>
@@ -216,7 +216,7 @@ export default async function NewArticlePage() {
                   type="submit" 
                   name="action_type" 
                   value="publish"
-                  className="h-16 px-12 bg-[#5c4ae4] text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3"
+                  className="h-16 px-12 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3"
                 >
                   <Send className="w-5 h-5" strokeWidth={1.25} /> Deploy Broadcast
                 </button>

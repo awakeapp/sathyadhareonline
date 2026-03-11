@@ -111,7 +111,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
               <button
                 key={t.id}
                 onClick={() => setActiveTab(t.id as any)}
-                className={`px-6 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === t.id ? 'bg-[#5c4ae4] text-white shadow-xl shadow-indigo-500/20' : 'text-zinc-500 hover:text-[#5c4ae4]'}`}
+                className={`px-6 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === t.id ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white shadow-xl shadow-indigo-500/20' : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-50'}`}
               >
                 {t.label}
               </button>
@@ -120,9 +120,9 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
 
           <div className="flex flex-wrap items-center gap-3">
              <div className="flex items-center gap-1 bg-white dark:bg-zinc-950 p-2 rounded-[2rem] shadow-sm">
-                <button onClick={() => applyPreset(7)} className="px-4 py-2 rounded-xl text-[10px] font-black text-zinc-500 hover:text-[#5c4ae4] transition-all">7D</button>
-                <button onClick={() => applyPreset(30)} className="px-4 py-2 rounded-xl text-[10px] font-black text-zinc-500 hover:text-[#5c4ae4] transition-all">30D</button>
-                <button onClick={() => setIsCustom(!isCustom)} className={`px-4 py-2 rounded-xl text-[10px] font-black flex items-center gap-2 transition-all ${isCustom ? 'bg-indigo-50 dark:bg-indigo-500/10 text-[#5c4ae4]' : 'text-zinc-500 hover:text-[#5c4ae4]'}`}>
+                <button onClick={() => applyPreset(7)} className="px-4 py-2 rounded-xl text-[10px] font-black text-zinc-500 hover:text-zinc-900 dark:text-zinc-50 transition-all">7D</button>
+                <button onClick={() => applyPreset(30)} className="px-4 py-2 rounded-xl text-[10px] font-black text-zinc-500 hover:text-zinc-900 dark:text-zinc-50 transition-all">30D</button>
+                <button onClick={() => setIsCustom(!isCustom)} className={`px-4 py-2 rounded-xl text-[10px] font-black flex items-center gap-2 transition-all ${isCustom ? 'bg-indigo-50 dark:bg-indigo-500/10 text-zinc-900 dark:text-zinc-50' : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-50'}`}>
                   <Calendar className="w-4 h-4" strokeWidth={1.25} /> Range
                 </button>
              </div>
@@ -131,7 +131,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
                <div className="flex items-center gap-3 animate-in fade-in zoom-in-95 duration-300">
                   <input type="date" className="h-12 px-4 rounded-2xl bg-white dark:bg-zinc-950 border-none text-[11px] font-black text-indigo-400 shadow-sm outline-none" value={customStart} onChange={e => setCustomStart(e.target.value)} />
                   <input type="date" className="h-12 px-4 rounded-2xl bg-white dark:bg-zinc-950 border-none text-[11px] font-black text-indigo-400 shadow-sm outline-none" value={customEnd} onChange={e => setCustomEnd(e.target.value)} />
-                  <PresenceButton onClick={applyCustom} className="h-12 px-6 bg-[#5c4ae4]">Seek</PresenceButton>
+                  <PresenceButton onClick={applyCustom} className="h-12 px-6 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900">Seek</PresenceButton>
                </div>
              )}
           </div>
@@ -165,7 +165,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                <PresenceCard>
                   <div className="flex items-center gap-3 mb-8">
-                    <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4]">
+                    <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50">
                        <TrendingUp className="w-5 h-5" strokeWidth={1.25} />
                     </div>
                     <div>
@@ -193,7 +193,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
 
                <PresenceCard>
                   <div className="flex items-center gap-3 mb-8">
-                    <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4]">
+                    <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50">
                        <BarChart3 className="w-5 h-5" strokeWidth={1.25} />
                     </div>
                     <div>
@@ -225,7 +225,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
         {activeTab === 'content' && (
            <div className="animate-in fade-in slide-in-from-bottom-6 duration-700 flex flex-col gap-4">
               <div className="flex justify-end">
-                 <PresenceButton onClick={() => handleExport('content')} disabled={isExporting} className="bg-indigo-50 !text-[#5c4ae4] hover:bg-indigo-100 shadow-none">
+                 <PresenceButton onClick={() => handleExport('content')} disabled={isExporting} className="bg-indigo-50 !text-zinc-900 dark:text-zinc-50 hover:bg-indigo-100 shadow-none">
                    <Download className="w-5 h-5 mr-3" strokeWidth={1.25} /> Export Performance Manifest
                  </PresenceButton>
               </div>
@@ -252,11 +252,11 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
                          return (
                            <div key={a.id} className="group">
                               <div className="flex items-center justify-between mb-2">
-                                 <Link href={`/${a.slug}`} target="_blank" className="font-black text-sm text-zinc-900 dark:text-zinc-50 group-hover:text-[#5c4ae4] transition-colors truncate max-w-[70%]">{a.title}</Link>
-                                 <span className="font-black tabular-nums text-sm text-zinc-500 group-hover:text-[#5c4ae4] transition-all">{a.count.toLocaleString()}</span>
+                                 <Link href={`/${a.slug}`} target="_blank" className="font-black text-sm text-zinc-900 dark:text-zinc-50 group-hover:text-zinc-900 dark:text-zinc-50 transition-colors truncate max-w-[70%]">{a.title}</Link>
+                                 <span className="font-black tabular-nums text-sm text-zinc-500 group-hover:text-zinc-900 dark:text-zinc-50 transition-all">{a.count.toLocaleString()}</span>
                               </div>
                               <div className="h-2 bg-zinc-50 dark:bg-white/5 rounded-full overflow-hidden">
-                                 <div className="h-full bg-rose-400/80 rounded-full transition-all duration-1000 group-hover:bg-[#5c4ae4]" style={{ width: `${pct}%` }} />
+                                 <div className="h-full bg-rose-400/80 rounded-full transition-all duration-1000 group-hover:bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" style={{ width: `${pct}%` }} />
                               </div>
                            </div>
                          );
@@ -267,7 +267,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
 
                 <PresenceCard>
                    <div className="flex items-center gap-4 mb-10 pb-6 border-b border-indigo-50 dark:border-white/5">
-                      <div className="w-14 h-14 rounded-2xl bg-[#5c4ae4]/10 flex items-center justify-center text-[#5c4ae4] shadow-lg shadow-indigo-500/10">
+                      <div className="w-14 h-14 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50 shadow-lg shadow-indigo-500/10">
                          <MessageSquare className="w-7 h-7" strokeWidth={1.25} />
                       </div>
                       <div>
@@ -286,11 +286,11 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
                          return (
                            <div key={a.id} className="group">
                               <div className="flex items-center justify-between mb-2">
-                                 <Link href={`/${a.slug}`} target="_blank" className="font-black text-sm text-zinc-900 dark:text-zinc-50 group-hover:text-[#5c4ae4] transition-colors truncate max-w-[70%]">{a.title}</Link>
-                                 <span className="font-black tabular-nums text-sm text-zinc-500 group-hover:text-[#5c4ae4] transition-all">{a.count.toLocaleString()}</span>
+                                 <Link href={`/${a.slug}`} target="_blank" className="font-black text-sm text-zinc-900 dark:text-zinc-50 group-hover:text-zinc-900 dark:text-zinc-50 transition-colors truncate max-w-[70%]">{a.title}</Link>
+                                 <span className="font-black tabular-nums text-sm text-zinc-500 group-hover:text-zinc-900 dark:text-zinc-50 transition-all">{a.count.toLocaleString()}</span>
                               </div>
                               <div className="h-2 bg-zinc-50 dark:bg-white/5 rounded-full overflow-hidden">
-                                 <div className="h-full bg-indigo-400/80 rounded-full transition-all duration-1000 group-hover:bg-[#5c4ae4]" style={{ width: `${pct}%` }} />
+                                 <div className="h-full bg-indigo-400/80 rounded-full transition-all duration-1000 group-hover:bg-zinc-900 dark:bg-white text-white dark:text-zinc-900" style={{ width: `${pct}%` }} />
                               </div>
                            </div>
                          );
@@ -345,7 +345,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
                            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">Engagement by category (Live)</p>
                         </div>
                      </div>
-                     <PresenceButton onClick={() => handleExport('categories')} disabled={isExporting} className="bg-indigo-50 !text-[#5c4ae4] hover:bg-indigo-100 shadow-none h-11 px-5">
+                     <PresenceButton onClick={() => handleExport('categories')} disabled={isExporting} className="bg-indigo-50 !text-zinc-900 dark:text-zinc-50 hover:bg-indigo-100 shadow-none h-11 px-5">
                        <Download className="w-4 h-4" strokeWidth={1.25} />
                      </PresenceButton>
                   </div>

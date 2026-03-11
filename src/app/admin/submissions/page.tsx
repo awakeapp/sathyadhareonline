@@ -139,7 +139,7 @@ export default async function AdminSubmissionsPage() {
                        </div>
                        <div className="flex items-center gap-2">
                           <Mail className="w-4 h-4 text-indigo-300" strokeWidth={1.25} />
-                          <a href={`mailto:${sub.email}`} className="text-xs font-black text-[#5c4ae4] uppercase truncate hover:underline">{sub.email}</a>
+                          <a href={`mailto:${sub.email}`} className="text-xs font-black text-zinc-900 dark:text-zinc-50 uppercase truncate hover:underline">{sub.email}</a>
                        </div>
                        <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-indigo-300" strokeWidth={1.25} />
@@ -151,7 +151,7 @@ export default async function AdminSubmissionsPage() {
 
                     {sub.content && (
                       <div className="bg-zinc-50 dark:bg-white/5 rounded-2xl p-5 border-l-4 border-indigo-100 dark:border-indigo-500/20 mb-2">
-                        <p className="text-sm font-medium leading-relaxed italic text-[#1b1929]/80 dark:text-white/80 line-clamp-4">
+                        <p className="text-sm font-medium leading-relaxed italic text-zinc-900/80 dark:text-white/80 line-clamp-4">
                           "{sub.content}"
                         </p>
                       </div>

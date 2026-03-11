@@ -73,10 +73,10 @@ export default async function MorePage() {
                          <item.icon size={24} style={{ color: item.color }} />
                       </div>
                       <div className="flex-1 min-w-0">
-                         <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-tight group-hover:text-[#5c4ae4] transition-colors">{item.label}</h3>
+                         <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-tight group-hover:text-zinc-900 dark:text-zinc-50 transition-colors">{item.label}</h3>
                          <p className="text-xs font-medium text-zinc-500 tracking-wide mt-1 truncate">{item.sub}</p>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-zinc-400 group-hover:text-[#5c4ae4] group-hover:translate-x-1 transition-all" strokeWidth={1.25} />
+                      <ChevronRight className="w-5 h-5 text-zinc-400 group-hover:text-zinc-900 dark:text-zinc-50 group-hover:translate-x-1 transition-all" strokeWidth={1.25} />
                    </div>
                 </Link>
              ))}

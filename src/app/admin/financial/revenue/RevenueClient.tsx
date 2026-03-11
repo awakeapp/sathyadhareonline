@@ -66,7 +66,7 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
       <PresenceCard className="bg-zinc-50 dark:bg-white/5 border-none p-5">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-             <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4]">
+             <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50">
                 <ShieldCheck className="w-6 h-6" strokeWidth={1.25} />
              </div>
              <div>
@@ -74,7 +74,7 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
                 <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-0.5">Super Admin Ledger Control</p>
              </div>
           </div>
-          <PresenceButton onClick={handleExport} disabled={isExporting} className="bg-white dark:bg-zinc-950 !text-zinc-500 hover:!text-[#5c4ae4] shadow-sm">
+          <PresenceButton onClick={handleExport} disabled={isExporting} className="bg-white dark:bg-zinc-950 !text-zinc-500 hover:!text-zinc-900 dark:text-zinc-50 shadow-sm">
              <Download className="w-5 h-5 mr-3" strokeWidth={1.25} /> Export Transaction Log
           </PresenceButton>
         </div>
@@ -87,10 +87,10 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
               <TrendingUp className="w-32 h-32 text-indigo-500" strokeWidth={1.25} />
            </div>
            <div className="relative z-10">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] mb-8 shadow-inner shadow-indigo-500/5">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50 mb-8 shadow-inner shadow-indigo-500/5">
                  <DollarSign className="w-6 h-6" strokeWidth={1.25} />
               </div>
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#5c4ae4] mb-3">Lifetime Asset Mass</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-zinc-50 mb-3">Lifetime Asset Mass</p>
               <h3 className="text-5xl font-black text-zinc-900 dark:text-zinc-50 tabular-nums tracking-tighter">
                 ₹{totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 0 })}
               </h3>
@@ -132,7 +132,7 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs whitespace-nowrap">
               <thead>
-                <tr className="bg-gray-50/50 dark:bg-white/5 border-b border-indigo-50 dark:border-white/5 font-black uppercase tracking-widest text-[#5c4ae4]">
+                <tr className="bg-gray-50/50 dark:bg-white/5 border-b border-indigo-50 dark:border-white/5 font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">
                   <th className="px-8 py-5 text-[10px]">Temporal Index</th>
                   <th className="px-8 py-5 text-[10px]">Actor Identity</th>
                   <th className="px-8 py-5 text-[10px]">Manifest</th>

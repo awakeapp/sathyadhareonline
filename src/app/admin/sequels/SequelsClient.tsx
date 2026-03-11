@@ -96,7 +96,7 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
                className="w-full h-14 pl-12 pr-4 rounded-2xl bg-white dark:bg-zinc-950 border-none shadow-sm focus:ring-2 focus:ring-indigo-500/20 font-bold text-sm"
             />
           </div>
-          <PresenceButton onClick={openCreate} className="h-14 px-8 bg-[#5c4ae4] font-black tracking-widest text-[10px] uppercase shadow-xl shadow-indigo-500/20">
+          <PresenceButton onClick={openCreate} className="h-14 px-8 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black tracking-widest text-[10px] uppercase shadow-xl shadow-indigo-500/20">
              New Collection
           </PresenceButton>
         </div>
@@ -134,10 +134,10 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
                    </p>
                    
                    <div className="flex items-center gap-3 mt-6 pt-6 border-t border-indigo-50 dark:border-white/5">
-                     <Link href={`/admin/sequels/${s.id}/edit`} className="flex-1 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-[#5c4ae4] hover:bg-[#5c4ae4] hover:text-white transition-all font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
+                     <Link href={`/admin/sequels/${s.id}/edit`} className="flex-1 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:text-white transition-all font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
                         <Box className="w-4 h-4" strokeWidth={1.25} /> {s.article_count} Units
                      </Link>
-                     <button className="w-12 h-12 rounded-xl bg-white dark:bg-zinc-950 text-zinc-500 hover:text-[#5c4ae4] shadow-sm flex items-center justify-center" onClick={() => openEdit(s)}>
+                     <button className="w-12 h-12 rounded-xl bg-white dark:bg-zinc-950 text-zinc-500 hover:text-zinc-900 dark:text-zinc-50 shadow-sm flex items-center justify-center" onClick={() => openEdit(s)}>
                         <Pen className="w-5 h-5" strokeWidth={1.25} />
                      </button>
                      <button className="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm flex items-center justify-center" onClick={() => handleDelete(s.id, s.title)}>
@@ -152,7 +152,7 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
 
       {/* ── MODAL ── */}
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#1b1929]/80 backdrop-blur-xl animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-zinc-950/80 backdrop-blur-xl animate-in fade-in duration-300">
            <div className="w-full max-w-lg bg-white dark:bg-[#181623] rounded-[2.5rem] shadow-2xl animate-in zoom-in-95 duration-300">
               <div className="p-4 border-b border-indigo-50 dark:border-white/5 flex items-center justify-between">
                  <div>
@@ -166,7 +166,7 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
               
               <div className="p-4 flex flex-col gap-4">
                  <div className="space-y-2">
-                   <label className="text-[10px] font-black uppercase tracking-widest text-[#5c4ae4]">Identification Label</label>
+                   <label className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Identification Label</label>
                    <input 
                      value={title} 
                      onChange={e => setTitle(e.target.value)} 
@@ -175,7 +175,7 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
                    />
                  </div>
                  <div className="space-y-2">
-                   <label className="text-[10px] font-black uppercase tracking-widest text-[#5c4ae4]">Narrative Overview</label>
+                   <label className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Narrative Overview</label>
                    <textarea 
                      value={description} onChange={e => setDescription(e.target.value)} 
                      placeholder="Collection summary..." 
@@ -183,7 +183,7 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
                    />
                  </div>
                  <div className="space-y-2">
-                   <label className="text-[10px] font-black uppercase tracking-widest text-[#5c4ae4]">Visual Banner (Asset URL)</label>
+                   <label className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Visual Banner (Asset URL)</label>
                    <input 
                      value={bannerUrl} 
                      onChange={e => setBannerUrl(e.target.value)} 
@@ -192,7 +192,7 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
                    />
                  </div>
                  
-                 <PresenceButton onClick={handleSave} className="w-full h-14 bg-[#5c4ae4] font-black tracking-widest text-xs uppercase shadow-xl shadow-indigo-500/20" loading={isPending}>
+                 <PresenceButton onClick={handleSave} className="w-full h-14 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black tracking-widest text-xs uppercase shadow-xl shadow-indigo-500/20" loading={isPending}>
                     {editingId ? 'Synchronize Data' : 'Initialize Node'}
                  </PresenceButton>
               </div>

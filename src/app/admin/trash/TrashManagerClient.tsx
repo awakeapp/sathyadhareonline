@@ -79,8 +79,8 @@ export default function TrashManagerClient({
             onClick={() => setActiveTab(t.id)}
             className={`shrink-0 flex items-center gap-3 px-6 py-4 rounded-[1.5rem] transition-all
               ${activeTab === t.id 
-                ? 'bg-[#5c4ae4] text-white shadow-xl shadow-indigo-500/30 font-black' 
-                : 'bg-white dark:bg-zinc-950 text-zinc-500 font-bold hover:text-[#5c4ae4] hover:bg-indigo-50 dark:hover:bg-indigo-500/10'
+                ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white shadow-xl shadow-indigo-500/30 font-black' 
+                : 'bg-white dark:bg-zinc-950 text-zinc-500 font-bold hover:text-zinc-900 dark:text-zinc-50 hover:bg-indigo-50 dark:hover:bg-indigo-500/10'
             }`}
           >
             <t.icon className={`w-5 h-5 ${activeTab === t.id ? 'text-white' : 'text-zinc-400'}`} />
@@ -116,7 +116,7 @@ export default function TrashManagerClient({
                   
                   <div className="flex-1 min-w-0 text-center md:text-left">
                      <h3 className="font-black text-lg text-zinc-900 dark:text-zinc-50 truncate">{title}</h3>
-                     {subtitle && <p className="text-xs font-bold text-[#5c4ae4] uppercase mt-0.5">{subtitle}</p>}
+                     {subtitle && <p className="text-xs font-bold text-zinc-900 dark:text-zinc-50 uppercase mt-0.5">{subtitle}</p>}
                      <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">
                         Purged · {formatDate(item.deleted_at)}
                      </p>
@@ -126,7 +126,7 @@ export default function TrashManagerClient({
                      <form action={(fd) => handleAction(restoreItemAction, fd)}>
                         <input type="hidden" name="id" value={item.id} />
                         <input type="hidden" name="type" value={activeTab} />
-                        <button type="submit" className="h-12 px-6 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-[#5c4ae4] hover:bg-[#5c4ae4] hover:text-white transition-all font-black text-[10px] uppercase tracking-widest flex items-center gap-2">
+                        <button type="submit" className="h-12 px-6 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:text-white transition-all font-black text-[10px] uppercase tracking-widest flex items-center gap-2">
                            <RotateCcw className="w-4 h-4" strokeWidth={1.25} /> Restore
                         </button>
                      </form>
