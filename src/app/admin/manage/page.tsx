@@ -76,11 +76,11 @@ export default async function ManagePage() {
         <PresenceCard>
            <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] shadow-inner">
-                 <SlidersHorizontal className="w-6 h-6" />
+                 <SlidersHorizontal className="w-6 h-6" strokeWidth={1.25} />
               </div>
               <div>
-                 <h2 className="text-xl font-bold text-[#1b1929] dark:text-white uppercase tracking-tight">System Operations</h2>
-                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mt-1">High-Privilege Vector Control</p>
+                 <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">System Operations</h2>
+                 <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide mt-1">High-Privilege Vector Control</p>
               </div>
            </div>
 
@@ -97,7 +97,7 @@ export default async function ManagePage() {
            </div>
         </PresenceCard>
 
-        <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-4 text-center">
+        <PresenceCard className="bg-zinc-50 dark:bg-white/5 border-none p-4 text-center">
            <p className="text-xs font-bold text-indigo-400 uppercase tracking-wide">Authorized Access Only</p>
         </PresenceCard>
       </div>

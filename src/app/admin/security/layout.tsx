@@ -21,7 +21,7 @@ export default function SecurityLayout({ children }: { children: React.ReactNode
         {/* ── Header ──────────────────────────────────────────────── */}
         <div className="flex items-center gap-4 mb-2">
           <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
-            <ShieldAlert className="w-6 h-6 text-rose-500" />
+            <ShieldAlert className="w-6 h-6 text-rose-500" strokeWidth={1.25} />
           </div>
           <div>
             <h1 className="text-3xl font-black tracking-tight leading-tight">Security & Auth</h1>

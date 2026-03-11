@@ -5,7 +5,7 @@ import Link from 'next/link';
 /* ─── Presence Layout Wrapper ─── */
 export function PresenceWrapper({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`min-h-screen bg-[var(--color-background)] pt-[88px] pb-[80px] ${className}`}>
+    <div className={`min-h-screen bg-[var(--color-background)] pt-[80px] pb-[80px] ${className}`}>
       {children}
     </div>
   );
@@ -31,37 +31,37 @@ export function PresenceHeader({
 }) {
   return (
     <div 
-      className="fixed top-0 left-1/2 -translate-x-1/2 z-40 w-full max-w-[1400px] bg-[#5c4ae4] text-white p-4 shadow-sm border-b border-indigo-400"
+      className="fixed top-0 left-1/2 -translate-x-1/2 z-40 w-full max-w-[1400px] h-[72px] bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800/80 p-0 shadow-sm flex flex-col justify-end"
       style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between h-14 px-4 w-full">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-wide">{title}</h1>
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">{title}</h1>
           {roleLabel && (
-            <p className="text-xs uppercase opacity-80 mt-1">{roleLabel}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mt-0.5">{roleLabel}</p>
           )}
         </div>
         <div className="flex items-center gap-4">
           {Icon1 && (
             icon1Href ? (
               <Link href={icon1Href} className="relative transition-transform active:scale-90 flex items-center justify-center min-w-[44px] min-h-[44px]">
-                <Icon1 className="w-6 h-6" strokeWidth={1.5} />
+                <Icon1 className="w-6 h-6" strokeWidth={1.25} />
                 <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full" />
               </Link>
             ) : (
               <div className="relative flex items-center justify-center min-w-[44px] min-h-[44px]">
-                <Icon1 className="w-6 h-6 opacity-50" strokeWidth={1.5} />
+                <Icon1 className="w-6 h-6 opacity-50" strokeWidth={1.25} />
               </div>
             )
           )}
           {Icon2 && (
             icon2Href ? (
               <Link href={icon2Href} className="transition-transform active:scale-90 flex items-center justify-center min-w-[44px] min-h-[44px]">
-                <Icon2 className="w-6 h-6" strokeWidth={1.5} />
+                <Icon2 className="w-6 h-6" strokeWidth={1.25} />
               </Link>
             ) : (
               <div className="flex items-center justify-center min-w-[44px] min-h-[44px]">
-                <Icon2 className="w-6 h-6 opacity-50" strokeWidth={1.5} />
+                <Icon2 className="w-6 h-6 opacity-50" strokeWidth={1.25} />
               </div>
             )
           )}
@@ -79,7 +79,7 @@ export function PresenceCard({ children, className = "", noPadding = false, onCl
   return (
     <div 
       onClick={onClick}
-      className={`bg-white dark:bg-[#1b1929] rounded-xl shadow-sm border border-black/5 dark:border-white/5 overflow-hidden ${noPadding ? '' : 'p-4'} ${onClick ? 'cursor-pointer active:scale-[0.98] transition-all' : ''} ${className}`}
+      className={`bg-white/80 dark:bg-white/5 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-black/5 dark:border-white/5 overflow-hidden ${noPadding ? '' : 'p-5'} ${onClick ? 'cursor-pointer active:scale-[0.98] transition-all' : ''} ${className}`}
     >
       {children}
     </div>
@@ -114,7 +114,7 @@ export function PresenceStatCircle({
             stroke="currentColor"
             strokeWidth="5"
             fill="transparent"
-            className="text-gray-100 dark:text-gray-800"
+            className="text-zinc-200 dark:text-gray-800"
           />
           {/* Progress circle */}
           <circle
@@ -132,10 +132,10 @@ export function PresenceStatCircle({
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center pt-0.5">
           <span className="text-xl font-bold leading-none">{value}</span>
-          {typeof value === 'number' && <span className="text-[8px] font-bold text-gray-400 -mt-0.5">%</span>}
+          {typeof value === 'number' && <span className="text-[8px] font-bold text-zinc-500 -mt-0.5">%</span>}
         </div>
       </div>
-      <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">{label}</span>
+      <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">{label}</span>
     </div>
   );
 }
@@ -155,16 +155,16 @@ export function PresenceActionTile({
   className?: string;
 }) {
   return (
-    <Link href={href} className={`flex flex-col items-center gap-2 p-2 transition-all active:scale-95 group min-h-[44px] min-w-[44px] ${className}`}>
+    <Link href={href} className={`flex flex-col items-center gap-3 p-2 transition-all active:scale-90 group min-h-[50px] min-w-[50px] ${className}`}>
       <div className="relative">
-        <div className="w-12 h-12 rounded-xl bg-[#f0efff] dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] dark:text-indigo-400 group-hover:bg-[#5c4ae4] group-hover:text-white transition-colors duration-300">
+        <div className="w-14 h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/50 dark:border-white/10 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.2)] flex items-center justify-center text-zinc-500 dark:text-zinc-400 group-hover:bg-[#5c4ae4] group-hover:border-[#5c4ae4] dark:group-hover:bg-[#5c4ae4] group-hover:text-white dark:group-hover:text-white group-hover:shadow-[0_8px_25px_rgba(92,74,228,0.4)] transition-all duration-300">
           <Icon className="w-6 h-6" strokeWidth={1.5} />
         </div>
         {badge && (
-          <span className="absolute top-0 -right-1 w-2.5 h-2.5 bg-rose-500 border border-white dark:border-[#1b1929] rounded-full" />
+          <span className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 border-2 border-white dark:border-[#181623] rounded-full animate-pulse" />
         )}
       </div>
-      <span className="text-xs font-medium text-gray-600 dark:text-gray-300 text-center whitespace-nowrap">
+      <span className="text-[11px] font-black uppercase tracking-wider text-zinc-600 dark:text-zinc-400 group-hover:text-[#5c4ae4] dark:group-hover:text-[#5c4ae4] text-center whitespace-nowrap transition-colors duration-300">
         {label}
       </span>
     </Link>
@@ -190,8 +190,8 @@ export function PresenceButton({
   className?: string 
 }) {
   const variantStyles = {
-    primary: "bg-[#5c4ae4] text-white shadow-indigo-500/20 hover:bg-[#4534c7]",
-    outline: "bg-white dark:bg-transparent border-2 border-indigo-500/10 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10",
+    primary: "bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200",
+    outline: "bg-transparent border-2 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-900",
     destructive: "bg-rose-500 text-white shadow-rose-500/20 hover:bg-rose-600"
   };
 
@@ -214,9 +214,9 @@ export function PresenceButton({
 export function PresenceSectionHeader({ title, action, actionHref }: { title: string; action?: string; actionHref?: string }) {
   return (
     <div className="flex items-center justify-between mb-4">
-      <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">{title}</h2>
+      <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-50">{title}</h2>
       {action && actionHref && (
-        <Link href={actionHref} className="text-sm font-medium text-[#5c4ae4] hover:underline min-h-[44px] flex items-center">
+        <Link href={actionHref} className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 hover:underline min-h-[44px] flex items-center">
           {action}
         </Link>
       )}

@@ -35,7 +35,7 @@ const ROLE_META: Record<string, { label: string; color: string }> = {
   super_admin: { label: 'Super Admin', color: 'bg-purple-500/10 text-purple-500 border-purple-500' },
   admin:       { label: 'Admin',       color: 'bg-blue-500/10 text-blue-500 border-blue-500' },
   editor:      { label: 'Editor',      color: 'bg-amber-500/10 text-amber-500 border-amber-500' },
-  reader:      { label: 'Reader',      color: 'bg-gray-500/10 text-gray-400 border-gray-500' },
+  reader:      { label: 'Reader',      color: 'bg-gray-500/10 text-zinc-500 border-gray-500' },
 };
 
 const STATUS_META: Record<string, { label: string; color: string; icon: React.ElementType }> = {
@@ -136,41 +136,41 @@ export default function UserManagementClient({ users: initialUsers, currentUserR
       {/* ── Action Bar ────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row gap-4 mb-2">
         <PresenceButton onClick={() => setShowInvite(true)} className="flex-1 h-14 bg-[#5c4ae4] shadow-indigo-500/20">
-          <Mail className="w-5 h-5 mr-3" /> Invite Team Member
+          <Mail className="w-5 h-5 mr-3" strokeWidth={1.25} /> Invite Team Member
         </PresenceButton>
         <PresenceButton onClick={() => setShowCreate(true)} className="flex-1 h-14 bg-white !text-[#5c4ae4] border-2 border-indigo-50 shadow-none hover:bg-indigo-50">
-          <UserPlus className="w-5 h-5 mr-3" /> Manual Creation
+          <UserPlus className="w-5 h-5 mr-3" strokeWidth={1.25} /> Manual Creation
         </PresenceButton>
       </div>
 
       {/* ── Filters ───────────────────────────────────────────── */}
-      <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none">
+      <PresenceCard className="bg-zinc-50 dark:bg-white/5 border-none">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400" />
+            <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400" strokeWidth={1.25} />
             <input 
               placeholder="Filter by name or email..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-12 pl-11 pr-4 rounded-2xl bg-white dark:bg-[#1b1929] border-none shadow-sm focus:ring-2 focus:ring-indigo-500/20 transition-all font-bold text-sm"
+              className="w-full h-12 pl-11 pr-4 rounded-2xl bg-white dark:bg-zinc-950 border-none shadow-sm focus:ring-2 focus:ring-indigo-500/20 transition-all font-bold text-sm"
             />
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1 md:pb-0 hide-scrollbar shrink-0">
-            <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="h-12 px-4 rounded-2xl bg-white dark:bg-[#1b1929] border-none shadow-sm font-bold text-xs focus:ring-2 focus:ring-indigo-500/20">
+            <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="h-12 px-4 rounded-2xl bg-white dark:bg-zinc-950 border-none shadow-sm font-bold text-xs focus:ring-2 focus:ring-indigo-500/20">
               <option value="all">Roles</option>
               <option value="super_admin">Super Admins</option>
               <option value="admin">Admins</option>
               <option value="editor">Editors</option>
               <option value="reader">Readers</option>
             </select>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="h-12 px-4 rounded-2xl bg-white dark:bg-[#1b1929] border-none shadow-sm font-bold text-xs focus:ring-2 focus:ring-indigo-500/20">
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="h-12 px-4 rounded-2xl bg-white dark:bg-zinc-950 border-none shadow-sm font-bold text-xs focus:ring-2 focus:ring-indigo-500/20">
               <option value="all">Status</option>
               <option value="active">Active</option>
               <option value="suspended">Suspended</option>
               <option value="banned">Banned</option>
             </select>
-            <button className="h-12 px-5 rounded-2xl bg-white dark:bg-[#1b1929] border-none shadow-sm font-black text-xs text-gray-400 hover:text-indigo-500 transition-colors" onClick={exportCSV}>
-               <Download className="w-4 h-4" />
+            <button className="h-12 px-5 rounded-2xl bg-white dark:bg-zinc-950 border-none shadow-sm font-black text-xs text-zinc-500 hover:text-indigo-500 transition-colors" onClick={exportCSV}>
+               <Download className="w-4 h-4" strokeWidth={1.25} />
             </button>
           </div>
         </div>
@@ -181,8 +181,8 @@ export default function UserManagementClient({ users: initialUsers, currentUserR
         {filteredUsers.length === 0 ? (
           <PresenceCard className="py-20 text-center flex flex-col items-center border-dashed border-2 border-indigo-100">
             <User className="w-16 h-16 mb-4 text-indigo-100" />
-            <p className="font-black text-xl tracking-tight text-gray-400">No members found</p>
-            <p className="text-sm text-gray-400/60 mt-2 font-bold uppercase tracking-widest">Adjust your search or filters</p>
+            <p className="font-black text-xl tracking-tight text-zinc-500">No members found</p>
+            <p className="text-sm text-zinc-500/60 mt-2 font-bold uppercase tracking-widest">Adjust your search or filters</p>
           </PresenceCard>
         ) : (
           filteredUsers.map(u => {
@@ -198,7 +198,7 @@ export default function UserManagementClient({ users: initialUsers, currentUserR
                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg ${u.status === 'active' ? 'bg-gradient-to-br from-[#5c4ae4] to-indigo-400' : 'bg-gray-400'}`}>
                        {initials}
                      </div>
-                     <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-4 border-white dark:border-[#1b1929] flex items-center justify-center shadow-sm ${statusMeta.color} bg-white dark:bg-[#1b1929]`}>
+                     <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-4 border-white dark:border-[#1b1929] flex items-center justify-center shadow-sm ${statusMeta.color} bg-white dark:bg-zinc-950`}>
                        <statusMeta.icon className="w-3 h-3" />
                      </div>
                    </div>
@@ -211,20 +211,20 @@ export default function UserManagementClient({ users: initialUsers, currentUserR
                         </span>
                      </div>
                      <div className="flex flex-wrap justify-center md:justify-start items-center gap-x-5 gap-y-1">
-                        <span className="text-xs font-bold text-gray-400">{u.email}</span>
-                        <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Joined {formatDate(u.created_at)}</span>
+                        <span className="text-xs font-bold text-zinc-500">{u.email}</span>
+                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Joined {formatDate(u.created_at)}</span>
                      </div>
                    </div>
 
                    <div className="flex items-center gap-3 shrink-0">
                       <button onClick={() => { setSelectedUser(u); setShowEdit(true); }} className="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] hover:bg-[#5c4ae4] hover:text-white transition-all shadow-sm">
-                        <Edit2 className="w-5 h-5" />
+                        <Edit2 className="w-5 h-5" strokeWidth={1.25} />
                       </button>
-                      <button onClick={() => { setSelectedUser(u); setShowStatus(true); }} className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all shadow-sm ${u.status !== 'active' ? 'bg-amber-500 text-white' : 'bg-gray-50 dark:bg-white/5 text-gray-400 hover:text-amber-500'}`}>
-                        <Slash className="w-5 h-5" />
+                      <button onClick={() => { setSelectedUser(u); setShowStatus(true); }} className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all shadow-sm ${u.status !== 'active' ? 'bg-amber-500 text-white' : 'bg-zinc-50 dark:bg-white/5 text-zinc-500 hover:text-amber-500'}`}>
+                        <Slash className="w-5 h-5" strokeWidth={1.25} />
                       </button>
                       <button onClick={() => { setSelectedUser(u); setShowDelete(true); }} className="w-11 h-11 rounded-xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm">
-                        <Trash2 className="w-5 h-5" />
+                        <Trash2 className="w-5 h-5" strokeWidth={1.25} />
                       </button>
                    </div>
                  </div>
@@ -383,14 +383,14 @@ export default function UserManagementClient({ users: initialUsers, currentUserR
                     { val: 'suspended', label: 'Suspended', desc: 'Temporary login restriction.', icon: Slash, col: 'text-amber-500' },
                     { val: 'banned',    label: 'Banned',    desc: 'Permanent restriction from login.', icon: Ban, col: 'text-red-500' },
                   ].map((s) => (
-                    <label key={s.val} className={`group flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${selectedUser.status === s.val ? 'bg-indigo-50/30 border-[#5c4ae4]' : 'border-gray-100 dark:border-white/5 hover:border-indigo-200'}`}>
+                    <label key={s.val} className={`group flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${selectedUser.status === s.val ? 'bg-indigo-50/30 border-[#5c4ae4]' : 'border-zinc-100 dark:border-white/5 hover:border-indigo-200'}`}>
                       <input type="radio" name="status" value={s.val} defaultChecked={selectedUser.status === s.val} className="sr-only" />
-                      <div className={`w-10 h-10 rounded-xl bg-white dark:bg-[#1b1929] border border-gray-100 dark:border-white/10 flex items-center justify-center transition-colors group-hover:scale-110 ${s.col}`}>
+                      <div className={`w-10 h-10 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-100 dark:border-white/10 flex items-center justify-center transition-colors group-hover:scale-110 ${s.col}`}>
                         <s.icon className="w-5 h-5" />
                       </div>
                       <div className="flex-1 text-left">
                         <p className={`text-sm font-black italic tracking-tighter ${s.col}`}>{s.label}</p>
-                        <p className="text-[10px] text-gray-400 font-medium">{s.desc}</p>
+                        <p className="text-[10px] text-zinc-500 font-medium">{s.desc}</p>
                       </div>
                     </label>
                   ))}

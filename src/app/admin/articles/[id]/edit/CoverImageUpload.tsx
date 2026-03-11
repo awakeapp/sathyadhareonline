@@ -31,7 +31,7 @@ export function CoverImageUpload({ currentImageUrl }: Props) {
     <div className="space-y-3">
       {/* Preview */}
       {displayImage && (
-        <div className="relative group w-full max-w-sm rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="relative group w-full max-w-sm rounded-xl overflow-hidden border border-zinc-200 dark:border-gray-700 shadow-sm">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={displayImage}
@@ -78,7 +78,7 @@ export function CoverImageUpload({ currentImageUrl }: Props) {
           className="sr-only"
         />
         {!displayImage && (
-          <span className="text-xs text-gray-400 dark:text-gray-500">
+          <span className="text-xs text-zinc-500 dark:text-zinc-400">
             JPG, PNG, WebP — max 5 MB
           </span>
         )}

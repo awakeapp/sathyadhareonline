@@ -80,10 +80,10 @@ export default function TrashManagerClient({
             className={`shrink-0 flex items-center gap-3 px-6 py-4 rounded-[1.5rem] transition-all
               ${activeTab === t.id 
                 ? 'bg-[#5c4ae4] text-white shadow-xl shadow-indigo-500/30 font-black' 
-                : 'bg-white dark:bg-[#1b1929] text-gray-400 font-bold hover:text-[#5c4ae4] hover:bg-indigo-50 dark:hover:bg-indigo-500/10'
+                : 'bg-white dark:bg-zinc-950 text-zinc-500 font-bold hover:text-[#5c4ae4] hover:bg-indigo-50 dark:hover:bg-indigo-500/10'
             }`}
           >
-            <t.icon className={`w-5 h-5 ${activeTab === t.id ? 'text-white' : 'text-gray-300'}`} />
+            <t.icon className={`w-5 h-5 ${activeTab === t.id ? 'text-white' : 'text-zinc-400'}`} />
             <span className="text-sm uppercase tracking-wider">{t.label}</span>
             {t.count > 0 && (
               <span className={`px-2 py-0.5 rounded-lg text-[10px] ${activeTab === t.id ? 'bg-white/20' : 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-400'}`}>
@@ -99,8 +99,8 @@ export default function TrashManagerClient({
         {currentItems.length === 0 ? (
           <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
              <History className="w-16 h-16 mb-5 text-indigo-100" />
-             <p className="font-black text-xl text-gray-400 uppercase tracking-widest">Archive Void</p>
-             <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mt-2">No records found in {activeTab} cache</p>
+             <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">Archive Void</p>
+             <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mt-2">No records found in {activeTab} cache</p>
           </PresenceCard>
         ) : (
           currentItems.map((item) => {
@@ -111,13 +111,13 @@ export default function TrashManagerClient({
               <PresenceCard key={item.id} noPadding className="group">
                 <div className="p-5 flex flex-col md:flex-row items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-300 shrink-0">
-                     <AlertTriangle className="w-6 h-6" />
+                     <AlertTriangle className="w-6 h-6" strokeWidth={1.25} />
                   </div>
                   
                   <div className="flex-1 min-w-0 text-center md:text-left">
-                     <h3 className="font-black text-lg text-[#1b1929] dark:text-white truncate">{title}</h3>
+                     <h3 className="font-black text-lg text-zinc-900 dark:text-zinc-50 truncate">{title}</h3>
                      {subtitle && <p className="text-xs font-bold text-[#5c4ae4] uppercase mt-0.5">{subtitle}</p>}
-                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
+                     <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">
                         Purged · {formatDate(item.deleted_at)}
                      </p>
                   </div>
@@ -127,11 +127,11 @@ export default function TrashManagerClient({
                         <input type="hidden" name="id" value={item.id} />
                         <input type="hidden" name="type" value={activeTab} />
                         <button type="submit" className="h-12 px-6 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-[#5c4ae4] hover:bg-[#5c4ae4] hover:text-white transition-all font-black text-[10px] uppercase tracking-widest flex items-center gap-2">
-                           <RotateCcw className="w-4 h-4" /> Restore
+                           <RotateCcw className="w-4 h-4" strokeWidth={1.25} /> Restore
                         </button>
                      </form>
                      <button className="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all" onClick={() => { setSelectedItem(item); setShowDelete(true); }}>
-                        <Trash2 className="w-5 h-5" />
+                        <Trash2 className="w-5 h-5" strokeWidth={1.25} />
                      </button>
                   </div>
 

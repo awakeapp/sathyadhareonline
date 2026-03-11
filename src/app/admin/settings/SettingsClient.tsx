@@ -60,7 +60,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
       {/* ── Navigator ── */}
       <div className="w-full md:w-64 shrink-0 space-y-3 flex flex-col">
         <div className="px-2 mb-2">
-           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Settings Domains</p>
+           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Settings Domains</p>
         </div>
         <div className="flex md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-2 md:pb-0 hide-scrollbar">
           {tabs.map((tab) => {
@@ -73,9 +73,9 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                 className={`flex items-center gap-4 px-5 py-4 rounded-[1.25rem] text-left transition-all whitespace-nowrap md:whitespace-normal
                   ${isActive 
                     ? 'bg-[#5c4ae4] text-white shadow-xl shadow-indigo-500/20' 
-                    : 'bg-white dark:bg-[#1b1929] text-gray-400 hover:text-[#5c4ae4] hover:bg-indigo-50 dark:hover:bg-indigo-500/10'}`}
+                    : 'bg-white dark:bg-zinc-950 text-zinc-500 hover:text-[#5c4ae4] hover:bg-indigo-50 dark:hover:bg-indigo-500/10'}`}
               >
-                <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-white' : 'text-gray-300'}`} />
+                <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-white' : 'text-zinc-400'}`} />
                 <span className="font-black text-sm uppercase tracking-wider">{tab.label}</span>
               </button>
             );
@@ -93,34 +93,34 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                {activeTab === 'general' && (
                  <div className="flex flex-col gap-4">
                    <div>
-                     <h2 className="text-2xl font-black text-[#1b1929] dark:text-white">Global Identity</h2>
-                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Foundational Branding</p>
+                     <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50">Global Identity</h2>
+                     <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Foundational Branding</p>
                    </div>
                    <div className="grid gap-8 md:grid-cols-2">
                      <div className="space-y-2 md:col-span-2">
-                        <label className="text-[10px] font-black uppercase text-gray-400">Site Name</label>
-                        <Input value={general.site_name || ''} onChange={(e) => setGeneral({ ...general, site_name: e.target.value })} className="h-14 rounded-2xl bg-gray-50 dark:bg-white/5 border-none font-bold" />
+                        <label className="text-[10px] font-black uppercase text-zinc-500">Site Name</label>
+                        <Input value={general.site_name || ''} onChange={(e) => setGeneral({ ...general, site_name: e.target.value })} className="h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-bold" />
                      </div>
                      <div className="space-y-2 md:col-span-2">
-                        <label className="text-[10px] font-black uppercase text-gray-400">Tagline</label>
-                        <Input value={general.tagline || ''} onChange={(e) => setGeneral({ ...general, tagline: e.target.value })} className="h-14 rounded-2xl bg-gray-50 dark:bg-white/5 border-none font-bold text-sm" />
+                        <label className="text-[10px] font-black uppercase text-zinc-500">Tagline</label>
+                        <Input value={general.tagline || ''} onChange={(e) => setGeneral({ ...general, tagline: e.target.value })} className="h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-bold text-sm" />
                      </div>
                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-gray-400">Contact Email</label>
-                        <Input type="email" value={general.contact_email || ''} onChange={(e) => setGeneral({ ...general, contact_email: e.target.value })} className="h-14 rounded-2xl bg-gray-50 dark:bg-white/5 border-none font-bold" />
+                        <label className="text-[10px] font-black uppercase text-zinc-500">Contact Email</label>
+                        <Input type="email" value={general.contact_email || ''} onChange={(e) => setGeneral({ ...general, contact_email: e.target.value })} className="h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-bold" />
                      </div>
                    </div>
                    
                    <div className="pt-8 border-t border-indigo-50 dark:border-white/5">
-                      <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6">Asset Repository</h3>
+                      <h3 className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-6">Asset Repository</h3>
                       <div className="grid gap-8 md:grid-cols-2">
                          <div className="space-y-2">
-                           <label className="text-[10px] font-black uppercase text-gray-400">Logo Endpoint</label>
-                           <Input value={general.logo_url || ''} onChange={(e) => setGeneral({ ...general, logo_url: e.target.value })} className="h-14 rounded-2xl bg-gray-50 dark:bg-white/5 border-none font-mono text-[11px]" placeholder="https://..." />
+                           <label className="text-[10px] font-black uppercase text-zinc-500">Logo Endpoint</label>
+                           <Input value={general.logo_url || ''} onChange={(e) => setGeneral({ ...general, logo_url: e.target.value })} className="h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-mono text-[11px]" placeholder="https://..." />
                          </div>
                          <div className="space-y-2">
-                           <label className="text-[10px] font-black uppercase text-gray-400">Favicon Link</label>
-                           <Input value={general.favicon_url || ''} onChange={(e) => setGeneral({ ...general, favicon_url: e.target.value })} className="h-14 rounded-2xl bg-gray-50 dark:bg-white/5 border-none font-mono text-[11px]" placeholder="https://..." />
+                           <label className="text-[10px] font-black uppercase text-zinc-500">Favicon Link</label>
+                           <Input value={general.favicon_url || ''} onChange={(e) => setGeneral({ ...general, favicon_url: e.target.value })} className="h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-mono text-[11px]" placeholder="https://..." />
                          </div>
                       </div>
                    </div>
@@ -130,17 +130,17 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                {activeTab === 'social' && (
                  <div className="flex flex-col gap-4">
                     <div>
-                      <h2 className="text-2xl font-black text-[#1b1929] dark:text-white">Social Network</h2>
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Cross-platform integration</p>
+                      <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50">Social Network</h2>
+                      <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Cross-platform integration</p>
                     </div>
                     <div className="grid gap-4 md:grid-cols-2">
                       {Object.keys(social).map(key => (
                         <div key={key} className="space-y-2">
-                          <label className="text-[10px] font-black uppercase text-gray-400">{key}</label>
+                          <label className="text-[10px] font-black uppercase text-zinc-500">{key}</label>
                           <Input 
                             value={social[key] || ''} 
                             onChange={(e) => setSocial({ ...social, [key]: e.target.value })} 
-                            className="h-14 rounded-2xl bg-gray-50 dark:bg-white/5 border-none font-mono text-[11px]" 
+                            className="h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-mono text-[11px]" 
                           />
                         </div>
                       ))}
@@ -151,26 +151,26 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                {activeTab === 'seo' && (
                  <div className="flex flex-col gap-4">
                     <div>
-                      <h2 className="text-2xl font-black text-[#1b1929] dark:text-white">Discovery & SEO</h2>
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Search Engine Optimisation</p>
+                      <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50">Discovery & SEO</h2>
+                      <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Search Engine Optimisation</p>
                     </div>
                     <div className="flex flex-col gap-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-gray-400">Default Architecture Title</label>
-                        <Input value={seo.meta_title || ''} onChange={(e) => setSeo({ ...seo, meta_title: e.target.value })} className="h-14 rounded-2xl bg-gray-50 dark:bg-white/5 border-none font-bold" />
+                        <label className="text-[10px] font-black uppercase text-zinc-500">Default Architecture Title</label>
+                        <Input value={seo.meta_title || ''} onChange={(e) => setSeo({ ...seo, meta_title: e.target.value })} className="h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-bold" />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-gray-400">Metadata Narrative</label>
+                        <label className="text-[10px] font-black uppercase text-zinc-500">Metadata Narrative</label>
                         <textarea 
                           value={seo.meta_description || ''} 
                           onChange={(e) => setSeo({ ...seo, meta_description: e.target.value })} 
-                          className="w-full px-5 py-4 rounded-3xl bg-gray-50 dark:bg-white/5 border-none text-sm font-medium focus:ring-2 focus:ring-indigo-500/20"
+                          className="w-full px-5 py-4 rounded-3xl bg-zinc-50 dark:bg-white/5 border-none text-sm font-medium focus:ring-2 focus:ring-indigo-500/20"
                           rows={4}
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-gray-400">Open Graph Manifest Image</label>
-                        <Input value={seo.og_image || ''} onChange={(e) => setSeo({ ...seo, og_image: e.target.value })} className="h-14 rounded-2xl bg-gray-50 dark:bg-white/5 border-none font-mono text-[11px]" />
+                        <label className="text-[10px] font-black uppercase text-zinc-500">Open Graph Manifest Image</label>
+                        <Input value={seo.og_image || ''} onChange={(e) => setSeo({ ...seo, og_image: e.target.value })} className="h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-mono text-[11px]" />
                       </div>
                     </div>
                  </div>
@@ -179,8 +179,8 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                {activeTab === 'features' && (
                  <div className="flex flex-col gap-4">
                     <div>
-                      <h2 className="text-2xl font-black text-[#1b1929] dark:text-white">Module Governance</h2>
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Dynamic feature toggles</p>
+                      <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50">Module Governance</h2>
+                      <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Dynamic feature toggles</p>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -189,12 +189,12 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                           const toggleName = label.charAt(0).toUpperCase() + label.slice(1);
                           const isActive = features[key];
                           return (
-                            <label key={key} className={`cursor-pointer group flex items-center justify-between p-6 rounded-[1.5rem] border-2 transition-all ${isActive ? 'bg-indigo-50/50 dark:bg-indigo-500/10 border-indigo-100 dark:border-[#5c4ae4]/30' : 'bg-white dark:bg-[#1b1929] border-gray-50 dark:border-white/5'}`}>
+                            <label key={key} className={`cursor-pointer group flex items-center justify-between p-6 rounded-[1.5rem] border-2 transition-all ${isActive ? 'bg-indigo-50/50 dark:bg-indigo-500/10 border-indigo-100 dark:border-[#5c4ae4]/30' : 'bg-white dark:bg-zinc-950 border-gray-50 dark:border-white/5'}`}>
                               <div className="space-y-1">
                                 <span className="font-black text-sm uppercase tracking-tight block">{toggleName}</span>
                                 <div className="flex items-center gap-2">
                                    <div className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-gray-300'}`} />
-                                   <span className={`text-[10px] font-bold uppercase tracking-widest ${isActive ? 'text-emerald-500' : 'text-gray-400'}`}>
+                                   <span className={`text-[10px] font-bold uppercase tracking-widest ${isActive ? 'text-emerald-500' : 'text-zinc-500'}`}>
                                       {isActive ? "Operational" : "Deferred"}
                                    </span>
                                 </div>
@@ -213,23 +213,23 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                {activeTab === 'integrations' && (
                  <div className="flex flex-col gap-4">
                     <div>
-                      <h2 className="text-2xl font-black text-[#1b1929] dark:text-white">System Ecosystem</h2>
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Cross-platform identifiers</p>
+                      <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50">System Ecosystem</h2>
+                      <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Cross-platform identifiers</p>
                     </div>
 
                     <div className="flex flex-col gap-4">
                        <div className="space-y-2">
-                         <label className="text-[10px] font-black uppercase text-gray-400">Cloud Analytics ID</label>
-                         <Input value={integrations.analytics_id || ''} onChange={(e) => setIntegrations({ ...integrations, analytics_id: e.target.value })} className="h-14 rounded-2xl bg-gray-50 dark:bg-white/5 border-none font-mono" placeholder="G-XXXXXXXXXX" />
+                         <label className="text-[10px] font-black uppercase text-zinc-500">Cloud Analytics ID</label>
+                         <Input value={integrations.analytics_id || ''} onChange={(e) => setIntegrations({ ...integrations, analytics_id: e.target.value })} className="h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-mono" placeholder="G-XXXXXXXXXX" />
                        </div>
 
                        <div className="pt-8 border-t border-indigo-50 dark:border-white/5">
-                          <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6">Security Protocols</h3>
+                          <h3 className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-6">Security Protocols</h3>
                           
-                          <label className={`cursor-pointer group flex items-center justify-between p-6 rounded-[1.5rem] border-2 transition-all mb-6 ${integrations.google_oauth_enabled ? 'bg-emerald-50/50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/30' : 'bg-white dark:bg-[#1b1929] border-gray-50 dark:border-white/5 font-bold'}`}>
+                          <label className={`cursor-pointer group flex items-center justify-between p-6 rounded-[1.5rem] border-2 transition-all mb-6 ${integrations.google_oauth_enabled ? 'bg-emerald-50/50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/30' : 'bg-white dark:bg-zinc-950 border-gray-50 dark:border-white/5 font-bold'}`}>
                               <div className="space-y-1">
                                 <span className="font-black text-sm uppercase tracking-tight block">Google OAuth Gate</span>
-                                <span className="text-[10px] font-bold text-gray-400">Authentication protocol bypass toggle</span>
+                                <span className="text-[10px] font-bold text-zinc-500">Authentication protocol bypass toggle</span>
                               </div>
                               <input type="checkbox" checked={integrations.google_oauth_enabled} onChange={(e) => setIntegrations({ ...integrations, google_oauth_enabled: e.target.checked })} className="hidden" />
                               <div className={`w-12 h-7 shrink-0 rounded-full transition-all flex items-center p-1 cursor-pointer ${integrations.google_oauth_enabled ? 'bg-emerald-500' : 'bg-gray-100 dark:bg-white/5'}`}>
@@ -238,11 +238,11 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                            </label>
 
                            <div className="space-y-2 opacity-40">
-                             <label className="text-[10px] font-black uppercase text-gray-400 flex justify-between">
+                             <label className="text-[10px] font-black uppercase text-zinc-500 flex justify-between">
                                <span>Google Client Identity</span>
                                <span className="text-emerald-500">Secure Vault Encrypted</span>
                              </label>
-                             <div className="h-14 rounded-2xl bg-gray-50 dark:bg-white/5 flex items-center px-5 font-mono text-xs select-none">
+                             <div className="h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 flex items-center px-5 font-mono text-xs select-none">
                                ******************************************.apps.googleusercontent.com
                              </div>
                            </div>
@@ -253,7 +253,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
             </div>
           </div>
 
-          <div className="p-4 bg-gray-50 dark:bg-white/5 flex justify-end items-center gap-4 mt-auto border-t border-indigo-50 dark:border-white/5">
+          <div className="p-4 bg-zinc-50 dark:bg-white/5 flex justify-end items-center gap-4 mt-auto border-t border-indigo-50 dark:border-white/5">
              {isPending && (
                 <div className="flex items-center gap-2">
                    <div className="w-4 h-4 rounded-full border-2 border-indigo-50 border-t-[#5c4ae4] animate-spin" />
@@ -265,7 +265,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                disabled={isPending}
                className="h-14 px-12 bg-[#5c4ae4] shadow-2xl shadow-indigo-500/30"
              >
-                <Save className="w-5 h-5 mr-3" /> Deploy Config
+                <Save className="w-5 h-5 mr-3" strokeWidth={1.25} /> Deploy Config
              </PresenceButton>
           </div>
         </PresenceCard>

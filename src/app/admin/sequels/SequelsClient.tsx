@@ -85,15 +85,15 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
     <div className="flex flex-col gap-4">
       
       {/* ── Filter Bar ── */}
-      <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-4">
+      <PresenceCard className="bg-zinc-50 dark:bg-white/5 border-none p-4">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400" />
+            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400" strokeWidth={1.25} />
             <input 
                placeholder="Search registry..." 
                value={searchQuery}
                onChange={(e) => setSearchQuery(e.target.value)}
-               className="w-full h-14 pl-12 pr-4 rounded-2xl bg-white dark:bg-[#1b1929] border-none shadow-sm focus:ring-2 focus:ring-indigo-500/20 font-bold text-sm"
+               className="w-full h-14 pl-12 pr-4 rounded-2xl bg-white dark:bg-zinc-950 border-none shadow-sm focus:ring-2 focus:ring-indigo-500/20 font-bold text-sm"
             />
           </div>
           <PresenceButton onClick={openCreate} className="h-14 px-8 bg-[#5c4ae4] font-black tracking-widest text-[10px] uppercase shadow-xl shadow-indigo-500/20">
@@ -106,13 +106,13 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
       {filteredSequels.length === 0 ? (
         <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
           <Layers className="w-16 h-16 mb-5 text-indigo-100" />
-          <p className="font-black text-xl text-gray-400 uppercase tracking-widest">No Sequences</p>
+          <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">No Sequences</p>
         </PresenceCard>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredSequels.map(s => (
              <PresenceCard key={s.id} noPadding className="group overflow-hidden">
-                <div className="h-40 bg-gray-50 dark:bg-white/5 relative flex items-center justify-center overflow-hidden">
+                <div className="h-40 bg-zinc-50 dark:bg-white/5 relative flex items-center justify-center overflow-hidden">
                    {s.banner_image ? (
                      <img src={s.banner_image} alt={s.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                    ) : (
@@ -128,20 +128,20 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
                 </div>
 
                 <div className="p-4">
-                   <h3 className="text-lg font-black text-[#1b1929] dark:text-white mb-2 truncate">{s.title}</h3>
-                   <p className="text-xs font-medium text-gray-400 line-clamp-2 h-10 leading-relaxed italic">
+                   <h3 className="text-lg font-black text-zinc-900 dark:text-zinc-50 mb-2 truncate">{s.title}</h3>
+                   <p className="text-xs font-medium text-zinc-500 line-clamp-2 h-10 leading-relaxed italic">
                       {s.description || 'No description provided.'}
                    </p>
                    
                    <div className="flex items-center gap-3 mt-6 pt-6 border-t border-indigo-50 dark:border-white/5">
                      <Link href={`/admin/sequels/${s.id}/edit`} className="flex-1 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-[#5c4ae4] hover:bg-[#5c4ae4] hover:text-white transition-all font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
-                        <Box className="w-4 h-4" /> {s.article_count} Units
+                        <Box className="w-4 h-4" strokeWidth={1.25} /> {s.article_count} Units
                      </Link>
-                     <button className="w-12 h-12 rounded-xl bg-white dark:bg-[#1b1929] text-gray-400 hover:text-[#5c4ae4] shadow-sm flex items-center justify-center" onClick={() => openEdit(s)}>
-                        <Pen className="w-5 h-5" />
+                     <button className="w-12 h-12 rounded-xl bg-white dark:bg-zinc-950 text-zinc-500 hover:text-[#5c4ae4] shadow-sm flex items-center justify-center" onClick={() => openEdit(s)}>
+                        <Pen className="w-5 h-5" strokeWidth={1.25} />
                      </button>
                      <button className="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm flex items-center justify-center" onClick={() => handleDelete(s.id, s.title)}>
-                        <Trash2 className="w-5 h-5" />
+                        <Trash2 className="w-5 h-5" strokeWidth={1.25} />
                      </button>
                    </div>
                 </div>
@@ -156,11 +156,11 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
            <div className="w-full max-w-lg bg-white dark:bg-[#181623] rounded-[2.5rem] shadow-2xl animate-in zoom-in-95 duration-300">
               <div className="p-4 border-b border-indigo-50 dark:border-white/5 flex items-center justify-between">
                  <div>
-                    <h2 className="text-2xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight">{editingId ? 'Modify Sequence' : 'Create Node'}</h2>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Registry Entry System</p>
+                    <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">{editingId ? 'Modify Sequence' : 'Create Node'}</h2>
+                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">Registry Entry System</p>
                  </div>
-                 <button className="w-10 h-10 rounded-full bg-gray-50 dark:bg-white/5 text-gray-400 flex items-center justify-center" onClick={() => setShowModal(false)}>
-                    <X className="w-5 h-5" />
+                 <button className="w-10 h-10 rounded-full bg-zinc-50 dark:bg-white/5 text-zinc-500 flex items-center justify-center" onClick={() => setShowModal(false)}>
+                    <X className="w-5 h-5" strokeWidth={1.25} />
                  </button>
               </div>
               
@@ -171,7 +171,7 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
                      value={title} 
                      onChange={e => setTitle(e.target.value)} 
                      placeholder="e.g. Volume I: The Genesis" 
-                     className="w-full h-12 px-5 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-sm font-bold shadow-inner" 
+                     className="w-full h-12 px-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-sm font-bold shadow-inner" 
                    />
                  </div>
                  <div className="space-y-2">
@@ -179,7 +179,7 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
                    <textarea 
                      value={description} onChange={e => setDescription(e.target.value)} 
                      placeholder="Collection summary..." 
-                     className="w-full p-5 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-sm font-bold shadow-inner placeholder-gray-300 resize-none h-24"
+                     className="w-full p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-sm font-bold shadow-inner placeholder-gray-300 resize-none h-24"
                    />
                  </div>
                  <div className="space-y-2">
@@ -188,7 +188,7 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
                      value={bannerUrl} 
                      onChange={e => setBannerUrl(e.target.value)} 
                      placeholder="https://..." 
-                     className="w-full h-12 px-5 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-sm font-bold shadow-inner" 
+                     className="w-full h-12 px-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-sm font-bold shadow-inner" 
                    />
                  </div>
                  

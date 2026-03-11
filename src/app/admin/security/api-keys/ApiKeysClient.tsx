@@ -44,7 +44,7 @@ export default function ApiKeysClient({ keys }: { keys: { id: string; name: stri
         <Card className="rounded-[1.5rem] border border-amber-500/20 bg-amber-500/5 mt-4">
           <CardContent className="p-5">
              <div className="flex items-center gap-3 mb-2 text-amber-500">
-                <KeyRound className="w-5 h-5" />
+                <KeyRound className="w-5 h-5" strokeWidth={1.25} />
                 <h3 className="font-bold tracking-tight">Save this secure key somewhere safe</h3>
              </div>
              <p className="text-xs text-[var(--color-muted)] mb-4 leading-relaxed">
@@ -53,7 +53,7 @@ export default function ApiKeysClient({ keys }: { keys: { id: string; name: stri
              <div className="flex bg-black/50 border border-white/10 rounded-xl overflow-hidden p-1 gap-2 items-center pl-3">
                 <code className="text-emerald-400 flex-1 font-mono text-xs select-all">{createdKey}</code>
                 <Button size="sm" variant="secondary" onClick={copyToClipboard} className="h-8">
-                   <Copy className="w-3.5 h-3.5 mr-1" />
+                   <Copy className="w-3.5 h-3.5 mr-1" strokeWidth={1.25} />
                    Copy
                 </Button>
              </div>
@@ -72,7 +72,7 @@ export default function ApiKeysClient({ keys }: { keys: { id: string; name: stri
               <Input id="name" name="name" placeholder="e.g. Vercel CMS Extractor Plugin" required className="bg-black/20" />
             </div>
             <Button type="submit" variant="primary" className="text-black bg-white hover:bg-gray-200">
-               <Plus className="w-4 h-4 mr-2" />
+               <Plus className="w-4 h-4 mr-2" strokeWidth={1.25} />
                Generate Key
             </Button>
           </form>
@@ -94,7 +94,7 @@ export default function ApiKeysClient({ keys }: { keys: { id: string; name: stri
                 <div key={k.id} className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-                      <KeyRound className="w-4 h-4 text-indigo-400" />
+                      <KeyRound className="w-4 h-4 text-indigo-400" strokeWidth={1.25} />
                     </div>
                     <div>
                       <h4 className="font-bold text-sm">{k.name}</h4>
@@ -112,7 +112,7 @@ export default function ApiKeysClient({ keys }: { keys: { id: string; name: stri
                     <form action={revokeApiKeyAction}>
                       <input type="hidden" name="id" value={k.id} />
                       <Button type="submit" variant="outline" size="sm" className="text-rose-500 border-rose-500/20 hover:bg-rose-500/10 hover:text-rose-500">
-                        <Trash2 className="w-3.5 h-3.5 mr-1" />
+                        <Trash2 className="w-3.5 h-3.5 mr-1" strokeWidth={1.25} />
                         Revoke Token
                       </Button>
                     </form>

@@ -74,8 +74,8 @@ export default async function FridayMessagesPage() {
         {!messages || messages.length === 0 ? (
           <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
             <Calendar className="w-16 h-16 mb-5 text-indigo-100" />
-            <p className="font-black text-xl text-gray-400 uppercase tracking-widest">Temporal Void</p>
-            <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mt-2">No Friday communications detected</p>
+            <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">Temporal Void</p>
+            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mt-2">No Friday communications detected</p>
           </PresenceCard>
         ) : (
           <div className="space-y-4">
@@ -83,16 +83,16 @@ export default async function FridayMessagesPage() {
                <PresenceCard key={msg.id} noPadding className="group">
                  <div className="p-6 flex flex-col md:flex-row items-center justify-between gap-6">
                    <div className="flex items-center gap-5 min-w-0 flex-1">
-                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform ${msg.is_published ? 'bg-emerald-50 text-emerald-500' : 'bg-gray-50 dark:bg-white/5 text-gray-400'}`}>
-                         <Sparkles className="w-7 h-7" />
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform ${msg.is_published ? 'bg-emerald-50 text-emerald-500' : 'bg-zinc-50 dark:bg-white/5 text-zinc-500'}`}>
+                         <Sparkles className="w-7 h-7" strokeWidth={1.25} />
                       </div>
                       <div className="min-w-0">
-                         <h2 className="text-xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight truncate hover:text-[#5c4ae4] transition-colors">{msg.title || 'Untitled Message'}</h2>
+                         <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight truncate hover:text-[#5c4ae4] transition-colors">{msg.title || 'Untitled Message'}</h2>
                          <div className="flex items-center gap-2 mt-1">
                             <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${
                               msg.is_published 
                                 ? 'bg-emerald-50 text-emerald-500 border-emerald-100' 
-                                : 'bg-gray-50 text-gray-300 border-indigo-50'
+                                : 'bg-gray-50 text-zinc-400 border-indigo-50'
                             }`}>
                               {msg.is_published ? 'Active Relay' : 'Cold Storage'}
                             </span>
@@ -112,8 +112,8 @@ export default async function FridayMessagesPage() {
                           </button>
                         </form>
                       )}
-                      <button disabled className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-white/5 text-gray-300 flex items-center justify-center cursor-not-allowed">
-                         <Settings className="w-6 h-6" />
+                      <button disabled className="w-12 h-12 rounded-xl bg-zinc-50 dark:bg-white/5 text-zinc-400 flex items-center justify-center cursor-not-allowed">
+                         <Settings className="w-6 h-6" strokeWidth={1.25} />
                       </button>
                    </div>
                  </div>

@@ -159,11 +159,11 @@ export default async function EditArticlePage({
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
            <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4]">
-                 <PenTool className="w-6 h-6" />
+                 <PenTool className="w-6 h-6" strokeWidth={1.25} />
               </div>
               <div>
-                 <h2 className="text-xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight">Edit Narrative</h2>
-                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Registry-ID: {id.slice(0, 8)}</p>
+                 <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Edit Narrative</h2>
+                 <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">Registry-ID: {id.slice(0, 8)}</p>
               </div>
            </div>
 
@@ -180,7 +180,7 @@ export default async function EditArticlePage({
               {['admin', 'super_admin'].includes(role) && article.status !== 'published' && (
                 <form action={publishNowAction}>
                   <button type="submit" className="h-10 px-6 bg-emerald-500 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-xl shadow-xl shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
-                     <Send className="w-4 h-4" /> Publish Now
+                     <Send className="w-4 h-4" strokeWidth={1.25} /> Publish Now
                   </button>
                 </form>
               )}
@@ -195,12 +195,12 @@ export default async function EditArticlePage({
                 article.is_featured ? 'border-[#5c4ae4] bg-indigo-50/50' : 'border-indigo-50 bg-gray-50'
               }`}>
                 <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${article.is_featured ? 'bg-[#5c4ae4] text-white shadow-lg shadow-indigo-500/50' : 'bg-white text-gray-300 shadow-sm'}`}>
-                    <Star className="w-6 h-6" fill={article.is_featured ? "currentColor" : "none"} />
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${article.is_featured ? 'bg-[#5c4ae4] text-white shadow-lg shadow-indigo-500/50' : 'bg-white text-zinc-400 shadow-sm'}`}>
+                    <Star className="w-6 h-6" strokeWidth={1.25} fill={article.is_featured ? "currentColor" : "none"} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-[#1b1929] dark:text-white uppercase tracking-tight">Highlight Priority</h3>
-                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">Prime Visibility Allocation</p>
+                    <h3 className="text-sm font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Highlight Priority</h3>
+                    <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mt-1">Prime Visibility Allocation</p>
                   </div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -213,7 +213,7 @@ export default async function EditArticlePage({
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                <div className="space-y-4">
                  <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Visual Identifier (Cover)</label>
-                 <div className="bg-gray-50 dark:bg-[#1b1929] rounded-[2rem] p-4 shadow-inner border-none">
+                 <div className="bg-zinc-50 dark:bg-zinc-950 rounded-[2rem] p-4 shadow-inner border-none">
                     <CoverImageUpload currentImageUrl={article.cover_image} />
                  </div>
                </div>
@@ -221,18 +221,18 @@ export default async function EditArticlePage({
                <div className="space-y-10">
                   <div className="space-y-3">
                     <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Narrative Headline</label>
-                    <input name="title" required defaultValue={article.title} placeholder="The Core Statement..." className="w-full h-16 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-md font-bold shadow-inner" />
+                    <input name="title" required defaultValue={article.title} placeholder="The Core Statement..." className="w-full h-16 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-md font-bold shadow-inner" />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">
                       <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Network Slug</label>
-                      <input name="slug" required defaultValue={article.slug} className="w-full h-14 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none font-mono text-xs font-bold shadow-inner text-indigo-400" />
+                      <input name="slug" required defaultValue={article.slug} className="w-full h-14 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none font-mono text-xs font-bold shadow-inner text-indigo-400" />
                     </div>
                     
                     <div className="space-y-3">
                       <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Protocol Status</label>
-                      <select name="status" defaultValue={article.status} className="w-full h-14 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-xs font-black uppercase tracking-widest shadow-inner accent-[#5c4ae4]">
+                      <select name="status" defaultValue={article.status} className="w-full h-14 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-xs font-black uppercase tracking-widest shadow-inner accent-[#5c4ae4]">
                         {role === 'editor' ? (
                           <>
                             <option value="draft">Cold Draft</option>
@@ -254,7 +254,7 @@ export default async function EditArticlePage({
 
             <div className="space-y-3">
               <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Network Category</label>
-              <select name="category_id" defaultValue={article.category_id ?? ''} className="w-full h-16 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-xs font-black uppercase tracking-widest shadow-inner">
+              <select name="category_id" defaultValue={article.category_id ?? ''} className="w-full h-16 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-xs font-black uppercase tracking-widest shadow-inner">
                 <option value="">Detached Segment</option>
                 {categories?.map((cat) => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
@@ -264,20 +264,20 @@ export default async function EditArticlePage({
 
             <div className="space-y-3">
               <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Manifest Overview (Excerpt)</label>
-              <textarea name="excerpt" rows={3} defaultValue={article.excerpt ?? ''} placeholder="Condensed narrative summary..." className="w-full p-6 rounded-[2rem] bg-gray-50 dark:bg-[#1b1929] border-none text-md font-bold shadow-inner resize-none leading-relaxed" />
+              <textarea name="excerpt" rows={3} defaultValue={article.excerpt ?? ''} placeholder="Condensed narrative summary..." className="w-full p-6 rounded-[2rem] bg-zinc-50 dark:bg-zinc-950 border-none text-md font-bold shadow-inner resize-none leading-relaxed" />
             </div>
 
             <div className="space-y-4">
               <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4] flex items-center gap-3">
-                 <Sparkles className="w-4 h-4" /> Core Content Stream
+                 <Sparkles className="w-4 h-4" strokeWidth={1.25} /> Core Content Stream
               </label>
-              <div className="min-h-[600px] rounded-[2rem] overflow-hidden border-none shadow-2xl bg-white dark:bg-[#1b1929]">
+              <div className="min-h-[600px] rounded-[2rem] overflow-hidden border-none shadow-2xl bg-white dark:bg-zinc-950">
                  <RichTextEditor name="content" defaultValue={article.content ?? ''} />
               </div>
             </div>
 
             <div className="pt-10 border-t border-indigo-50 dark:border-white/5 flex flex-col sm:flex-row justify-end gap-4">
-              <Link href="/admin/articles" className="h-16 px-10 rounded-2xl bg-gray-50 dark:bg-white/5 border-none font-black text-[11px] uppercase tracking-widest text-gray-400 flex items-center justify-center hover:bg-gray-100 transition-all">Discard Mutation</Link>
+              <Link href="/admin/articles" className="h-16 px-10 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-black text-[11px] uppercase tracking-widest text-zinc-500 flex items-center justify-center hover:bg-gray-100 transition-all">Discard Mutation</Link>
               <button type="submit" className="h-16 px-12 bg-[#5c4ae4] text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all">
                 Synchronize Article
               </button>

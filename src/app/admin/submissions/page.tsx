@@ -107,8 +107,8 @@ export default async function AdminSubmissionsPage() {
         {!submissions || submissions.length === 0 ? (
           <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
             <Inbox className="w-16 h-16 mb-5 text-indigo-100" />
-            <p className="font-black text-xl text-gray-400 uppercase tracking-widest">Inbox Void</p>
-            <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mt-2">No guest communications intercepted</p>
+            <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">Inbox Void</p>
+            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mt-2">No guest communications intercepted</p>
           </PresenceCard>
         ) : (
           <div className="space-y-4">
@@ -122,7 +122,7 @@ export default async function AdminSubmissionsPage() {
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-4">
-                      <h2 className="text-xl font-black text-[#1b1929] dark:text-white tracking-tight truncate flex-1">{sub.title}</h2>
+                      <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50 tracking-tight truncate flex-1">{sub.title}</h2>
                       <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${
                         sub.status === 'converted' ? 'bg-emerald-50 text-emerald-500 border-emerald-100' :
                         sub.status === 'rejected' ? 'bg-rose-50 text-rose-500 border-rose-100' :
@@ -134,23 +134,23 @@ export default async function AdminSubmissionsPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
                        <div className="flex items-center gap-2">
-                          <User className="w-4 h-4 text-indigo-300" />
-                          <span className="text-xs font-black text-gray-400 uppercase truncate">{sub.name}</span>
+                          <User className="w-4 h-4 text-indigo-300" strokeWidth={1.25} />
+                          <span className="text-xs font-black text-zinc-500 uppercase truncate">{sub.name}</span>
                        </div>
                        <div className="flex items-center gap-2">
-                          <Mail className="w-4 h-4 text-indigo-300" />
+                          <Mail className="w-4 h-4 text-indigo-300" strokeWidth={1.25} />
                           <a href={`mailto:${sub.email}`} className="text-xs font-black text-[#5c4ae4] uppercase truncate hover:underline">{sub.email}</a>
                        </div>
                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-indigo-300" />
-                          <span className="text-[10px] font-black text-gray-300 uppercase">
+                          <Calendar className="w-4 h-4 text-indigo-300" strokeWidth={1.25} />
+                          <span className="text-[10px] font-black text-zinc-400 uppercase">
                              Received · {new Date(sub.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                           </span>
                        </div>
                     </div>
 
                     {sub.content && (
-                      <div className="bg-gray-50 dark:bg-white/5 rounded-2xl p-5 border-l-4 border-indigo-100 dark:border-indigo-500/20 mb-2">
+                      <div className="bg-zinc-50 dark:bg-white/5 rounded-2xl p-5 border-l-4 border-indigo-100 dark:border-indigo-500/20 mb-2">
                         <p className="text-sm font-medium leading-relaxed italic text-[#1b1929]/80 dark:text-white/80 line-clamp-4">
                           "{sub.content}"
                         </p>
@@ -169,7 +169,7 @@ export default async function AdminSubmissionsPage() {
                           className="w-12 h-12 rounded-xl bg-emerald-500 text-white flex items-center justify-center hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/20 transition-all"
                           title="Convert to Draft"
                         >
-                          <CheckCircle2 className="w-6 h-6" />
+                          <CheckCircle2 className="w-6 h-6" strokeWidth={1.25} />
                         </button>
                       </form>
                       <form action={rejectAction}>
@@ -179,7 +179,7 @@ export default async function AdminSubmissionsPage() {
                           className="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-lg shadow-rose-500/5"
                           title="Reject"
                         >
-                          <X className="w-6 h-6" />
+                          <X className="w-6 h-6" strokeWidth={1.25} />
                         </button>
                       </form>
                     </div>

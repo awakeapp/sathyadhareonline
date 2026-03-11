@@ -63,19 +63,19 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
   return (
     <div className="flex flex-col gap-4">
 
-      <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-5">
+      <PresenceCard className="bg-zinc-50 dark:bg-white/5 border-none p-5">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4]">
-                <ShieldCheck className="w-6 h-6" />
+                <ShieldCheck className="w-6 h-6" strokeWidth={1.25} />
              </div>
              <div>
-                <h2 className="text-xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight">Financial Registry</h2>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-0.5">Super Admin Ledger Control</p>
+                <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Financial Registry</h2>
+                <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-0.5">Super Admin Ledger Control</p>
              </div>
           </div>
-          <PresenceButton onClick={handleExport} disabled={isExporting} className="bg-white dark:bg-[#1b1929] !text-gray-400 hover:!text-[#5c4ae4] shadow-sm">
-             <Download className="w-5 h-5 mr-3" /> Export Transaction Log
+          <PresenceButton onClick={handleExport} disabled={isExporting} className="bg-white dark:bg-zinc-950 !text-zinc-500 hover:!text-[#5c4ae4] shadow-sm">
+             <Download className="w-5 h-5 mr-3" strokeWidth={1.25} /> Export Transaction Log
           </PresenceButton>
         </div>
       </PresenceCard>
@@ -84,14 +84,14 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <PresenceCard className="relative overflow-hidden group">
            <div className="absolute right-0 top-0 p-8 opacity-5">
-              <TrendingUp className="w-32 h-32 text-indigo-500" />
+              <TrendingUp className="w-32 h-32 text-indigo-500" strokeWidth={1.25} />
            </div>
            <div className="relative z-10">
               <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] mb-8 shadow-inner shadow-indigo-500/5">
-                 <DollarSign className="w-6 h-6" />
+                 <DollarSign className="w-6 h-6" strokeWidth={1.25} />
               </div>
               <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#5c4ae4] mb-3">Lifetime Asset Mass</p>
-              <h3 className="text-5xl font-black text-[#1b1929] dark:text-white tabular-nums tracking-tighter">
+              <h3 className="text-5xl font-black text-zinc-900 dark:text-zinc-50 tabular-nums tracking-tighter">
                 ₹{totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 0 })}
               </h3>
            </div>
@@ -99,14 +99,14 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
 
         <PresenceCard className="relative overflow-hidden group">
            <div className="absolute right-0 top-0 p-8 opacity-5">
-              <Activity className="w-32 h-32 text-emerald-500" />
+              <Activity className="w-32 h-32 text-emerald-500" strokeWidth={1.25} />
            </div>
            <div className="relative z-10">
               <div className="w-12 h-12 rounded-2xl bg-emerald-50/50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-500 mb-8 shadow-inner shadow-emerald-500/5">
-                 <RefreshCcw className="w-6 h-6" />
+                 <RefreshCcw className="w-6 h-6" strokeWidth={1.25} />
               </div>
               <p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-500 mb-3">Monthly Recurring Velocity</p>
-              <h3 className="text-5xl font-black text-[#1b1929] dark:text-white tabular-nums tracking-tighter">
+              <h3 className="text-5xl font-black text-zinc-900 dark:text-zinc-50 tabular-nums tracking-tighter">
                 ₹{mrr.toLocaleString(undefined, { minimumFractionDigits: 0 })}
               </h3>
            </div>
@@ -117,16 +117,16 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
       <PresenceCard noPadding>
         <div className="p-4 border-b border-indigo-50 dark:border-white/5 flex items-center justify-between">
            <div>
-              <h3 className="text-sm font-black text-[#1b1929] dark:text-white uppercase tracking-widest">Global Cache</h3>
-              <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest mt-1">Natively intercepted payment vectors</p>
+              <h3 className="text-sm font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-widest">Global Cache</h3>
+              <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mt-1">Natively intercepted payment vectors</p>
            </div>
-           <Activity className="w-6 h-6 text-indigo-100" />
+           <Activity className="w-6 h-6 text-indigo-100" strokeWidth={1.25} />
         </div>
         
         {transactions.length === 0 ? (
           <div className="py-24 text-center flex flex-col items-center">
              <AlertCircle className="w-16 h-16 mb-5 text-indigo-100" />
-             <p className="font-black text-xl text-gray-400 uppercase tracking-widest">Registry Null</p>
+             <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">Registry Null</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -144,12 +144,12 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
               <tbody className="divide-y divide-indigo-50 dark:divide-white/5">
                 {transactions.map(t => (
                   <tr key={t.id} className={`group transition-all hover:bg-gray-50/30 dark:hover:bg-white/5 ${t.type === 'refund' ? 'opacity-40 grayscale' : ''}`}>
-                    <td className="px-8 py-6 font-black tabular-nums text-gray-400">
+                    <td className="px-8 py-6 font-black tabular-nums text-zinc-500">
                       {new Date(t.created_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                     </td>
                     <td className="px-8 py-6">
                        <div>
-                          <p className="font-black text-[#1b1929] dark:text-white">{t.userEmail}</p>
+                          <p className="font-black text-zinc-900 dark:text-zinc-50">{t.userEmail}</p>
                           <p className="text-[9px] font-black text-indigo-300 uppercase mt-0.5">Citizen-ID: {t.id.slice(0, 8)}</p>
                        </div>
                     </td>
@@ -158,7 +158,7 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
                         {t.planName}
                       </span>
                     </td>
-                    <td className={`px-8 py-6 font-black tabular-nums text-sm text-right ${t.type === 'refund' ? 'text-rose-500 font-bold' : 'text-[#1b1929] dark:text-white'}`}>
+                    <td className={`px-8 py-6 font-black tabular-nums text-sm text-right ${t.type === 'refund' ? 'text-rose-500 font-bold' : 'text-zinc-900 dark:text-zinc-50'}`}>
                       {t.type === 'refund' ? '−' : '+'}₹{(t.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </td>
                     <td className="px-8 py-6 text-center">
@@ -177,7 +177,7 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
                          </button>
                       )}
                       {t.status === 'refunded' && (
-                         <ArrowDownCircle className="w-5 h-5 text-rose-300 inline" />
+                         <ArrowDownCircle className="w-5 h-5 text-rose-300 inline" strokeWidth={1.25} />
                       )}
                     </td>
                   </tr>

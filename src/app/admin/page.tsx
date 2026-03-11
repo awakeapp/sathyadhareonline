@@ -131,10 +131,10 @@ export default async function AdminPage() {
         {/* ── Attendance/Quick Info Card ── */}
         <PresenceCard className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400">
-              <Plus className="w-6 h-6" />
+            <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-zinc-500">
+              <Plus className="w-6 h-6" strokeWidth={1.25} />
             </div>
-            <p className="font-bold text-gray-600 dark:text-gray-300">Quick Create Article</p>
+            <p className="font-bold text-zinc-600 dark:text-zinc-400">Quick Create Article</p>
           </div>
           <Link href="/admin/articles/new">
             <PresenceButton>Submit</PresenceButton>
@@ -147,22 +147,22 @@ export default async function AdminPage() {
             <div className="flex items-center gap-4">
               <span className="text-4xl sm:text-5xl font-black text-[#5c4ae4]">
                 {new Date().getDate()}
-                <Library className="inline-block w-4 h-4 ml-1 mb-6 text-indigo-300" />
+                <Library className="inline-block w-4 h-4 ml-1 mb-6 text-indigo-300" strokeWidth={1.25} />
               </span>
               <div>
                 <p className="text-lg font-black leading-none">{new Date().toLocaleDateString('en-US', { weekday: 'long' })}</p>
-                <p className="text-xs font-bold text-gray-400 mt-1 uppercase tracking-wider">
+                <p className="text-xs font-bold text-zinc-500 mt-1 uppercase tracking-wider">
                   {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                 </p>
               </div>
             </div>
-            <Link href="/admin/articles" className="w-10 h-10 rounded-full border border-gray-100 dark:border-white/10 flex items-center justify-center text-indigo-400 hover:bg-indigo-50 transition-colors">
-              <ChevronRight className="w-5 h-5" />
+            <Link href="/admin/articles" className="w-10 h-10 rounded-full border border-zinc-100 dark:border-white/10 flex items-center justify-center text-indigo-400 hover:bg-indigo-50 transition-colors">
+              <ChevronRight className="w-5 h-5" strokeWidth={1.25} />
             </Link>
           </div>
 
           <div className="space-y-4">
-            <p className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Platform Overview</p>
+            <p className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em]">Platform Overview</p>
             <div className="flex items-center gap-5">
               {[
                 { day: 'M', active: metrics.publishedToday > 0 },
@@ -172,9 +172,9 @@ export default async function AdminPage() {
                 { day: 'F', active: false },
               ].map((d, i) => (
                 <div key={i} className="flex flex-col items-center gap-2">
-                  <span className="text-[10px] font-black text-gray-400">{d.day}</span>
-                  <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${d.active ? 'bg-[#5c4ae4] border-[#5c4ae4] text-white' : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'}`}>
-                    {d.active && <CheckCircle className="w-4 h-4" />}
+                  <span className="text-[10px] font-black text-zinc-500">{d.day}</span>
+                  <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${d.active ? 'bg-[#5c4ae4] border-[#5c4ae4] text-white' : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-gray-700'}`}>
+                    {d.active && <CheckCircle className="w-4 h-4" strokeWidth={1.25} />}
                   </div>
                 </div>
               ))}
@@ -236,14 +236,14 @@ export default async function AdminPage() {
                 <PresenceCard className="flex items-center justify-between py-3 px-4 active:scale-[0.98] transition-transform">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] shrink-0">
-                      <FileText className="w-5 h-5" />
+                      <FileText className="w-5 h-5" strokeWidth={1.25} />
                     </div>
                     <div className="min-w-0">
                       <p className="font-bold text-sm truncate">{a.title}</p>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">{(a.status || 'draft').replace('_', ' ')} · {new Date(a.created_at).toLocaleDateString()}</p>
+                      <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">{(a.status || 'draft').replace('_', ' ')} · {new Date(a.created_at).toLocaleDateString()}</p>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-gray-300" />
+                  <ChevronRight className="w-4 h-4 text-zinc-400" strokeWidth={1.25} />
                 </PresenceCard>
               </Link>
             ))}

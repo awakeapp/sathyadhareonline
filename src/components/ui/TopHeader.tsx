@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
@@ -23,10 +23,9 @@ interface TopHeaderProps {
 
 export default function TopHeader({ user, role, profile }: TopHeaderProps) {
   const pathname = usePathname();
-  const router   = useRouter();
 
   // ── Reader‑mode context ──────────────────────────────────────────────────
-  const { readerMode, enableReaderMode, disableReaderMode } = useReaderMode();
+  const { readerMode, disableReaderMode } = useReaderMode();
 
   const isAuthPage       = pathname === '/login' || pathname === '/signup';
   const isAdminRoute     = pathname.startsWith('/admin') || pathname.startsWith('/editor');
@@ -157,12 +156,11 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
         </div>
       )}
 
-      {pathname === '/' && (
+      {!isAdminRoute && (
       <header
-        className="fixed left-0 right-0 z-50 w-full transition-colors duration-300"
+        className="fixed left-0 right-0 z-50 w-full transition-colors duration-300 backdrop-blur-2xl bg-white/80 dark:bg-[#181623]/80 border-b border-[var(--color-border)]"
         style={{
           top: (isPrivilegedRole && isOnReaderSide && safeReaderMode) ? 'calc(32px + env(safe-area-inset-top, 0px))' : '0px',
-          background: isAdminRoute ? 'var(--color-surface)' : 'var(--color-background)',
           paddingTop: (isPrivilegedRole && isOnReaderSide && safeReaderMode) ? '0px' : 'env(safe-area-inset-top, 0px)',
         }}
       >

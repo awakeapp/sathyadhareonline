@@ -77,7 +77,7 @@ export default function AuditLogFilters({ actions }: Props) {
           size="sm"
           className="px-4 h-10 rounded-xl"
         >
-          <Search className="w-4 h-4 mr-2" />
+          <Search className="w-4 h-4 mr-2" strokeWidth={1.25} />
           Filter
         </Button>
         <Button 
@@ -87,7 +87,7 @@ export default function AuditLogFilters({ actions }: Props) {
           size="sm"
           className="px-3 h-10 rounded-xl border-[var(--color-border)] text-[var(--color-muted)]"
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4" strokeWidth={1.25} />
         </Button>
       </div>
     </div>

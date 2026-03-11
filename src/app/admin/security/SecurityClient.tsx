@@ -113,7 +113,7 @@ export default function SecurityClient({
     <div className="flex flex-col gap-4">
 
       {/* ── Protocol Selectors ── */}
-      <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-2">
+      <PresenceCard className="bg-zinc-50 dark:bg-white/5 border-none p-2">
         <div className="flex gap-2 w-full overflow-x-auto hide-scrollbar">
           {[
             { id: 'keys', label: 'Cryptographic Vault', icon: Key },
@@ -126,7 +126,7 @@ export default function SecurityClient({
                 onClick={() => setActiveTab(t.id as 'keys' | 'logins')}
                 className={`flex items-center gap-3 px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex-1 justify-center ${activeTab === t.id ? 'bg-[#5c4ae4] text-white shadow-xl shadow-indigo-500/20' : 'text-indigo-400 hover:text-[#5c4ae4] hover:bg-white dark:hover:bg-white/5'}`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-4 h-4" strokeWidth={1.25} />
                 {t.label}
               </button>
             );
@@ -140,15 +140,15 @@ export default function SecurityClient({
            {isCreatingKey && (
              <PresenceCard className="bg-white dark:bg-[#181623] border-l-8 border-l-[#5c4ae4] p-8 flex flex-col gap-4 relative overflow-hidden">
                 <div className="absolute right-[-20px] top-[-20px] opacity-[0.03] rotate-12">
-                   <KeyRound className="w-48 h-48 text-[#5c4ae4]" />
+                   <KeyRound className="w-48 h-48 text-[#5c4ae4]" strokeWidth={1.25} />
                 </div>
                 <div className="flex items-center justify-between relative z-10">
                    <div>
-                      <h2 className="text-2xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight">Forge Access Token</h2>
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">High-Privilege Authorization Vector</p>
+                      <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Forge Access Token</h2>
+                      <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">High-Privilege Authorization Vector</p>
                    </div>
-                   <button onClick={() => setIsCreatingKey(false)} className="w-10 h-10 rounded-full bg-gray-50 dark:bg-white/5 text-gray-400 flex items-center justify-center">
-                      <X className="w-5 h-5" />
+                   <button onClick={() => setIsCreatingKey(false)} className="w-10 h-10 rounded-full bg-zinc-50 dark:bg-white/5 text-zinc-500 flex items-center justify-center">
+                      <X className="w-5 h-5" strokeWidth={1.25} />
                    </button>
                 </div>
                 
@@ -159,7 +159,7 @@ export default function SecurityClient({
                        value={newKeyName} 
                        onChange={e => setNewKeyName(e.target.value)} 
                        placeholder="e.g. CORE_SYSTEM_API" 
-                       className="w-full h-14 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-sm font-bold shadow-inner" 
+                       className="w-full h-14 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-sm font-bold shadow-inner" 
                      />
                    </div>
 
@@ -177,9 +177,9 @@ export default function SecurityClient({
                              <button
                                key={p.id}
                                onClick={() => togglePermission(p.id)}
-                               className={`flex items-center gap-3 p-4 rounded-2xl transition-all border-2 text-left ${active ? 'bg-indigo-50 border-[#5c4ae4] text-[#5c4ae4]' : 'bg-white dark:bg-[#1b1929] border-transparent text-gray-400'}`}
+                               className={`flex items-center gap-3 p-4 rounded-2xl transition-all border-2 text-left ${active ? 'bg-indigo-50 border-[#5c4ae4] text-[#5c4ae4]' : 'bg-white dark:bg-zinc-950 border-transparent text-zinc-500'}`}
                              >
-                                <div className={`w-3 h-3 rounded-full border-2 ${active ? 'bg-[#5c4ae4] border-[#5c4ae4] shadow-lg shadow-indigo-500/50' : 'border-gray-200'}`}></div>
+                                <div className={`w-3 h-3 rounded-full border-2 ${active ? 'bg-[#5c4ae4] border-[#5c4ae4] shadow-lg shadow-indigo-500/50' : 'border-zinc-200'}`}></div>
                                 <span className="text-[10px] font-black uppercase tracking-widest">{p.label}</span>
                              </button>
                            );
@@ -199,7 +199,7 @@ export default function SecurityClient({
                 <div className="absolute top-0 left-0 bottom-0 w-2 bg-rose-500"></div>
                 <div className="flex items-center gap-4">
                    <div className="w-14 h-14 rounded-2xl bg-rose-500 text-white flex items-center justify-center shadow-xl shadow-rose-500/20">
-                      <AlertTriangle className="w-8 h-8" />
+                      <AlertTriangle className="w-8 h-8" strokeWidth={1.25} />
                    </div>
                    <div>
                       <h3 className="text-2xl font-black text-rose-600 uppercase tracking-tighter">Raw Key Intercepted</h3>
@@ -223,14 +223,14 @@ export default function SecurityClient({
            )}
 
            {!isCreatingKey && !generatedKey && (
-             <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-6">
+             <PresenceCard className="bg-zinc-50 dark:bg-white/5 border-none p-6">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                   <div>
-                    <h2 className="text-sm font-black text-[#1b1929] dark:text-white uppercase tracking-[0.2em]">Active Cipher Nodes</h2>
-                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">Authorized system access points</p>
+                    <h2 className="text-sm font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-[0.2em]">Active Cipher Nodes</h2>
+                    <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mt-1">Authorized system access points</p>
                   </div>
                   <PresenceButton onClick={() => setIsCreatingKey(true)} className="bg-[#5c4ae4] shadow-xl shadow-indigo-500/20 px-8">
-                    <Plus className="w-5 h-5 mr-3" /> Forge New Node
+                    <Plus className="w-5 h-5 mr-3" strokeWidth={1.25} /> Forge New Node
                   </PresenceButton>
                 </div>
              </PresenceCard>
@@ -241,21 +241,21 @@ export default function SecurityClient({
                <PresenceCard key={k.id} noPadding className="group overflow-hidden">
                   <div className="p-4 flex flex-col md:flex-row gap-8 items-start md:items-center">
                      <div className="w-16 h-16 rounded-[1.5rem] bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] shrink-0 shadow-inner group-hover:scale-110 transition-transform">
-                        <Key className="w-8 h-8" />
+                        <Key className="w-8 h-8" strokeWidth={1.25} />
                      </div>
                      <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-4 mb-3">
-                           <h3 className="text-xl font-black text-[#1b1929] dark:text-white truncate uppercase tracking-tight">{k.name}</h3>
-                           <span className="px-3 py-1 rounded-lg bg-gray-50 dark:bg-white/5 text-[10px] font-black text-gray-300 uppercase tracking-widest border border-indigo-50">{k.prefix}••••</span>
+                           <h3 className="text-xl font-black text-zinc-900 dark:text-zinc-50 truncate uppercase tracking-tight">{k.name}</h3>
+                           <span className="px-3 py-1 rounded-lg bg-zinc-50 dark:bg-white/5 text-[10px] font-black text-zinc-400 uppercase tracking-widest border border-indigo-50">{k.prefix}••••</span>
                         </div>
                         <div className="flex flex-wrap items-center gap-4">
                            <div className="flex items-center gap-3">
-                              <Calendar className="w-4 h-4 text-indigo-300" />
-                              <span className="text-[10px] font-black text-gray-400 uppercase">Deployed · {new Date(k.created_at).toLocaleDateString()}</span>
+                              <Calendar className="w-4 h-4 text-indigo-300" strokeWidth={1.25} />
+                              <span className="text-[10px] font-black text-zinc-500 uppercase">Deployed · {new Date(k.created_at).toLocaleDateString()}</span>
                            </div>
                            <div className="flex items-center gap-3">
-                              <Clock className="w-4 h-4 text-indigo-300" />
-                              <span className="text-[10px] font-black text-gray-400 uppercase">Pulse · {k.last_used_at ? new Date(k.last_used_at).toLocaleDateString() : 'Zero Activity'}</span>
+                              <Clock className="w-4 h-4 text-indigo-300" strokeWidth={1.25} />
+                              <span className="text-[10px] font-black text-zinc-500 uppercase">Pulse · {k.last_used_at ? new Date(k.last_used_at).toLocaleDateString() : 'Zero Activity'}</span>
                            </div>
                         </div>
                      </div>
@@ -275,7 +275,7 @@ export default function SecurityClient({
              {keys.length === 0 && !isCreatingKey && (
                <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
                   <KeyRound className="w-16 h-16 mb-5 text-indigo-100" />
-                  <p className="font-black text-xl text-gray-400 uppercase tracking-widest">Vault Empty</p>
+                  <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">Vault Empty</p>
                </PresenceCard>
              )}
            </div>
@@ -289,12 +289,12 @@ export default function SecurityClient({
            <PresenceCard noPadding>
               <div className="p-4 border-b border-indigo-50 dark:border-white/5 flex flex-col md:flex-row items-center gap-4">
                  <div className="relative flex-1 w-full">
-                   <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-300" />
+                   <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-300" strokeWidth={1.25} />
                    <input 
                      placeholder="Filter target identity..." 
                      value={searchEmail}
                      onChange={e => { setSearchEmail(e.target.value); setLoginPage(1); }}
-                     className="w-full h-14 pl-12 pr-4 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-sm font-bold shadow-inner"
+                     className="w-full h-14 pl-12 pr-4 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-sm font-bold shadow-inner"
                    />
                  </div>
                  <div className="px-8 py-4 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-[10px] font-black text-[#5c4ae4] uppercase tracking-widest border border-indigo-100">
@@ -317,29 +317,29 @@ export default function SecurityClient({
                        <tr>
                          <td colSpan={4} className="py-24 text-center">
                            <div className="w-12 h-12 rounded-2xl border-4 border-indigo-100 border-t-[#5c4ae4] animate-spin mx-auto mb-4"></div>
-                           <p className="text-gray-300 font-black uppercase tracking-widest text-[10px]">Decoding Traces...</p>
+                           <p className="text-zinc-400 font-black uppercase tracking-widest text-[10px]">Decoding Traces...</p>
                          </td>
                        </tr>
                     ) : paginatedLogins.length === 0 ? (
                        <tr>
                          <td colSpan={4} className="py-24 text-center">
                            <Shield className="w-16 h-16 text-indigo-100 mx-auto mb-5" />
-                           <p className="font-black text-xl text-gray-400 uppercase tracking-widest">No Events Found</p>
+                           <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">No Events Found</p>
                          </td>
                        </tr>
                     ) : (
                        paginatedLogins.map(login => (
                          <tr key={login.log_id} className="group transition-all hover:bg-gray-50/30 dark:hover:bg-white/5">
-                            <td className="px-8 py-6 font-black tabular-nums text-gray-400">
+                            <td className="px-8 py-6 font-black tabular-nums text-zinc-500">
                               {new Date(login.created_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                             </td>
                             <td className="px-8 py-6">
                               <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-white/5 flex items-center justify-center text-indigo-400">
-                                   <User className="w-5 h-5" />
+                                <div className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-white/5 flex items-center justify-center text-indigo-400">
+                                   <User className="w-5 h-5" strokeWidth={1.25} />
                                 </div>
                                 <div>
-                                   <p className="font-black text-[#1b1929] dark:text-white uppercase tracking-tight">{login.email}</p>
+                                   <p className="font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">{login.email}</p>
                                    <span className="text-[9px] font-black text-indigo-300 uppercase mt-0.5 tracking-widest">{login.role || 'reader'}</span>
                                 </div>
                               </div>
@@ -347,7 +347,7 @@ export default function SecurityClient({
                             <td className="px-8 py-6 font-mono font-black text-indigo-400 text-[11px]">
                               {login.ip_address}
                             </td>
-                            <td className="px-8 py-6 text-[10px] font-bold text-gray-300 text-right max-w-[250px] truncate italic">
+                            <td className="px-8 py-6 text-[10px] font-bold text-zinc-400 text-right max-w-[250px] truncate italic">
                               {login.user_agent || 'Zero Signal Header'}
                             </td>
                          </tr>
@@ -359,12 +359,12 @@ export default function SecurityClient({
               
               {totalPages > 1 && (
                 <div className="p-4 bg-gray-50/30 dark:bg-white/5 border-t border-indigo-50 dark:border-white/5 flex items-center justify-between">
-                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                  <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
                     Cluster {loginPage} <span className="mx-2 text-indigo-100">|</span> Total {totalPages}
                   </span>
                   <div className="flex gap-3">
-                     <button disabled={loginPage === 1} onClick={() => setLoginPage(loginPage - 1)} className="w-12 h-12 rounded-xl bg-white dark:bg-[#1b1929] text-gray-300 hover:text-[#5c4ae4] disabled:opacity-20 shadow-sm flex items-center justify-center"><ChevronLeft className="w-6 h-6" /></button>
-                     <button disabled={loginPage >= totalPages} onClick={() => setLoginPage(loginPage + 1)} className="w-12 h-12 rounded-xl bg-white dark:bg-[#1b1929] text-gray-300 hover:text-[#5c4ae4] disabled:opacity-20 shadow-sm flex items-center justify-center"><ChevronRight className="w-6 h-6" /></button>
+                     <button disabled={loginPage === 1} onClick={() => setLoginPage(loginPage - 1)} className="w-12 h-12 rounded-xl bg-white dark:bg-zinc-950 text-zinc-400 hover:text-[#5c4ae4] disabled:opacity-20 shadow-sm flex items-center justify-center"><ChevronLeft className="w-6 h-6" strokeWidth={1.25} /></button>
+                     <button disabled={loginPage >= totalPages} onClick={() => setLoginPage(loginPage + 1)} className="w-12 h-12 rounded-xl bg-white dark:bg-zinc-950 text-zinc-400 hover:text-[#5c4ae4] disabled:opacity-20 shadow-sm flex items-center justify-center"><ChevronRight className="w-6 h-6" strokeWidth={1.25} /></button>
                   </div>
                 </div>
               )}

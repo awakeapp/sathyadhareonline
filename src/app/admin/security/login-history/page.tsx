@@ -57,7 +57,7 @@ export default async function LoginHistoryPage() {
                     <tr key={log.log_id} className="hover:bg-white/5 transition-colors group">
                       <td className="px-6 py-4 text-white/60 whitespace-nowrap font-mono text-[11px]">
                         <div className="flex items-center gap-2">
-                           <Activity className="w-3.5 h-3.5 text-rose-500 opacity-50 group-hover:opacity-100 transition-opacity" />
+                           <Activity className="w-3.5 h-3.5 text-rose-500 opacity-50 group-hover:opacity-100 transition-opacity" strokeWidth={1.25} />
                            {new Date(log.created_at).toLocaleString()}
                         </div>
                       </td>
@@ -75,13 +75,13 @@ export default async function LoginHistoryPage() {
                       </td>
                       <td className="px-6 py-4 text-[var(--color-muted)] whitespace-nowrap">
                         <div className="flex items-center gap-1.5 font-mono text-xs">
-                           <MapPin className="w-3 h-3 opacity-50" />
+                           <MapPin className="w-3 h-3 opacity-50" strokeWidth={1.25} />
                            {log.ip_address || '---.---.---.---'}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-[var(--color-muted)] max-w-xs truncate">
                         <div className="flex items-center gap-1.5" title={log.user_agent}>
-                           <MonitorSmartphone className="w-3.5 h-3.5 opacity-50 flex-shrink-0" />
+                           <MonitorSmartphone className="w-3.5 h-3.5 opacity-50 flex-shrink-0" strokeWidth={1.25} />
                            <span className="truncate">{log.user_agent || 'Unknown Client Engine'}</span>
                         </div>
                       </td>
