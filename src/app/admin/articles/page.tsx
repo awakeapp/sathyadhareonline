@@ -28,9 +28,13 @@ export default async function ArticlesPage() {
   // 2. Fetch Data
   
   // A. Articles
+  // Fetch all non-deleted articles. Super admins also see a separate "Trash"
+  // view via the statusFilter='deleted' option in the client.
+  // We do NOT filter by status here — the client handles that.
   const { data: articles, error } = await supabase
     .from('articles')
     .select('id, title, slug, status, is_deleted, is_featured, created_at, published_at, author_id, category_id, profiles(full_name), categories(name)')
+    .or('is_deleted.eq.false,is_deleted.is.null')
     .order('created_at', { ascending: false });
 
   if (error) console.error('Error fetching articles:', error);
@@ -48,6 +52,10 @@ export default async function ArticlesPage() {
 
   const mergedArticles = (articles || []).map(a => ({
     ...a,
+    // Normalise nulls that can come from direct DB inserts
+    is_deleted: a.is_deleted === true,
+    is_featured: a.is_featured === true,
+    status: a.status ?? 'draft',
     profiles: Array.isArray(a.profiles) ? a.profiles[0] : a.profiles,
     categories: Array.isArray(a.categories) ? a.categories[0] : a.categories,
     views: viewsMap.get(a.id) || 0

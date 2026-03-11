@@ -6,41 +6,41 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input, Select } from '@/components/ui/Input';
 import {
-  FileText, Sparkles, AlertCircle, Edit2, Share, Trash2,
-  RefreshCcw, Eye, Star, CheckSquare, Search, Filter, Hash, User, Calendar
+  FileText, Sparkles, Edit2, Share, Trash2,
+  RefreshCcw, Eye, Star, CheckSquare, Search, Hash, User, Calendar
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { 
-  bulkDeleteArticles, bulkUpdateStatus, setArticleStatusAction, 
-  restoreArticleAction, featureArticleAction, deleteArticleAction 
+import {
+  bulkDeleteArticles, bulkUpdateStatus,
+  restoreArticleAction, featureArticleAction, deleteArticleAction
 } from './actions';
 
 export type Article = {
   id: string;
   title: string;
   slug: string;
-  status: string;
-  is_deleted: boolean;
-  is_featured: boolean;
+  status: string | null;
+  is_deleted: boolean | null;
+  is_featured: boolean | null;
   created_at: string;
-  published_at?: string;
+  published_at?: string | null;
   author_id: string;
-  category_id?: string;
+  category_id?: string | null;
   profiles?: { full_name: string } | null;
   categories?: { name: string } | null;
   views?: number;
 };
 
-export default function ArticlesClient({ 
-  articles, 
-  users, 
-  categories, 
-  currentUserRole 
-}: { 
-  articles: Article[], 
+export default function ArticlesClient({
+  articles,
+  users,
+  categories,
+  currentUserRole
+}: {
+  articles: Article[],
   users: { id: string, name: string }[],
   categories: { id: string, name: string }[],
-  currentUserRole: string 
+  currentUserRole: string
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -56,16 +56,28 @@ export default function ArticlesClient({
   // Derived state
   const filteredArticles = useMemo(() => {
     return articles.filter(a => {
-      // 1. Search
-      if (searchQuery && !a.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-      
-      // 2. Status (treat 'deleted' internally as a meta-status for archived viewing)
+      // Normalise nullable DB values
+      const status    = a.status    ?? 'draft';
+      const isDeleted = a.is_deleted === true;
+
+      // 1. Search — Unicode/Kannada-safe
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const inTitle = (a.title ?? '').toLowerCase().includes(q);
+        const inSlug  = (a.slug  ?? '').toLowerCase().includes(q);
+        if (!inTitle && !inSlug) return false;
+      }
+
+      // 2. Status filter
       if (statusFilter !== 'all') {
-        if (statusFilter === 'deleted' && !a.is_deleted) return false;
-        if (statusFilter !== 'deleted' && a.is_deleted) return false; // Hide deleted from normal views
-        if (statusFilter !== 'deleted' && a.status !== statusFilter) return false;
+        if (statusFilter === 'deleted') {
+          if (!isDeleted) return false;
+        } else {
+          if (isDeleted) return false;
+          if (status !== statusFilter) return false;
+        }
       } else {
-        if (a.is_deleted) return false; // Only show non-deleted in 'all'
+        if (isDeleted) return false; // hide deleted from 'all'
       }
 
       // 3. Author
@@ -87,11 +99,6 @@ export default function ArticlesClient({
     setSelectedIds(newSet);
   };
 
-  const toggleSelectAll = () => {
-    if (selectedIds.size === filteredArticles.length) setSelectedIds(new Set());
-    else setSelectedIds(new Set(filteredArticles.map(a => a.id)));
-  };
-
   const wrapAction = async (promise: Promise<{ error?: string, success?: boolean }>, successMsg: string) => {
     startTransition(async () => {
       const res = await promise;
@@ -110,14 +117,14 @@ export default function ArticlesClient({
 
   return (
     <div className="space-y-6">
-      
-      {/* ── Filters ────────────────────────────────────── */}
+
+      {/* ── Filters ─────────────────────────────────────── */}
       <Card className="rounded-3xl shadow-none border-[var(--color-border)] bg-[var(--color-surface)]">
         <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" />
-            <Input 
-              placeholder="Search articles by title..." 
+            <Input
+              placeholder="Search articles by title or slug…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 h-11 w-full bg-black/20"
@@ -144,7 +151,7 @@ export default function ArticlesClient({
         </CardContent>
       </Card>
 
-      {/* ── Bulk Actions Bar ──────────────────────────── */}
+      {/* ── Bulk Actions Bar ─────────────────────────────── */}
       {selectedIds.size > 0 && canManage && (
         <div className="sticky top-20 z-20 flex items-center justify-between p-4 bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/30 backdrop-blur-md rounded-2xl shadow-lg animate-in slide-in-from-top-4">
           <div className="flex items-center gap-3">
@@ -167,99 +174,103 @@ export default function ArticlesClient({
         </div>
       )}
 
-      {/* ── List ───────────────────────────────────────── */}
+      {/* ── List ────────────────────────────────────────── */}
       <div className="space-y-3">
         {filteredArticles.length === 0 ? (
-           <Card className="py-20 text-center flex flex-col items-center border-[var(--color-border)] border-dashed rounded-[2rem] shadow-none bg-[var(--color-surface)]">
+          <Card className="py-20 text-center flex flex-col items-center border-[var(--color-border)] border-dashed rounded-[2rem] shadow-none bg-[var(--color-surface)]">
             <FileText className="w-12 h-12 mb-4 opacity-20 text-[var(--color-muted)]" />
             <p className="font-bold mb-1 text-lg tracking-tight">No articles found</p>
-            <p className="text-sm text-[var(--color-muted)]">Try adjusting your valid filters.</p>
+            <p className="text-sm text-[var(--color-muted)]">Try adjusting your filters.</p>
           </Card>
         ) : (
           filteredArticles.map(a => {
-             const isSelected = selectedIds.has(a.id);
-             return (
-              <Card key={a.id} className={`rounded-3xl border transition-all duration-300 group ${isSelected ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5' : 'border-transparent bg-[var(--color-surface)] hover:border-[var(--color-border)]'} ${a.is_deleted ? 'opacity-50 grayscale' : ''}`}>
-                 <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                   
-                   {canManage && !a.is_deleted && (
-                     <button onClick={() => toggleSelect(a.id)} className={`w-5 h-5 rounded flex items-center justify-center shrink-0 border transition-colors mt-1 sm:mt-0 ${isSelected ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-black' : 'border-[var(--color-border)] text-transparent hover:border-white'}`}>
-                       <CheckSquare className="w-3.5 h-3.5" />
-                     </button>
-                   )}
+            const isSelected = selectedIds.has(a.id);
+            const status     = a.status    ?? 'draft';
+            const isDeleted  = a.is_deleted === true;
+            const isFeatured = a.is_featured === true;
 
-                   {/* Title and metadata */}
-                   <div className="flex-1 min-w-0">
-                     <div className="flex items-center gap-2.5 mb-1.5">
-                       {a.is_featured && <Star className="w-4 h-4 text-[var(--color-primary)] flex-shrink-0" fill="currentColor" />}
-                       <Link href={`/admin/articles/${a.id}/edit`} className="font-bold text-[15px] sm:text-base leading-tight truncate hover:text-[#a78bfa] transition-colors">{a.title}</Link>
-                       {a.is_deleted && (
-                         <span className="shrink-0 text-[9px] font-black uppercase text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-full">Deleted</span>
-                       )}
-                     </div>
-                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-[var(--color-muted)] font-medium">
-                       <span className="flex items-center gap-1.5 min-w-0">
-                         <User className="w-3 h-3 flex-shrink-0" />
-                         <span className="truncate max-w-[120px]">{a.profiles?.full_name || 'Anonymous'}</span>
-                       </span>
-                       <span className="flex items-center gap-1.5">
-                         <Hash className="w-3 h-3 flex-shrink-0" />
-                         <span className="truncate max-w-[100px]">{a.categories?.name || 'Uncategorized'}</span>
-                       </span>
-                       <span className="flex items-center gap-1.5">
-                         <Calendar className="w-3 h-3 flex-shrink-0" />
-                         {a.published_at ? new Date(a.published_at).toLocaleDateString() : 'Unpublished'}
-                       </span>
-                       <span className="flex items-center gap-1.5 text-sky-400">
-                         <Eye className="w-3 h-3 flex-shrink-0" />
-                         {a.views?.toLocaleString() || 0}
-                       </span>
-                       
-                       <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${
-                         a.status === 'published' ? 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5' : 
-                         a.status === 'in_review' ? 'text-amber-500 border-amber-500/20 bg-amber-500/5' :
-                         a.status === 'archived' ? 'text-purple-500 border-purple-500/20 bg-purple-500/5' :
-                         'text-gray-400 border-gray-500/20 bg-gray-500/5'
-                       }`}>
-                         {a.status.replace('_', ' ')}
-                       </span>
-                     </div>
-                   </div>
+            return (
+              <Card key={a.id} className={`rounded-3xl border transition-all duration-300 group ${isSelected ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5' : 'border-transparent bg-[var(--color-surface)] hover:border-[var(--color-border)]'} ${isDeleted ? 'opacity-50 grayscale' : ''}`}>
+                <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
 
-                   {/* Actions */}
-                   <div className="w-full sm:w-auto flex flex-wrap gap-2 pt-3 sm:pt-0 border-t sm:border-t-0 border-[var(--color-border)] justify-end">
-                     
-                     <Button asChild variant="outline" size="icon" className="h-8 w-8 rounded-lg shrink-0">
-                       <Link href={`/${a.slug}`} target="_blank" title="View Article"><Share className="w-3.5 h-3.5" /></Link>
-                     </Button>
+                  {canManage && !isDeleted && (
+                    <button onClick={() => toggleSelect(a.id)} className={`w-5 h-5 rounded flex items-center justify-center shrink-0 border transition-colors mt-1 sm:mt-0 ${isSelected ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-black' : 'border-[var(--color-border)] text-transparent hover:border-white'}`}>
+                      <CheckSquare className="w-3.5 h-3.5" />
+                    </button>
+                  )}
 
-                     {!a.is_deleted && (
-                       <Button asChild variant="outline" size="icon" className="h-8 w-8 rounded-lg shrink-0 text-[#a78bfa] border-[#a78bfa]/30 hover:bg-[#a78bfa]/10">
-                         <Link href={`/admin/articles/${a.id}/edit`}><Edit2 className="w-3.5 h-3.5" /></Link>
-                       </Button>
-                     )}
+                  {/* Title and metadata */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2.5 mb-1.5">
+                      {isFeatured && <Star className="w-4 h-4 text-[var(--color-primary)] flex-shrink-0" fill="currentColor" />}
+                      <Link href={`/admin/articles/${a.id}/edit`} className="font-bold text-[15px] sm:text-base leading-tight truncate hover:text-[#a78bfa] transition-colors">{a.title}</Link>
+                      {isDeleted && (
+                        <span className="shrink-0 text-[9px] font-black uppercase text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-full">Deleted</span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-[var(--color-muted)] font-medium">
+                      <span className="flex items-center gap-1.5 min-w-0">
+                        <User className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate max-w-[120px]">{a.profiles?.full_name || 'Anonymous'}</span>
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Hash className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate max-w-[100px]">{a.categories?.name || 'Uncategorized'}</span>
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Calendar className="w-3 h-3 flex-shrink-0" />
+                        {a.published_at ? new Date(a.published_at).toLocaleDateString() : 'Unpublished'}
+                      </span>
+                      <span className="flex items-center gap-1.5 text-sky-400">
+                        <Eye className="w-3 h-3 flex-shrink-0" />
+                        {a.views?.toLocaleString() || 0}
+                      </span>
 
-                     {!a.is_deleted && canManage && a.status === 'published' && (
-                       <Button variant={a.is_featured ? "primary" : "outline"} size="icon" className={`h-8 w-8 rounded-lg shrink-0 ${a.is_featured ? 'shadow-sm text-black' : ''}`} onClick={() => wrapAction(featureArticleAction(a.id, a.is_featured), a.is_featured ? 'Unfeatured' : 'Featured')} loading={isPending}>
-                         <Sparkles className="w-3.5 h-3.5" />
-                       </Button>
-                     )}
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${
+                        status === 'published' ? 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5' :
+                        status === 'in_review' ? 'text-amber-500 border-amber-500/20 bg-amber-500/5' :
+                        status === 'archived'  ? 'text-purple-500 border-purple-500/20 bg-purple-500/5' :
+                        'text-gray-400 border-gray-500/20 bg-gray-500/5'
+                      }`}>
+                        {status.replace('_', ' ')}
+                      </span>
+                    </div>
+                  </div>
 
-                     {!a.is_deleted && canManage && (
-                       <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg shrink-0 text-red-500 border-red-500/20 hover:bg-red-500/10" onClick={() => { if(confirm('Delete article?')) wrapAction(deleteArticleAction(a.id), 'Deleted') }} loading={isPending}>
-                         <Trash2 className="w-3.5 h-3.5" />
-                       </Button>
-                     )}
+                  {/* Actions */}
+                  <div className="w-full sm:w-auto flex flex-wrap gap-2 pt-3 sm:pt-0 border-t sm:border-t-0 border-[var(--color-border)] justify-end">
 
-                     {a.is_deleted && canManage && (
-                        <Button variant="outline" size="sm" className="h-8 rounded-lg text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/10" onClick={() => wrapAction(restoreArticleAction(a.id), 'Restored')} loading={isPending}>
-                           <RefreshCcw className="w-3.5 h-3.5 mr-1.5" /> Restore
-                        </Button>
-                     )}
-                   </div>
-                 </CardContent>
+                    <Button asChild variant="outline" size="icon" className="h-8 w-8 rounded-lg shrink-0">
+                      <Link href={`/${a.slug}`} target="_blank" title="View Article"><Share className="w-3.5 h-3.5" /></Link>
+                    </Button>
+
+                    {!isDeleted && (
+                      <Button asChild variant="outline" size="icon" className="h-8 w-8 rounded-lg shrink-0 text-[#a78bfa] border-[#a78bfa]/30 hover:bg-[#a78bfa]/10">
+                        <Link href={`/admin/articles/${a.id}/edit`}><Edit2 className="w-3.5 h-3.5" /></Link>
+                      </Button>
+                    )}
+
+                    {!isDeleted && canManage && status === 'published' && (
+                      <Button variant={isFeatured ? 'primary' : 'outline'} size="icon" className={`h-8 w-8 rounded-lg shrink-0 ${isFeatured ? 'shadow-sm text-black' : ''}`} onClick={() => wrapAction(featureArticleAction(a.id, isFeatured), isFeatured ? 'Unfeatured' : 'Featured')} loading={isPending}>
+                        <Sparkles className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
+
+                    {!isDeleted && canManage && (
+                      <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg shrink-0 text-red-500 border-red-500/20 hover:bg-red-500/10" onClick={() => { if (confirm('Delete article?')) wrapAction(deleteArticleAction(a.id), 'Deleted'); }} loading={isPending}>
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
+
+                    {isDeleted && canManage && (
+                      <Button variant="outline" size="sm" className="h-8 rounded-lg text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/10" onClick={() => wrapAction(restoreArticleAction(a.id), 'Restored')} loading={isPending}>
+                        <RefreshCcw className="w-3.5 h-3.5 mr-1.5" /> Restore
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
               </Card>
-             );
+            );
           })
         )}
       </div>
