@@ -128,12 +128,6 @@ export default async function ManagePage() {
                   key={item.href}
                   href={item.href}
                   prefetch={true}
-                  onClick={() => {
-                    // Vibrate for physical feedback if supported
-                    if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-                       window.navigator.vibrate(30);
-                    }
-                  }}
                   className={`relative flex flex-col items-center justify-center py-8 group transition-all duration-100 hover:bg-[var(--color-text)]/5 active:bg-[var(--color-text)]/10 active:scale-[0.98] active:opacity-90 rounded-2xl ${
                     !isLastCol ? 'border-r border-[var(--color-border)]/40' : ''
                   } ${

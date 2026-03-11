@@ -58,9 +58,6 @@ function MetricCard({
     <Link
       href={href}
       prefetch={true}
-      onClick={() => {
-        if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) window.navigator.vibrate(30);
-      }}
       className="block h-full outline-none transition-transform duration-100 active:scale-[0.98]"
     >
       {inner}
@@ -75,9 +72,6 @@ function ActionTile({ href, label, icon: Icon, color, badge }: {
     <Link
       href={href}
       prefetch={true}
-      onClick={() => {
-        if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) window.navigator.vibrate(30);
-      }}
       className="group outline-none relative transition-transform duration-100 active:scale-[0.96]"
     >
       {badge && (
