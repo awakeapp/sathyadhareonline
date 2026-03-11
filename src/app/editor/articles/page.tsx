@@ -62,7 +62,7 @@ export default async function EditorArticlesPage() {
         initials={initials}
         icon1={Bell}
         icon2={Plus}
-        onIcon2Click={() => window.location.href = '/editor/articles/new'}
+        icon2Href="/editor/articles/new"
       />
       
       <div className="px-5 -mt-12 pb-10 space-y-6 relative z-20 max-w-4xl mx-auto">

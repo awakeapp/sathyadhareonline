@@ -69,7 +69,7 @@ export default async function EditorDashboard() {
         initials={initials}
         icon1={Bell}
         icon2={Eye}
-        onIcon2Click={() => window.location.href = '/'}
+        icon2Href="/"
       />
 
       <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20">
