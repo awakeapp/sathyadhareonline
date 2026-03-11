@@ -6,6 +6,17 @@ import RichTextEditor from '@/components/RichTextEditorClient';
 export default async function NewArticlePage() {
   const supabase = await createClient();
 
+  // Determine user role
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+  const role = profile?.role || 'reader';
+
   const { data: categories, error: catError } = await supabase
     .from('categories')
     .select('id, name')
@@ -24,9 +35,26 @@ export default async function NewArticlePage() {
     const category_id = formData.get('category_id') as string;
     const author_name = formData.get('author_name') as string;
     const coverFile = formData.get('cover_image') as File | null;
+    const action_type = formData.get('action_type') as string;
 
-    const { data: { user }, error: userError } = await supabaseAction.auth.getUser();
-    if (userError || !user) throw new Error('Unauthorized');
+    const { data: { user: actionUser }, error: userError } = await supabaseAction.auth.getUser();
+    if (userError || !actionUser) throw new Error('Unauthorized');
+
+    const { data: actionProfile } = await supabaseAction
+      .from('profiles')
+      .select('role')
+      .eq('id', actionUser.id)
+      .single();
+    const actionRole = actionProfile?.role || 'reader';
+
+    // Role-based status determination
+    let status = 'draft';
+    if (actionRole === 'editor') {
+      if (action_type === 'submit') status = 'in_review';
+    } else if (['admin', 'super_admin'].includes(actionRole)) {
+      if (action_type === 'publish') status = 'published';
+      else if (action_type === 'submit') status = 'in_review';
+    }
 
     // Insert article first to get the ID
     const { data: inserted, error: insertError } = await supabaseAction
@@ -37,9 +65,10 @@ export default async function NewArticlePage() {
         excerpt,
         content,
         category_id: category_id || null,
-        status: 'draft',
-        author_id: user.id,
+        status,
+        author_id: actionUser.id,
         author_name,
+        published_at: status === 'published' ? new Date().toISOString() : null,
       })
       .select('id')
       .single();
@@ -155,13 +184,38 @@ export default async function NewArticlePage() {
             {/* Actions */}
             <div className="pt-6 mt-6 border-t border-[var(--color-border)] flex flex-col sm:flex-row justify-end gap-3">
               <Link href="/admin/articles"
-                className="w-full sm:w-auto px-6 py-4 rounded-2xl border border-[var(--color-border)] font-semibold text-[var(--color-muted)] hover:text-white hover:bg-white/5 transition-colors text-center">
+                className="w-full px-6 py-4 rounded-2xl border border-[var(--color-border)] font-semibold text-[var(--color-muted)] hover:text-white hover:bg-white/5 transition-colors text-center">
                 Cancel
               </Link>
-              <button type="submit"
-                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[var(--color-primary)] text-black font-bold hover:bg-[#ffed4a] transition-colors shadow-lg shadow-[var(--color-primary)]/20 text-center">
-                Publish Draft
+              
+              <button 
+                type="submit" 
+                name="action_type" 
+                value="draft"
+                className="w-full px-6 py-4 rounded-2xl bg-white/5 border border-[var(--color-border)] text-white font-bold hover:bg-white/10 transition-colors text-center"
+              >
+                Save Draft
               </button>
+
+              {role === 'editor' ? (
+                <button 
+                  type="submit" 
+                  name="action_type" 
+                  value="submit"
+                  className="w-full px-8 py-4 rounded-2xl bg-amber-500 text-black font-bold hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20 text-center"
+                >
+                  Submit for Review
+                </button>
+              ) : (
+                <button 
+                  type="submit" 
+                  name="action_type" 
+                  value="publish"
+                  className="w-full px-8 py-4 rounded-2xl bg-[var(--color-primary)] text-black font-bold hover:bg-[#ffed4a] transition-colors shadow-lg shadow-[var(--color-primary)]/20 text-center"
+                >
+                  Publish Now
+                </button>
+              )}
             </div>
             
           </form>

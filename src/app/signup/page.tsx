@@ -197,7 +197,7 @@ export default function SignupPage() {
               className="w-5 h-5 rounded border-2 border-[var(--color-muted)]/40 text-[#f04a4c] focus:ring-[#f04a4c] cursor-pointer"
             />
             <label htmlFor="terms" className="text-sm font-semibold text-[var(--color-muted)] cursor-pointer">
-              I have read <span className="text-[#f04a4c]">Terms & Agreement</span>
+              I have read <Link href="/terms" className="text-[#f04a4c] hover:underline">Terms & Agreement</Link>
             </label>
           </div>
 

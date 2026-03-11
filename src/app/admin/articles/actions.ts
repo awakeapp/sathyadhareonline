@@ -34,7 +34,7 @@ export async function bulkUpdateStatus(ids: string[], status: string) {
   const role = profile?.role || '';
   if (!['admin', 'super_admin'].includes(role)) return { error: 'Permission denied' };
 
-  const updatePayload: any = { status };
+  const updatePayload: Record<string, unknown> = { status };
   if (status === 'published') updatePayload.published_at = new Date().toISOString();
 
   const { error } = await supabase
@@ -59,7 +59,11 @@ export async function setArticleStatusAction(id: string, status: string) {
   const role = profile?.role || '';
   if (!['admin', 'super_admin', 'editor'].includes(role)) return { error: 'Permission denied' };
 
-  const updatePayload: any = { status };
+  if (role === 'editor' && ['published', 'archived'].includes(status)) {
+    return { error: 'Editors cannot publish or archive articles' };
+  }
+
+  const updatePayload: Record<string, unknown> = { status };
   if (status === 'published') updatePayload.published_at = new Date().toISOString();
 
   const { error } = await supabase

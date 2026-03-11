@@ -22,15 +22,19 @@ export default async function EditArticlePage({
   if (!user) redirect('/login');
 
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  const role = profile?.role || 'reader';
 
   // Fetch article data
   const { data: article, error: articleError } = await supabase
     .from('articles')
-    .select('id, title, slug, excerpt, content, category_id, status, cover_image, is_featured')
+    .select('id, title, slug, excerpt, content, category_id, status, cover_image, is_featured, published_at')
     .eq('id', id)
     .single();
 
-  if (articleError || !article) notFound();
+  if (articleError || !article) {
+    notFound();
+    return null; // For TypeScript
+  }
 
   // Fetch categories for dropdown
   const { data: categories } = await supabase
@@ -49,9 +53,21 @@ export default async function EditArticlePage({
     const excerpt     = formData.get('excerpt') as string;
     const content     = formData.get('content') as string;
     const category_id = formData.get('category_id') as string;
-    const status      = formData.get('status') as string;
     const is_featured = formData.get('is_featured') === 'on';
     const coverFile   = formData.get('cover_image') as File | null;
+    
+    // Check role again securely via action context
+    const { data: { user: actionUser } } = await supabaseAction.auth.getUser();
+    if (!actionUser) return;
+    const { data: actionProfile } = await supabaseAction.from('profiles').select('role').eq('id', actionUser.id).single();
+    const actionRole = actionProfile?.role || 'reader';
+
+    let targetStatus = formData.get('status') as string;
+
+    // Server-side guard: Editors cannot publish or archive
+    if (actionRole === 'editor' && ['published', 'archived'].includes(targetStatus)) {
+      targetStatus = 'in_review'; // Force to review status
+    }
 
     const updateData: Record<string, unknown> = {
       title,
@@ -59,9 +75,12 @@ export default async function EditArticlePage({
       excerpt,
       content,
       category_id: category_id || null,
-      status: status === 'published' ? 'published' : 'draft',
+      status: targetStatus,
       is_featured,
       updated_at: new Date().toISOString(),
+      published_at: targetStatus === 'published' && article?.status !== 'published' 
+                      ? new Date().toISOString() 
+                      : (targetStatus !== 'published' ? null : article?.published_at), // retain previous if still published else null
     };
 
     if (is_featured) {
@@ -85,7 +104,7 @@ export default async function EditArticlePage({
     const { error } = await supabaseAction.from('articles').update(updateData).eq('id', id);
     if (error) { console.error('Update failed:', error); return; }
 
-    await logAuditEvent(user!.id, 'ARTICLE_UPDATED', { article_id: id });
+    await logAuditEvent(actionUser.id, 'ARTICLE_UPDATED', { article_id: id });
 
     revalidatePath('/admin/articles');
     revalidatePath('/');
@@ -99,7 +118,7 @@ export default async function EditArticlePage({
     if (!actionUser) return;
 
     const { data: p } = await supabaseAction.from('profiles').select('role').eq('id', actionUser.id).single();
-    if (!p || p.role !== 'super_admin') return;
+    if (!p || !['admin', 'super_admin'].includes(p.role)) return;
 
     await supabaseAction
       .from('articles')
@@ -110,7 +129,7 @@ export default async function EditArticlePage({
       })
       .eq('id', id);
 
-    await logAuditEvent(actionUser.id, 'ARTICLE_PUBLISH_OVERRIDE', { article_id: id });
+    await logAuditEvent(actionUser.id, 'ARTICLE_PUBLISHED', { article_id: id });
 
     revalidatePath('/admin/articles');
     revalidatePath('/');
@@ -128,15 +147,17 @@ export default async function EditArticlePage({
           </Link>
           <div className="flex-1 flex items-center justify-between">
             <h1 className="text-2xl font-bold tracking-tight text-white leading-tight">Edit Article</h1>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
               <div className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
                 article.status === 'published' 
                   ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' 
+                  : article.status === 'in_review'
+                  ? 'bg-amber-500/10 border-amber-500/20 text-amber-500'
                   : 'bg-orange-500/10 border-orange-500/20 text-orange-500'
               }`}>
-                {article.status}
+                {article.status.replace('_', ' ')}
               </div>
-              {profile?.role === 'super_admin' && article.status !== 'published' && (
+              {['admin', 'super_admin'].includes(role) && article.status !== 'published' && (
                 <form action={publishNowAction}>
                   <button type="submit" className="text-[10px] font-black uppercase tracking-widest bg-emerald-500 text-black px-3 py-1 rounded-full hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/20">
                     Publish Now
@@ -150,21 +171,23 @@ export default async function EditArticlePage({
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl overflow-hidden shadow-2xl">
           <form action={updateArticleAction} encType="multipart/form-data" className="p-6 md:p-8 space-y-6">
             
-            <div className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${
-              article.is_featured ? 'border-[var(--color-primary)]/40 bg-[var(--color-primary)]/5' : 'border-[var(--color-border)] bg-black/20'
-            }`}>
-              <div className="flex items-center gap-3">
-                <Star className={`w-6 h-6 ${article.is_featured ? 'text-[var(--color-primary)]' : 'opacity-40'}`} fill={article.is_featured ? "currentColor" : "none"} />
-                <div>
-                  <p className="text-sm font-bold text-white leading-tight">Feature on Homepage</p>
-                  <p className="text-[11px] text-[var(--color-muted)] mt-0.5">Displays as hero banner.</p>
+            {['admin', 'super_admin'].includes(role) && (
+              <div className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${
+                article.is_featured ? 'border-[var(--color-primary)]/40 bg-[var(--color-primary)]/5' : 'border-[var(--color-border)] bg-black/20'
+              }`}>
+                <div className="flex items-center gap-3">
+                  <Star className={`w-6 h-6 ${article.is_featured ? 'text-[var(--color-primary)]' : 'opacity-40'}`} fill={article.is_featured ? "currentColor" : "none"} />
+                  <div>
+                    <p className="text-sm font-bold text-white leading-tight">Feature on Homepage</p>
+                    <p className="text-[11px] text-[var(--color-muted)] mt-0.5">Displays as hero banner.</p>
+                  </div>
                 </div>
+                <label className="relative inline-flex items-center cursor-pointer ml-2">
+                  <input type="checkbox" name="is_featured" defaultChecked={article.is_featured ?? false} className="sr-only peer" />
+                  <div className="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-[var(--color-primary)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
+                </label>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer ml-2">
-                <input type="checkbox" name="is_featured" defaultChecked={article.is_featured ?? false} className="sr-only peer" />
-                <div className="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-[var(--color-primary)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
-              </label>
-            </div>
+            )}
 
             <div>
               <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-2 px-1">Cover Image</label>
@@ -183,13 +206,23 @@ export default async function EditArticlePage({
                 <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-2 px-1">URL Slug</label>
                 <input name="slug" required defaultValue={article.slug} className="w-full px-4 py-3.5 rounded-2xl bg-black/20 border border-[var(--color-border)] text-white font-mono text-sm outline-none" />
               </div>
+              
               <div>
                 <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-2 px-1">Visibility</label>
                 <select name="status" defaultValue={article.status} className="w-full px-4 py-3.5 rounded-2xl bg-black/20 border border-[var(--color-border)] text-white outline-none">
-                  <option value="draft">Draft</option>
-                  <option value="in_review">In Review</option>
-                  <option value="published">Published</option>
-                  <option value="archived">Archived</option>
+                  {role === 'editor' ? (
+                    <>
+                      <option value="draft">Draft</option>
+                      <option value="in_review">In Review</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="draft">Draft</option>
+                      <option value="in_review">In Review</option>
+                      <option value="published">Published</option>
+                      <option value="archived">Archived</option>
+                    </>
+                  )}
                 </select>
               </div>
             </div>
