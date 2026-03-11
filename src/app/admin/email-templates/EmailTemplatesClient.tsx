@@ -56,12 +56,12 @@ export default function EmailTemplatesClient({ initialTemplates }: { initialTemp
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4">
       {!editingTemplate ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {templates.map(t => (
             <PresenceCard key={t.id} noPadding className="group cursor-pointer overflow-hidden" onClick={() => openEdit(t)}>
-              <div className="p-8">
+              <div className="p-4">
                 <div className="flex items-start justify-between mb-6">
                   <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-[#5c4ae4] flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">
                     <Mail className="w-7 h-7" />
@@ -95,7 +95,7 @@ export default function EmailTemplatesClient({ initialTemplates }: { initialTemp
       ) : (
         <PresenceCard className="p-0 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="p-10 border-b border-indigo-50 dark:border-white/5 flex items-center justify-between bg-indigo-50/10">
-             <div className="flex items-center gap-5">
+             <div className="flex items-center gap-4">
                 <button onClick={closeEdit} className="w-12 h-12 rounded-full bg-white dark:bg-[#1b1929] text-gray-400 flex items-center justify-center shadow-sm">
                    <ArrowLeft className="w-6 h-6" />
                 </button>
@@ -146,7 +146,7 @@ export default function EmailTemplatesClient({ initialTemplates }: { initialTemp
                </div>
              </div>
 
-             <div className="p-8 rounded-[2rem] bg-[#f0f2ff] dark:bg-indigo-500/5 border-none">
+             <div className="p-4 rounded-[2rem] bg-[#f0f2ff] dark:bg-indigo-500/5 border-none">
                <h4 className="text-[10px] font-black uppercase text-[#5c4ae4] tracking-[0.3em] mb-4">Injection Pointers</h4>
                <div className="flex flex-wrap gap-3">
                  {["{{name}}", "{{email}}", "{{reset_link}}", "{{invite_link}}", "{{role}}"].map(v => (

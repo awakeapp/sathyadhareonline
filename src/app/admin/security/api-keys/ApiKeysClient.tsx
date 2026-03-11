@@ -29,7 +29,7 @@ export default function ApiKeysClient({ keys }: { keys: { id: string; name: stri
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4">
       
       {/* ── Heading ────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
@@ -63,7 +63,7 @@ export default function ApiKeysClient({ keys }: { keys: { id: string; name: stri
 
       {/* ── Create New UI ─────────────────────────────────────── */}
       <Card className="rounded-[2rem] border-[var(--color-border)] bg-[var(--color-surface)] shadow-none">
-        <CardContent className="p-6">
+        <CardContent className="p-4">
           <form action={handleCreate} className="flex gap-4 items-end">
             <div className="flex-1 space-y-2">
               <label htmlFor="name" className="text-xs font-bold uppercase tracking-widest text-[var(--color-muted)]">
@@ -91,7 +91,7 @@ export default function ApiKeysClient({ keys }: { keys: { id: string; name: stri
           ) : (
             <div className="divide-y divide-[var(--color-border)]/50">
               {keys.map((k) => (
-                <div key={k.id} className="p-6 flex items-center justify-between hover:bg-white/5 transition-colors">
+                <div key={k.id} className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
                       <KeyRound className="w-4 h-4 text-indigo-400" />
@@ -104,7 +104,7 @@ export default function ApiKeysClient({ keys }: { keys: { id: string; name: stri
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-4">
                     <div className="text-right">
                        <p className="text-[10px] uppercase font-bold text-[var(--color-muted)] tracking-widest">Created On</p>
                        <p className="text-xs text-white/50">{new Date(k.created_at).toLocaleDateString()}</p>

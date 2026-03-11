@@ -59,11 +59,11 @@ export default function PlansClient({ initialPlans }: { initialPlans: Plan[] }) 
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4">
 
       {/* ── Tier Control Bar ── */}
       <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-5">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4]">
                 <ShieldCheck className="w-6 h-6" />
@@ -91,7 +91,7 @@ export default function PlansClient({ initialPlans }: { initialPlans: Plan[] }) 
               </div>
             )}
             
-            <div className="p-8 pb-0 flex-1">
+            <div className="p-4 pb-0 flex-1">
                <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] mb-8 shadow-inner group-hover:scale-110 transition-transform">
                   <Box className="w-7 h-7" />
                </div>
@@ -113,7 +113,7 @@ export default function PlansClient({ initialPlans }: { initialPlans: Plan[] }) 
                </div>
             </div>
 
-            <div className="p-6 pt-0 mt-auto flex items-center gap-3 relative z-20">
+            <div className="p-4 pt-0 mt-auto flex items-center gap-3 relative z-20">
                <button onClick={() => handleEdit(plan)} className="flex-1 h-12 rounded-2xl bg-indigo-50 hover:bg-[#5c4ae4] hover:text-white dark:bg-indigo-500/10 text-[#5c4ae4] font-black text-[10px] uppercase tracking-widest transition-all shadow-sm">
                   Modify Node
                </button>
@@ -131,7 +131,7 @@ export default function PlansClient({ initialPlans }: { initialPlans: Plan[] }) 
            <div className="w-full max-w-xl bg-white dark:bg-[#181623] rounded-[3rem] shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
               <form onSubmit={handleSave}>
                  <div className="p-10 border-b border-indigo-50 dark:border-white/5 flex items-center justify-between bg-indigo-50/20">
-                    <div className="flex items-center gap-5">
+                    <div className="flex items-center gap-4">
                        <div className="w-12 h-12 rounded-2xl bg-[#5c4ae4] flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
                           <Settings className="w-6 h-6" />
                        </div>
@@ -145,7 +145,7 @@ export default function PlansClient({ initialPlans }: { initialPlans: Plan[] }) 
                     </button>
                  </div>
                  
-                 <div className="p-10 space-y-8 max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-50">
+                 <div className="p-10 flex flex-col gap-4 max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-50">
                     <input type="hidden" name="id" value={editingPlan?.id || ''} />
                     
                     <div className="grid grid-cols-2 gap-8">

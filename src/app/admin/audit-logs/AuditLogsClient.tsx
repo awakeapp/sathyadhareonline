@@ -92,7 +92,7 @@ export default function AuditLogsClient({
   const totalPages = Math.ceil(totalCount / limit);
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4">
       
       {/* ── Protocol Filters ── */}
       <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-4">
@@ -168,10 +168,10 @@ export default function AuditLogsClient({
            <table className="w-full text-left text-xs whitespace-nowrap">
              <thead>
                <tr className="bg-gray-50/50 dark:bg-white/5 border-b border-indigo-50 dark:border-white/5 font-black uppercase tracking-widest text-[#5c4ae4]">
-                 <th className="px-6 py-5 text-[10px]">Temporal Index</th>
-                 <th className="px-6 py-5 text-[10px]">Primary Actor</th>
-                 <th className="px-6 py-5 text-[10px]">Protocol Action</th>
-                 <th className="px-6 py-5 text-[10px] text-right">Payload</th>
+                 <th className="px-4 py-5 text-[10px]">Temporal Index</th>
+                 <th className="px-4 py-5 text-[10px]">Primary Actor</th>
+                 <th className="px-4 py-5 text-[10px]">Protocol Action</th>
+                 <th className="px-4 py-5 text-[10px] text-right">Payload</th>
                </tr>
              </thead>
              <tbody className="divide-y divide-indigo-50 dark:divide-white/5">
@@ -201,12 +201,12 @@ export default function AuditLogsClient({
                    return (
                      <React.Fragment key={log.id}>
                        <tr className={`group transition-all hover:bg-gray-50/50 dark:hover:bg-white/5 ${isExpanded ? 'bg-indigo-50/30' : ''}`}>
-                         <td className="px-6 py-5 font-black tabular-nums text-gray-400">
+                         <td className="px-4 py-5 font-black tabular-nums text-gray-400">
                            {new Date(log.created_at).toLocaleString('en-GB', {
                              day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit'
                            })}
                          </td>
-                         <td className="px-6 py-5">
+                         <td className="px-4 py-5">
                            <div className="flex items-center gap-3">
                              <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] font-black text-xs shrink-0">
                                {actorInitial}
@@ -217,7 +217,7 @@ export default function AuditLogsClient({
                              </div>
                            </div>
                          </td>
-                         <td className="px-6 py-5">
+                         <td className="px-4 py-5">
                            <div className="flex items-center gap-2">
                              <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50 animate-pulse"></div>
                              <span className="font-black uppercase tracking-widest text-[#1b1929] dark:text-white">
@@ -225,7 +225,7 @@ export default function AuditLogsClient({
                              </span>
                            </div>
                          </td>
-                         <td className="px-6 py-5 text-right">
+                         <td className="px-4 py-5 text-right">
                            {hasDetails ? (
                              <button 
                                onClick={() => toggleExpand(log.id)}
@@ -240,11 +240,11 @@ export default function AuditLogsClient({
                        </tr>
                        {isExpanded && hasDetails && (
                          <tr className="bg-white/40 dark:bg-black/40">
-                           <td colSpan={4} className="px-6 py-6 font-mono text-[11px] relative">
+                           <td colSpan={4} className="px-4 py-6 font-mono text-[11px] relative">
                              <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#5c4ae4]"></div>
                              <div className="flex gap-4">
                                 <FileJson className="w-5 h-5 text-[#5c4ae4] mt-1 shrink-0" />
-                                <pre className="p-6 rounded-2xl bg-[#0d0c13] text-indigo-300 overflow-x-auto w-full shadow-2xl border border-white/5 border-l-4 border-l-indigo-500/50">
+                                <pre className="p-4 rounded-2xl bg-[#0d0c13] text-indigo-300 overflow-x-auto w-full shadow-2xl border border-white/5 border-l-4 border-l-indigo-500/50">
                                   {JSON.stringify(log.details, null, 2)}
                                 </pre>
                              </div>
@@ -260,7 +260,7 @@ export default function AuditLogsClient({
         </div>
 
         {/* ── Matrix Controls ── */}
-        <div className="p-6 flex flex-col sm:flex-row items-center justify-between gap-6 bg-gray-50/30 dark:bg-white/5 border-t border-indigo-50 dark:border-white/5">
+        <div className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50/30 dark:bg-white/5 border-t border-indigo-50 dark:border-white/5">
            <div className="flex items-center gap-4">
              <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Registry Density</span>
              <select 
@@ -275,7 +275,7 @@ export default function AuditLogsClient({
              </select>
            </div>
            
-           <div className="flex items-center gap-6">
+           <div className="flex items-center gap-4">
              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
                 Entry Index {logs.length > 0 ? (page - 1) * limit + 1 : 0} — {Math.min(page * limit, totalCount)} <span className="mx-2 text-indigo-100">|</span> Total {totalCount}
              </span>

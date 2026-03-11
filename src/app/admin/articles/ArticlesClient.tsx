@@ -112,7 +112,7 @@ export default function ArticlesClient({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-4">
         <PresenceSectionHeader title="Article Library" />
         <Link href="/admin/articles/new">
@@ -196,7 +196,7 @@ export default function ArticlesClient({
 
             return (
               <PresenceCard key={a.id} noPadding className={`group transition-all duration-300 ${isSelected ? 'ring-2 ring-indigo-500 bg-indigo-50/50' : 'hover:shadow-md'} ${isDeleted ? 'opacity-50 grayscale' : ''}`}>
-                <div className="p-5 flex flex-col md:flex-row items-start md:items-center gap-5">
+                <div className="p-5 flex flex-col md:flex-row items-start md:items-center gap-4">
                   
                   {canManage && !isDeleted && (
                     <button 

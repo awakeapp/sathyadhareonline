@@ -84,14 +84,14 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
       </div>
 
       {/* ── Content ── */}
-      <div className="flex-1 space-y-6">
+      <div className="flex-1 flex flex-col gap-4">
         <PresenceCard className="min-h-[600px] flex flex-col">
           <div className="flex-1 p-2 md:p-4">
             
             {/* TAB CONTENT */}
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                {activeTab === 'general' && (
-                 <div className="space-y-8">
+                 <div className="flex flex-col gap-4">
                    <div>
                      <h2 className="text-2xl font-black text-[#1b1929] dark:text-white">Global Identity</h2>
                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Foundational Branding</p>
@@ -128,12 +128,12 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                )}
 
                {activeTab === 'social' && (
-                 <div className="space-y-8">
+                 <div className="flex flex-col gap-4">
                     <div>
                       <h2 className="text-2xl font-black text-[#1b1929] dark:text-white">Social Network</h2>
                       <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Cross-platform integration</p>
                     </div>
-                    <div className="grid gap-6 md:grid-cols-2">
+                    <div className="grid gap-4 md:grid-cols-2">
                       {Object.keys(social).map(key => (
                         <div key={key} className="space-y-2">
                           <label className="text-[10px] font-black uppercase text-gray-400">{key}</label>
@@ -149,12 +149,12 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                )}
 
                {activeTab === 'seo' && (
-                 <div className="space-y-8">
+                 <div className="flex flex-col gap-4">
                     <div>
                       <h2 className="text-2xl font-black text-[#1b1929] dark:text-white">Discovery & SEO</h2>
                       <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Search Engine Optimisation</p>
                     </div>
-                    <div className="space-y-6">
+                    <div className="flex flex-col gap-4">
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase text-gray-400">Default Architecture Title</label>
                         <Input value={seo.meta_title || ''} onChange={(e) => setSeo({ ...seo, meta_title: e.target.value })} className="h-14 rounded-2xl bg-gray-50 dark:bg-white/5 border-none font-bold" />
@@ -177,7 +177,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                )}
 
                {activeTab === 'features' && (
-                 <div className="space-y-8">
+                 <div className="flex flex-col gap-4">
                     <div>
                       <h2 className="text-2xl font-black text-[#1b1929] dark:text-white">Module Governance</h2>
                       <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Dynamic feature toggles</p>
@@ -211,13 +211,13 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                )}
 
                {activeTab === 'integrations' && (
-                 <div className="space-y-8">
+                 <div className="flex flex-col gap-4">
                     <div>
                       <h2 className="text-2xl font-black text-[#1b1929] dark:text-white">System Ecosystem</h2>
                       <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Cross-platform identifiers</p>
                     </div>
 
-                    <div className="space-y-8">
+                    <div className="flex flex-col gap-4">
                        <div className="space-y-2">
                          <label className="text-[10px] font-black uppercase text-gray-400">Cloud Analytics ID</label>
                          <Input value={integrations.analytics_id || ''} onChange={(e) => setIntegrations({ ...integrations, analytics_id: e.target.value })} className="h-14 rounded-2xl bg-gray-50 dark:bg-white/5 border-none font-mono" placeholder="G-XXXXXXXXXX" />
@@ -253,7 +253,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
             </div>
           </div>
 
-          <div className="p-6 bg-gray-50 dark:bg-white/5 flex justify-end items-center gap-4 mt-auto border-t border-indigo-50 dark:border-white/5">
+          <div className="p-4 bg-gray-50 dark:bg-white/5 flex justify-end items-center gap-4 mt-auto border-t border-indigo-50 dark:border-white/5">
              {isPending && (
                 <div className="flex items-center gap-2">
                    <div className="w-4 h-4 rounded-full border-2 border-indigo-50 border-t-[#5c4ae4] animate-spin" />

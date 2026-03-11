@@ -187,7 +187,7 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
 
              return (
                <PresenceCard key={cat.id} noPadding className="group active:scale-[0.99] transition-all">
-                  <div className="p-5 flex flex-col md:flex-row items-center gap-5">
+                  <div className="p-5 flex flex-col md:flex-row items-center gap-4">
                      
                      <div className="flex flex-col gap-1 shrink-0">
                         <button onClick={() => move(idx, -1)} disabled={idx === 0 || reordering} className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-400 hover:text-[#5c4ae4] disabled:opacity-20 transition-all">

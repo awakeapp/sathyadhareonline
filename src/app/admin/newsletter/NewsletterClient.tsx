@@ -84,11 +84,11 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4">
       
       {/* ── BROADCAST BAR ── */}
       <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-5">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4]">
                 <Mail className="w-6 h-6" />
@@ -111,7 +111,7 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
 
       {/* ── RECEIVER NETWORK ── */}
       <PresenceCard noPadding>
-        <div className="p-8 border-b border-indigo-50 dark:border-white/5 flex items-center justify-between">
+        <div className="p-4 border-b border-indigo-50 dark:border-white/5 flex items-center justify-between">
            <div>
               <h3 className="text-sm font-black text-[#1b1929] dark:text-white uppercase tracking-widest">Active Receivers</h3>
               <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest mt-1">Verified communication channels</p>
@@ -161,7 +161,7 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
                  </button>
               </div>
               
-              <form onSubmit={handleSend} className="p-10 space-y-8">
+              <form onSubmit={handleSend} className="p-10 flex flex-col gap-4">
                  <div className="space-y-3">
                    <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Communication Subject</label>
                    <input 

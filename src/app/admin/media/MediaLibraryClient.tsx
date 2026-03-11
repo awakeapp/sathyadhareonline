@@ -145,7 +145,7 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
   const getFileName = (url: string) => url.split('/').pop() || 'Untitled Asset';
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4">
        
       {/* ── Search & Filter ── */}
       <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none">
@@ -176,7 +176,7 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
         <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleFiles(e.target.files)} />
 
         {uploading ? (
-          <div className="flex flex-col items-center justify-center gap-6">
+          <div className="flex flex-col items-center justify-center gap-4">
             <div className="relative">
                <div className="w-20 h-20 rounded-full border-4 border-indigo-100 border-t-[#5c4ae4] animate-spin" />
                <div className="absolute inset-0 flex items-center justify-center font-black text-xs text-[#5c4ae4]">{uploadProgress}%</div>
@@ -184,7 +184,7 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
             <p className="text-sm font-black uppercase tracking-widest text-[#5c4ae4]">Synchronising Assets...</p>
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-5">
+          <div className="flex flex-col items-center gap-4">
             <div className={`w-20 h-20 rounded-3xl flex items-center justify-center transition-all duration-500 shadow-xl shadow-indigo-500/10
               ${dragOver ? 'bg-[#5c4ae4] text-white scale-110 rotate-6' : 'bg-indigo-50 dark:bg-indigo-500/10 text-[#5c4ae4] group-hover:scale-105 group-hover:-rotate-3'}`}>
                <UploadCloud className="w-10 h-10" />
@@ -220,7 +220,7 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
           </PresenceCard>
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {visibleItems.map((item) => {
                 const isCopied = copiedId === item.id;
                 const fileName = getFileName(item.url);

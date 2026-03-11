@@ -110,7 +110,7 @@ export default function SecurityClient({
   const totalPages = Math.ceil(totalLoginsCount / loginsPerPage);
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4">
 
       {/* ── Protocol Selectors ── */}
       <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-2">
@@ -135,10 +135,10 @@ export default function SecurityClient({
       </PresenceCard>
 
       {activeTab === 'keys' && (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
            
            {isCreatingKey && (
-             <PresenceCard className="bg-white dark:bg-[#181623] border-l-8 border-l-[#5c4ae4] p-8 space-y-8 relative overflow-hidden">
+             <PresenceCard className="bg-white dark:bg-[#181623] border-l-8 border-l-[#5c4ae4] p-8 flex flex-col gap-4 relative overflow-hidden">
                 <div className="absolute right-[-20px] top-[-20px] opacity-[0.03] rotate-12">
                    <KeyRound className="w-48 h-48 text-[#5c4ae4]" />
                 </div>
@@ -152,7 +152,7 @@ export default function SecurityClient({
                    </button>
                 </div>
                 
-                <div className="space-y-8 relative z-10">
+                <div className="flex flex-col gap-4 relative z-10">
                    <div className="space-y-3">
                      <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Identity Label</label>
                      <input 
@@ -195,9 +195,9 @@ export default function SecurityClient({
            )}
 
            {generatedKey && (
-             <PresenceCard className="bg-rose-50 border-none p-10 space-y-8 animate-in zoom-in-95 duration-500 relative overflow-hidden">
+             <PresenceCard className="bg-rose-50 border-none p-10 flex flex-col gap-4 animate-in zoom-in-95 duration-500 relative overflow-hidden">
                 <div className="absolute top-0 left-0 bottom-0 w-2 bg-rose-500"></div>
-                <div className="flex items-center gap-5">
+                <div className="flex items-center gap-4">
                    <div className="w-14 h-14 rounded-2xl bg-rose-500 text-white flex items-center justify-center shadow-xl shadow-rose-500/20">
                       <AlertTriangle className="w-8 h-8" />
                    </div>
@@ -207,7 +207,7 @@ export default function SecurityClient({
                    </div>
                 </div>
 
-                <div className="p-8 rounded-[2rem] bg-black/5 flex flex-col items-center gap-6">
+                <div className="p-4 rounded-[2rem] bg-black/5 flex flex-col items-center gap-4">
                    <code className="text-xl font-mono text-rose-500 font-black break-all text-center tracking-widest">
                       {generatedKey}
                    </code>
@@ -224,7 +224,7 @@ export default function SecurityClient({
 
            {!isCreatingKey && !generatedKey && (
              <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-6">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                   <div>
                     <h2 className="text-sm font-black text-[#1b1929] dark:text-white uppercase tracking-[0.2em]">Active Cipher Nodes</h2>
                     <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">Authorized system access points</p>
@@ -239,7 +239,7 @@ export default function SecurityClient({
            <div className="grid gap-4">
              {keys.map(k => (
                <PresenceCard key={k.id} noPadding className="group overflow-hidden">
-                  <div className="p-8 flex flex-col md:flex-row gap-8 items-start md:items-center">
+                  <div className="p-4 flex flex-col md:flex-row gap-8 items-start md:items-center">
                      <div className="w-16 h-16 rounded-[1.5rem] bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] shrink-0 shadow-inner group-hover:scale-110 transition-transform">
                         <Key className="w-8 h-8" />
                      </div>
@@ -248,7 +248,7 @@ export default function SecurityClient({
                            <h3 className="text-xl font-black text-[#1b1929] dark:text-white truncate uppercase tracking-tight">{k.name}</h3>
                            <span className="px-3 py-1 rounded-lg bg-gray-50 dark:bg-white/5 text-[10px] font-black text-gray-300 uppercase tracking-widest border border-indigo-50">{k.prefix}••••</span>
                         </div>
-                        <div className="flex flex-wrap items-center gap-6">
+                        <div className="flex flex-wrap items-center gap-4">
                            <div className="flex items-center gap-3">
                               <Calendar className="w-4 h-4 text-indigo-300" />
                               <span className="text-[10px] font-black text-gray-400 uppercase">Deployed · {new Date(k.created_at).toLocaleDateString()}</span>
@@ -284,10 +284,10 @@ export default function SecurityClient({
       )}
 
       {activeTab === 'logins' && (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
            
            <PresenceCard noPadding>
-              <div className="p-8 border-b border-indigo-50 dark:border-white/5 flex flex-col md:flex-row items-center gap-6">
+              <div className="p-4 border-b border-indigo-50 dark:border-white/5 flex flex-col md:flex-row items-center gap-4">
                  <div className="relative flex-1 w-full">
                    <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-300" />
                    <input 
@@ -358,7 +358,7 @@ export default function SecurityClient({
               </div>
               
               {totalPages > 1 && (
-                <div className="p-8 bg-gray-50/30 dark:bg-white/5 border-t border-indigo-50 dark:border-white/5 flex items-center justify-between">
+                <div className="p-4 bg-gray-50/30 dark:bg-white/5 border-t border-indigo-50 dark:border-white/5 flex items-center justify-between">
                   <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
                     Cluster {loginPage} <span className="mx-2 text-indigo-100">|</span> Total {totalPages}
                   </span>

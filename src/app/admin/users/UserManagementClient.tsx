@@ -131,7 +131,7 @@ export default function UserManagementClient({ users: initialUsers, currentUserR
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4">
       
       {/* ── Action Bar ────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row gap-4 mb-2">
@@ -192,7 +192,7 @@ export default function UserManagementClient({ users: initialUsers, currentUserR
 
             return (
               <PresenceCard key={u.id} noPadding className={`group active:scale-[0.99] transition-all duration-200 ${u.status !== 'active' ? 'opacity-70 grayscale' : ''}`}>
-                 <div className="p-5 flex flex-col md:flex-row items-center gap-5">
+                 <div className="p-5 flex flex-col md:flex-row items-center gap-4">
                    
                    <div className="relative shrink-0">
                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg ${u.status === 'active' ? 'bg-gradient-to-br from-[#5c4ae4] to-indigo-400' : 'bg-gray-400'}`}>

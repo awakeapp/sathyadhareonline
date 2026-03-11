@@ -30,7 +30,7 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
       <div className="bg-white dark:bg-[#181623] border border-indigo-100 dark:border-white/10 p-4 rounded-2xl shadow-2xl space-y-2 z-50">
         <p className="font-black text-[10px] uppercase tracking-widest text-gray-400 mb-2 border-b border-indigo-50 dark:border-white/10 pb-2">{label}</p>
         {payload.map((p: any) => (
-          <div key={p.name} className="flex justify-between gap-6 items-center">
+          <div key={p.name} className="flex justify-between gap-4 items-center">
              <span className="text-[10px] font-black uppercase tracking-tight" style={{ color: p.color }}>{p.name}</span>
              <span className="font-black text-sm text-[#1b1929] dark:text-white tabular-nums">{Number(p.value).toLocaleString()}</span>
           </div>
@@ -96,11 +96,11 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4">
       
       {/* ── Discovery Controls ── */}
       <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-4">
-        <div className="flex flex-col xl:flex-row gap-6 justify-between items-center">
+        <div className="flex flex-col xl:flex-row gap-4 justify-between items-center">
           
           <div className="flex gap-2 bg-white dark:bg-[#1b1929] p-2 rounded-[2rem] shadow-sm">
             {[
@@ -143,8 +143,8 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
       <div className="transition-all duration-500">
         
         {activeTab === 'overview' && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-6 duration-700">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-6 duration-700">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                <PresenceCard className="relative overflow-hidden group">
                   <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-3">Traffic Volume</p>
                   <p className="text-4xl font-black text-[#1b1929] dark:text-white tabular-nums">{totals.viewsInRange.toLocaleString()}</p>
@@ -162,7 +162,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
                </PresenceCard>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                <PresenceCard>
                   <div className="flex items-center gap-3 mb-8">
                     <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4]">
@@ -223,14 +223,14 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
         )}
 
         {activeTab === 'content' && (
-           <div className="animate-in fade-in slide-in-from-bottom-6 duration-700 space-y-6">
+           <div className="animate-in fade-in slide-in-from-bottom-6 duration-700 flex flex-col gap-4">
               <div className="flex justify-end">
                  <PresenceButton onClick={() => handleExport('content')} disabled={isExporting} className="bg-indigo-50 !text-[#5c4ae4] hover:bg-indigo-100 shadow-none">
                    <Download className="w-5 h-5 mr-3" /> Export Performance Manifest
                  </PresenceButton>
               </div>
               
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <PresenceCard>
                    <div className="flex items-center gap-4 mb-10 pb-6 border-b border-indigo-50 dark:border-white/5">
                       <div className="w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center text-rose-500 shadow-lg shadow-rose-500/10">
@@ -242,7 +242,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
                       </div>
                    </div>
                    
-                   <div className="space-y-6">
+                   <div className="flex flex-col gap-4">
                      {topArticlesByViews.length === 0 ? (
                        <p className="text-center py-12 text-gray-300 font-black uppercase text-xs">No Data Synchronised</p>
                      ) : (
@@ -276,7 +276,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
                       </div>
                    </div>
                    
-                   <div className="space-y-6">
+                   <div className="flex flex-col gap-4">
                      {topArticlesByComments.length === 0 ? (
                        <p className="text-center py-12 text-gray-300 font-black uppercase text-xs">No Data Synchronised</p>
                      ) : (
@@ -303,7 +303,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
         )}
 
         {activeTab === 'categories' && (
-           <div className="animate-in fade-in slide-in-from-bottom-6 duration-700 grid grid-cols-1 md:grid-cols-2 gap-6">
+           <div className="animate-in fade-in slide-in-from-bottom-6 duration-700 grid grid-cols-1 md:grid-cols-2 gap-4">
               <PresenceCard>
                   <div className="flex items-center gap-4 mb-10 pb-6 border-b border-indigo-50 dark:border-white/5">
                     <div className="w-14 h-14 rounded-2xl bg-fuchsia-50 dark:bg-fuchsia-500/10 flex items-center justify-center text-fuchsia-500">
@@ -315,7 +315,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
                     </div>
                   </div>
                   
-                  <div className="space-y-6">
+                  <div className="flex flex-col gap-4">
                     {categoryStats.map((cat, i) => {
                       const pct = (cat.count / maxCatCount) * 100;
                       return (

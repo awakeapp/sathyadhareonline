@@ -82,7 +82,7 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4">
       
       {/* ── Filter Bar ── */}
       <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-4">
@@ -109,7 +109,7 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
           <p className="font-black text-xl text-gray-400 uppercase tracking-widest">No Sequences</p>
         </PresenceCard>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredSequels.map(s => (
              <PresenceCard key={s.id} noPadding className="group overflow-hidden">
                 <div className="h-40 bg-gray-50 dark:bg-white/5 relative flex items-center justify-center overflow-hidden">
@@ -127,7 +127,7 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
                    </div>
                 </div>
 
-                <div className="p-6">
+                <div className="p-4">
                    <h3 className="text-lg font-black text-[#1b1929] dark:text-white mb-2 truncate">{s.title}</h3>
                    <p className="text-xs font-medium text-gray-400 line-clamp-2 h-10 leading-relaxed italic">
                       {s.description || 'No description provided.'}
@@ -154,7 +154,7 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
       {showModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#1b1929]/80 backdrop-blur-xl animate-in fade-in duration-300">
            <div className="w-full max-w-lg bg-white dark:bg-[#181623] rounded-[2.5rem] shadow-2xl animate-in zoom-in-95 duration-300">
-              <div className="p-8 border-b border-indigo-50 dark:border-white/5 flex items-center justify-between">
+              <div className="p-4 border-b border-indigo-50 dark:border-white/5 flex items-center justify-between">
                  <div>
                     <h2 className="text-2xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight">{editingId ? 'Modify Sequence' : 'Create Node'}</h2>
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Registry Entry System</p>
@@ -164,7 +164,7 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
                  </button>
               </div>
               
-              <div className="p-8 space-y-6">
+              <div className="p-4 flex flex-col gap-4">
                  <div className="space-y-2">
                    <label className="text-[10px] font-black uppercase tracking-widest text-[#5c4ae4]">Identification Label</label>
                    <input 

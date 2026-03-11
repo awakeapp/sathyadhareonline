@@ -87,7 +87,7 @@ export default function CommentsClient({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4">
       
       {/* ── Filter Engine ── */}
       <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none">
@@ -150,7 +150,7 @@ export default function CommentsClient({
 
              return (
                <PresenceCard key={c.id} noPadding className={`group transition-all ${isSelected ? 'ring-2 ring-[#5c4ae4]' : ''} ${c.status !== 'pending' ? 'opacity-80' : ''}`}>
-                  <div className="p-5 flex flex-col md:flex-row gap-5">
+                  <div className="p-5 flex flex-col md:flex-row gap-4">
                     
                     <div className="shrink-0 pt-1">
                        <button onClick={() => toggleSelect(c.id)} className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${isSelected ? 'bg-[#5c4ae4] text-white shadow-lg' : 'bg-gray-50 dark:bg-white/5 text-gray-200 border-2 border-transparent hover:border-indigo-100'}`}>

@@ -69,7 +69,7 @@ export default function TrashManagerClient({
     new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4">
       
       {/* ── Tabs ── */}
       <div className="flex gap-3 overflow-x-auto scrollbar-none pb-2">
@@ -109,7 +109,7 @@ export default function TrashManagerClient({
 
             return (
               <PresenceCard key={item.id} noPadding className="group">
-                <div className="p-5 flex flex-col md:flex-row items-center gap-5">
+                <div className="p-5 flex flex-col md:flex-row items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-300 shrink-0">
                      <AlertTriangle className="w-6 h-6" />
                   </div>
