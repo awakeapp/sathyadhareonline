@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import {
   Users, BarChart2, MessageSquare, Image as ImageIcon,
-  Layers, ScrollText, Library, LucideIcon, ArrowRight,
+  Layers, ScrollText, Library, LucideIcon,
   SlidersHorizontal, ChevronLeft,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -12,78 +12,50 @@ export const dynamic = 'force-dynamic';
 
 interface CardItem {
   label: string;
-  sub: string;
   href: string;
   icon: LucideIcon;
-  color: string;       // text / icon colour
-  bg: string;          // icon bg
-  border: string;      // card border accent (hover)
   badge?: number;
 }
+
+// Using a unified color scheme for that minimal, standard look
+const UNIFIED_COLOR = '#4f46e5'; // Indigo
+const UNIFIED_BG = 'rgba(79, 70, 229, 0.1)';
 
 const MANAGE_ITEMS: CardItem[] = [
   {
     label: 'Users',
-    sub: 'Manage accounts & assign roles',
     href: '/admin/users',
     icon: Users,
-    color: '#a78bfa',
-    bg: 'rgba(124,58,237,0.15)',
-    border: 'rgba(124,58,237,0.40)',
   },
   {
     label: 'Analytics',
-    sub: 'Traffic, page views & growth',
     href: '/admin/analytics',
     icon: BarChart2,
-    color: '#60a5fa',
-    bg: 'rgba(37,99,235,0.15)',
-    border: 'rgba(37,99,235,0.40)',
   },
   {
     label: 'Comments',
-    sub: 'Moderation queue & approvals',
     href: '/admin/comments',
     icon: MessageSquare,
-    color: '#34d399',
-    bg: 'rgba(16,185,129,0.15)',
-    border: 'rgba(16,185,129,0.40)',
   },
   {
     label: 'Media',
-    sub: 'File library & image uploads',
     href: '/admin/media',
     icon: ImageIcon,
-    color: '#f472b6',
-    bg: 'rgba(236,72,153,0.15)',
-    border: 'rgba(236,72,153,0.40)',
   },
   {
     label: 'Categories',
-    sub: 'Organise content by topics',
     href: '/admin/categories',
     icon: Library,
-    color: '#fbbf24',
-    bg: 'rgba(245,158,11,0.15)',
-    border: 'rgba(245,158,11,0.40)',
   },
   {
     label: 'Sequels',
-    sub: 'Multi-part article collections',
     href: '/admin/sequels',
     icon: Layers,
-    color: '#fb923c',
-    bg: 'rgba(234,88,12,0.15)',
-    border: 'rgba(234,88,12,0.40)',
   },
   {
     label: 'Audit Logs',
-    sub: 'Full activity & change history',
     href: '/admin/audit-logs',
     icon: ScrollText,
-    color: '#c084fc',
-    bg: 'rgba(168,85,247,0.15)',
-    border: 'rgba(168,85,247,0.40)',
   },
 ];
 
@@ -117,83 +89,78 @@ export default async function ManagePage() {
       : i
   );
 
+  // Pad the array to make the grid exactly divisible by 3 (optional, to keep borders neat)
+  // The image shows 6 items. We have 7. A 3-column grid is fine.
+  
   return (
     <div className="font-sans antialiased min-h-screen pb-28 px-4 pt-6 bg-[var(--color-background)]">
       <div className="max-w-4xl mx-auto">
 
         {/* ── Header ─────────────────────────────────────────── */}
         <div className="flex items-center gap-4 mb-8 mt-2">
-          <Button asChild variant="outline" size="icon" className="rounded-full w-10 h-10 border-[var(--color-border)] text-[var(--color-muted)] shrink-0 hidden sm:flex">
+          <Button asChild variant="outline" size="icon" className="rounded-full w-10 h-10 border-[var(--color-border)] text-[var(--color-muted)] shrink-0 hidden sm:flex hover:bg-[var(--color-surface)]">
             <Link href="/admin">
               <ChevronLeft className="w-5 h-5" />
             </Link>
           </Button>
-          <div className="w-12 h-12 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center flex-shrink-0">
-            <SlidersHorizontal className="w-6 h-6 text-violet-400" />
+          <div className="w-12 h-12 rounded-2xl bg-[#4f46e5]/10 border border-[#4f46e5]/20 flex items-center justify-center flex-shrink-0">
+            <SlidersHorizontal className="w-6 h-6 text-[#4f46e5]" />
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-[var(--color-text)]">
-              Manage
+              Manage Operations
             </h1>
             <p className="text-sm text-[var(--color-muted)] font-medium mt-0.5">
-              Daily oversight &amp; operations hub
+              Admin tools & platform settings
             </p>
           </div>
         </div>
 
-        {/* ── Grid of cards ─────────────────────────────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {items.map(item => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="group relative rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 flex items-center gap-4 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-              style={{
-                // We use inline style for the dynamic hover border since Tailwind
-                // cannot interpolate arbitrary colour values at runtime.
-              }}
-              onMouseEnter={undefined /* handled via Tailwind group hover below */}
-            >
-              {/* Hover border glow — rendered as a pseudo-element via box-shadow */}
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                style={{ boxShadow: `0 0 0 1.5px ${item.border}` }}
-              />
-
-              {/* Icon */}
-              <div
-                className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 transition-transform duration-200 group-hover:scale-110"
-                style={{ background: item.bg }}
-              >
-                <item.icon size={22} style={{ color: item.color }} />
-              </div>
-
-              {/* Text */}
-              <div className="flex-1 min-w-0">
-                <p
-                  className="font-black text-base text-[var(--color-text)] group-hover:text-white transition-colors"
+        {/* ── Minimalist Grid ─────────────────────────────────── */}
+        <div className="bg-[var(--color-surface)] rounded-[2rem] border border-[var(--color-border)] shadow-sm px-2 py-6 sm:p-8 animate-fade-up">
+          <div className="grid grid-cols-3">
+            {items.map((item, idx) => {
+              const isLastCol = idx % 3 === 2;
+              const isLastRow = Math.floor(idx / 3) === Math.floor((items.length - 1) / 3);
+              
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`relative flex flex-col items-center justify-center py-8 group transition-colors hover:bg-[var(--color-text)]/5 rounded-2xl ${
+                    !isLastCol ? 'border-r border-[var(--color-border)]/40' : ''
+                  } ${
+                    !isLastRow ? 'border-b border-[var(--color-border)]/40' : ''
+                  }`}
+                  style={{
+                    // Removing borders on hover to let the exact rounded rect feel prominent,
+                    // but standard CSS keeps the border structural.
+                    borderRightWidth: !isLastCol ? '1px' : '0px',
+                    borderBottomWidth: !isLastRow ? '1px' : '0px',
+                    borderRadius: 0, // ensure no rounding to break border matrix
+                  }}
                 >
-                  {item.label}
-                  {item.badge ? (
-                    <span className="ml-2 inline-flex items-center justify-center min-w-[20px] h-5 rounded-full bg-rose-500 text-white text-[9px] font-black px-1.5">
-                      {item.badge}
-                    </span>
-                  ) : null}
-                </p>
-                <p className="text-xs text-[var(--color-muted)] font-medium mt-0.5 truncate">
-                  {item.sub}
-                </p>
-              </div>
+                  {/* Icon Wrapper */}
+                  <div
+                    className="w-[60px] h-[60px] rounded-full flex items-center justify-center mb-3 transition-transform duration-200 group-hover:-translate-y-1"
+                    style={{ background: UNIFIED_BG }}
+                  >
+                    <item.icon size={26} style={{ color: UNIFIED_COLOR }} strokeWidth={1.5} />
+                  </div>
 
-              {/* Arrow */}
-              <ArrowRight
-                size={16}
-                className="flex-shrink-0 text-[var(--color-muted)] group-hover:translate-x-1 transition-transform duration-200"
-                style={{ color: item.color, opacity: 0.6 }}
-              />
-            </Link>
-          ))}
+                  {/* Text Label */}
+                  <div className="flex items-center justify-center">
+                    <p className="font-semibold text-[13px] text-[var(--color-text)] tracking-tight">
+                      {item.label}
+                    </p>
+                    {item.badge ? (
+                      <span className="ml-[5px] w-2 h-2 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50 flex-shrink-0" />
+                    ) : null}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </div>
 
       </div>
