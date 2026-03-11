@@ -229,7 +229,7 @@ export default async function AdminPage() {
 
         {/* ── Recent Articles Section ── */}
         <div className="pt-4">
-          <PresenceSectionHeader title="Recent Activity" action="See All" onActionClick={() => {}} />
+          <PresenceSectionHeader title="Recent Activity" action="See All" actionHref="/admin/audit-logs" />
           <div className="space-y-3">
             {metrics.recentArticles.map((a) => (
               <Link key={a.id} href={`/admin/articles/${a.id}/edit`}>
