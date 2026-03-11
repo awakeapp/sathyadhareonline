@@ -36,7 +36,8 @@ export default async function AdminCommentsPage() {
       status,
       is_spam,
       created_at,
-      articles ( title )
+      articles ( title ),
+      profiles ( full_name, email )
     `)
     .eq('is_deleted', false)
     .order('created_at', { ascending: false });

@@ -262,7 +262,7 @@ export default async function AdminPage() {
         <div className="grid grid-cols-4 sm:grid-cols-5 gap-3 mb-8">
           <ActionTile href="/admin/articles"     label="All Articles"   icon={FileText}   color="bg-blue-500" />
           <ActionTile href="/admin/categories"   label="Categories"     icon={Tag}        color="bg-indigo-500" />
-          <ActionTile href="/admin/sequels"       label="Sequels"         icon={BookOpen}   color="bg-sky-600" />
+          <ActionTile href="/admin/media"        label="Media"          icon={ImageIcon}  color="bg-sky-600" />
           <ActionTile href="/admin/sequels"      label="Sequels"        icon={Layers}     color="bg-cyan-600" />
           <ActionTile href="/admin/settings"     label="Settings"       icon={Settings}   color="bg-gray-600" />
         </div>

@@ -25,13 +25,20 @@ export default async function AdminUsersPage() {
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (!profile || profile.role !== 'super_admin') redirect('/admin');
 
-  // Fetch all users with profile and status
+  const { createAdminClient } = await import('@/lib/supabase/admin');
+  const adminAuth = createAdminClient();
+  
+  // Fetch all users from Auth directly (source of truth)
+  const { data: authData } = await adminAuth.auth.admin.listUsers();
+  const authUsers = authData?.users || [];
+
+  // Fetch all profiles
   const { data: fetchUsers, error } = await supabase
     .from('profiles')
     .select('id, full_name, email, role, status, created_at')
     .order('created_at', { ascending: false });
     
-  let users = fetchUsers;
+  let profileRecords = fetchUsers || [];
 
   if (error) {
     console.warn('Could not fetch with status (migration likely missing), falling back:', error.message);
@@ -39,8 +46,26 @@ export default async function AdminUsersPage() {
       .from('profiles')
       .select('id, full_name, email, role, created_at')
       .order('created_at', { ascending: false });
-    users = fallback.data?.map(u => ({ ...u, status: 'active' })) as UserProfile[];
+    profileRecords = (fallback.data || []).map(u => ({ ...u, status: 'active' }));
   }
+  
+  // Merge Auth users with Profiles to ensure no user is left behind
+  const profileMap = new Map(profileRecords.map(p => [p.id, p]));
+  
+  const users: UserProfile[] = authUsers.map(au => {
+    const profile = profileMap.get(au.id);
+    return {
+      id: au.id,
+      email: au.email || profile?.email || null,
+      full_name: profile?.full_name || au.user_metadata?.full_name || null,
+      role: profile?.role || au.user_metadata?.role || 'reader',
+      status: profile?.status || 'active',
+      created_at: profile?.created_at || au.created_at,
+    };
+  });
+  
+  // Sort by created_at desc
+  users.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   return (
     <div className="font-sans antialiased max-w-4xl mx-auto py-2 px-4 pb-20">

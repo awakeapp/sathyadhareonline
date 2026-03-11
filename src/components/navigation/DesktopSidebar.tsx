@@ -30,7 +30,6 @@ const ADMIN_SECTIONS: NavSection[] = [
       { label: 'Users',     href: '/admin/users',      icon: Users        },
       { label: 'Comments',  href: '/admin/comments',   icon: MessageSquare },
       { label: 'Media',     href: '/admin/media',       icon: ImageIcon    },
-      { label: 'Sequels',    href: '/admin/sequels',      icon: FileText     },
       { label: 'Sequels',   href: '/admin/sequels',     icon: Layers       },
     ],
   },

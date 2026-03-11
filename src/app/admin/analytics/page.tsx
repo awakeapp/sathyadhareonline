@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { Button } from '@/components/ui/Button';
+import { ChevronLeft } from 'lucide-react';
 import AnalyticsClient from './AnalyticsClient';
 import { differenceInDays, parseISO, isValid } from 'date-fns';
 
@@ -52,7 +54,7 @@ export default async function AnalyticsPage({
     .from('articles').select('*', { count: 'exact', head: true })
     .eq('status', 'published').eq('is_deleted', false);
 
-  // ── Time Sequels Data (Range) ─────────────────────────────────────
+  // ── Time Series Data (Range) ─────────────────────────────────────
   const [
     { data: viewRows },
     { data: userRows },
@@ -63,7 +65,7 @@ export default async function AnalyticsPage({
     supabase.from('comments').select('created_at').gte('created_at', startISO).lte('created_at', endISO)
   ]);
 
-  const mapTimeSequels = () => {
+  const mapTimeSeries = () => {
     const map: Record<string, { views: number; users: number; comments: number }> = {};
     for (let i = daysDiff - 1; i >= 0; i--) {
       const d = new Date(endDate.getTime() - i * 86400000).toISOString().slice(0, 10);
@@ -84,15 +86,11 @@ export default async function AnalyticsPage({
     return Object.entries(map).map(([date, data]) => ({ date, ...data }));
   };
 
-  const timeSequels = mapTimeSequels();
-  const rangeViews = timeSequels.reduce((acc, curr) => acc + curr.views, 0);
+  const timeSeries = mapTimeSeries();
+  const rangeViews = timeSeries.reduce((acc, curr) => acc + curr.views, 0);
 
   // ── Top articles by views (Range) ────────────────────────────────
   const viewCounts: Record<string, number> = {};
-  for (const row of viewRows ?? []) {
-    // Note: Since article_views only select created_at, we need article_id! 
-    // Wait, let's fix the above query to include article_id. Let's do a grouped map locally.
-  }
 
   // To fix `viewRows` query for Top Articles and aggregations, we refetch just the IDs since we missed them above.
   const { data: viewDataWithIds } = await supabase.from('article_views').select('article_id').gte('created_at', startISO).lte('created_at', endISO);
@@ -145,23 +143,24 @@ export default async function AnalyticsPage({
       <div className="max-w-6xl mx-auto space-y-6">
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4 mb-4">
+          <Button asChild variant="outline" size="icon" className="rounded-full w-10 h-10 border-[var(--color-border)] text-[var(--color-muted)] shrink-0">
+            <Link href="/admin">
+              <ChevronLeft className="w-5 h-5" />
+            </Link>
+          </Button>
           <div>
             <h1 className="text-3xl font-black tracking-tight text-white leading-tight">Analytics Engine</h1>
             <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider font-semibold mt-0.5">
               Platform Performance Overview
             </p>
           </div>
-          <Link href="/admin"
-            className="px-5 py-2.5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-bold text-[var(--color-muted)] hover:text-white transition-all shadow-sm">
-            ← Dashboard
-          </Link>
         </div>
 
         <AnalyticsClient
           startDate={startISO}
           endDate={endISO}
-          timeSequels={timeSequels}
+          timeSeries={timeSeries}
           topArticlesByViews={topArticlesByViews.map(a => ({ ...a, count: viewCounts[a.id] || 0 }))}
           topArticlesByComments={topArticlesByComments.map(a => ({ ...a, count: commentCounts[a.id] || 0 }))}
           categoryStats={categoryStats}

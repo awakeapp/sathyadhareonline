@@ -4,8 +4,8 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, BarChart, Bar, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
-import { Download, Users, Eye, MessageSquare, Layers, Calendar, Flame, ChevronDown } from 'lucide-react';
+import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
+import { Download, Users, Eye, MessageSquare, Layers, Calendar, Flame } from 'lucide-react';
 import { toast } from 'sonner';
 import { exportUsersCSVAction, exportContentPerformanceCSVAction, exportCategoryCSVAction } from './exports';
 import Link from 'next/link';
@@ -16,7 +16,7 @@ import Link from 'next/link';
 interface Props {
   startDate: string;
   endDate: string;
-  timeSequels: { date: string; views: number; users: number; comments: number }[];
+  timeSeries: { date: string; views: number; users: number; comments: number }[];
   topArticlesByViews: { id: string; title: string; slug: string; count: number }[];
   topArticlesByComments: { id: string; title: string; slug: string; count: number }[];
   categoryStats: { id: string; name: string; count: number; views: number }[];
@@ -42,7 +42,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export default function AnalyticsClient({ startDate, endDate, timeSequels, topArticlesByViews, topArticlesByComments, categoryStats, totals }: Props) {
+export default function AnalyticsClient({ startDate, endDate, timeSeries, topArticlesByViews, topArticlesByComments, categoryStats, totals }: Props) {
   const router = useRouter();
   const [isExporting, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState<'overview' | 'content' | 'categories'>('overview');
@@ -52,8 +52,8 @@ export default function AnalyticsClient({ startDate, endDate, timeSequels, topAr
   const [customStart, setCustomStart] = useState(startDate.substring(0, 10));
   const [customEnd, setCustomEnd] = useState(endDate.substring(0, 10));
 
-  const totalUsers = timeSequels.reduce((s, p) => s + p.users, 0);
-  const totalComments = timeSequels.reduce((s, p) => s + p.comments, 0);
+  const totalUsers = timeSeries.reduce((s, p) => s + p.users, 0);
+  const totalComments = timeSeries.reduce((s, p) => s + p.comments, 0);
   const maxCatCount = Math.max(...categoryStats.map(c => c.count), 1);
 
   const applyPreset = (days: number) => {
@@ -186,7 +186,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSequels, topAr
                     </div>
                     <div className="h-[250px] w-full">
                       <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={timeSequels} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
+                        <AreaChart data={timeSeries} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
                           <defs>
                             <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
                               <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
@@ -211,7 +211,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSequels, topAr
                     </div>
                     <div className="h-[250px] w-full">
                       <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={timeSequels} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
+                        <AreaChart data={timeSeries} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
                           <defs>
                             <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
                               <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>

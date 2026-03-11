@@ -97,6 +97,13 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
             label="More"
             active={isMoreActive}
           />
+
+          {/* Tab 5 — Reader Mode */}
+          <button onClick={() => { enableReaderMode(); window.location.href = '/'; }}
+            className="flex-1 flex flex-col items-center justify-center gap-1 h-full active:scale-90 focus:outline-none"
+            style={{ color: 'var(--color-muted)' }}>
+            <Eye size={22} /><span className="text-[10px] font-bold">Reader</span>
+          </button>
         </div>
       </nav>
     );

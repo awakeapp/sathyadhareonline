@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { IndianRupee, Layers } from 'lucide-react';
+import { IndianRupee, Layers, ChevronLeft } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 
 export default function FinancialLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -18,6 +19,11 @@ export default function FinancialLayout({ children }: { children: React.ReactNod
         
         {/* ── Header ──────────────────────────────────────────────── */}
         <div className="flex items-center gap-4 mb-2 mt-2">
+          <Button asChild variant="outline" size="icon" className="rounded-full w-10 h-10 border-[var(--color-border)] text-[var(--color-muted)] shrink-0">
+            <Link href="/admin">
+              <ChevronLeft className="w-5 h-5" />
+            </Link>
+          </Button>
           <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
             <IndianRupee className="w-6 h-6 text-emerald-500" />
           </div>

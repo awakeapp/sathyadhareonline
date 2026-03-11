@@ -13,7 +13,7 @@ import {
   bulkDeleteCommentsAction 
 } from './actions';
 import { 
-  Search, CheckCircle2, X as RejectIcon, ShieldAlert, Trash2, MessageSquare, ExternalLink, CheckSquare
+  Search, CheckCircle2, X as RejectIcon, ShieldAlert, Trash2, MessageSquare, CheckSquare
 } from 'lucide-react';
 
 interface CommentType {
@@ -26,6 +26,7 @@ interface CommentType {
   is_spam: boolean;
   created_at: string;
   articles: { title: string } | null;
+  profiles?: { full_name: string | null, email: string | null } | null;
 }
 
 export default function CommentsClient({ 
@@ -174,7 +175,7 @@ export default function CommentsClient({
                    <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         <span className="text-sm font-bold text-white tracking-tight">
-                          {c.guest_name || 'Registered User'}
+                          {c.guest_name || c.profiles?.full_name || c.profiles?.email || 'Registered User'}
                         </span>
                         <div className="flex gap-2">
                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${statusColors[c.status] ?? 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>

@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import CategoryManagerClient, { Category } from './CategoryManagerClient';
-import { Tag } from 'lucide-react';
+import { Tag, ChevronLeft } from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/Button';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +25,7 @@ export default async function CategoriesPage() {
   const { data: rawCats } = await supabase
     .from('categories')
     .select('id, name, slug, description, icon_name, sort_order')
-    .eq('is_deleted', false)
+    .or('is_deleted.eq.false,is_deleted.is.null')
     .order('sort_order', { ascending: true });
 
   // ── Article counts per category ─────────────────────────────────────────────
@@ -56,7 +58,12 @@ export default async function CategoriesPage() {
 
         {/* ── Page header ─────────────────────────────────────────────── */}
         <div className="flex items-center gap-4 mb-8 mt-2">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
+          <Button asChild variant="outline" size="icon" className="rounded-full w-10 h-10 border-[var(--color-border)] text-[var(--color-muted)] shrink-0">
+            <Link href="/admin">
+              <ChevronLeft className="w-5 h-5" />
+            </Link>
+          </Button>
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 bg-amber-500/10 border border-amber-500/20">
             <Tag className="w-6 h-6 text-amber-400" />
           </div>
           <div>
