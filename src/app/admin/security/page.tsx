@@ -39,7 +39,7 @@ export default async function SecurityPage() {
   return (
     <PresenceWrapper>
       <PresenceHeader 
-        title="Presence"
+        title="Super Admin"
         roleLabel="Security Protocol · Zero Trust"
         initials={initials}
         icon1={Bell}
@@ -47,7 +47,7 @@ export default async function SecurityPage() {
         icon2Href="/admin"
       />
       
-      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20">
+      <div className="p-4 flex flex-col gap-4 relative z-20">
         <SecurityClient initialKeys={keys || []} />
       </div>
     </PresenceWrapper>

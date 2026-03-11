@@ -118,7 +118,7 @@ export default async function AdminPage() {
     <PresenceWrapper>
       {/* ── Presence Header ── */}
       <PresenceHeader 
-        title="Presence"
+        title="Super Admin"
         roleLabel={roleLabel}
         initials={initials}
         icon1={Send}
@@ -127,7 +127,7 @@ export default async function AdminPage() {
         icon2Href="/admin/audit-logs"
       />
 
-      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20">
+      <div className="p-4 flex flex-col gap-4 relative z-20">
         {/* ── Attendance/Quick Info Card ── */}
         <PresenceCard className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -143,9 +143,9 @@ export default async function AdminPage() {
 
         {/* ── Today's Status Card ── */}
         <PresenceCard>
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
-              <span className="text-5xl font-black text-[#5c4ae4]">
+              <span className="text-4xl sm:text-5xl font-black text-[#5c4ae4]">
                 {new Date().getDate()}
                 <Library className="inline-block w-4 h-4 ml-1 mb-6 text-indigo-300" />
               </span>
@@ -210,8 +210,8 @@ export default async function AdminPage() {
         </div>
 
         {/* ── Main Action Grid ── */}
-        <PresenceCard className="grid grid-cols-3 gap-y-6">
-          <PresenceActionTile href="/admin/articles" icon={FileText} label="All Articles" />
+        <PresenceCard className="grid grid-cols-3 gap-y-4 gap-x-2">
+          <PresenceActionTile href="/admin/articles" icon={FileText} label="Articles" />
           <PresenceActionTile href="/admin/users" icon={Users} label="Users" badge={metrics.newUsers7d > 0} />
           <PresenceActionTile href="/admin/comments" icon={MessageSquare} label="Comments" badge={metrics.pendingComments > 0} />
           <PresenceActionTile href="/admin/analytics" icon={TrendingUp} label="Analytics" />
@@ -230,11 +230,11 @@ export default async function AdminPage() {
         {/* ── Recent Articles Section ── */}
         <div className="pt-4">
           <PresenceSectionHeader title="Recent Activity" action="See All" actionHref="/admin/audit-logs" />
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3">
             {metrics.recentArticles.map((a) => (
               <Link key={a.id} href={`/admin/articles/${a.id}/edit`}>
-                <PresenceCard className="flex items-center justify-between py-4 px-5 active:scale-[0.98] transition-transform">
-                  <div className="flex items-center gap-4 min-w-0">
+                <PresenceCard className="flex items-center justify-between py-3 px-4 active:scale-[0.98] transition-transform">
+                  <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] shrink-0">
                       <FileText className="w-5 h-5" />
                     </div>

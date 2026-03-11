@@ -69,7 +69,7 @@ export default async function ArticlesPage() {
   return (
     <PresenceWrapper>
       <PresenceHeader 
-        title="Presence"
+        title="Super Admin"
         roleLabel={`Article Library · ${mergedArticles.length} Nodes`}
         initials={initials}
         icon1={Bell}
@@ -77,7 +77,7 @@ export default async function ArticlesPage() {
         icon2Href="/admin/articles/new"
       />
       
-      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20">
+      <div className="p-4 flex flex-col gap-4 relative z-20">
         <ArticlesClient 
           articles={mergedArticles}
           users={(users || []).map(u => ({ id: u.id, name: u.full_name || 'Unknown' }))}

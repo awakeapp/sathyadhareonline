@@ -64,7 +64,7 @@ export default async function EditorDashboard() {
   return (
     <PresenceWrapper>
       <PresenceHeader 
-        title="Presence"
+        title="Editor"
         roleLabel="Editor Workspace"
         initials={initials}
         icon1={Bell}
@@ -72,7 +72,7 @@ export default async function EditorDashboard() {
         icon2Href="/"
       />
 
-      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20">
+      <div className="px-5 pb-10 space-y-6 relative z-20">
         <PresenceCard className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400">

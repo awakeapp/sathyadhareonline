@@ -29,8 +29,8 @@ export default async function EditorLayout({ children }: { children: React.React
   }
 
   return (
-    <div className="flex-1 w-full relative transition-all">
-      <div className="h-full overflow-y-auto w-full max-w-[1400px] mx-auto p-4 md:p-8 pb-32">
+    <div className="flex-1 w-full bg-[var(--color-background)]">
+      <div className="w-full max-w-[1400px] mx-auto min-h-screen">
         {children}
       </div>
     </div>

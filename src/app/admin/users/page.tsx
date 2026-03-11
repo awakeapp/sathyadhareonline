@@ -75,7 +75,7 @@ export default async function AdminUsersPage() {
   return (
     <PresenceWrapper>
       <PresenceHeader 
-        title="Presence"
+        title="Super Admin"
         roleLabel="User Management · Master Control"
         initials={initials}
         icon1={Bell}
@@ -83,7 +83,7 @@ export default async function AdminUsersPage() {
         icon2Href="/admin"
       />
       
-      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20">
+      <div className="p-4 flex flex-col gap-4 relative z-20">
         <UserManagementClient users={(users as UserProfile[]) || []} currentUserRole={profile.role} />
       </div>
     </PresenceWrapper>

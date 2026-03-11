@@ -28,14 +28,14 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
 
   const variants = {
     'slide-right': {
-      initial: { x: '25px', opacity: 0 },
+      initial: { x: '100%', opacity: 1 },
       animate: { x: 0, opacity: 1 },
-      exit: { x: '-25px', opacity: 0 },
+      exit: { x: '-20%', opacity: 0 },
     },
     'slide-up': {
-      initial: { y: '25px', opacity: 0 },
+      initial: { y: '100%', opacity: 1 },
       animate: { y: 0, opacity: 1 },
-      exit: { y: '-25px', opacity: 0 },
+      exit: { opacity: 0 },
     }
   };
 
@@ -43,14 +43,19 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   const currentVariant = variants[key] || variants['slide-right'];
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
+    <AnimatePresence mode="popLayout" initial={false}>
       <motion.div
         key={pathname}
         initial={currentVariant.initial}
         animate={currentVariant.animate}
         exit={currentVariant.exit}
-        transition={{ duration: 0.25, ease: 'easeOut' }}
+        transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
         className="w-full flex-1 flex flex-col min-w-0"
+        style={{
+          backgroundColor: 'var(--color-background)',
+          boxShadow: '-10px 0 30px rgba(0,0,0,0.1)',
+          zIndex: 10
+        }}
       >
         <Suspense fallback={<PageContentFallback />}>
           {children}

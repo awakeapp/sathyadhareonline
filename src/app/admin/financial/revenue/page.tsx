@@ -55,7 +55,7 @@ export default async function RevenuePage() {
   return (
     <PresenceWrapper>
       <PresenceHeader 
-        title="Presence"
+        title="Super Admin"
         roleLabel="Financial Intelligence · Capital Matrix"
         initials={initials}
         icon1={Bell}
@@ -63,7 +63,7 @@ export default async function RevenuePage() {
         icon2Href="/admin"
       />
       
-      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20 max-w-5xl mx-auto">
+      <div className="p-4 flex flex-col gap-4 relative z-20 max-w-5xl mx-auto">
         <RevenueClient 
           totalRevenue={totalRevenue} 
           mrr={mrr} 

@@ -34,7 +34,7 @@ export default async function AdminNewsletterPage() {
   return (
     <PresenceWrapper>
       <PresenceHeader 
-        title="Presence"
+        title="Super Admin"
         roleLabel={`Broadcasting · ${subscribers?.length ?? 0} Receivers`}
         initials={initials}
         icon1={Bell}
@@ -42,7 +42,7 @@ export default async function AdminNewsletterPage() {
         icon2Href="/admin"
       />
       
-      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20 max-w-3xl mx-auto">
+      <div className="p-4 flex flex-col gap-4 relative z-20 max-w-3xl mx-auto">
         <NewsletterClient subscribers={subscribers ?? []} />
       </div>
     </PresenceWrapper>

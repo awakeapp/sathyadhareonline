@@ -145,7 +145,7 @@ export default async function EditArticlePage({
   return (
     <PresenceWrapper>
       <PresenceHeader 
-        title="Presence"
+        title="Super Admin"
         roleLabel="Article Weaver · Data Mutation"
         initials={initials}
         icon1={Bell}
@@ -153,7 +153,7 @@ export default async function EditArticlePage({
         icon2Href="/admin/articles"
       />
       
-      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20 max-w-4xl mx-auto">
+      <div className="p-4 flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
         
         {/* State Bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">

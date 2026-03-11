@@ -62,7 +62,7 @@ export default async function FridayMessagesPage() {
   return (
     <PresenceWrapper>
       <PresenceHeader 
-        title="Presence"
+        title="Super Admin"
         roleLabel={`Friday Dispatch · ${messages?.length || 0} Nodes`}
         initials={initials}
         icon1={Bell}
@@ -70,7 +70,7 @@ export default async function FridayMessagesPage() {
         icon2Href="/admin/friday/new"
       />
       
-      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20 max-w-4xl mx-auto">
+      <div className="p-4 flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
         {!messages || messages.length === 0 ? (
           <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
             <Calendar className="w-16 h-16 mb-5 text-indigo-100" />

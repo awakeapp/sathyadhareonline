@@ -32,7 +32,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="flex-1 w-full bg-[var(--color-background)]">
-      <div className="h-full overflow-y-auto w-full max-w-[1400px] mx-auto pb-24 touch-pan-y">
+      <div className="w-full max-w-[1400px] mx-auto min-h-screen">
         {children}
       </div>
     </div>

@@ -110,7 +110,7 @@ export default async function NewArticlePage() {
   return (
     <PresenceWrapper>
       <PresenceHeader 
-        title="Presence"
+        title="Super Admin"
         roleLabel="Article Weaver · Creation Matrix"
         initials={initials}
         icon1={Bell}
@@ -118,7 +118,7 @@ export default async function NewArticlePage() {
         icon2Href="/admin/articles"
       />
       
-      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20 max-w-4xl mx-auto">
+      <div className="p-4 flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
         
         <div className="flex items-center gap-5 mb-6">
            <div className="w-12 h-12 rounded-2xl bg-[#5c4ae4] flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">

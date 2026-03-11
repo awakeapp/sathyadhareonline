@@ -119,7 +119,7 @@ export default async function EditorEditArticlePage({
         icon2Href="/editor/articles"
       />
       
-      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20 max-w-4xl mx-auto">
+      <div className="px-5 pb-10 space-y-6 relative z-20 max-w-4xl mx-auto">
         
         {/* State Bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">

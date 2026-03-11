@@ -56,7 +56,7 @@ export default async function TrashPage() {
   return (
     <PresenceWrapper>
       <PresenceHeader 
-        title="Presence"
+        title="Super Admin"
         roleLabel="Archive System · Data Recovery"
         initials={initials}
         icon1={Bell}
@@ -64,7 +64,7 @@ export default async function TrashPage() {
         icon2Href="/admin"
       />
       
-      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20">
+      <div className="p-4 flex flex-col gap-4 relative z-20">
         <TrashManagerClient 
           initialArticles={mappedArticles}
           initialCategories={mappedCategories}

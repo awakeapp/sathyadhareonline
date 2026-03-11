@@ -48,7 +48,7 @@ export default async function SettingsPage() {
   return (
     <PresenceWrapper>
       <PresenceHeader 
-        title="Presence"
+        title="Super Admin"
         roleLabel="System Architecture · Global Config"
         initials={initials}
         icon1={Bell}
@@ -56,7 +56,7 @@ export default async function SettingsPage() {
         icon2Href="/admin"
       />
       
-      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20">
+      <div className="p-4 flex flex-col gap-4 relative z-20">
         <SettingsClient initialSettings={safeSettings} />
       </div>
     </PresenceWrapper>

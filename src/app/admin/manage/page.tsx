@@ -64,7 +64,7 @@ export default async function ManagePage() {
   return (
     <PresenceWrapper>
       <PresenceHeader 
-        title="Presence"
+        title="Super Admin"
         roleLabel="Management Operations · Control Matrix"
         initials={initials}
         icon1={Bell}
@@ -72,19 +72,19 @@ export default async function ManagePage() {
         icon2Href="/admin"
       />
       
-      <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20 max-w-4xl mx-auto">
-        <PresenceCard className="p-8">
-           <div className="flex items-center gap-5 mb-10">
-              <div className="w-14 h-14 rounded-[1.5rem] bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] shadow-inner">
-                 <SlidersHorizontal className="w-7 h-7" />
+      <div className="p-4 flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
+        <PresenceCard>
+           <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] shadow-inner">
+                 <SlidersHorizontal className="w-6 h-6" />
               </div>
               <div>
-                 <h2 className="text-2xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight">System Operations</h2>
-                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">High-Privilege Vector Control</p>
+                 <h2 className="text-xl font-bold text-[#1b1929] dark:text-white uppercase tracking-tight">System Operations</h2>
+                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mt-1">High-Privilege Vector Control</p>
               </div>
            </div>
 
-           <div className="grid grid-cols-3 gap-y-10">
+           <div className="grid grid-cols-3 gap-y-6 gap-x-2">
              {items.map((item) => (
                 <PresenceActionTile 
                   key={item.href}
@@ -97,8 +97,8 @@ export default async function ManagePage() {
            </div>
         </PresenceCard>
 
-        <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-6 text-center">
-           <p className="text-[10px] font-black text-indigo-300 uppercase tracking-[0.3em]">Authorized Access Only · Cryptographic Verification Active</p>
+        <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-4 text-center">
+           <p className="text-xs font-bold text-indigo-400 uppercase tracking-wide">Authorized Access Only</p>
         </PresenceCard>
       </div>
     </PresenceWrapper>

@@ -57,9 +57,8 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
 
     return (
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 backdrop-blur-2xl bg-white/80 dark:bg-[#0f0e17]/80"
         style={{
-          background: 'var(--color-surface)',
           borderTop: '1px solid var(--color-border)',
           boxShadow: '0 -4px 24px rgba(0,0,0,0.04)',
         }}
@@ -113,8 +112,8 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
   ────────────────────────────────────────────────────────────── */
   if (isAdminView && role === 'admin') {
     return (
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50"
-        style={{ background: 'var(--color-surface)', borderTop: '1px solid var(--color-border)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 backdrop-blur-2xl bg-white/80 dark:bg-[#0f0e17]/80"
+        style={{ borderTop: '1px solid var(--color-border)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="flex items-stretch h-16 px-2">
           {[
             { label: 'Dashboard', href: '/admin',          icon: LayoutDashboard, exact: true  },
@@ -140,8 +139,8 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
   ────────────────────────────────────────────────────────────── */
   if (isAdminView && role === 'editor') {
     return (
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50"
-        style={{ background: 'var(--color-surface)', borderTop: '1px solid var(--color-border)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 backdrop-blur-2xl bg-white/80 dark:bg-[#0f0e17]/80"
+        style={{ borderTop: '1px solid var(--color-border)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="flex items-stretch h-16 px-2">
           {[
             { label: 'Dashboard', href: '/editor',               icon: LayoutDashboard, exact: true  },
@@ -165,8 +164,8 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
      READER / GUEST nav
   ────────────────────────────────────────────────────────────── */
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50"
-      style={{ background: 'var(--color-background)', borderTop: '1px solid var(--color-border)', paddingBottom: 'env(safe-area-inset-bottom)', boxShadow: '0 -2px 20px rgba(0,0,0,0.08)' }}>
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 backdrop-blur-2xl bg-white/80 dark:bg-[#0f0e17]/80"
+      style={{ borderTop: '1px solid var(--color-border)', paddingBottom: 'env(safe-area-inset-bottom)', boxShadow: '0 -2px 20px rgba(0,0,0,0.08)' }}>
       <div className="flex items-stretch h-16 px-2">
         {[
           { label: 'Home',    href: '/',        icon: Home,   exact: true  },
