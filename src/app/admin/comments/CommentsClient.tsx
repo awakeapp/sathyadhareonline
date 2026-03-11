@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useTransition } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
 import { toast } from 'sonner';
 import { 
   updateCommentStatusAction, 
@@ -14,8 +13,7 @@ import {
   Search, CheckCircle2, X as RejectIcon, ShieldAlert, Trash2, MessageSquare, CheckSquare, Clock, User
 } from 'lucide-react';
 import { 
-  PresenceCard, 
-  PresenceButton 
+  PresenceCard 
 } from '@/components/PresenceUI';
 
 interface CommentType {
@@ -38,7 +36,7 @@ export default function CommentsClient({
   comments: CommentType[], 
   articlesList: { id: string, title: string }[] 
 }) {
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -79,6 +77,7 @@ export default function CommentsClient({
         toast.success(successMsg);
         setSelectedIds(new Set());
       }
+      return;
     });
   };
 
@@ -190,9 +189,7 @@ export default function CommentsClient({
                        </div>
 
                        <div className="bg-gray-50 dark:bg-white/5 rounded-2xl p-4 mb-3 border-l-4 border-indigo-100 dark:border-indigo-500/20">
-                          <p className="text-sm font-medium leading-relaxed italic text-[#1b1929]/80 dark:text-white/80">
-                             "{c.content}"
-                          </p>
+                              &ldquo;{c.content}&rdquo;
                        </div>
 
                        <div className="flex items-center gap-3">

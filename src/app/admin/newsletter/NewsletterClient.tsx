@@ -1,10 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Button } from '@/components/ui/Button';
-import { Input, Textarea, Label } from '@/components/ui/Input';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from '@/components/ui/Modal';
-import { Mail, Download, Trash2, CheckCircle2, AlertCircle, Users, SendPulse, X } from 'lucide-react';
+import { Mail, Download, Trash2, CheckCircle2, AlertCircle, Users, X } from 'lucide-react';
 import { 
   PresenceCard, 
   PresenceButton 
@@ -58,6 +55,7 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
         alert(j.error ?? 'Atomic Rejection');
       }
       setRemovingId(null);
+      return;
     });
   }
 

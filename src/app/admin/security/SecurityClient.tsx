@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
-import { Button } from '@/components/ui/Button';
 import { toast } from 'sonner';
 import { createApiKeyAction, deleteApiKeyAction, getLoginHistoryAction } from './actions';
-import { Key, Shield, Clock, AlertTriangle, MonitorSmartphone, Plus, Eye, KeyRound, Check, X, Search, Calendar, ChevronLeft, ChevronRight, User } from 'lucide-react';
+import { Key, Shield, Clock, AlertTriangle, KeyRound, X, Search, Calendar, ChevronLeft, ChevronRight, User, Plus } from 'lucide-react';
 import { 
   PresenceCard, 
   PresenceButton 
@@ -59,7 +58,7 @@ export default function SecurityClient({
         setIsLoadingLogins(false);
       });
     }
-  }, [activeTab]);
+  }, [activeTab, logins.length, isLoadingLogins]);
 
   const togglePermission = (perm: string) => {
     const next = new Set(newKeyPerms);
@@ -83,6 +82,7 @@ export default function SecurityClient({
         setIsCreatingKey(false);
         toast.success('Key Forged');
       }
+      return;
     });
   };
 
@@ -95,6 +95,7 @@ export default function SecurityClient({
         toast.success('Key Purged');
         setKeys(prev => prev.filter(k => k.id !== id));
       }
+      return;
     });
   };
 
@@ -122,7 +123,7 @@ export default function SecurityClient({
             return (
               <button
                 key={t.id}
-                onClick={() => setActiveTab(t.id as any)}
+                onClick={() => setActiveTab(t.id as 'keys' | 'logins')}
                 className={`flex items-center gap-3 px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex-1 justify-center ${activeTab === t.id ? 'bg-[#5c4ae4] text-white shadow-xl shadow-indigo-500/20' : 'text-indigo-400 hover:text-[#5c4ae4] hover:bg-white dark:hover:bg-white/5'}`}
               >
                 <Icon className="w-4 h-4" />

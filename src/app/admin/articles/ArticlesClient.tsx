@@ -2,15 +2,13 @@
 
 import { useState, useMemo, useTransition } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
 import {
-  FileText, Sparkles, Edit2, Share, Trash2,
-  RefreshCcw, Eye, Star, CheckSquare, Search, Tag, Calendar, Plus, ChevronRight
+  FileText, Sparkles, Edit2, Trash2,
+  Eye, CheckSquare, Search, Tag, Calendar, Plus
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
-  bulkDeleteArticles, bulkUpdateStatus,
-  restoreArticleAction, featureArticleAction, deleteArticleAction
+  bulkDeleteArticles, bulkUpdateStatus, deleteArticleAction
 } from './actions';
 import { 
   PresenceCard, 
@@ -50,7 +48,7 @@ export default function ArticlesClient({
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [authorFilter, setAuthorFilter] = useState('all');
+  const [authorFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
 
   // Bulk Selection
@@ -104,6 +102,7 @@ export default function ArticlesClient({
         toast.success(successMsg);
         setSelectedIds(new Set());
       }
+      return;
     });
   };
 
@@ -168,15 +167,15 @@ export default function ArticlesClient({
             <span className="text-sm font-black text-indigo-500 uppercase tracking-widest">selected</span>
           </div>
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" className="h-9 rounded-xl border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10 font-bold" onClick={() => wrapAction(bulkUpdateStatus(Array.from(selectedIds), 'published'), 'Articles published')} loading={isPending}>
+            <PresenceButton variant="outline" className="h-9 px-4 rounded-xl border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10 font-bold" onClick={() => wrapAction(bulkUpdateStatus(Array.from(selectedIds), 'published'), 'Articles published')} loading={isPending}>
               Publish
-            </Button>
-            <Button size="sm" variant="outline" className="h-9 rounded-xl border-amber-500/30 text-amber-500 hover:bg-amber-500/10 font-bold" onClick={() => wrapAction(bulkUpdateStatus(Array.from(selectedIds), 'draft'), 'Reverted to draft')} loading={isPending}>
+            </PresenceButton>
+            <PresenceButton variant="outline" className="h-9 px-4 rounded-xl border-amber-500/30 text-amber-500 hover:bg-amber-500/10 font-bold" onClick={() => wrapAction(bulkUpdateStatus(Array.from(selectedIds), 'draft'), 'Reverted to draft')} loading={isPending}>
               Draft
-            </Button>
-            <Button size="sm" variant="destructive" className="h-9 rounded-xl font-bold" onClick={handleBulkDelete} loading={isPending}>
+            </PresenceButton>
+            <PresenceButton variant="destructive" className="h-9 px-4 rounded-xl font-bold bg-rose-500 text-white" onClick={handleBulkDelete} loading={isPending}>
               <Trash2 className="w-4 h-4 mr-1.5" /> Delete
-            </Button>
+            </PresenceButton>
           </div>
         </div>
       )}

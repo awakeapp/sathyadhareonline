@@ -10,8 +10,7 @@ import {
 } from 'lucide-react';
 import { restoreItemAction, permanentDeleteAction } from './actions';
 import { 
-  PresenceCard, 
-  PresenceButton 
+  PresenceCard 
 } from '@/components/PresenceUI';
 
 export interface TrashItem {
@@ -41,7 +40,7 @@ export default function TrashManagerClient({
   const [showDelete, setShowDelete] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const tabs: { id: TrashItem['type']; label: string; icon: any; count: number }[] = [
+  const tabs: { id: TrashItem['type']; label: string; icon: React.ComponentType<{ className?: string }>; count: number }[] = [
     { id: 'article', label: 'Article Cache', icon: FileText, count: initialArticles.length },
     { id: 'category', label: 'Taxonomy', icon: Shapes, count: initialCategories.length },
     { id: 'sequel', label: 'Archives', icon: Archive, count: initialSequels.length },
@@ -62,6 +61,7 @@ export default function TrashManagerClient({
         setShowDelete(false);
         setSelectedItem(null);
       }
+      return;
     });
   }
 
@@ -150,9 +150,10 @@ export default function TrashManagerClient({
               <ModalHeader>
                 <ModalTitle className="text-rose-500">Atomic Purge?</ModalTitle>
                 <ModalDescription>
-                  Permanently erase <span className="font-black">"{selectedItem.title || selectedItem.name || 'this item'}"</span>. Irreversible operation.
+                  Permanently erase <span className="font-black">&ldquo;{selectedItem.title || selectedItem.name || 'this item'}&rdquo;</span>. Irreversible operation.
                 </ModalDescription>
               </ModalHeader>
+
               <form action={(fd) => handleAction(permanentDeleteAction, fd)}>
                 <input type="hidden" name="id" value={selectedItem.id} />
                 <input type="hidden" name="type" value={selectedItem.type} />

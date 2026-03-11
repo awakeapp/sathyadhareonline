@@ -1,11 +1,9 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { toast } from 'sonner';
 import { updateTemplateAction } from './actions';
-import { Mail, Edit, Calendar, Code, Check, Box, Layout, ArrowLeft, Terminal } from 'lucide-react';
+import { Mail, Edit, Calendar, Layout, ArrowLeft, Terminal, Check } from 'lucide-react';
 import { 
   PresenceCard, 
   PresenceButton 
@@ -53,6 +51,7 @@ export default function EmailTemplatesClient({ initialTemplates }: { initialTemp
         ));
         closeEdit();
       }
+      return;
     });
   };
 

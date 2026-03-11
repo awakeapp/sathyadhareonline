@@ -66,9 +66,12 @@ export function PresenceHeader({
 }
 
 /* ─── Presence Card ─── */
-export function PresenceCard({ children, className = "", noPadding = false }: { children: React.ReactNode; className?: string; noPadding?: boolean }) {
+export function PresenceCard({ children, className = "", noPadding = false, onClick }: { children: React.ReactNode; className?: string; noPadding?: boolean; onClick?: () => void }) {
   return (
-    <div className={`bg-white dark:bg-[#1b1929] rounded-[2rem] shadow-sm border border-black/5 dark:border-white/5 overflow-hidden ${noPadding ? '' : 'p-6'} ${className}`}>
+    <div 
+      onClick={onClick}
+      className={`bg-white dark:bg-[#1b1929] rounded-[2rem] shadow-sm border border-black/5 dark:border-white/5 overflow-hidden ${noPadding ? '' : 'p-6'} ${onClick ? 'cursor-pointer active:scale-[0.98] transition-all' : ''} ${className}`}
+    >
       {children}
     </div>
   );
@@ -166,6 +169,7 @@ export function PresenceButton({
   disabled, 
   type = "button",
   loading = false,
+  variant = "primary",
   className = "" 
 }: { 
   children: React.ReactNode; 
@@ -173,14 +177,21 @@ export function PresenceButton({
   disabled?: boolean; 
   type?: "button" | "submit" | "reset";
   loading?: boolean;
+  variant?: "primary" | "outline" | "destructive";
   className?: string 
 }) {
+  const variantStyles = {
+    primary: "bg-[#5c4ae4] text-white shadow-indigo-500/20 hover:bg-[#4534c7]",
+    outline: "bg-white dark:bg-transparent border-2 border-indigo-500/10 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10",
+    destructive: "bg-rose-500 text-white shadow-rose-500/20 hover:bg-rose-600"
+  };
+
   return (
     <button 
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
-      className={`px-6 py-2.5 rounded-xl bg-rose-500 text-white text-sm font-bold shadow-lg shadow-rose-500/30 hover:bg-rose-600 transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 ${className}`}
+      className={`px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 ${variantStyles[variant]} ${className}`}
     >
       {loading && (
         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
