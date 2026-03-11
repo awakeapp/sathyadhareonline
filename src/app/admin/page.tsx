@@ -123,8 +123,8 @@ export default async function AdminPage() {
         initials={initials}
         icon1={Send}
         icon2={Bell}
-        onIcon1Click={() => {}}
-        onIcon2Click={() => {}}
+        icon1Href="/admin/submissions"
+        icon2Href="/admin/audit-logs"
       />
 
       <div className="px-5 -mt-8 pb-10 space-y-6 relative z-20">

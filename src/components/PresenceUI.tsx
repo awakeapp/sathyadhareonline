@@ -20,16 +20,16 @@ export function PresenceHeader({
   initials,
   icon1: Icon1,
   icon2: Icon2,
-  onIcon1Click,
-  onIcon2Click
+  icon1Href,
+  icon2Href
 }: { 
   title?: string; 
-  roleLabel?: string;
-  initials?: string;
-  icon1?: LucideIcon;
-  icon2?: LucideIcon;
-  onIcon1Click?: () => void;
-  onIcon2Click?: () => void;
+  roleLabel?: string; 
+  initials?: string; 
+  icon1?: LucideIcon; 
+  icon2?: LucideIcon; 
+  icon1Href?: string; 
+  icon2Href?: string; 
 }) {
   return (
     <div className="bg-gradient-to-b from-[#5c4ae4] to-[#4534c7] text-white px-6 pt-8 pb-16 rounded-b-[3rem] relative overflow-hidden shadow-2xl shadow-indigo-500/20">
@@ -46,15 +46,25 @@ export function PresenceHeader({
         </div>
         <div className="flex items-center gap-5">
           {Icon1 && (
-            <button onClick={onIcon1Click} className="relative transition-transform active:scale-90">
-              <Icon1 className="w-6 h-6" strokeWidth={1.5} />
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 border-2 border-[#5442db] rounded-full" />
-            </button>
+            icon1Href ? (
+              <Link href={icon1Href} className="relative transition-transform active:scale-90">
+                <Icon1 className="w-6 h-6" strokeWidth={1.5} />
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 border-2 border-[#5442db] rounded-full" />
+              </Link>
+            ) : (
+              <div className="relative">
+                <Icon1 className="w-6 h-6 opacity-50" strokeWidth={1.5} />
+              </div>
+            )
           )}
           {Icon2 && (
-            <button onClick={onIcon2Click} className="transition-transform active:scale-90">
-              <Icon2 className="w-6 h-6" strokeWidth={1.5} />
-            </button>
+            icon2Href ? (
+              <Link href={icon2Href} className="transition-transform active:scale-90">
+                <Icon2 className="w-6 h-6" strokeWidth={1.5} />
+              </Link>
+            ) : (
+              <Icon2 className="w-6 h-6 opacity-50" strokeWidth={1.5} />
+            )
           )}
           <div className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-sm font-bold">
             {initials || 'A'}
