@@ -54,23 +54,40 @@ function MetricCard({
       </div>
     </div>
   );
-  return href ? <Link href={href} className="block h-full outline-none">{inner}</Link> : <div className="h-full">{inner}</div>;
+  return href ? (
+    <Link
+      href={href}
+      prefetch={true}
+      onClick={() => {
+        if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) window.navigator.vibrate(30);
+      }}
+      className="block h-full outline-none transition-transform duration-100 active:scale-[0.98]"
+    >
+      {inner}
+    </Link>
+  ) : <div className="h-full">{inner}</div>;
 }
 
-/* ─── Quick action tile ─── */
 function ActionTile({ href, label, icon: Icon, color, badge }: {
   href: string; label: string; icon: LucideIcon; color: string; badge?: string;
 }) {
   return (
-    <Link href={href} className="group outline-none relative">
+    <Link
+      href={href}
+      prefetch={true}
+      onClick={() => {
+        if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) window.navigator.vibrate(30);
+      }}
+      className="group outline-none relative transition-transform duration-100 active:scale-[0.96]"
+    >
       {badge && (
         <span className="absolute -top-1 -right-1 z-10 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-rose-500 text-white text-[9px] font-black px-1.5">
           {badge}
         </span>
       )}
-      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 flex flex-col items-center gap-2.5 transition-all hover:scale-[1.04] active:scale-95 hover:border-opacity-100 group-hover:shadow-lg">
-        <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-white ${color} shadow-md group-hover:shadow-xl transition-shadow`}>
-          <Icon className="w-5 h-5" />
+      <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 flex flex-col items-center gap-2.5 transition-all hover:-translate-y-0.5 group-active:translate-y-0 hover:border-opacity-100 group-hover:shadow-lg">
+        <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white ${color} shadow-sm group-hover:shadow-md transition-shadow`}>
+          <Icon className="w-5 h-5" strokeWidth={2} />
         </div>
         <span className="text-[10px] font-bold text-center leading-tight text-[var(--color-muted)] group-hover:text-[var(--color-text)] transition-colors">{label}</span>
       </div>
@@ -189,7 +206,7 @@ export default async function AdminPage() {
     const LIGHT  = '#a78bfa';
 
     return (
-      <div className="font-sans antialiased max-w-5xl mx-auto px-1 py-2 pb-28">
+      <div className="font-sans antialiased w-full px-3 sm:px-6 py-4 animate-fade-in">
 
         {/* ── Hero Header ─────────────────────────────────────────── */}
         <header className="relative overflow-hidden rounded-[2rem] border border-[#7c3aed]/20 bg-gradient-to-br from-[#7c3aed]/10 via-[var(--color-surface)] to-[var(--color-surface)] px-6 py-6 mb-6 mt-2">
@@ -472,7 +489,7 @@ export default async function AdminPage() {
      REGULAR ADMIN DASHBOARD
   ════════════════════════════════════════════════════════════════ */
   return (
-    <div className="font-sans antialiased max-w-5xl mx-auto px-1 py-2 pb-28">
+    <div className="font-sans antialiased w-full px-3 sm:px-6 py-4 animate-fade-in">
 
       {/* Header */}
       <header className="relative overflow-hidden rounded-[2rem] border border-[#0047ff]/20 bg-[var(--color-surface)] px-6 py-6 mb-6 mt-2">

@@ -61,11 +61,10 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
         style={{
           background: 'var(--color-surface)',
           borderTop: '1px solid var(--color-border)',
-          paddingBottom: 'env(safe-area-inset-bottom)',
-          boxShadow: '0 -2px 32px rgba(0,0,0,0.18)',
+          boxShadow: '0 -4px 24px rgba(0,0,0,0.04)',
         }}
       >
-        <div className="flex items-stretch h-16 px-2">
+        <div className="flex items-stretch h-[65px] px-2 pb-[env(safe-area-inset-bottom)]">
           {/* Tab 1 — Dashboard */}
           <NavTabLink
             href="/admin"
@@ -196,7 +195,7 @@ function NavTabLink({
   href, icon: Icon, label, active, accentColor = '#a78bfa', onTap,
 }: {
   href: string;
-  icon: React.ComponentType<{ size?: number }>;
+  icon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
   label: string;
   active?: boolean;
   accentColor?: string;
@@ -205,20 +204,21 @@ function NavTabLink({
   return (
     <Link
       href={href}
-      onClick={onTap}
-      className="relative flex-1 flex flex-col items-center justify-center gap-1 h-full transition-all active:scale-90 focus:outline-none tap-highlight"
+      prefetch={true}
+      onClick={() => {
+        // Vibrate for physical feedback if supported
+        if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+           window.navigator.vibrate(50);
+        }
+        if (onTap) onTap();
+      }}
+      className="relative flex-1 flex flex-col items-center justify-center gap-[2px] h-full transition-all duration-75 active:scale-[0.85] active:opacity-70 focus:outline-none select-none tap-highlight-none"
       style={{ color: active ? accentColor : 'var(--color-muted)' }}
     >
       <div className="relative">
-        <Icon size={22} />
-        {active && (
-          <span
-            className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3.5 h-0.5 rounded-full"
-            style={{ background: accentColor }}
-          />
-        )}
+        <Icon size={24} strokeWidth={active ? 2.5 : 2} />
       </div>
-      <span className="text-[10px] font-bold tracking-wide">{label}</span>
+      <span className="text-[10px] font-semibold tracking-wide">{label}</span>
     </Link>
   );
 }

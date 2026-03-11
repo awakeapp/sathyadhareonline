@@ -155,7 +155,7 @@ function DesktopSidebar({ role }: SidebarProps) {
     const isHighlight = item.highlight;
 
     const baseClass = `
-      w-full flex items-center rounded-xl transition-all
+      w-full flex items-center rounded-xl transition-all duration-100 active:scale-[0.98]
       ${collapsed ? 'justify-center px-0 py-3' : 'px-3 py-2.5 gap-3'}
       text-sm font-semibold border
       ${isHighlight
@@ -194,7 +194,7 @@ function DesktopSidebar({ role }: SidebarProps) {
         {inner}
       </button>
     ) : (
-      <Link key={idx} href={item.href} className={baseClass} style={activeStyle}>
+      <Link key={idx} href={item.href} prefetch={true} className={baseClass} style={activeStyle}>
         {inner}
       </Link>
     );
