@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
@@ -212,14 +210,14 @@ export function PresenceButton({
 }
 
 /* ─── Presence Section Header ─── */
-export function PresenceSectionHeader({ title, action, onActionClick }: { title: string; action?: string; onActionClick?: () => void }) {
+export function PresenceSectionHeader({ title, action, actionHref }: { title: string; action?: string; actionHref?: string }) {
   return (
     <div className="flex items-center justify-between mb-6">
       <h2 className="text-lg font-black text-[#2d2d2d] dark:text-white">{title}</h2>
-      {action && (
-        <button onClick={onActionClick} className="text-sm font-bold text-indigo-500 hover:underline">
+      {action && actionHref && (
+        <Link href={actionHref} className="text-sm font-bold text-indigo-500 hover:underline">
           {action}
-        </button>
+        </Link>
       )}
     </div>
   );

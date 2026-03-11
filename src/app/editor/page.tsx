@@ -119,7 +119,7 @@ export default async function EditorDashboard() {
         </div>
 
         <div className="pt-4">
-          <PresenceSectionHeader title="Recent Activity" action="See All" onActionClick={() => window.location.href = '/editor/articles'} />
+          <PresenceSectionHeader title="Recent Activity" action="See All" actionHref="/editor/articles" />
           <div className="space-y-3">
             {recent.map((a) => (
               <Link key={a.id} href={`/editor/articles/${a.id}/edit`}>
