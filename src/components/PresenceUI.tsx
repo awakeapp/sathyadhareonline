@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { LucideIcon, ChevronRight } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 
 /* ─── Presence Layout Wrapper ─── */
@@ -160,12 +160,31 @@ export function PresenceActionTile({
 }
 
 /* ─── Presence Button ─── */
-export function PresenceButton({ children, onClick, className = "" }: { children: React.ReactNode; onClick?: () => void; className?: string }) {
+export function PresenceButton({ 
+  children, 
+  onClick, 
+  disabled, 
+  type = "button",
+  loading = false,
+  className = "" 
+}: { 
+  children: React.ReactNode; 
+  onClick?: () => void; 
+  disabled?: boolean; 
+  type?: "button" | "submit" | "reset";
+  loading?: boolean;
+  className?: string 
+}) {
   return (
     <button 
+      type={type}
       onClick={onClick}
-      className={`px-6 py-2.5 rounded-xl bg-rose-500 text-white text-sm font-bold shadow-lg shadow-rose-500/30 hover:bg-rose-600 transition-all active:scale-95 ${className}`}
+      disabled={disabled || loading}
+      className={`px-6 py-2.5 rounded-xl bg-rose-500 text-white text-sm font-bold shadow-lg shadow-rose-500/30 hover:bg-rose-600 transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 ${className}`}
     >
+      {loading && (
+        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+      )}
       {children}
     </button>
   );

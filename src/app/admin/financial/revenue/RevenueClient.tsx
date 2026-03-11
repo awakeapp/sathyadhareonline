@@ -1,7 +1,6 @@
 'use client';
 
 import { useTransition } from 'react';
-import { Button } from '@/components/ui/Button';
 import { Download, RefreshCcw, TrendingUp, DollarSign, Activity, AlertCircle, ShieldCheck, ArrowDownCircle } from 'lucide-react';
 import { refundTransactionAction, exportTransactionsCSV } from './actions';
 import { toast } from 'sonner';
@@ -33,7 +32,10 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
   const handleExport = () => {
     startTransition(async () => {
       const res = await exportTransactionsCSV();
-      if (res?.error) return toast.error(`Export failed: ${res.error}`);
+      if (res?.error) {
+        toast.error(`Export failed: ${res.error}`);
+        return;
+      }
       if (res?.csv && res?.filename) {
         const blob = new Blob([res.csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
@@ -45,6 +47,7 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
         document.body.removeChild(link);
         toast.success('Ledger Exported');
       }
+      return;
     });
   };
 

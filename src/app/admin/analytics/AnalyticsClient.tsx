@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/Button';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
 import { Download, Users, Eye, MessageSquare, Layers, Calendar, Flame, TrendingUp, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -25,7 +24,7 @@ interface Props {
 
 const COLORS = ['#5c4ae4', '#2dd4bf', '#fbbf24', '#f43f5e', '#a855f7', '#06b6d4', '#84cc16'];
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string }) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white dark:bg-[#181623] border border-indigo-100 dark:border-white/10 p-4 rounded-2xl shadow-2xl space-y-2 z-50">
@@ -77,7 +76,10 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
         else if (type === 'content') res = await exportContentPerformanceCSVAction(startDate, endDate);
         else res = await exportCategoryCSVAction(startDate, endDate);
 
-        if (res?.error) return toast.error(`Export failed: ${res.error}`);
+        if (res?.error) {
+          toast.error(`Export failed: ${res.error}`);
+          return;
+        }
         if (res?.csv && res?.filename) {
           const blob = new Blob([res.csv], { type: 'text/csv;charset=utf-8;' });
           const url = URL.createObjectURL(blob);
@@ -89,6 +91,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
           document.body.removeChild(link);
           toast.success(`Exported ${res.filename}`);
         }
+        return;
     });
   };
 
@@ -243,7 +246,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
                      {topArticlesByViews.length === 0 ? (
                        <p className="text-center py-12 text-gray-300 font-black uppercase text-xs">No Data Synchronised</p>
                      ) : (
-                       topArticlesByViews.map((a, i) => {
+                       topArticlesByViews.map((a) => {
                          const maxViews = Math.max(...topArticlesByViews.map(x => x.count), 1);
                          const pct = (a.count / maxViews) * 100;
                          return (
@@ -277,7 +280,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
                      {topArticlesByComments.length === 0 ? (
                        <p className="text-center py-12 text-gray-300 font-black uppercase text-xs">No Data Synchronised</p>
                      ) : (
-                       topArticlesByComments.map((a, i) => {
+                       topArticlesByComments.map((a) => {
                          const maxComments = Math.max(...topArticlesByComments.map(x => x.count), 1);
                          const pct = (a.count / maxComments) * 100;
                          return (
