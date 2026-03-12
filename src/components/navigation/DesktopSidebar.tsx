@@ -9,53 +9,13 @@ import {
   Image as ImageIcon, Layers, ScrollText, Settings, Shield,
   IndianRupee, Mail, Eye, Home, Search, Mic, SquarePen,
   PanelLeftClose, PanelLeftOpen, LucideIcon, ChevronRight,
+  Library, Send, Trash2, Calendar
 } from 'lucide-react';
-import { SA_SECTIONS, NavSection, NavSectionItem } from './nav-items';
+import { SA_SECTIONS, ADMIN_SECTIONS, EDITOR_SECTIONS, NavSection, NavSectionItem } from './nav-items';
 
 interface SidebarProps { role?: string | null }
 
-/* ── ADMIN sections ── */
-
-/* ── ADMIN sections ── */
-const ADMIN_SECTIONS: NavSection[] = [
-  {
-    items: [
-      { label: 'Dashboard',  href: '/admin',           icon: LayoutDashboard, exact: true },
-      { label: 'Articles',   href: '/admin/articles',  icon: FileText },
-    ],
-  },
-  {
-    title: 'Content & Users',
-    items: [
-      { label: 'Users',     href: '/admin/users',      icon: Users        },
-      { label: 'Comments',  href: '/admin/comments',   icon: MessageSquare },
-      { label: 'Media',     href: '/admin/media',       icon: ImageIcon    },
-      { label: 'Sequels',   href: '/admin/sequels',     icon: Layers       },
-    ],
-  },
-  {
-    items: [
-      { label: 'Reader Mode', href: '/', icon: Eye, readerToggle: true },
-    ],
-  },
-];
-
-/* ── EDITOR sections ── */
-const EDITOR_SECTIONS: NavSection[] = [
-  {
-    items: [
-      { label: 'Dashboard',   href: '/editor',               icon: LayoutDashboard, exact: true },
-      { label: 'My Articles', href: '/editor/articles',      icon: FileText },
-      { label: 'Write',       href: '/editor/articles/new',  icon: SquarePen, highlight: true },
-    ],
-  },
-  {
-    items: [
-      { label: 'Reader Mode', href: '/', icon: Eye, readerToggle: true },
-    ],
-  },
-];
-
+/* ── Sections imported from nav-items ── */
 /* ── READER items ── */
 const READER_ITEMS: NavSectionItem[] = [
   { label: 'Home',    href: '/',        icon: Home,   exact: true  },
@@ -66,16 +26,20 @@ const READER_ITEMS: NavSectionItem[] = [
 
 /* ── Icon accent colors per section ── */
 const SA_ACCENT_MAP: Record<string, string> = {
+  '/admin/categories': '#f59e0b',
   '/admin/users':      '#a78bfa',
+  '/admin/submissions':'#10b981',
   '/admin/analytics':  '#60a5fa',
   '/admin/comments':   '#34d399',
   '/admin/media':      '#f472b6',
-  '/admin/sequels':     '#fb923c',
+  '/admin/sequels':    '#fb923c',
   '/admin/audit-logs': '#c084fc',
   '/admin/settings':   '#94a3b8',
-  '/admin/newsletter': '#60a5fa',
+  '/admin/newsletter': '#ec4899',
+  '/admin/friday':     '#8b5cf6',
   '/admin/security':   '#f87171',
   '/admin/financial':  '#34d399',
+  '/admin/trash':      '#ef4444',
 };
 
 /* ═══════════════════════════════════════════════════════════════════

@@ -42,11 +42,12 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
     const manageGroupPaths = [
       '/admin/manage', '/admin/users', '/admin/analytics',
       '/admin/comments', '/admin/media', '/admin/categories',
-      '/admin/sequels', '/admin/audit-logs',
+      '/admin/sequels', '/admin/audit-logs', '/admin/submissions',
     ];
     const moreGroupPaths = [
       '/admin/more', '/admin/settings', '/admin/email-templates',
-      '/admin/security', '/admin/financial',
+      '/admin/security', '/admin/financial', '/admin/newsletter',
+      '/admin/trash', '/admin/friday',
     ];
     const isManageActive = manageGroupPaths.some(p =>
       p === '/admin/manage' ? pathname === p || pathname.startsWith(p + '/') : pathname.startsWith(p)

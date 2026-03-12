@@ -9,6 +9,7 @@ import { useReaderMode } from '@/context/ReaderModeContext';
 import { useTheme } from 'next-themes';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { ArrowLeft, Eye } from 'lucide-react';
+import { SA_SECTIONS, ADMIN_SECTIONS, EDITOR_SECTIONS } from '../navigation/nav-items';
 
 
 interface TopHeaderProps {
@@ -278,36 +279,21 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                 {isAdminRoute ? (
                   /* ─── ADMIN drawer: minimal ─────────────────────── */
                   <nav className="px-5 py-6 flex flex-col gap-3">
-                    <Link href="/admin" onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-3 py-3 text-sm font-semibold text-[var(--color-text)] hover:text-[#ffe500] transition-colors">
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                      Dashboard
-                    </Link>
-                    <Link href="/admin/articles" onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-3 py-3 text-sm font-semibold text-[var(--color-text)] hover:text-[#ffe500] transition-colors">
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9" /></svg>
-                      Articles
-                    </Link>
-                    <Link href="/admin/categories" onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-3 py-3 text-sm font-semibold text-[var(--color-text)] hover:text-[#ffe500] transition-colors">
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
-                      Categories
-                    </Link>
-                    <Link href="/admin/users" onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-3 py-3 text-sm font-semibold text-[var(--color-text)] hover:text-[#ffe500] transition-colors">
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                      Users
-                    </Link>
-                    <Link href="/admin/media" onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-3 py-3 text-sm font-semibold text-[var(--color-text)] hover:text-[#ffe500] transition-colors">
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                      Media Library
-                    </Link>
-                    <Link href="/admin/sequels" onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-3 py-3 text-sm font-semibold text-[var(--color-text)] hover:text-[#ffe500] transition-colors">
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                      Sequels
-                    </Link>
+                    {(() => {
+                      const sections = role === 'super_admin' ? SA_SECTIONS : role === 'admin' ? ADMIN_SECTIONS : EDITOR_SECTIONS;
+                      return sections.flatMap(section => section.items).map((item, idx) => {
+                        if (item.readerToggle) return null;
+                        const Component = item.icon as React.ElementType;
+                        return (
+                          <Link key={idx} href={item.href} onClick={() => setIsMenuOpen(false)}
+                            className="flex items-center gap-3 py-3 text-sm font-semibold text-[var(--color-text)] hover:text-[#ffe500] transition-colors">
+                            <Component className="w-5 h-5" />
+                            {item.label}
+                          </Link>
+                        );
+                      });
+                    })()}
+
 
                     <div className="h-px bg-[var(--color-border)] my-2" />
                     

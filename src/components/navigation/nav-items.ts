@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, Library, Users, Menu, SquarePen, Eye, Home, Search, Layers, Mic, ScrollText, Settings, Shield, IndianRupee, BarChart2, MessageSquare, Image as ImageIcon, Mail, LucideIcon } from 'lucide-react';
+import { LayoutDashboard, FileText, Library, Users, Menu, SquarePen, Eye, Home, Search, Layers, Mic, ScrollText, Settings, Shield, IndianRupee, BarChart2, MessageSquare, Image as ImageIcon, Mail, LucideIcon, Send, Trash2, Calendar } from 'lucide-react';
 
 export interface NavItem {
   name: string;
@@ -43,7 +43,9 @@ export interface NavSection {
 }
 
 export const SA_MANAGE_ITEMS: NavSectionItem[] = [
+  { label: 'Categories', sub: 'Topics & tags', href: '/admin/categories', icon: Library, color: '#f59e0b', bg: 'rgba(245,158,11,0.15)' },
   { label: 'Users', sub: 'Accounts & roles', href: '/admin/users', icon: Users, color: '#a78bfa', bg: 'rgba(124,58,237,0.15)' },
+  { label: 'Submissions', sub: 'Guest articles', href: '/admin/submissions', icon: Send, color: '#10b981', bg: 'rgba(16,185,129,0.15)' },
   { label: 'Analytics', sub: 'Traffic & growth', href: '/admin/analytics', icon: BarChart2, color: '#60a5fa', bg: 'rgba(37,99,235,0.15)' },
   { label: 'Comments', sub: 'Moderation queue', href: '/admin/comments', icon: MessageSquare, color: '#34d399', bg: 'rgba(16,185,129,0.15)' },
   { label: 'Media', sub: 'File library', href: '/admin/media', icon: ImageIcon, color: '#f472b6', bg: 'rgba(236,72,153,0.15)' },
@@ -54,8 +56,11 @@ export const SA_MANAGE_ITEMS: NavSectionItem[] = [
 export const SA_MORE_ITEMS: NavSectionItem[] = [
   { label: 'Settings', sub: 'Site config & branding', href: '/admin/settings', icon: Settings, color: '#94a3b8', bg: 'rgba(148,163,184,0.12)' },
   { label: 'Email Templates', sub: 'Welcome & System', href: '/admin/email-templates', icon: Mail, color: '#60a5fa', bg: 'rgba(37,99,235,0.15)' },
+  { label: 'Newsletter', sub: 'Subscribers', href: '/admin/newsletter', icon: Mail, color: '#ec4899', bg: 'rgba(236,72,153,0.15)' },
+  { label: 'Friday Msg', sub: 'Weekly updates', href: '/admin/friday', icon: Calendar, color: '#8b5cf6', bg: 'rgba(139,92,246,0.15)' },
   { label: 'Security', sub: 'API keys, logins', href: '/admin/security', icon: Shield, color: '#f87171', bg: 'rgba(239,68,68,0.15)' },
   { label: 'Financial', sub: 'Revenue & plans', href: '/admin/financial', icon: IndianRupee, color: '#34d399', bg: 'rgba(16,185,129,0.15)' },
+  { label: 'Trash', sub: 'Deleted content', href: '/admin/trash', icon: Trash2, color: '#ef4444', bg: 'rgba(239,68,68,0.15)' },
 ];
 
 export const SA_SECTIONS: NavSection[] = [
@@ -72,6 +77,54 @@ export const SA_SECTIONS: NavSection[] = [
   {
     title: 'System',
     items: SA_MORE_ITEMS,
+  },
+  {
+    items: [
+      { label: 'Reader Mode', href: '/', icon: Eye, readerToggle: true },
+    ],
+  },
+];
+
+export const ADMIN_SECTIONS: NavSection[] = [
+  {
+    items: [
+      { label: 'Dashboard',  href: '/admin',           icon: LayoutDashboard, exact: true },
+      { label: 'Articles',   href: '/admin/articles',  icon: FileText },
+    ],
+  },
+  {
+    title: 'Content & Users',
+    items: [
+      { label: 'Categories', href: '/admin/categories', icon: Library },
+      { label: 'Users',     href: '/admin/users',      icon: Users        },
+      { label: 'Submissions', href: '/admin/submissions', icon: Send },
+      { label: 'Comments',  href: '/admin/comments',   icon: MessageSquare },
+      { label: 'Media',     href: '/admin/media',       icon: ImageIcon    },
+      { label: 'Sequels',   href: '/admin/sequels',     icon: Layers       },
+    ],
+  },
+  {
+    title: 'System',
+    items: [
+      { label: 'Newsletter', href: '/admin/newsletter', icon: Mail },
+      { label: 'Friday Msg', href: '/admin/friday',     icon: Calendar },
+      { label: 'Trash',      href: '/admin/trash',      icon: Trash2 },
+    ],
+  },
+  {
+    items: [
+      { label: 'Reader Mode', href: '/', icon: Eye, readerToggle: true },
+    ],
+  },
+];
+
+export const EDITOR_SECTIONS: NavSection[] = [
+  {
+    items: [
+      { label: 'Dashboard',   href: '/editor',               icon: LayoutDashboard, exact: true },
+      { label: 'My Articles', href: '/editor/articles',      icon: FileText },
+      { label: 'Write',       href: '/editor/articles/new',  icon: SquarePen, highlight: true },
+    ],
   },
   {
     items: [

@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
 import {
   Users, BarChart2, MessageSquare, Image as ImageIcon,
   Layers, ScrollText, Library, LucideIcon,
@@ -95,10 +94,6 @@ export default async function ManagePage() {
                 />
              ))}
            </div>
-        </PresenceCard>
-
-        <PresenceCard className="bg-zinc-50 dark:bg-white/5 border-none p-4 text-center">
-           <p className="text-xs font-bold text-indigo-400 uppercase tracking-wide">Authorized Access Only</p>
         </PresenceCard>
       </div>
     </PresenceWrapper>
