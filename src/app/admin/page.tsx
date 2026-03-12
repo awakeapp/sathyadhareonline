@@ -5,7 +5,7 @@ import {
   Plus, Users, FileText, MessageSquare,
   Settings, TrendingUp, Layers,
   Tag, Image as ImageIcon, CheckCircle,
-  ArrowUp, ArrowRight, Send, Bell, Library, ChevronRight
+  Send, Bell, Library, ChevronRight
 } from 'lucide-react';
 import ReaderModeSwitch from '@/components/ReaderModeSwitch';
 import { 
@@ -55,6 +55,7 @@ export default async function AdminPage() {
     recentComments: [] as { id: string; content: string; created_at: string; profiles?: { full_name: string; avatar_url: string }; articles?: { title: string } }[],
     chartData: [] as { date: string; views: number }[],
     systemHealth: 'online' as 'online' | 'degraded',
+    weeklyActivity: [] as { day: string, active: boolean }[],
   };
 
   try {
@@ -107,6 +108,24 @@ export default async function AdminPage() {
     metrics.pendingSubmissions = g(13)?.count ?? 0;
     metrics.totalViews30d      = g(14)?.count ?? 0;
     metrics.recentComments     = g(15)?.data  || [];
+
+    // HIGH-01: Compute weekly dots from actual publish data
+    // Get all articles published in the last 7 days
+    const { data: weeklyArticles } = await supabase
+      .from('articles')
+      .select('published_at')
+      .eq('status', 'published')
+      .gte('published_at', sevenDaysAgo.toISOString());
+
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    metrics.weeklyActivity = Array.from({ length: 7 }).map((_, i) => {
+      const d = new Date(); d.setDate(d.getDate() - (6 - i));
+      const hasPublished = weeklyArticles?.some(a => {
+        const pad = new Date(a.published_at);
+        return pad.toDateString() === d.toDateString();
+      });
+      return { day: days[d.getDay()], active: !!hasPublished };
+    });
   } catch (e) { console.error('Admin dashboard fetch error:', e); }
 
   /* ════════════════════════════════════════════════════════════════
@@ -125,6 +144,8 @@ export default async function AdminPage() {
         icon2={Bell}
         icon1Href="/admin/submissions"
         icon2Href="/admin/audit-logs"
+        icon1Badge={metrics.pendingSubmissions > 0}
+        icon2Badge={metrics.pendingComments > 0}
       />
 
       <div className="p-4 flex flex-col gap-4 relative z-20">
@@ -163,18 +184,12 @@ export default async function AdminPage() {
 
           <div className="space-y-4">
             <p className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em]">Platform Overview</p>
-            <div className="flex items-center gap-5">
-              {[
-                { day: 'M', active: metrics.publishedToday > 0 },
-                { day: 'T', active: false },
-                { day: 'W', active: true },
-                { day: 'Th', active: false },
-                { day: 'F', active: false },
-              ].map((d, i) => (
-                <div key={i} className="flex flex-col items-center gap-2">
+            <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
+              {metrics.weeklyActivity.map((d, i) => (
+                <div key={i} className="flex flex-col items-center gap-2 shrink-0">
                   <span className="text-[10px] font-black text-zinc-500">{d.day}</span>
-                  <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${d.active ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white text-white' : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-gray-700'}`}>
-                    {d.active && <CheckCircle className="w-4 h-4" strokeWidth={1.25} />}
+                  <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${d.active ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white' : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-gray-700'}`}>
+                    {d.active ? <CheckCircle className="w-4 h-4" strokeWidth={1.25} /> : <div className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />}
                   </div>
                 </div>
               ))}
@@ -186,22 +201,22 @@ export default async function AdminPage() {
         <div className="grid grid-cols-3 gap-3">
           <PresenceCard className="flex flex-col items-center p-4">
             <PresenceStatCircle 
-              percent={Math.min(100, (metrics.publishedToday / 5) * 100)} 
+              percent={Math.min(100, (metrics.totalArticles / 50) * 100)} 
               value={metrics.totalArticles} 
               label="Articles" 
             />
           </PresenceCard>
           <PresenceCard className="flex flex-col items-center p-4">
             <PresenceStatCircle 
-              percent={75} 
-              value={metrics.pendingComments} 
+              percent={Math.min(100, (metrics.totalComments / 100) * 100)} 
+              value={metrics.totalComments} 
               label="Comments" 
               color="#fbbf24" 
             />
           </PresenceCard>
           <PresenceCard className="flex flex-col items-center p-4">
             <PresenceStatCircle 
-              percent={90} 
+              percent={Math.min(100, (metrics.totalUsers / 20) * 100)} 
               value={metrics.totalUsers > 1000 ? (metrics.totalUsers / 1000).toFixed(1) + 'k' : metrics.totalUsers} 
               label="Users" 
               color="#34d399" 
@@ -224,7 +239,7 @@ export default async function AdminPage() {
 
         {/* ── Floating Reader Mode Switch ── */}
         <div className="pt-4">
-          <ReaderModeSwitch role={profile?.role as any} />
+          <ReaderModeSwitch role={profile?.role as 'super_admin' | 'admin' | 'editor' | 'reader'} />
         </div>
 
         {/* ── Recent Articles Section ── */}

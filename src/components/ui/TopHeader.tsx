@@ -332,13 +332,14 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                       <Eye className="w-5 h-5 text-current" /> Switch to Reader Mode
                     </button>
 
-                    <button
-                      onClick={() => { setIsMenuOpen(false); handleSwitchToReader(); }}
+                    <Link
+                      href="/"
+                      onClick={() => setIsMenuOpen(false)}
                       className="flex items-center gap-3 py-3 text-sm font-semibold text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors text-left"
                     >
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                       Back to Site
-                    </button>
+                    </Link>
                     <Link href="/logout" onClick={() => setIsMenuOpen(false)}
                       className="flex items-center gap-3 py-3 text-sm font-semibold text-red-400 hover:text-red-300 transition-colors">
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>

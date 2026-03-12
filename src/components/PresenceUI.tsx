@@ -22,7 +22,9 @@ export function PresenceHeader({
   icon1: Icon1,
   icon2: Icon2,
   icon1Href,
-  icon2Href
+  icon2Href,
+  icon1Badge = false,
+  icon2Badge = false
 }: { 
   title?: string; 
   roleLabel?: string; 
@@ -31,6 +33,8 @@ export function PresenceHeader({
   icon2?: LucideIcon; 
   icon1Href?: string; 
   icon2Href?: string; 
+  icon1Badge?: boolean;
+  icon2Badge?: boolean;
 }) {
   const headerRef = useRef<HTMLDivElement>(null);
 
@@ -69,7 +73,7 @@ export function PresenceHeader({
             icon1Href ? (
               <Link href={icon1Href} className="relative transition-transform active:scale-90 flex items-center justify-center min-w-[44px] min-h-[44px]">
                 <Icon1 className="w-6 h-6" strokeWidth={1.25} />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full" />
+                {icon1Badge && <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full" />}
               </Link>
             ) : (
               <div className="relative flex items-center justify-center min-w-[44px] min-h-[44px]">
@@ -79,8 +83,9 @@ export function PresenceHeader({
           )}
           {Icon2 && (
             icon2Href ? (
-              <Link href={icon2Href} className="transition-transform active:scale-90 flex items-center justify-center min-w-[44px] min-h-[44px]">
+              <Link href={icon2Href} className="relative transition-transform active:scale-90 flex items-center justify-center min-w-[44px] min-h-[44px]">
                 <Icon2 className="w-6 h-6" strokeWidth={1.25} />
+                {icon2Badge && <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full" />}
               </Link>
             ) : (
               <div className="flex items-center justify-center min-w-[44px] min-h-[44px]">
