@@ -29,11 +29,17 @@ export default async function AdminUsersPage() {
   if (!profile || profile.role !== 'super_admin') redirect('/admin');
 
   const { createAdminClient } = await import('@/lib/supabase/admin');
-  const adminAuth = createAdminClient();
   
-  // Fetch all users from Auth directly (source of truth)
-  const { data: authData } = await adminAuth.auth.admin.listUsers();
-  const authUsers = authData?.users || [];
+  let authUsers: { id: string; email?: string; created_at: string }[] = [];
+  try {
+    const adminAuth = createAdminClient();
+    // Fetch all users from Auth directly (source of truth)
+    const { data: authData } = await adminAuth.auth.admin.listUsers();
+    authUsers = authData?.users || [];
+  } catch (err) {
+    console.error('[AdminUsers] createAdminClient failed — SUPABASE_SERVICE_ROLE_KEY may be missing:', err);
+    // Page will still render using profile data only (partial degradation)
+  }
 
   // Fetch all profiles
   const { data: fetchUsers, error } = await supabase
