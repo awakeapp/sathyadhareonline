@@ -77,7 +77,7 @@ export async function middleware(request: NextRequest) {
     // SELECT BOTH: If 'status' column is missing (e.g. migration not applied), 
     // the query will return an error and role will be null, triggering a redirect to /login.
     const { data: firstTry } = await supabase
-      .from('profiles').select('role, status').eq('id', user.id).single()
+      .from('profiles').select('role, status').eq('id', user.id).maybeSingle()
 
     let profile: { role?: string; status?: string } | null = firstTry
 
@@ -85,7 +85,7 @@ export async function middleware(request: NextRequest) {
     // We try to fetch just the role to break the redirect loop.
     if (!profile?.role) {
       const { data: fallback } = await supabase
-        .from('profiles').select('role').eq('id', user.id).single()
+        .from('profiles').select('role').eq('id', user.id).maybeSingle()
       profile = fallback
     }
 
@@ -108,7 +108,7 @@ export async function middleware(request: NextRequest) {
   if (user && !pathname.startsWith('/auth') && pathname !== '/login') {
     // Gracefully handle missing status column here too
     const { data: profile } = await supabase
-      .from('profiles').select('status').eq('id', user.id).single()
+      .from('profiles').select('status').eq('id', user.id).maybeSingle()
     if (profile?.status === 'suspended' || profile?.status === 'banned') {
       return redirectWithCookies('/login?error=account_suspended')
     }
@@ -117,7 +117,7 @@ export async function middleware(request: NextRequest) {
   // 2. Auth Pages Routing (Skip login/signup if already logged in)
   if (user && (pathname === '/login' || pathname === '/signup')) {
     const { data: profile } = await supabase
-      .from('profiles').select('role, status').eq('id', user.id).single()
+      .from('profiles').select('role, status').eq('id', user.id).maybeSingle()
     const role = profile?.role as string | undefined
 
     if (profile?.status === 'suspended' || profile?.status === 'banned') {

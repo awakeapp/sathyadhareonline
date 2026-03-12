@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
 import { ChevronLeft, Bell } from 'lucide-react';
 import UserManagementClient from './UserManagementClient';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { 
   PresenceWrapper, 
   PresenceHeader 
@@ -28,17 +28,15 @@ export default async function AdminUsersPage() {
   const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).maybeSingle();
   if (!profile || profile.role !== 'super_admin') redirect('/admin');
 
-  const { createAdminClient } = await import('@/lib/supabase/admin');
-  
-  let authUsers: { id: string; email?: string; created_at: string }[] = [];
+  let authUsers: { id: string; email?: string; created_at: string; user_metadata?: Record<string, unknown> }[] = [];
   try {
     const adminAuth = createAdminClient();
-    // Fetch all users from Auth directly (source of truth)
-    const { data: authData } = await adminAuth.auth.admin.listUsers();
-    authUsers = authData?.users || [];
+    if (adminAuth) {
+      const { data: authData } = await adminAuth.auth.admin.listUsers();
+      authUsers = authData?.users || [];
+    }
   } catch (err) {
-    console.error('[AdminUsers] createAdminClient failed — SUPABASE_SERVICE_ROLE_KEY may be missing:', err);
-    // Page will still render using profile data only (partial degradation)
+    console.error('[AdminUsers] Auth fetch failed:', err);
   }
 
   // Fetch all profiles
@@ -55,23 +53,39 @@ export default async function AdminUsersPage() {
       .from('profiles')
       .select('id, full_name, email, role, created_at')
       .order('created_at', { ascending: false });
-    profileRecords = (fallback.data || []).map(u => ({ ...u, status: 'active' }));
+    profileRecords = (fallback.data || []).map((u: any) => ({ 
+      id: u.id, 
+      full_name: u.full_name, 
+      email: u.email, 
+      role: u.role, 
+      created_at: u.created_at, 
+      status: 'active' 
+    }));
   }
   
   // Merge Auth users with Profiles to ensure no user is left behind
-  const profileMap = new Map(profileRecords.map(p => [p.id, p]));
+  const profileMap = new Map<string, any>(profileRecords.map((p: any) => [p.id, p]));
   
-  const users: UserProfile[] = authUsers.map(au => {
-    const profile = profileMap.get(au.id);
-    return {
-      id: au.id,
-      email: au.email || profile?.email || null,
-      full_name: profile?.full_name || au.user_metadata?.full_name || null,
-      role: profile?.role || au.user_metadata?.role || 'reader',
-      status: profile?.status || 'active',
-      created_at: profile?.created_at || au.created_at,
-    };
-  });
+  const users: UserProfile[] = authUsers.length > 0 
+    ? authUsers.map(au => {
+        const uProfile = profileMap.get(au.id);
+        return {
+          id: au.id,
+          email: au.email || uProfile?.email || null,
+          full_name: uProfile?.full_name || au.user_metadata?.full_name || null,
+          role: uProfile?.role || au.user_metadata?.role || 'reader',
+          status: uProfile?.status || 'active',
+          created_at: uProfile?.created_at || au.created_at,
+        };
+      })
+    : profileRecords.map((p: any) => ({
+        id: p.id,
+        email: p.email || null,
+        full_name: p.full_name || null,
+        role: p.role || 'reader',
+        status: p.status || 'active',
+        created_at: p.created_at
+      }));
   
   // Sort by created_at desc
   users.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());

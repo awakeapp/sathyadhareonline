@@ -73,7 +73,7 @@ export default async function AuditLogsPage() {
       />
       
       <div className="p-4 flex flex-col gap-4 relative z-20">
-        <AuditLogsClient usersList={usersList} initialLogs={initialLogs as never[]} initialCount={initialCount} />
+        <AuditLogsClient usersList={usersList} initialLogs={initialLogs as any[]} initialCount={initialCount} />
       </div>
     </PresenceWrapper>
   );
