@@ -79,12 +79,11 @@ export default async function RootLayout({
           .from('profiles')
           .insert({
             id: user.id,
-            email: user.email,
             full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Member',
-            role: 'reader' // Default to reader, admin must promote manually later or via bootstrap.
+            role: 'reader'
           })
           .select('role, full_name')
-          .single();
+          .maybeSingle();
         
         if (newProfile) {
           profile = { ...newProfile, avatar_url: null } as any;

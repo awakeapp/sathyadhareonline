@@ -76,18 +76,8 @@ export async function middleware(request: NextRequest) {
 
     // SELECT BOTH: If 'status' column is missing (e.g. migration not applied), 
     // the query will return an error and role will be null, triggering a redirect to /login.
-    const { data: firstTry } = await supabase
+    const { data: profile } = await supabase
       .from('profiles').select('role, status').eq('id', user.id).maybeSingle()
-
-    let profile: { role?: string; status?: string } | null = firstTry
-
-    // FALLBACK: If role is null but user exists, they might be missing the 'status' column.
-    // We try to fetch just the role to break the redirect loop.
-    if (!profile?.role) {
-      const { data: fallback } = await supabase
-        .from('profiles').select('role').eq('id', user.id).maybeSingle()
-      profile = fallback
-    }
 
     const role = profile?.role as string | undefined
     const status = profile?.status as string | undefined

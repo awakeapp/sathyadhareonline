@@ -70,16 +70,20 @@ export default async function AdminPage() {
     ]);
 
     // Fast 7-day view aggregates directly mapped
-    const last7DaysData = await Promise.all(
-      Array.from({ length: 7 }).map(async (_, i) => {
-        const d = new Date(); d.setDate(d.getDate() - i);
-        const start = new Date(d); start.setHours(0,0,0,0);
-        const end = new Date(d); end.setHours(23,59,59,999);
-        const { count } = await supabase.from('article_views').select('*', { count: 'exact', head: true }).gte('created_at', start.toISOString()).lte('created_at', end.toISOString());
-        return { date: d.toLocaleDateString('en-US', { weekday: 'short' }), views: count || 0 };
-      })
-    );
-    metrics.chartData = last7DaysData.reverse();
+    try {
+      const last7DaysData = await Promise.all(
+        Array.from({ length: 7 }).map(async (_, i) => {
+          const d = new Date(); d.setDate(d.getDate() - i);
+          const start = new Date(d); start.setHours(0,0,0,0);
+          const end = new Date(d); end.setHours(23,59,59,999);
+          const { count } = await supabase.from('article_views').select('*', { count: 'exact', head: true }).gte('created_at', start.toISOString()).lte('created_at', end.toISOString());
+          return { date: d.toLocaleDateString('en-US', { weekday: 'short' }), views: count || 0 };
+        })
+      );
+      metrics.chartData = last7DaysData.reverse();
+    } catch (chartErr) {
+      console.error('Dashboard chart fetch error:', chartErr);
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const g = (i: number) => results[i].status === 'fulfilled' ? (results[i] as PromiseFulfilledResult<any>).value : null;
