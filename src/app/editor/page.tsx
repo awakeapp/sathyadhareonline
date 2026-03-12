@@ -67,8 +67,8 @@ export default async function EditorDashboard() {
         title="Editor"
         roleLabel="Editor Workspace"
         initials={initials}
-        icon1={Bell}
-        icon2={Eye}
+        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
+        icon2Node={<Eye className="w-6 h-6" strokeWidth={1.25} />}
         icon2Href="/"
       />
 
@@ -110,8 +110,8 @@ export default async function EditorDashboard() {
         </PresenceCard>
 
         <PresenceCard className="grid grid-cols-2 gap-y-6">
-          <PresenceActionTile href="/editor/articles/new" icon={SquarePen} label="Write New" />
-          <PresenceActionTile href="/editor/articles" icon={FileText} label="My Articles" />
+          <PresenceActionTile href="/editor/articles/new" iconNode={<SquarePen className="w-6 h-6" strokeWidth={1.5} />} label="Write New" />
+          <PresenceActionTile href="/editor/articles" iconNode={<FileText className="w-6 h-6" strokeWidth={1.5} />} label="My Articles" />
         </PresenceCard>
 
         <div className="pt-4">

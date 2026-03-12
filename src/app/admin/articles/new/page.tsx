@@ -21,7 +21,7 @@ export default async function NewArticlePage() {
     .from('profiles')
     .select('full_name, role')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
   const role = profile?.role || 'reader';
 
   const { data: categories, error: catError } = await supabase
@@ -51,7 +51,7 @@ export default async function NewArticlePage() {
       .from('profiles')
       .select('role')
       .eq('id', actionUser.id)
-      .single();
+      .maybeSingle();
     const actionRole = actionProfile?.role || 'reader';
 
     let status = 'draft';
@@ -76,7 +76,7 @@ export default async function NewArticlePage() {
         published_at: status === 'published' ? new Date().toISOString() : null,
       })
       .select('id')
-      .single();
+      .maybeSingle();
 
     if (insertError || !inserted) {
       console.error('Error inserting article:', insertError);
@@ -124,8 +124,8 @@ export default async function NewArticlePage() {
         title="Super Admin"
         roleLabel="Article Weaver · Creation Matrix"
         initials={initials}
-        icon1={Bell}
-        icon2={ChevronLeft}
+        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
+        icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
         icon2Href="/admin/articles"
       />
       

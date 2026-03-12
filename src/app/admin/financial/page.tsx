@@ -12,7 +12,7 @@ export default async function FinancialPage() {
     .from('profiles')
     .select('role')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
   if (!profile || profile.role !== 'super_admin') {
     redirect('/admin');

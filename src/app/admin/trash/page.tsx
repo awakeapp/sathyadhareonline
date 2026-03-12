@@ -27,7 +27,7 @@ export default async function TrashPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).maybeSingle();
   if (!profile || profile.role !== 'super_admin') {
     redirect('/admin');
   }
@@ -59,8 +59,8 @@ export default async function TrashPage() {
         title="Super Admin"
         roleLabel="Archive System · Data Recovery"
         initials={initials}
-        icon1={Bell}
-        icon2={ChevronLeft}
+        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
+        icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
         icon2Href="/admin"
       />
       

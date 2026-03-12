@@ -17,7 +17,7 @@ async function convertAction(formData: FormData) {
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
-  const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).maybeSingle();
   if (!profile || !['admin', 'super_admin'].includes(profile.role)) return;
 
   const id      = formData.get('id')      as string;
@@ -60,7 +60,7 @@ async function rejectAction(formData: FormData) {
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (!profile || !['admin', 'super_admin'].includes(profile.role)) return;
 
   const id = formData.get('id') as string;
@@ -81,7 +81,7 @@ export default async function AdminSubmissionsPage() {
     .from('profiles')
     .select('full_name, role')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
   if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
     redirect('/admin?error=unauthorized');
@@ -103,8 +103,8 @@ export default async function AdminSubmissionsPage() {
         title="Super Admin"
         roleLabel={`Submissions · ${pendingCount} Waiting Discovery`}
         initials={initials}
-        icon1={Bell}
-        icon2={ChevronLeft}
+        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
+        icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
         icon2Href="/admin"
       />
       

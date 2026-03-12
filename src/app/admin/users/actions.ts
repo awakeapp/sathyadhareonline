@@ -65,7 +65,7 @@ export async function updateUserAction(formData: FormData) {
 
     // Safeguard: Last super admin check
     if (role !== SUPER_ADMIN) {
-      const { data: target } = await supabase.from('profiles').select('role, status').eq('id', userId).single();
+      const { data: target } = await supabase.from('profiles').select('role, status').eq('id', userId).maybeSingle();
       if (target?.role === SUPER_ADMIN) {
         const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', SUPER_ADMIN).eq('status', 'active');
         if ((count || 0) <= 1 && target?.status === 'active') {
@@ -99,7 +99,7 @@ export async function deleteUserAction(formData: FormData) {
     const adminClient = createAdminClient();
 
     // Safeguard: Check if it's the last super admin
-    const { data: target } = await supabase.from('profiles').select('role, status').eq('id', userId).single();
+    const { data: target } = await supabase.from('profiles').select('role, status').eq('id', userId).maybeSingle();
     if (target?.role === SUPER_ADMIN) {
       const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', SUPER_ADMIN).eq('status', 'active');
       if ((count || 0) <= 1 && target?.status === 'active') {
@@ -152,7 +152,7 @@ export async function toggleStatusAction(formData: FormData) {
     
     // Safeguard: Cannot suspend the last super admin
     if (status !== 'active') {
-       const { data: target } = await supabase.from('profiles').select('role, status').eq('id', userId).single();
+       const { data: target } = await supabase.from('profiles').select('role, status').eq('id', userId).maybeSingle();
        if (target?.role === SUPER_ADMIN) {
           const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', SUPER_ADMIN).eq('status', 'active');
           if ((count || 0) <= 1 && target?.status === 'active') {

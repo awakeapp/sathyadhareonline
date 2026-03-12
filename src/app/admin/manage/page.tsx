@@ -40,7 +40,7 @@ export default async function ManagePage() {
     .from('profiles')
     .select('full_name, role')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
   if (!profile || profile.role !== 'super_admin') redirect('/admin?error=unauthorized');
 
   let pendingComments = 0;
@@ -66,8 +66,8 @@ export default async function ManagePage() {
         title="Super Admin"
         roleLabel="Management Operations · Control Matrix"
         initials={initials}
-        icon1={Bell}
-        icon2={ChevronLeft}
+        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
+        icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
         icon2Href="/admin"
       />
       
@@ -84,15 +84,18 @@ export default async function ManagePage() {
            </div>
 
            <div className="grid grid-cols-3 gap-y-6 gap-x-2">
-             {items.map((item) => (
-                <PresenceActionTile 
-                  key={item.href}
-                  icon={item.icon}
-                  label={item.label}
-                  href={item.href}
-                  badge={item.badge ? true : false}
-                />
-             ))}
+             {items.map((item) => {
+                const Icon = item.icon;
+                return (
+                 <PresenceActionTile 
+                   key={item.href}
+                   iconNode={<Icon className="w-6 h-6" strokeWidth={1.5} />}
+                   label={item.label}
+                   href={item.href}
+                   badge={item.badge ? true : false}
+                 />
+                );
+             })}
            </div>
         </PresenceCard>
       </div>

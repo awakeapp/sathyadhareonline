@@ -19,7 +19,7 @@ export default async function ArticlesPage() {
     .from('profiles')
     .select('full_name, role')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
   const role = currentProfile?.role ?? 'reader';
   if (!['admin', 'super_admin', 'editor'].includes(role)) {
@@ -72,8 +72,8 @@ export default async function ArticlesPage() {
         title="Super Admin"
         roleLabel={`Article Library · ${mergedArticles.length} Nodes`}
         initials={initials}
-        icon1={Bell}
-        icon2={Plus}
+        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
+        icon2Node={<Plus className="w-6 h-6" strokeWidth={1.25} />}
         icon2Href="/admin/articles/new"
       />
       

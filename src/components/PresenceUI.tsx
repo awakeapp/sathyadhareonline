@@ -23,6 +23,8 @@ export function PresenceHeader({
   initials,
   icon1: Icon1,
   icon2: Icon2,
+  icon1Node,
+  icon2Node,
   icon1Href,
   icon2Href,
   icon1Badge = false,
@@ -32,7 +34,9 @@ export function PresenceHeader({
   roleLabel?: string; 
   initials?: string; 
   icon1?: LucideIcon; 
-  icon2?: LucideIcon; 
+  icon2?: LucideIcon;
+  icon1Node?: React.ReactNode;
+  icon2Node?: React.ReactNode;
   icon1Href?: string; 
   icon2Href?: string; 
   icon1Badge?: boolean;
@@ -71,27 +75,27 @@ export function PresenceHeader({
           )}
         </div>
         <div className="flex items-center gap-4">
-          {Icon1 && (
+          {(Icon1 || icon1Node) && (
             icon1Href ? (
               <Link href={icon1Href} className="relative transition-transform active:scale-90 flex items-center justify-center min-w-[44px] min-h-[44px]">
-                <Icon1 className="w-6 h-6" strokeWidth={1.25} />
+                {icon1Node ? icon1Node : Icon1 ? <Icon1 className="w-6 h-6" strokeWidth={1.25} /> : null}
                 {icon1Badge && <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full" />}
               </Link>
             ) : (
               <div className="relative flex items-center justify-center min-w-[44px] min-h-[44px]">
-                <Icon1 className="w-6 h-6 opacity-50" strokeWidth={1.25} />
+                <div className="opacity-50">{icon1Node ? icon1Node : Icon1 ? <Icon1 className="w-6 h-6" strokeWidth={1.25} /> : null}</div>
               </div>
             )
           )}
-          {Icon2 && (
+          {(Icon2 || icon2Node) && (
             icon2Href ? (
               <Link href={icon2Href} className="relative transition-transform active:scale-90 flex items-center justify-center min-w-[44px] min-h-[44px]">
-                <Icon2 className="w-6 h-6" strokeWidth={1.25} />
+                {icon2Node ? icon2Node : Icon2 ? <Icon2 className="w-6 h-6" strokeWidth={1.25} /> : null}
                 {icon2Badge && <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full" />}
               </Link>
             ) : (
-              <div className="flex items-center justify-center min-w-[44px] min-h-[44px]">
-                <Icon2 className="w-6 h-6 opacity-50" strokeWidth={1.25} />
+              <div className="flex items-center justify-center min-w-[44px] min-h-[44px] opacity-50">
+                {icon2Node ? icon2Node : Icon2 ? <Icon2 className="w-6 h-6" strokeWidth={1.25} /> : null}
               </div>
             )
           )}
@@ -177,12 +181,14 @@ export function PresenceStatCircle({
 export function PresenceActionTile({ 
   href, 
   icon: Icon, 
+  iconNode,
   label, 
   badge,
   className = "" 
 }: { 
   href: string; 
-  icon: LucideIcon; 
+  icon?: LucideIcon; 
+  iconNode?: React.ReactNode;
   label: string; 
   badge?: boolean;
   className?: string;
@@ -191,7 +197,7 @@ export function PresenceActionTile({
     <Link href={href} className={`flex flex-col items-center gap-3 p-2 transition-all active:scale-90 group min-h-[50px] min-w-[50px] ${className}`}>
       <div className="relative">
         <div className="w-14 h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/50 dark:border-white/10 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.2)] flex items-center justify-center text-zinc-500 dark:text-zinc-400 group-hover:bg-[#5c4ae4] group-hover:border-[#5c4ae4] dark:group-hover:bg-[#5c4ae4] group-hover:text-white dark:group-hover:text-white group-hover:shadow-[0_8px_25px_rgba(92,74,228,0.4)] transition-all duration-300">
-          <Icon className="w-6 h-6" strokeWidth={1.5} />
+          {iconNode ? iconNode : Icon ? <Icon className="w-6 h-6" strokeWidth={1.5} /> : null}
         </div>
         {badge && (
           <span className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 border-2 border-white dark:border-[#181623] rounded-full animate-pulse" />

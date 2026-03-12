@@ -15,7 +15,7 @@ export default async function PlansPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).maybeSingle();
   if (!profile || profile.role !== 'super_admin') redirect('/admin?error=unauthorized');
 
   const { data: plans } = await supabase.from('subscription_plans').select('*').order('created_at', { ascending: true });
@@ -28,8 +28,8 @@ export default async function PlansPage() {
         title="Super Admin"
         roleLabel="Capital Config · Plan Matrix"
         initials={initials}
-        icon1={Bell}
-        icon2={ChevronLeft}
+        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
+        icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
         icon2Href="/admin"
       />
       

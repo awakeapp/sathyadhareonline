@@ -19,7 +19,7 @@ export default async function MediaLibraryPage() {
     .from('profiles')
     .select('full_name, role')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
   if (!profile || !['super_admin', 'admin'].includes(profile.role)) {
     redirect('/admin');
@@ -41,8 +41,8 @@ export default async function MediaLibraryPage() {
         title="Super Admin"
         roleLabel="Cloud Assets · Media Library"
         initials={initials}
-        icon1={Bell}
-        icon2={ChevronLeft}
+        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
+        icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
         icon2Href="/admin"
       />
       

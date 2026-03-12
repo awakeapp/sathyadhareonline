@@ -86,8 +86,8 @@ export default async function EditorNewArticlePage() {
         title="Presence"
         roleLabel="Article Weaver · Creation Matrix"
         initials={initials}
-        icon1={Bell}
-        icon2={ChevronLeft}
+        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
+        icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
         icon2Href="/editor/articles"
       />
       

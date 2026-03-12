@@ -20,7 +20,7 @@ export default async function FridayMessagesPage() {
     .from('profiles')
     .select('full_name, role')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
   const { data: messages, error } = await supabase
     .from('friday_messages')
@@ -65,8 +65,8 @@ export default async function FridayMessagesPage() {
         title="Super Admin"
         roleLabel={`Friday Dispatch · ${messages?.length || 0} Nodes`}
         initials={initials}
-        icon1={Bell}
-        icon2={Plus}
+        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
+        icon2Node={<Plus className="w-6 h-6" strokeWidth={1.25} />}
         icon2Href="/admin/friday/new"
       />
       

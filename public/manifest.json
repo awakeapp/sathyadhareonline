@@ -1,0 +1,21 @@
+{
+  "name": "Sathyadhare Digital Journal",
+  "short_name": "Sathyadhare",
+  "description": "Sathyadhare Digital Journal — Stories that matter.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#181623",
+  "theme_color": "#181623",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

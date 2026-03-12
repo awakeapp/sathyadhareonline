@@ -9,7 +9,7 @@ export async function bulkDeleteArticles(ids: string[]) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Unauthorized' };
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (!['admin', 'super_admin'].includes(profile?.role || '')) return { error: 'Permission denied' };
 
   const { error } = await supabase
@@ -30,7 +30,7 @@ export async function bulkUpdateStatus(ids: string[], status: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Unauthorized' };
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   const role = profile?.role || '';
   if (!['admin', 'super_admin'].includes(role)) return { error: 'Permission denied' };
 
@@ -55,7 +55,7 @@ export async function setArticleStatusAction(id: string, status: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Unauthorized' };
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   const role = profile?.role || '';
   if (!['admin', 'super_admin', 'editor'].includes(role)) return { error: 'Permission denied' };
 
@@ -84,7 +84,7 @@ export async function restoreArticleAction(id: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Unauthorized' };
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (!['admin', 'super_admin'].includes(profile?.role || '')) return { error: 'Permission denied' };
 
   const { error } = await supabase
@@ -104,7 +104,7 @@ export async function featureArticleAction(id: string, currentStatus: boolean) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Unauthorized' };
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (!['admin', 'super_admin'].includes(profile?.role || '')) return { error: 'Permission denied' };
 
   if (currentStatus) {
@@ -126,7 +126,7 @@ export async function deleteArticleAction(id: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Unauthorized' };
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (!['admin', 'super_admin'].includes(profile?.role || '')) return { error: 'Permission denied' };
 
   const { error } = await supabase

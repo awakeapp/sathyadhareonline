@@ -9,7 +9,7 @@ async function verifySuperAdmin() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Unauthorized');
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (!profile || profile.role !== 'super_admin') {
     throw new Error('Super Admin access required');
   }
@@ -66,7 +66,7 @@ export async function permanentDeleteAction(formData: FormData) {
     // Specific cleanup for Articles (cover images) or Media (the file itself)
     if (type === 'article' || type === 'media') {
        const column = type === 'article' ? 'cover_image' : 'url';
-       const { data: row } = await supabase.from(table).select(column).eq('id', id).single();
+       const { data: row } = await supabase.from(table).select(column).eq('id', id).maybeSingle();
        const fileUrl = (row as Record<string, unknown> | null)?.[column] as string | undefined;
 
        if (fileUrl) {

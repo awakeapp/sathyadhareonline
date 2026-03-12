@@ -19,7 +19,7 @@ export default async function SettingsPage() {
     .from('profiles')
     .select('full_name, role')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
   if (!profile || profile.role !== 'super_admin') {
     redirect('/admin?error=unauthorized');
@@ -64,8 +64,8 @@ export default async function SettingsPage() {
         title="Super Admin"
         roleLabel="System Architecture · Global Config"
         initials={initials}
-        icon1={Bell}
-        icon2={ChevronLeft}
+        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
+        icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
         icon2Href="/admin"
       />
       

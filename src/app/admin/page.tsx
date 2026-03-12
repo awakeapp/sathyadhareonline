@@ -126,8 +126,8 @@ export default async function AdminPage() {
         title="Super Admin"
         roleLabel={roleLabel}
         initials={initials}
-        icon1={Send}
-        icon2={Bell}
+        icon1Node={<Send className="w-6 h-6" strokeWidth={1.25} />}
+        icon2Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
         icon1Href="/admin/submissions"
         icon2Href="/admin/audit-logs"
         icon1Badge={metrics.pendingSubmissions > 0}
@@ -212,15 +212,15 @@ export default async function AdminPage() {
 
         {/* ── Main Action Grid ── */}
         <PresenceCard className="grid grid-cols-3 gap-y-4 gap-x-2">
-          <PresenceActionTile href="/admin/articles" icon={FileText} label="Articles" />
-          <PresenceActionTile href="/admin/users" icon={Users} label="Users" badge={metrics.newUsers7d > 0} />
-          <PresenceActionTile href="/admin/comments" icon={MessageSquare} label="Comments" badge={metrics.pendingComments > 0} />
-          <PresenceActionTile href="/admin/analytics" icon={TrendingUp} label="Analytics" />
-          <PresenceActionTile href="/admin/categories" icon={Tag} label="Categories" />
-          <PresenceActionTile href="/admin/media" icon={ImageIcon} label="Media" />
-          <PresenceActionTile href="/admin/sequels" icon={Layers} label="Sequels" />
-          <PresenceActionTile href="/admin/submissions" icon={Send} label="Submissions" badge={metrics.pendingSubmissions > 0} />
-          <PresenceActionTile href="/admin/settings" icon={Settings} label="Settings" />
+          <PresenceActionTile href="/admin/articles" iconNode={<FileText className="w-6 h-6" strokeWidth={1.5} />} label="Articles" />
+          <PresenceActionTile href="/admin/users" iconNode={<Users className="w-6 h-6" strokeWidth={1.5} />} label="Users" badge={metrics.newUsers7d > 0} />
+          <PresenceActionTile href="/admin/comments" iconNode={<MessageSquare className="w-6 h-6" strokeWidth={1.5} />} label="Comments" badge={metrics.pendingComments > 0} />
+          <PresenceActionTile href="/admin/analytics" iconNode={<TrendingUp className="w-6 h-6" strokeWidth={1.5} />} label="Analytics" />
+          <PresenceActionTile href="/admin/categories" iconNode={<Tag className="w-6 h-6" strokeWidth={1.5} />} label="Categories" />
+          <PresenceActionTile href="/admin/media" iconNode={<ImageIcon className="w-6 h-6" strokeWidth={1.5} />} label="Media" />
+          <PresenceActionTile href="/admin/sequels" iconNode={<Layers className="w-6 h-6" strokeWidth={1.5} />} label="Sequels" />
+          <PresenceActionTile href="/admin/submissions" iconNode={<Send className="w-6 h-6" strokeWidth={1.5} />} label="Submissions" badge={metrics.pendingSubmissions > 0} />
+          <PresenceActionTile href="/admin/settings" iconNode={<Settings className="w-6 h-6" strokeWidth={1.5} />} label="Settings" />
         </PresenceCard>
 
         {/* ── Floating Reader Mode Switch ── */}

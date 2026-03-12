@@ -37,7 +37,7 @@ export default async function MorePage() {
     .from('profiles')
     .select('full_name, role')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
   if (!profile || profile.role !== 'super_admin') redirect('/admin?error=unauthorized');
 
   const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
@@ -48,8 +48,8 @@ export default async function MorePage() {
         title="Super Admin"
         roleLabel="System Utility · More Protocols"
         initials={initials}
-        icon1={Bell}
-        icon2={ChevronLeft}
+        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
+        icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
         icon2Href="/admin"
       />
       

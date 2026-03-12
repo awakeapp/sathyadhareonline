@@ -9,7 +9,7 @@ export async function createApiKeyAction(name: string, permissions: string[]) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Unauthorized' };
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (!profile || profile.role !== 'super_admin') {
     return { error: 'Super Admin required' };
   }
@@ -28,7 +28,7 @@ export async function createApiKeyAction(name: string, permissions: string[]) {
       created_by: user.id
     })
     .select('id, name, prefix, permissions, created_at, last_used_at')
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Error creating API key:', error);
@@ -45,7 +45,7 @@ export async function deleteApiKeyAction(id: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Unauthorized' };
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (!profile || profile.role !== 'super_admin') {
     return { error: 'Super Admin required' };
   }
@@ -62,7 +62,7 @@ export async function getLoginHistoryAction() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Unauthorized' };
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (!profile || profile.role !== 'super_admin') {
     return { error: 'Super Admin required' };
   }

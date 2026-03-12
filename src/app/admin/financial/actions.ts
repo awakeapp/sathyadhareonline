@@ -8,7 +8,7 @@ export async function createPlanAction(name: string, price: number, interval: st
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Unauthorized' };
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (!profile || profile.role !== 'super_admin') return { error: 'Super Admin required' };
 
   const { error } = await supabase
@@ -29,7 +29,7 @@ export async function updatePlanAction(id: string, updates: any) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Unauthorized' };
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (!profile || profile.role !== 'super_admin') return { error: 'Super Admin required' };
 
   const { error } = await supabase
@@ -51,7 +51,7 @@ export async function deletePlanAction(id: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Unauthorized' };
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (!profile || profile.role !== 'super_admin') return { error: 'Super Admin required' };
 
   // Instead of deleting, we deactivate it so historical transactions retain relations
@@ -71,7 +71,7 @@ export async function refundTransactionAction(transactionId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Unauthorized' };
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (!profile || profile.role !== 'super_admin') return { error: 'Super Admin required' };
 
   const { error } = await supabase

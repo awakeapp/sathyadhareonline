@@ -9,7 +9,7 @@ export async function updateTemplateAction(id: string, subject: string, body: st
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Unauthorized' };
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (!profile || profile.role !== 'super_admin') {
     return { error: 'Permission Denied: Super Admin required' };
   }

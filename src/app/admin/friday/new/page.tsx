@@ -19,7 +19,7 @@ export default async function NewFridayMessagePage() {
     .from('profiles')
     .select('full_name, role')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
   async function createMessageAction(formData: FormData) {
     'use server';
@@ -55,8 +55,8 @@ export default async function NewFridayMessagePage() {
         title="Super Admin"
         roleLabel="Temporal Dispatch · Friday Node"
         initials={initials}
-        icon1={Bell}
-        icon2={ChevronLeft}
+        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
+        icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
         icon2Href="/admin/friday"
       />
       

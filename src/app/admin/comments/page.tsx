@@ -19,7 +19,7 @@ export default async function AdminCommentsPage() {
     .from('profiles')
     .select('full_name, role')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
   if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
     redirect('/admin?error=unauthorized');
@@ -61,8 +61,8 @@ export default async function AdminCommentsPage() {
         title="Super Admin"
         roleLabel={`Comments · ${pendingCount} Pending Triage`}
         initials={initials}
-        icon1={Bell}
-        icon2={ChevronLeft}
+        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
+        icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
         icon2Href="/admin"
       />
       

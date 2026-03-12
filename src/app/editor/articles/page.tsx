@@ -60,8 +60,8 @@ export default async function EditorArticlesPage() {
         title="Presence"
         roleLabel={`Editor Registry · ${articles?.length ?? 0} Nodes`}
         initials={initials}
-        icon1={Bell}
-        icon2={Plus}
+        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
+        icon2Node={<Plus className="w-6 h-6" strokeWidth={1.25} />}
         icon2Href="/editor/articles/new"
       />
       

@@ -91,7 +91,7 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
                .from('media')
                .insert({ url: publicUrl, uploaded_by: userId })
                .select('id, url, uploaded_by, created_at')
-               .single();
+               .maybeSingle();
 
            if (dbErr) toast.error(`DB Record Error: ${dbErr.message}`);
            else if (row) newItems.push(row);
