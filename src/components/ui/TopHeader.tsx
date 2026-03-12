@@ -49,6 +49,32 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
 
 
   const [clientUser, setClientUser] = useState<User | null>(user);
+  const [categories, setCategories] = useState<{name: string, slug: string, highlight?: boolean}[]>([
+    { name: 'Editorials', slug: 'editorials' },
+    { name: 'Education', slug: 'education' },
+    { name: 'Friday Message', slug: 'friday-message', highlight: true },
+    { name: 'Readers Corner', slug: 'readers-corner', highlight: true },
+    { name: 'History', slug: 'history', highlight: true },
+    { name: 'Literature', slug: 'literature' },
+    { name: 'Politics', slug: 'politics' },
+    { name: 'Interview', slug: 'interview' },
+    { name: 'Religion', slug: 'religion', highlight: true },
+    { name: 'Science', slug: 'science' },
+  ]);
+
+  useEffect(() => {
+    async function fetchCats() {
+      try {
+        const { data } = await createClient().from('categories').select('name, slug, is_active').eq('is_active', true).order('name');
+        if (data && data.length > 0) {
+          setCategories(data.map(c => ({ name: c.name, slug: c.slug, highlight: false })));
+        }
+      } catch (e) {
+        console.error('Failed to fetch categories dynamically:', e);
+      }
+    }
+    fetchCats();
+  }, []);
 
   useEffect(() => {
     const { data: authListener } = createClient().auth.onAuthStateChange((_event, session) => {
@@ -346,19 +372,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                     </div>
 
                     <nav className="flex flex-col">
-                      {[
-                        { name: 'Editorials',      slug: 'editorials' },
-                        { name: 'Education',        slug: 'education' },
-                        { name: 'Friday Message',   slug: 'friday-message',   highlight: true },
-                        { name: 'Readers Corner',   slug: 'readers-corner',   highlight: true },
-                        { name: 'History',          slug: 'history',          highlight: true },
-                        { name: 'Literature',       slug: 'literature' },
-                        { name: 'Politics',         slug: 'politics' },
-                        { name: 'Interview',        slug: 'interview' },
-                        { name: 'Religion',         slug: 'religion',         highlight: true },
-                        { name: 'Science',          slug: 'science' },
-                        { name: 'About Us',         slug: 'about-us' },
-                      ].map((item) => (
+                      {[...categories, { name: 'About Us', slug: 'about-us' }].map((item) => (
                         <Link
                           key={item.name}
                           href={item.slug === 'about-us' ? '/about' : `/categories/${item.slug}`}

@@ -94,7 +94,7 @@ export function PresenceHeader({
             )
           )}
           {/* LOW-04: contrast-safe initials avatar */}
-          <div className="w-10 h-10 rounded-full bg-zinc-800 dark:bg-white/20 border border-zinc-700 dark:border-white/30 flex items-center justify-center text-sm font-bold text-white dark:text-zinc-50 shrink-0">
+          <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-white/20 border border-zinc-200 dark:border-white/30 flex items-center justify-center text-sm font-bold text-zinc-900 dark:text-zinc-50 shrink-0">
             {initials || 'A'}
           </div>
         </div>
@@ -120,12 +120,14 @@ export function PresenceStatCircle({
   percent, 
   label, 
   value,
-  color = "#5c4ae4" 
+  color = "#5c4ae4",
+  showPercent = false
 }: { 
   percent: number; 
   label: string; 
   value: string | number;
   color?: string;
+  showPercent?: boolean;
 }) {
   const radius = 35;
   const circumference = 2 * Math.PI * radius;
@@ -161,7 +163,7 @@ export function PresenceStatCircle({
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center pt-0.5">
           <span className="text-xl font-bold leading-none">{value}</span>
-          {typeof value === 'number' && <span className="text-[8px] font-bold text-zinc-500 -mt-0.5">%</span>}
+          {showPercent && <span className="text-[8px] font-bold text-zinc-500 -mt-0.5">%</span>}
         </div>
       </div>
       <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">{label}</span>

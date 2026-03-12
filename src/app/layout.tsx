@@ -70,17 +70,11 @@ export default async function RootLayout({
         .eq('id', user.id)
         .maybeSingle()
       
-      console.log('LAYOUT DB FETCH -> p:', p, 'error:', error);
-
       if (!error && p) profile = { ...p, avatar_url: null } as { role: string | null; full_name: string | null; avatar_url: string | null; }
     } catch (e) {
       console.error('Layout profile fetch error:', e)
     }
   }
-
-  console.log('LAYOUT RENDER -> User:', user?.id, 'Role:', profile?.role);
-
-
 
   return (
     <html lang="en" className={`${dmSans.variable} ${balooTamma.variable}`} suppressHydrationWarning>
