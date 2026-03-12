@@ -25,9 +25,9 @@ export default async function CategoriesPage() {
 
   const { data: rawCats } = await supabase
     .from('categories')
-    .select('id, name, slug, description, icon_name, sort_order')
+    .select('id, name, slug, description, display_order')
     .or('is_deleted.eq.false,is_deleted.is.null')
-    .order('sort_order', { ascending: true });
+    .order('display_order', { ascending: true });
 
   const { data: articleRows } = await supabase
     .from('articles')
@@ -42,13 +42,13 @@ export default async function CategoriesPage() {
   }
 
   const categories: Category[] = (rawCats ?? []).map(c => ({
-    id: c.id,
-    name: c.name,
-    slug: c.slug,
-    description: c.description ?? null,
-    icon_name: c.icon_name ?? null,
-    sort_order: c.sort_order ?? 0,
-    article_count: countMap[c.id] ?? 0,
+    id: (c as any).id,
+    name: (c as any).name,
+    slug: (c as any).slug,
+    description: (c as any).description ?? null,
+    icon_name: null,
+    sort_order: (c as any).display_order ?? 0,
+    article_count: countMap[(c as any).id] ?? 0,
   }));
 
   const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();

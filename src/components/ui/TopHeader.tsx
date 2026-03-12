@@ -65,7 +65,12 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
   useEffect(() => {
     async function fetchCats() {
       try {
-        const { data } = await createClient().from('categories').select('name, slug, is_active').eq('is_active', true).order('name');
+        const { data } = await createClient()
+          .from('categories')
+          .select('name, slug')
+          .is('deleted_at', null)
+          .order('name');
+          
         if (data && data.length > 0) {
           setCategories(data.map(c => ({ name: c.name, slug: c.slug, highlight: false })));
         }
