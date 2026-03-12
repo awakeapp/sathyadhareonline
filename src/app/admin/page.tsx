@@ -2,24 +2,19 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Plus, Users, FileText, MessageSquare,
-  Settings, TrendingUp, Layers,
-  Tag, Image as ImageIcon, CheckCircle,
-  Send, Bell, Library, ChevronRight
+  FileText, MessageSquare,
+  CheckCircle,
+  Send, Bell, ChevronRight
 } from 'lucide-react';
 import ReaderModeSwitch from '@/components/ReaderModeSwitch';
 import { 
   PresenceWrapper, 
   PresenceHeader, 
-  PresenceCard, 
-  PresenceStatCircle, 
-  PresenceActionTile, 
-  PresenceButton, 
+  PresenceCard,
   PresenceSectionHeader 
 } from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
-
 
 export default async function AdminPage() {
   const supabase = await createClient();
@@ -38,218 +33,205 @@ export default async function AdminPage() {
   const isSuperAdmin = role === 'super_admin';
   const initials  = (profile?.full_name || user.email || 'A').charAt(0).toUpperCase();
 
-  /* ── Shared data fetches ── */
-  const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  /* ── Data fetches for Meta Dashboard Analytics ── */
   const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  const startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0);
+  const nowStr = new Date().toISOString();
 
   const metrics = {
-    totalArticles: 0, publishedToday: 0, draftArticles: 0,
-    totalViews: 0, totalCategories: 0,
-    totalComments: 0, pendingComments: 0,
-    totalUsers: 0, newUsers7d: 0, newUsers30d: 0,
-    totalViews30d: 0, pendingSubmissions: 0,
-    lastAudit: null as { action: string; created_at: string } | null,
-    recentArticles: [] as { id: string; title: string; status: string; created_at: string; author?: { full_name: string } }[],
-    recentUsers: [] as { id: string; avatar_url?: string; full_name?: string; email?: string; role?: string; created_at?: string }[],
-    recentComments: [] as { id: string; content: string; created_at: string; profiles?: { full_name: string; avatar_url: string }; articles?: { title: string } }[],
-    chartData: [] as { date: string; views: number }[],
-    systemHealth: 'online' as 'online' | 'degraded',
-    weeklyActivity: [] as { day: string, active: boolean }[],
+    totalArticles: 0,
+    monthlyReaders: 0,
+    activeAuthors: 0,
+    communityEngagement: 0,
+    pendingSubmissions: 0,
+    pendingComments: 0,
+    scheduledArticles: 0,
+    recentActivity: [] as { id: string; type: string; title: string; user?: string; ts: string; href: string }[]
   };
 
   try {
     const results = await Promise.allSettled([
-      /* 0 */ supabase.from('articles').select('*', { count: 'exact', head: true }).eq('is_deleted', false),
-      /* 1 */ supabase.from('comments').select('*', { count: 'exact', head: true }),
-      /* 2 */ supabase.from('comments').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-      /* 3 */ supabase.from('profiles').select('*', { count: 'exact', head: true }),
-      /* 4 */ supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', sevenDaysAgo.toISOString()),
-      /* 5 */ supabase.from('articles').select('id, title, status, created_at, author:profiles!author_id(full_name)').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
-      /* 6 */ supabase.from('guest_submissions').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabase.from('articles').select('*', { count: 'exact', head: true }).eq('is_deleted', false),
+      supabase.from('article_views').select('*', { count: 'exact', head: true }).gte('viewed_at', thirtyDaysAgo.toISOString()),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).in('role', ['admin', 'editor', 'super_admin']),
+      supabase.from('comments').select('*', { count: 'exact', head: true }),
+      supabase.from('guest_submissions').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabase.from('comments').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'published').gt('published_at', nowStr),
+      // Activity queries
+      supabase.from('articles').select('id, title, status, created_at, author:profiles!author_id(full_name)').eq('is_deleted', false).order('created_at', { ascending: false }).limit(3),
+      supabase.from('guest_submissions').select('id, name, title, created_at').order('created_at', { ascending: false }).limit(3),
+      supabase.from('comments').select('id, content, created_at, guest_name, profiles!user_id(full_name)').order('created_at', { ascending: false }).limit(3),
     ]);
 
-    // Fast 7-day view aggregates directly mapped
-    try {
-      const last7DaysData = await Promise.all(
-        Array.from({ length: 7 }).map(async (_, i) => {
-          const d = new Date(); d.setDate(d.getDate() - i);
-          const start = new Date(d); start.setHours(0,0,0,0);
-          const end = new Date(d); end.setHours(23,59,59,999);
-          const { count } = await supabase.from('article_views').select('*', { count: 'exact', head: true }).gte('created_at', start.toISOString()).lte('created_at', end.toISOString());
-          return { date: d.toLocaleDateString('en-US', { weekday: 'short' }), views: count || 0 };
-        })
-      );
-      metrics.chartData = last7DaysData.reverse();
-    } catch (chartErr) {
-      console.error('Dashboard chart fetch error:', chartErr);
-    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const gC = (i: number) => results[i].status === 'fulfilled' ? (results[i] as PromiseFulfilledResult<any>).value?.count ?? 0 : 0;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const gD = (i: number) => results[i].status === 'fulfilled' ? (results[i] as PromiseFulfilledResult<any>).value?.data ?? [] : [];
+
+    metrics.totalArticles = gC(0);
+    metrics.monthlyReaders = gC(1);
+    metrics.activeAuthors = gC(2);
+    metrics.communityEngagement = gC(3);
+    metrics.pendingSubmissions = gC(4);
+    metrics.pendingComments = gC(5);
+    metrics.scheduledArticles = gC(6);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const g = (i: number) => results[i].status === 'fulfilled' ? (results[i] as PromiseFulfilledResult<any>).value : null;
-    metrics.totalArticles      = g(0)?.count  ?? 0;
-    metrics.totalComments      = g(1)?.count  ?? 0;
-    metrics.pendingComments    = g(2)?.count  ?? 0;
-    metrics.totalUsers         = g(3)?.count  ?? 0;
-    metrics.newUsers7d         = g(4)?.count  ?? 0;
-    metrics.recentArticles     = g(5)?.data  || [];
-    metrics.pendingSubmissions = g(6)?.count ?? 0;
+    const aArts = gD(7).map((a: any) => ({
+      id: a.id, type: 'article', title: `New article: ${a.title}`, user: a.author?.full_name || 'Admin', ts: a.created_at, href: `/admin/articles/${a.id}/edit`
+    }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const aSubs = gD(8).map((s: any) => ({
+      id: s.id, type: 'submission', title: `Guest submission: ${s.title}`, user: s.name || 'Guest', ts: s.created_at, href: `/admin/submissions`
+    }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const aComs = gD(9).map((c: any) => ({
+      id: c.id, type: 'comment', title: `Commented: "${c.content.substring(0, 30)}..."`, user: c.profiles?.full_name || c.guest_name || 'Anonymous', ts: c.created_at, href: `/admin/comments`
+    }));
 
-    // HIGH-01: Compute weekly dots from actual publish data
-    // Get all articles published in the last 7 days
-    const { data: weeklyArticles } = await supabase
-      .from('articles')
-      .select('published_at')
-      .eq('status', 'published')
-      .gte('published_at', sevenDaysAgo.toISOString());
+    metrics.recentActivity = [...aArts, ...aSubs, ...aComs].sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime()).slice(0, 6);
 
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    metrics.weeklyActivity = Array.from({ length: 7 }).map((_, i) => {
-      const d = new Date(); d.setDate(d.getDate() - (6 - i));
-      const hasPublished = weeklyArticles?.some(a => {
-        const pad = new Date(a.published_at);
-        return pad.toDateString() === d.toDateString();
-      });
-      return { day: days[d.getDay()], active: !!hasPublished };
-    });
-  } catch (e) { console.error('Admin dashboard fetch error:', e); }
+  } catch (e) { console.error('Dashboard fetch err:', e); }
 
-  /* ════════════════════════════════════════════════════════════════
-     PRESENCE DASHBOARD IMPLEMENTATION
-  ════════════════════════════════════════════════════════════════ */
-  const roleLabel = isSuperAdmin ? 'Super Admin · Full Access' : 'Admin · Content Manager';
+  const roleLabel = isSuperAdmin ? 'Super Admin · Overview Dashboard' : 'Admin · Overview';
 
   return (
-    <PresenceWrapper>
+    <PresenceWrapper className="bg-[#f0f2f5] dark:bg-[#0b141a]">
       {/* ── Presence Header ── */}
       <PresenceHeader 
         title="Super Admin"
         roleLabel={roleLabel}
         initials={initials}
-        icon1Node={<Send className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
+        icon1Node={<Send className="w-5 h-5" strokeWidth={1.5} />}
+        icon2Node={<Bell className="w-5 h-5" strokeWidth={1.5} />}
         icon1Href="/admin/submissions"
         icon2Href="/admin/audit-logs"
         icon1Badge={metrics.pendingSubmissions > 0}
         icon2Badge={metrics.pendingComments > 0}
       />
 
-      <div className="p-4 flex flex-col gap-4 relative z-20">
-        {/* ── Attendance/Quick Info Card ── */}
-        <PresenceCard className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-zinc-500">
-              <Plus className="w-6 h-6" strokeWidth={1.25} />
-            </div>
-            <p className="font-bold text-zinc-600 dark:text-zinc-400">Quick Create Article</p>
+      <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 pt-5 pb-24 space-y-6">
+        
+        {/* Analytics Summary */}
+        <div>
+          <h2 className="text-[18px] font-bold text-[var(--color-text)] mb-4">Account Analytics</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <PresenceCard className="flex flex-col p-4">
+              <span className="text-[13px] font-semibold text-[var(--color-muted)] mb-1">Total Articles</span>
+              <span className="text-[24px] font-bold text-[var(--color-text)]">{metrics.totalArticles}</span>
+            </PresenceCard>
+            <PresenceCard className="flex flex-col p-4">
+              <span className="text-[13px] font-semibold text-[var(--color-muted)] mb-1">Monthly Readers</span>
+              <span className="text-[24px] font-bold text-[var(--color-text)]">{metrics.monthlyReaders}</span>
+            </PresenceCard>
+            <PresenceCard className="flex flex-col p-4">
+              <span className="text-[13px] font-semibold text-[var(--color-muted)] mb-1">Active Authors</span>
+              <span className="text-[24px] font-bold text-[var(--color-text)]">{metrics.activeAuthors}</span>
+            </PresenceCard>
+            <PresenceCard className="flex flex-col p-4">
+              <span className="text-[13px] font-semibold text-[var(--color-muted)] mb-1">Community Acts</span>
+              <span className="text-[24px] font-bold text-[var(--color-text)]">{metrics.communityEngagement}</span>
+            </PresenceCard>
           </div>
-          <Link href="/admin/articles/new">
-            <PresenceButton>Submit</PresenceButton>
-          </Link>
-        </PresenceCard>
+        </div>
 
-        {/* ── Today's Status Card ── */}
-        <PresenceCard>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <span className="text-4xl sm:text-5xl font-black text-zinc-900 dark:text-zinc-50">
-                {new Date().getDate()}
-                <Library className="inline-block w-4 h-4 ml-1 mb-6 text-indigo-300" strokeWidth={1.25} />
-              </span>
+        {/* Dashboard Card System */}
+        <div>
+          <h2 className="text-[18px] font-bold text-[var(--color-text)] mb-4">Operations Overview</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            
+            <PresenceCard className="p-4 flex flex-col justify-between min-h-[140px]">
               <div>
-                <p className="text-lg font-black leading-none">{new Date().toLocaleDateString('en-US', { weekday: 'long' })}</p>
-                <p className="text-xs font-bold text-zinc-500 mt-1 uppercase tracking-wider">
-                  {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                </p>
-              </div>
-            </div>
-            <Link href="/admin/articles" className="w-10 h-10 rounded-full border border-zinc-100 dark:border-white/10 flex items-center justify-center text-indigo-400 hover:bg-indigo-50 transition-colors">
-              <ChevronRight className="w-5 h-5" strokeWidth={1.25} />
-            </Link>
-          </div>
-
-          <div className="space-y-4">
-            <p className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em]">Platform Overview</p>
-            <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
-              {metrics.weeklyActivity.map((d, i) => (
-                <div key={i} className="flex flex-col items-center gap-2 shrink-0">
-                  <span className="text-[10px] font-black text-zinc-500">{d.day}</span>
-                  <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${d.active ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white' : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-gray-700'}`}>
-                    {d.active ? <CheckCircle className="w-4 h-4" strokeWidth={1.25} /> : <div className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />}
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                    <Send className="w-4 h-4" strokeWidth={2} />
                   </div>
+                  <h3 className="text-[15px] font-bold text-[var(--color-text)]">New Submissions</h3>
                 </div>
-              ))}
-            </div>
-          </div>
-        </PresenceCard>
+                <p className="text-[28px] font-black text-[var(--color-text)] leading-none">{metrics.pendingSubmissions}</p>
+                <p className="text-[12px] text-[var(--color-muted)] mt-1">Pending guest articles</p>
+              </div>
+              <Link href="/admin/submissions" className="mt-4 text-[13px] font-semibold text-[var(--color-primary)] hover:underline">Review all</Link>
+            </PresenceCard>
 
-        {/* ── Real-time Analytics Row ── */}
-        <div className="grid grid-cols-3 gap-3">
-          <PresenceCard className="flex flex-col items-center p-4">
-            <PresenceStatCircle 
-              percent={Math.min(100, (metrics.totalArticles / 50) * 100)} 
-              value={metrics.totalArticles} 
-              label="Articles" 
-            />
-          </PresenceCard>
-          <PresenceCard className="flex flex-col items-center p-4">
-            <PresenceStatCircle 
-              percent={Math.min(100, (metrics.totalComments / 100) * 100)} 
-              value={metrics.totalComments} 
-              label="Comments" 
-              color="#fbbf24" 
-            />
-          </PresenceCard>
-          <PresenceCard className="flex flex-col items-center p-4">
-            <PresenceStatCircle 
-              percent={Math.min(100, (metrics.totalUsers / 20) * 100)} 
-              value={metrics.totalUsers > 1000 ? (metrics.totalUsers / 1000).toFixed(1) + 'k' : metrics.totalUsers} 
-              label="Users" 
-              color="#34d399" 
-            />
+            <PresenceCard className="p-4 flex flex-col justify-between min-h-[140px]">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-600 dark:text-orange-400">
+                    <MessageSquare className="w-4 h-4" strokeWidth={2} />
+                  </div>
+                  <h3 className="text-[15px] font-bold text-[var(--color-text)]">Recent Comments</h3>
+                </div>
+                <p className="text-[28px] font-black text-[var(--color-text)] leading-none">{metrics.pendingComments}</p>
+                <p className="text-[12px] text-[var(--color-muted)] mt-1">Comments needing review</p>
+              </div>
+              <Link href="/admin/comments" className="mt-4 text-[13px] font-semibold text-[var(--color-primary)] hover:underline">Moderate</Link>
+            </PresenceCard>
+
+            <PresenceCard className="p-4 flex flex-col justify-between min-h-[140px]">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center text-green-600 dark:text-green-400">
+                    <CheckCircle className="w-4 h-4" strokeWidth={2} />
+                  </div>
+                  <h3 className="text-[15px] font-bold text-[var(--color-text)]">Scheduled Articles</h3>
+                </div>
+                <p className="text-[28px] font-black text-[var(--color-text)] leading-none">{metrics.scheduledArticles}</p>
+                <p className="text-[12px] text-[var(--color-muted)] mt-1">Set for future publishing</p>
+              </div>
+              <Link href="/admin/articles" className="mt-4 text-[13px] font-semibold text-[var(--color-primary)] hover:underline">Manage pipeline</Link>
+            </PresenceCard>
+
+          </div>
+        </div>
+
+        {/* Recent Activity Panel */}
+        <div>
+          <PresenceSectionHeader title="Recent Activity" action="See Logs" actionHref="/admin/audit-logs" />
+          <PresenceCard className="overflow-hidden noPadding">
+            <div className="divide-y divide-[var(--color-border)]">
+              {metrics.recentActivity.map((activity, idx) => (
+                <Link key={idx} href={activity.href} className="flex grid grid-cols-1 sm:grid-cols-4 items-center p-4 hover:bg-[var(--color-surface-2)] transition-colors gap-3 sm:gap-4">
+                  
+                  {/* Action / Title */}
+                  <div className="col-span-1 border-b sm:border-0 border-transparent sm:col-span-2 flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center shrink-0">
+                      {activity.type === 'article' && <FileText className="w-5 h-5 text-[var(--color-text)]" strokeWidth={1.5} />}
+                      {activity.type === 'submission' && <Send className="w-5 h-5 text-[var(--color-primary)]" strokeWidth={1.5} />}
+                      {activity.type === 'comment' && <MessageSquare className="w-5 h-5 text-orange-500" strokeWidth={1.5} />}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[14px] font-semibold text-[var(--color-text)] truncate">{activity.title}</p>
+                      <p className="text-[12px] font-medium text-[var(--color-muted)] block sm:hidden">By {activity.user} · {new Date(activity.ts).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  
+                  {/* User (hidden on very small mobile, visible sm up) */}
+                  <div className="hidden sm:block col-span-1 truncate">
+                    <span className="text-[13px] font-medium text-[var(--color-muted)]">{activity.user}</span>
+                  </div>
+
+                  {/* Timestamp & Icon */}
+                  <div className="hidden sm:flex col-span-1 justify-between items-center whitespace-nowrap">
+                    <span className="text-[12px] text-[var(--color-muted)] font-medium">
+                      {new Date(activity.ts).toLocaleDateString()} {new Date(activity.ts).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    </span>
+                    <ChevronRight className="w-4 h-4 text-[var(--color-muted)]" strokeWidth={2} />
+                  </div>
+                  
+                </Link>
+              ))}
+              {metrics.recentActivity.length === 0 && (
+                <div className="p-8 text-center text-[var(--color-muted)] text-[14px] font-medium">No recent activity found.</div>
+              )}
+            </div>
           </PresenceCard>
         </div>
 
-        {/* ── Main Action Grid ── */}
-        <PresenceCard className="grid grid-cols-3 gap-y-4 gap-x-2">
-          <PresenceActionTile href="/admin/articles" iconNode={<FileText className="w-6 h-6" strokeWidth={1.5} />} label="Articles" />
-          <PresenceActionTile href="/admin/users" iconNode={<Users className="w-6 h-6" strokeWidth={1.5} />} label="Users" badge={metrics.newUsers7d > 0} />
-          <PresenceActionTile href="/admin/comments" iconNode={<MessageSquare className="w-6 h-6" strokeWidth={1.5} />} label="Comments" badge={metrics.pendingComments > 0} />
-          <PresenceActionTile href="/admin/analytics" iconNode={<TrendingUp className="w-6 h-6" strokeWidth={1.5} />} label="Analytics" />
-          <PresenceActionTile href="/admin/categories" iconNode={<Tag className="w-6 h-6" strokeWidth={1.5} />} label="Categories" />
-          <PresenceActionTile href="/admin/media" iconNode={<ImageIcon className="w-6 h-6" strokeWidth={1.5} />} label="Media" />
-          <PresenceActionTile href="/admin/sequels" iconNode={<Layers className="w-6 h-6" strokeWidth={1.5} />} label="Sequels" />
-          <PresenceActionTile href="/admin/submissions" iconNode={<Send className="w-6 h-6" strokeWidth={1.5} />} label="Submissions" badge={metrics.pendingSubmissions > 0} />
-          <PresenceActionTile href="/admin/settings" iconNode={<Settings className="w-6 h-6" strokeWidth={1.5} />} label="Settings" />
-        </PresenceCard>
-
-        {/* ── Floating Reader Mode Switch ── */}
-        <div className="pt-4">
+        <div className="pt-2">
           <ReaderModeSwitch role={profile?.role as 'super_admin' | 'admin' | 'editor' | 'reader'} />
         </div>
 
-        {/* ── Recent Articles Section ── */}
-        <div className="pt-4">
-          <PresenceSectionHeader title="Recent Activity" action="See All" actionHref="/admin/audit-logs" />
-          <div className="flex flex-col gap-3">
-            {metrics.recentArticles.map((a) => (
-              <Link key={a.id} href={`/admin/articles/${a.id}/edit`}>
-                <PresenceCard className="flex items-center justify-between py-3 px-4 active:scale-[0.98] transition-transform">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50 shrink-0">
-                      <FileText className="w-5 h-5" strokeWidth={1.25} />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-bold text-sm truncate">{a.title}</p>
-                      <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">{(a.status || 'draft').replace('_', ' ')} · {new Date(a.created_at).toLocaleDateString()}</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-zinc-400" strokeWidth={1.25} />
-                </PresenceCard>
-              </Link>
-            ))}
-          </div>
-        </div>
       </div>
     </PresenceWrapper>
   );

@@ -42,41 +42,38 @@ export interface NavSection {
   items: NavSectionItem[];
 }
 
-export const SA_MANAGE_ITEMS: NavSectionItem[] = [
-  { label: 'Categories', sub: 'Topics & tags', href: '/admin/categories', icon: Library, color: '#f59e0b', bg: 'rgba(245,158,11,0.15)' },
-  { label: 'Users', sub: 'Accounts & roles', href: '/admin/users', icon: Users, color: '#a78bfa', bg: 'rgba(124,58,237,0.15)' },
-  { label: 'Submissions', sub: 'Guest articles', href: '/admin/submissions', icon: Send, color: '#10b981', bg: 'rgba(16,185,129,0.15)' },
-  { label: 'Analytics', sub: 'Traffic & growth', href: '/admin/analytics', icon: BarChart2, color: '#60a5fa', bg: 'rgba(37,99,235,0.15)' },
-  { label: 'Comments', sub: 'Moderation queue', href: '/admin/comments', icon: MessageSquare, color: '#34d399', bg: 'rgba(16,185,129,0.15)' },
-  { label: 'Media', sub: 'File library', href: '/admin/media', icon: ImageIcon, color: '#f472b6', bg: 'rgba(236,72,153,0.15)' },
-  { label: 'Sequels', sub: 'Collections', href: '/admin/sequels', icon: Layers, color: '#fb923c', bg: 'rgba(234,88,12,0.15)' },
-  { label: 'Audit Logs', sub: 'Activity history', href: '/admin/audit-logs', icon: ScrollText, color: '#c084fc', bg: 'rgba(168,85,247,0.15)' },
-];
-
-export const SA_MORE_ITEMS: NavSectionItem[] = [
-  { label: 'Settings', sub: 'Site config & branding', href: '/admin/settings', icon: Settings, color: '#94a3b8', bg: 'rgba(148,163,184,0.12)' },
-  { label: 'Email Templates', sub: 'Welcome & System', href: '/admin/email-templates', icon: Mail, color: '#60a5fa', bg: 'rgba(37,99,235,0.15)' },
-  { label: 'Newsletter', sub: 'Subscribers', href: '/admin/newsletter', icon: Mail, color: '#ec4899', bg: 'rgba(236,72,153,0.15)' },
-  { label: 'Friday Msg', sub: 'Weekly updates', href: '/admin/friday', icon: Calendar, color: '#8b5cf6', bg: 'rgba(139,92,246,0.15)' },
-  { label: 'Security', sub: 'API keys, logins', href: '/admin/security', icon: Shield, color: '#f87171', bg: 'rgba(239,68,68,0.15)' },
-  { label: 'Financial', sub: 'Revenue & plans', href: '/admin/financial', icon: IndianRupee, color: '#34d399', bg: 'rgba(16,185,129,0.15)' },
-  { label: 'Trash', sub: 'Deleted content', href: '/admin/trash', icon: Trash2, color: '#ef4444', bg: 'rgba(239,68,68,0.15)' },
-];
-
 export const SA_SECTIONS: NavSection[] = [
   {
     items: [
       { label: 'Dashboard', href: '/admin', icon: LayoutDashboard, exact: true },
-      { label: 'Articles', href: '/admin/articles', icon: FileText },
     ],
   },
   {
-    title: 'Content & Users',
-    items: SA_MANAGE_ITEMS,
+    title: 'Content',
+    items: [
+      { label: 'Articles', href: '/admin/articles', icon: FileText },
+      { label: 'Authors', href: '/admin/users?role=author', icon: Users },
+      { label: 'Categories', href: '/admin/categories', icon: Library },
+      { label: 'Media Library', href: '/admin/media', icon: ImageIcon },
+      { label: 'Submissions', href: '/admin/submissions', icon: Send },
+    ],
+  },
+  {
+    title: 'Community',
+    items: [
+      { label: 'Comments', href: '/admin/comments', icon: MessageSquare },
+      { label: 'Analytics', href: '/admin/analytics', icon: BarChart2 },
+      { label: 'Notifications', href: '/admin/audit-logs', icon: ScrollText },
+    ],
   },
   {
     title: 'System',
-    items: SA_MORE_ITEMS,
+    items: [
+      { label: 'User Management', href: '/admin/users', icon: Users },
+      { label: 'Roles & Permissions', href: '/admin/security', icon: Shield },
+      { label: 'System Logs', href: '/admin/audit-logs', icon: ScrollText },
+      { label: 'Settings', href: '/admin/settings', icon: Settings },
+    ],
   },
   {
     items: [

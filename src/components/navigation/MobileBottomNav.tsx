@@ -1,12 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useReaderMode } from '@/context/ReaderModeContext';
 import {
   LayoutDashboard, FileText, Users, MessageSquare,
   Layers, Eye, Home, Search, Mic, Menu,
-  SquarePen, SlidersHorizontal,
+  SquarePen, SlidersHorizontal, PlusCircle, BarChart2,
+  Image as ImageIcon, Library, X
 } from 'lucide-react';
 
 interface MobileBottomNavProps {
@@ -26,6 +28,7 @@ interface MobileBottomNavProps {
 export default function MobileBottomNav({ role }: MobileBottomNavProps) {
   const pathname = usePathname();
   const { enableReaderMode } = useReaderMode();
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const isAuthPage  = pathname === '/login' || pathname === '/signup';
   const isPrivileged = role === 'super_admin' || role === 'admin' || role === 'editor';
@@ -38,73 +41,111 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
      SUPER ADMIN — 4-tab Meta Business style nav
   ────────────────────────────────────────────────────────────── */
   if (isAdminView && role === 'super_admin') {
-    // Manage tab is active when on /admin/manage OR any section it links to
-    const manageGroupPaths = [
-      '/admin/manage', '/admin/users', '/admin/analytics',
-      '/admin/comments', '/admin/media', '/admin/categories',
-      '/admin/sequels', '/admin/audit-logs', '/admin/submissions',
-    ];
-    const moreGroupPaths = [
-      '/admin/more', '/admin/settings', '/admin/email-templates',
-      '/admin/security', '/admin/financial', '/admin/newsletter',
-      '/admin/trash', '/admin/friday',
-    ];
-    const isManageActive = manageGroupPaths.some(p =>
-      p === '/admin/manage' ? pathname === p || pathname.startsWith(p + '/') : pathname.startsWith(p)
-    );
-    const isMoreActive = moreGroupPaths.some(p =>
-      p === '/admin/more' ? pathname === p || pathname.startsWith(p + '/') : pathname.startsWith(p)
-    );
+    const isContentActive = pathname.startsWith('/admin/articles') || pathname.startsWith('/admin/media');
+    const isAnalyticsActive = pathname.startsWith('/admin/analytics');
+    const isMoreActive = pathname.startsWith('/admin/more') || pathname.startsWith('/admin/settings');
 
     return (
-      <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 backdrop-blur-2xl bg-white/80 dark:bg-[#0f0e17]/80"
-        style={{
-          borderTop: '1px solid var(--color-border)',
-          boxShadow: '0 -4px 24px rgba(0,0,0,0.04)',
-        }}
-      >
-        <div className="flex items-stretch h-[65px] px-2 pb-[env(safe-area-inset-bottom)]">
-          {/* Tab 1 — Dashboard */}
-          <NavTabLink
-            href="/admin"
-            icon={LayoutDashboard}
-            label="Dashboard"
-            active={pathname === '/admin'}
-          />
+      <>
+        {/* Create Quick Action Panel (Modal) */}
+        {isCreateOpen && (
+          <div className="fixed inset-0 z-[60] flex flex-col justify-end bg-black/60 backdrop-blur-sm"
+               onClick={() => setIsCreateOpen(false)}>
+            <div className="bg-[var(--color-surface)] rounded-t-2xl w-full max-w-[430px] mx-auto overflow-hidden animate-slide-up"
+                 style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 24px)' }}
+                 onClick={(e) => e.stopPropagation()}>
+              
+              <div className="flex items-center justify-between p-4 border-b border-[var(--color-border)]">
+                <h3 className="text-[17px] font-bold text-[var(--color-text)]">Create Quick Action</h3>
+                <button onClick={() => setIsCreateOpen(false)} className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)]">
+                  <X size={18} strokeWidth={2} />
+                </button>
+              </div>
 
-          {/* Tab 2 — Articles */}
-          <NavTabLink
-            href="/admin/articles"
-            icon={FileText}
-            label="Articles"
-            active={pathname.startsWith('/admin/articles')}
-          />
+              <div className="grid grid-cols-2 gap-3 p-4">
+                <Link href="/admin/articles/new" onClick={() => setIsCreateOpen(false)} className="flex items-center gap-3 p-4 rounded-xl bg-[var(--color-surface-2)] hover:bg-[var(--color-primary)] hover:text-white transition-colors group">
+                  <div className="w-10 h-10 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] group-hover:border-[var(--color-primary)] flex items-center justify-center group-hover:text-[var(--color-primary)]">
+                    <SquarePen size={20} strokeWidth={1.5} />
+                  </div>
+                  <span className="text-[14px] font-medium text-[var(--color-text)] group-hover:text-white">Article</span>
+                </Link>
 
-          {/* Tab 3 — Manage (dedicated page) */}
-          <NavTabLink
-            href="/admin/manage"
-            icon={SlidersHorizontal}
-            label="Manage"
-            active={isManageActive}
-          />
+                <Link href="/admin/media" onClick={() => setIsCreateOpen(false)} className="flex items-center gap-3 p-4 rounded-xl bg-[var(--color-surface-2)] hover:bg-[var(--color-primary)] hover:text-white transition-colors group">
+                  <div className="w-10 h-10 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] group-hover:border-[var(--color-primary)] flex items-center justify-center group-hover:text-[var(--color-primary)]">
+                    <ImageIcon size={20} strokeWidth={1.5} />
+                  </div>
+                  <span className="text-[14px] font-medium text-[var(--color-text)] group-hover:text-white">Media</span>
+                </Link>
 
-          {/* Tab 4 — More (dedicated page) */}
-          <NavTabLink
-            href="/admin/more"
-            icon={Menu}
-            label="More"
-            active={isMoreActive}
-          />
+                <Link href="/admin/users?action=new-author" onClick={() => setIsCreateOpen(false)} className="flex items-center gap-3 p-4 rounded-xl bg-[var(--color-surface-2)] hover:bg-[var(--color-primary)] hover:text-white transition-colors group">
+                  <div className="w-10 h-10 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] group-hover:border-[var(--color-primary)] flex items-center justify-center group-hover:text-[var(--color-primary)]">
+                    <Users size={20} strokeWidth={1.5} />
+                  </div>
+                  <span className="text-[14px] font-medium text-[var(--color-text)] group-hover:text-white">Author</span>
+                </Link>
 
-          {/* Tab 5 — Reader Mode */}
-          <button onClick={() => { enableReaderMode(); window.location.href = '/'; }}
-            className="flex-1 flex flex-col items-center justify-center gap-1 h-full active:scale-90 focus:outline-none"
-            style={{ color: 'var(--color-muted)' }}>
-            <Eye size={22} /><span className="text-[10px] font-bold">Reader</span>
-          </button>
-        </div>
-      </nav>
+                <Link href="/admin/categories" onClick={() => setIsCreateOpen(false)} className="flex items-center gap-3 p-4 rounded-xl bg-[var(--color-surface-2)] hover:bg-[var(--color-primary)] hover:text-white transition-colors group">
+                  <div className="w-10 h-10 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] group-hover:border-[var(--color-primary)] flex items-center justify-center group-hover:text-[var(--color-primary)]">
+                    <Library size={20} strokeWidth={1.5} />
+                  </div>
+                  <span className="text-[14px] font-medium text-[var(--color-text)] group-hover:text-white">Category</span>
+                </Link>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        <nav
+          className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-surface)]/95 backdrop-blur-xl"
+          style={{
+            borderTop: '1px solid var(--color-border)',
+            boxShadow: '0 -4px 24px rgba(0,0,0,0.04)',
+          }}
+        >
+          {/* Target minimum 48px tap heights */}
+          <div className="flex items-stretch h-[60px] px-2 pb-[env(safe-area-inset-bottom)] max-w-[430px] mx-auto">
+            <NavTabLink
+              href="/admin"
+              icon={LayoutDashboard}
+              label="Dashboard"
+              active={pathname === '/admin'}
+              accentColor="var(--color-primary)"
+            />
+
+            <NavTabLink
+              href="/admin/articles"
+              icon={FileText}
+              label="Content"
+              active={isContentActive}
+              accentColor="var(--color-primary)"
+            />
+
+            {/* Create Trigger */}
+            <button onClick={() => setIsCreateOpen(true)}
+              className="flex-1 flex flex-col items-center justify-center gap-[2px] h-full active:scale-90 focus:outline-none"
+              style={{ color: 'var(--color-text)' }}>
+              <PlusCircle size={32} strokeWidth={1.5} className="text-[var(--color-primary)]" />
+            </button>
+
+            <NavTabLink
+              href="/admin/analytics"
+              icon={BarChart2}
+              label="Analytics"
+              active={isAnalyticsActive}
+              accentColor="var(--color-primary)"
+            />
+
+            <NavTabLink
+              href="/admin/more"
+              icon={Menu}
+              label="More"
+              active={isMoreActive}
+              accentColor="var(--color-primary)"
+            />
+          </div>
+        </nav>
+      </>
     );
   }
 
@@ -217,10 +258,10 @@ function NavTabLink({
       className="relative flex-1 flex flex-col items-center justify-center gap-[2px] h-full transition-all duration-75 active:scale-[0.85] active:opacity-70 focus:outline-none select-none tap-highlight-none"
       style={{ color: active ? accentColor : 'var(--color-muted)' }}
     >
-      <div className="relative">
-        <Icon size={24} strokeWidth={active ? 2.5 : 2} />
+      <div className="relative flex items-center justify-center w-full">
+        <Icon size={24} strokeWidth={active ? 2.5 : 1.5} />
       </div>
-      <span className="text-[10px] font-semibold tracking-wide">{label}</span>
+      <span className="text-[11px] font-medium tracking-wide leading-none select-none">{label}</span>
     </Link>
   );
 }

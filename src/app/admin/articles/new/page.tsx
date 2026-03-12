@@ -3,12 +3,6 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { logAuditEvent } from '@/lib/audit';
 import ArticleFormClient from './ArticleFormClient';
-import { ChevronLeft, Bell, FileText } from 'lucide-react';
-
-import { 
-  PresenceWrapper, 
-  PresenceHeader,
-} from '@/components/PresenceUI';
 
 export default async function NewArticlePage() {
   const supabase = await createClient();
@@ -31,6 +25,12 @@ export default async function NewArticlePage() {
 
   if (catError) console.error('Error fetching categories:', catError);
 
+  const { data: users } = await supabase
+    .from('profiles')
+    .select('id, full_name')
+    .in('role', ['admin', 'super_admin', 'editor'])
+    .order('full_name');
+
   async function createArticleAction(formData: FormData) {
     'use server';
     const supabaseAction = await createClient();
@@ -40,7 +40,8 @@ export default async function NewArticlePage() {
     const excerpt = formData.get('excerpt') as string;
     const content = formData.get('content') as string;
     const category_id = formData.get('category_id') as string;
-    const author_name = formData.get('author_name') as string;
+    // We now use author_id from the dropdown
+    const author_id = formData.get('author_id') as string;
     const coverFile = formData.get('cover_image') as File | null;
     const action_type = formData.get('action_type') as string;
 
@@ -60,6 +61,19 @@ export default async function NewArticlePage() {
     } else if (['admin', 'super_admin'].includes(actionRole)) {
       if (action_type === 'publish') status = 'published';
       else if (action_type === 'submit') status = 'in_review';
+      else if (action_type === 'schedule') status = 'published'; // Scheduled uses published status with future date
+    }
+
+    // Determine published_at
+    let published_at = null;
+    if (status === 'published') {
+      published_at = new Date().toISOString();
+      if (action_type === 'schedule') {
+         const scheduleDate = formData.get('schedule_date') as string;
+         if (scheduleDate) {
+            published_at = new Date(scheduleDate).toISOString();
+         }
+      }
     }
 
     const { data: inserted, error: insertError } = await supabaseAction
@@ -71,9 +85,8 @@ export default async function NewArticlePage() {
         content,
         category_id: category_id || null,
         status,
-        author_id: actionUser.id,
-        author_name,
-        published_at: status === 'published' ? new Date().toISOString() : null,
+        author_id: author_id || actionUser.id,
+        published_at,
       })
       .select('id')
       .maybeSingle();
@@ -109,45 +122,27 @@ export default async function NewArticlePage() {
       status,
       role: actionRole,
     });
+
+    if (status === 'in_review') {
+        const adminMessage = `New article draft submitted by ${profile?.full_name || 'Author'}`;
+        await logAuditEvent(actionUser.id, 'NOTIFICATION_SYSTEM', { message: adminMessage });
+    }
+
     revalidatePath('/');
     revalidatePath('/admin/articles');
 
     redirect('/admin/articles');
   }
 
-
-  const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
-
   return (
-    <PresenceWrapper>
-      <PresenceHeader 
-        title="Super Admin"
-        roleLabel="Article Weaver · Creation Matrix"
-        initials={initials}
-        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Href="/admin/articles"
-      />
-      
-      <div className="p-4 flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
-        
-        <div className="flex items-center gap-5 mb-6">
-           <div className="w-12 h-12 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
-              <FileText className="w-6 h-6" strokeWidth={1.25} />
-           </div>
-           <div>
-              <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Birth of Narrative</h2>
-              <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">Initializing new document sequence</p>
-           </div>
-        </div>
-
+    <div className="min-h-screen bg-[var(--color-surface-2)]">
         <ArticleFormClient 
           categories={categories}
+          users={users?.map(u => ({ id: u.id, name: u.full_name || 'Unknown' })) || []}
           role={role}
           onSubmit={createArticleAction}
-          defaultAuthorName={profile?.full_name || ''}
+          currentUserId={user.id}
         />
-      </div>
-    </PresenceWrapper>
+    </div>
   );
 }

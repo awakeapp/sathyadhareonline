@@ -1,24 +1,26 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, Search, Bell, Plus } from 'lucide-react';
 import Link from 'next/link';
 
 /* ─── Presence Layout Wrapper ─── */
 export function PresenceWrapper({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
     <div
-      className={`min-h-screen bg-[var(--color-background)] pb-[120px] ${className}`}
-      style={{ paddingTop: 'var(--admin-header-h, 80px)' }}
+      className={`min-h-screen bg-[var(--color-background)] pb-[120px] pt-[var(--admin-header-h,64px)] flex flex-col items-center ${className}`}
     >
-      {children}
+      {/* 16px screen margin (p-4), 24px section spacing (space-y-6) */}
+      <div className="w-full max-w-[1400px] p-4 space-y-6">
+        {children}
+      </div>
     </div>
   );
 }
 
 /* ─── Presence Header ─── */
 export function PresenceHeader({ 
-  title = "Presence", 
+  title = "Super Admin", 
   roleLabel,
   initials,
   icon1: Icon1,
@@ -42,11 +44,11 @@ export function PresenceHeader({
   icon1Badge?: boolean;
   icon2Badge?: boolean;
 }) {
-  const headerRef = useRef<HTMLDivElement>(null);
+  const headerRef = React.useRef<HTMLDivElement>(null);
+  const [isSearchOpen, setIsSearchOpen] = React.useState(false);
+  const [isNotifOpen, setIsNotifOpen] = React.useState(false);
 
-  // CRIT-03: Measure real header height (including safe-area) and expose as CSS var
-  // so PresenceWrapper can pad content exactly right on all devices / notch sizes.
-  useEffect(() => {
+  React.useEffect(() => {
     const el = headerRef.current;
     if (!el) return;
     const update = () => {
@@ -62,50 +64,105 @@ export function PresenceHeader({
   }, []);
 
   return (
-    <div 
-      ref={headerRef}
-      className="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-full max-w-[1400px] bg-[var(--color-surface)]/90 backdrop-blur-xl border-b border-[var(--color-border)] shadow-sm flex flex-col justify-end"
-      style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}
-    >
-      <div className="flex items-center justify-between h-14 px-4 w-full">
-        <div>
-          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-[var(--color-text)]">{title}</h1>
-          {roleLabel && (
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)] mt-0.5">{roleLabel}</p>
-          )}
+    <>
+      {/* Notifications Panel Modal */}
+      {isNotifOpen && (
+        <div className="fixed inset-0 z-[60] flex sm:items-start justify-end sm:pt-16 sm:pr-4 bg-black/20 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none" onClick={() => setIsNotifOpen(false)}>
+          <div className="bg-[var(--color-surface)] sm:rounded-2xl w-full h-full sm:h-auto sm:w-[380px] sm:max-h-[80vh] shadow-2xl border border-[var(--color-border)] flex flex-col animate-slide-up sm:animate-in sm:fade-in sm:slide-in-from-top-4" onClick={e => e.stopPropagation()}>
+            <div className="p-4 border-b border-[var(--color-border)] flex items-center justify-between">
+              <h3 className="text-[18px] font-bold text-[var(--color-text)]">Notifications</h3>
+              <button onClick={() => setIsNotifOpen(false)} className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)]">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-2 space-y-1 pb-safe">
+              {[
+                { title: 'Content Update', desc: 'New article published by Editor.', time: '2m ago' },
+                { title: 'Submission Alert', desc: 'Guest article awaiting review.', time: '1h ago' },
+                { title: 'Community Action', desc: 'New comment reported.', time: '3h ago' },
+                { title: 'System Alert', desc: 'Weekly backup completed successfully.', time: '1d ago' },
+              ].map((n, i) => (
+                <div key={i} className="flex gap-3 p-3 rounded-xl hover:bg-[var(--color-surface-2)] transition-colors cursor-pointer active:scale-[0.98]">
+                  <div className="w-2 h-2 rounded-full bg-[var(--color-primary)] mt-1.5 shrink-0" />
+                  <div>
+                    <p className="text-[14px] font-semibold text-[var(--color-text)] leading-tight">{n.title}</p>
+                    <p className="text-[13px] text-[var(--color-muted)] mt-1">{n.desc}</p>
+                    <p className="text-[11px] text-[var(--color-muted)] mt-2 font-medium">{n.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="p-3 border-t border-[var(--color-border)]">
+              <Link href="/admin/audit-logs" onClick={() => setIsNotifOpen(false)} className="block w-full text-center py-2 text-[14px] font-medium text-[var(--color-primary)] hover:bg-[var(--color-surface-2)] rounded-lg">
+                View All Activity
+              </Link>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-4">
-          {(Icon1 || icon1Node) && (
-            icon1Href ? (
-              <Link href={icon1Href} className="relative transition-transform active:scale-90 flex items-center justify-center min-w-[44px] min-h-[44px]">
-                {icon1Node ? icon1Node : Icon1 ? <Icon1 className="w-6 h-6" strokeWidth={1.25} /> : null}
-                {icon1Badge && <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full" />}
-              </Link>
-            ) : (
-              <div className="relative flex items-center justify-center min-w-[44px] min-h-[44px]">
-                <div className="opacity-50">{icon1Node ? icon1Node : Icon1 ? <Icon1 className="w-6 h-6" strokeWidth={1.25} /> : null}</div>
-              </div>
-            )
-          )}
-          {(Icon2 || icon2Node) && (
-            icon2Href ? (
-              <Link href={icon2Href} className="relative transition-transform active:scale-90 flex items-center justify-center min-w-[44px] min-h-[44px]">
-                {icon2Node ? icon2Node : Icon2 ? <Icon2 className="w-6 h-6" strokeWidth={1.25} /> : null}
-                {icon2Badge && <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full" />}
-              </Link>
-            ) : (
-              <div className="flex items-center justify-center min-w-[44px] min-h-[44px] opacity-50">
-                {icon2Node ? icon2Node : Icon2 ? <Icon2 className="w-6 h-6" strokeWidth={1.25} /> : null}
-              </div>
-            )
-          )}
-          {/* LOW-04: contrast-safe initials avatar */}
-          <div className="w-10 h-10 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-center justify-center text-sm font-bold text-[var(--color-text)] shrink-0">
-            {initials || 'A'}
+      )}
+
+      {/* Global Search Modal */}
+      {isSearchOpen && (
+        <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[calc(env(safe-area-inset-top)+60px)] sm:pt-[100px] bg-black/60 backdrop-blur-sm px-4 pb-4" onClick={() => setIsSearchOpen(false)}>
+          <div className="bg-[var(--color-surface)] rounded-2xl w-full max-w-[600px] max-h-full shadow-2xl overflow-hidden flex flex-col animate-slide-up sm:animate-in sm:fade-in sm:zoom-in-95" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 p-3 border-b border-[var(--color-border)]">
+              <Search className="w-5 h-5 text-[var(--color-muted)] ml-2 shrink-0" />
+              <input 
+                type="text" 
+                placeholder="Search articles, authors, categories, or users..." 
+                className="flex-1 bg-transparent border-none focus:ring-0 text-[16px] text-[var(--color-text)] placeholder:text-[var(--color-muted)] py-2 outline-none! shadow-none!"
+                autoFocus
+              />
+              <button onClick={() => setIsSearchOpen(false)} className="px-3 py-1.5 text-[13px] font-medium bg-[var(--color-surface-2)] rounded-lg text-[var(--color-muted)]">
+                ESC
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center justify-center text-center min-h-[200px]">
+              <Search className="w-10 h-10 text-[var(--color-muted)] opacity-30 mb-3" />
+              <p className="text-[14px] font-medium text-[var(--color-text)]">Start typing to search globally.</p>
+              <p className="text-[13px] text-[var(--color-muted)] mt-1">Results will appear here categorized.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div 
+        ref={headerRef}
+        className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-surface)]/95 backdrop-blur-xl border-b border-[var(--color-border)] shadow-sm flex flex-col justify-end"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top))' }}
+      >
+        {/* 56-64px Header Height */}
+        <div className="flex items-center justify-between h-[60px] px-4 w-full max-w-[1400px] mx-auto">
+          <div className="flex flex-col justify-center">
+            {/* Page Title: 22px */}
+            <h1 className="text-[22px] font-bold tracking-tight text-[var(--color-text)] leading-[1.5]">{title}</h1>
+          </div>
+          
+          <div className="flex items-center gap-2 sm:gap-4">
+            {/* Search Action */}
+            <button onClick={() => setIsSearchOpen(true)} className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors">
+              <Search className="w-5 h-5 text-[var(--color-text)]" strokeWidth={1.5} />
+            </button>
+            
+            {/* Create Quick Link (Desktop primarily, mobile has + tab) */}
+            <Link href="/admin/articles/new" className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors">
+              <Plus className="w-5 h-5 text-[var(--color-text)]" strokeWidth={1.5} />
+            </Link>
+
+            {/* Notifications Action */}
+            <button onClick={() => setIsNotifOpen(true)} className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors">
+              <Bell className="w-5 h-5 text-[var(--color-text)]" strokeWidth={1.5} />
+              {icon2Badge && <span className="absolute top-2 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-[var(--color-surface)]" />}
+            </button>
+
+            {/* User Avatar */}
+            <div className="w-9 h-9 rounded-full bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center text-[14px] font-bold text-[var(--color-primary)] ml-1 shrink-0 cursor-pointer">
+              {initials || 'A'}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -114,19 +171,20 @@ export function PresenceCard({ children, className = "", noPadding = false, onCl
   return (
     <div 
       onClick={onClick}
-      className={`bg-[var(--color-surface)] rounded-xl shadow-sm border border-[var(--color-border)] overflow-hidden ${noPadding ? '' : 'p-5'} ${onClick ? 'cursor-pointer active:scale-[0.98] hover:bg-[var(--color-surface-2)] transition-all' : ''} ${className}`}
+      /* Card padding: 16px (p-4), Border radius: 12px (rounded-xl) */
+      className={`bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] overflow-hidden ${noPadding ? '' : 'p-4'} ${onClick ? 'cursor-pointer active:scale-[0.99] hover:bg-[var(--color-surface-2)] transition-colors' : ''} ${className}`}
     >
       {children}
     </div>
   );
 }
 
-/* ─── Presence Stat Circle ─── */
+/* ─── Presence Stat Circle (Refined) ─── */
 export function PresenceStatCircle({ 
   percent, 
   label, 
   value,
-  color = "#5c4ae4",
+  color = "#685de6",
   showPercent = false
 }: { 
   percent: number; 
@@ -135,31 +193,29 @@ export function PresenceStatCircle({
   color?: string;
   showPercent?: boolean;
 }) {
-  const radius = 35;
+  const radius = 30;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (percent / 100) * circumference;
 
   return (
-    <div className="flex flex-col items-center gap-3">
-      <div className="relative w-20 h-20 flex items-center justify-center">
-        <svg className="w-20 h-20 transform -rotate-90">
-          {/* Background circle */}
+    <div className="flex flex-col items-center gap-2">
+      <div className="relative w-16 h-16 flex items-center justify-center">
+        <svg className="w-16 h-16 transform -rotate-90">
           <circle
-            cx="40"
-            cy="40"
+            cx="32"
+            cy="32"
             r={radius}
             stroke="currentColor"
-            strokeWidth="5"
+            strokeWidth="4"
             fill="transparent"
-            className="text-zinc-200 dark:text-gray-800"
+            className="text-[var(--color-border)]"
           />
-          {/* Progress circle */}
           <circle
-            cx="40"
-            cy="40"
+            cx="32"
+            cy="32"
             r={radius}
             stroke={color}
-            strokeWidth="5"
+            strokeWidth="4"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
             strokeLinecap="round"
@@ -167,12 +223,13 @@ export function PresenceStatCircle({
             className="transition-all duration-1000 ease-out"
           />
         </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center pt-0.5">
-          <span className="text-xl font-bold leading-none">{value}</span>
-          {showPercent && <span className="text-[8px] font-bold text-zinc-500 -mt-0.5">%</span>}
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          {/* Card Title: 16-18px */}
+          <span className="text-[16px] font-bold leading-none text-[var(--color-text)]">{value}</span>
         </div>
       </div>
-      <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">{label}</span>
+      {/* Metadata: 12-13px */}
+      <span className="text-[12px] font-medium text-[var(--color-muted)]">{label}</span>
     </div>
   );
 }
@@ -194,16 +251,17 @@ export function PresenceActionTile({
   className?: string;
 }) {
   return (
-    <Link href={href} className={`flex flex-col items-center gap-3 p-2 transition-all active:scale-90 group min-h-[50px] min-w-[50px] ${className}`}>
+    <Link href={href} className={`flex flex-col items-center gap-2 p-3 transition-colors hover:bg-[var(--color-surface-2)] rounded-xl group ${className}`}>
       <div className="relative">
-        <div className="w-14 h-14 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)] group-hover:bg-[var(--color-primary)] group-hover:border-[var(--color-primary)] group-hover:text-white transition-all duration-300">
+        <div className="w-12 h-12 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)] group-hover:border-[var(--color-primary)] group-hover:text-[var(--color-primary)] transition-colors duration-200">
           {iconNode ? iconNode : Icon ? <Icon className="w-6 h-6" strokeWidth={1.5} /> : null}
         </div>
         {badge && (
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 border-2 border-[var(--color-surface)] rounded-full animate-pulse" />
+          <span className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 border-2 border-[var(--color-surface)] rounded-full" />
         )}
       </div>
-      <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-muted)] group-hover:text-[var(--color-primary)] text-center whitespace-nowrap transition-colors duration-300">
+      {/* Body text/Metadata: 12-13px for dense tiles */}
+      <span className="text-[12px] font-medium text-[var(--color-muted)] group-hover:text-[var(--color-primary)] text-center transition-colors duration-200">
         {label}
       </span>
     </Link>
@@ -229,9 +287,9 @@ export function PresenceButton({
   className?: string 
 }) {
   const variantStyles = {
-    primary: "bg-[var(--color-primary)] text-white hover:opacity-90",
+    primary: "bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary)]/90",
     outline: "bg-transparent border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-2)]",
-    destructive: "bg-rose-500 text-white shadow-rose-500/20 hover:bg-rose-600"
+    destructive: "bg-rose-600 text-white hover:bg-rose-700"
   };
 
   return (
@@ -239,10 +297,11 @@ export function PresenceButton({
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
-      className={`px-4 py-2 min-h-[44px] min-w-[44px] rounded-lg text-sm font-bold shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 ${variantStyles[variant]} ${className}`}
+      /* Large tap targets: min 48px height */
+      className={`px-4 min-h-[48px] rounded-lg text-[14px] font-medium shadow-sm transition-colors flex items-center justify-center gap-2 ${variantStyles[variant]} ${className}`}
     >
       {loading && (
-        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+        <div className="w-4 h-4 border-2 border-[var(--color-surface)] border-t-transparent rounded-full animate-spin" />
       )}
       {children}
     </button>
@@ -252,10 +311,11 @@ export function PresenceButton({
 /* ─── Presence Section Header ─── */
 export function PresenceSectionHeader({ title, action, actionHref }: { title: string; action?: string; actionHref?: string }) {
   return (
-    <div className="flex items-center justify-between mb-4">
-      <h2 className="text-base sm:text-lg font-bold text-[var(--color-text)]">{title}</h2>
+    <div className="flex items-center justify-between pb-2">
+      {/* Card/Section Title: 16-18px */}
+      <h2 className="text-[17px] font-semibold text-[var(--color-text)] leading-[1.5]">{title}</h2>
       {action && actionHref && (
-        <Link href={actionHref} className="text-sm font-medium text-[var(--color-primary)] hover:underline min-h-[44px] flex items-center">
+        <Link href={actionHref} className="text-[14px] font-medium text-[var(--color-primary)] hover:underline min-h-[48px] flex items-center">
           {action}
         </Link>
       )}

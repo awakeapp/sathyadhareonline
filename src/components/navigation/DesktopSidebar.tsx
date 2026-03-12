@@ -179,7 +179,7 @@ function DesktopSidebar({ role }: SidebarProps) {
     <aside
       data-debug-role={role}
       className={`hidden md:flex flex-col flex-shrink-0 transition-all duration-300 border-r sticky top-0 h-screen overflow-hidden
-        ${collapsed ? 'w-[68px]' : 'w-64'}
+        ${collapsed ? 'w-[68px]' : 'w-[240px]'}
         ${isAdminView
           ? 'backdrop-blur-2xl bg-[var(--color-surface)]/80 dark:bg-[#0f0e17]/80 border-[var(--color-border)]'
           : 'backdrop-blur-2xl bg-[var(--color-background)]/80 dark:bg-[#0f0e17]/80 border-[var(--color-border)]'
