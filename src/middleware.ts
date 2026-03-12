@@ -48,7 +48,7 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   const { pathname } = request.nextUrl
-  if (pathname.startsWith('/auth/callback') || pathname === '/suspended') return supabaseResponse
+  if (pathname.startsWith('/auth/callback')) return supabaseResponse
 
   // Helper to safely redirect while preserving refreshed cookies
   const redirectWithCookies = (path: string) => {
@@ -94,7 +94,7 @@ export async function middleware(request: NextRequest) {
     const allowed = ROUTE_ROLES[protectedPrefix]
 
     if (status === 'suspended' || status === 'banned') {
-      return redirectWithCookies('/suspended')
+      return redirectWithCookies('/login?error=account_suspended')
     }
 
     if (allowed !== '*') {
@@ -105,20 +105,24 @@ export async function middleware(request: NextRequest) {
   }
 
   // 1b. Check status for non-protected routes too if logged in
-  if (user && pathname !== '/suspended' && !pathname.startsWith('/auth') && pathname !== '/login') {
+  if (user && !pathname.startsWith('/auth') && pathname !== '/login') {
     // Gracefully handle missing status column here too
     const { data: profile } = await supabase
       .from('profiles').select('status').eq('id', user.id).single()
     if (profile?.status === 'suspended' || profile?.status === 'banned') {
-      return redirectWithCookies('/suspended')
+      return redirectWithCookies('/login?error=account_suspended')
     }
   }
 
   // 2. Auth Pages Routing (Skip login/signup if already logged in)
   if (user && (pathname === '/login' || pathname === '/signup')) {
     const { data: profile } = await supabase
-      .from('profiles').select('role').eq('id', user.id).single()
+      .from('profiles').select('role, status').eq('id', user.id).single()
     const role = profile?.role as string | undefined
+
+    if (profile?.status === 'suspended' || profile?.status === 'banned') {
+       return supabaseResponse; // Keep them on login so they see error and can log out
+    }
 
     if (role === 'super_admin' || role === 'admin') {
       return redirectWithCookies('/admin')

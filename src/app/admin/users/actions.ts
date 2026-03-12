@@ -46,7 +46,7 @@ export async function createUserAction(formData: FormData) {
     }
 
     revalidatePath('/admin/users');
-    return { success: true };
+    return { success: true, message: 'User profile manually created.' };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Failed to create user';
     console.error('Create User Error:', error);
@@ -65,11 +65,11 @@ export async function updateUserAction(formData: FormData) {
 
     // Safeguard: Last super admin check
     if (role !== SUPER_ADMIN) {
-      const { data: target } = await supabase.from('profiles').select('role').eq('id', userId).single();
+      const { data: target } = await supabase.from('profiles').select('role, status').eq('id', userId).single();
       if (target?.role === SUPER_ADMIN) {
-        const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', SUPER_ADMIN);
-        if ((count || 0) <= 1) {
-          throw new Error('Cannot demote the last Super Admin.');
+        const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', SUPER_ADMIN).eq('status', 'active');
+        if ((count || 0) <= 1 && target?.status === 'active') {
+          throw new Error('Cannot demote the last active Super Admin.');
         }
       }
     }
@@ -84,7 +84,7 @@ export async function updateUserAction(formData: FormData) {
     await logAuditEvent(caller.id, 'USER_UPDATED', { target_user_id: userId, fullName, role });
 
     revalidatePath('/admin/users');
-    return { success: true };
+    return { success: true, message: 'User role updated successfully.' };
   } catch (error: unknown) {
     return { error: error instanceof Error ? error.message : 'Failed to update user' };
   }
@@ -99,11 +99,11 @@ export async function deleteUserAction(formData: FormData) {
     const adminClient = createAdminClient();
 
     // Safeguard: Check if it's the last super admin
-    const { data: target } = await supabase.from('profiles').select('role').eq('id', userId).single();
+    const { data: target } = await supabase.from('profiles').select('role, status').eq('id', userId).single();
     if (target?.role === SUPER_ADMIN) {
-      const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', SUPER_ADMIN);
-      if ((count || 0) <= 1) {
-        throw new Error('Cannot delete the last Super Admin.');
+      const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', SUPER_ADMIN).eq('status', 'active');
+      if ((count || 0) <= 1 && target?.status === 'active') {
+        throw new Error('Cannot delete the last active Super Admin.');
       }
     }
 
@@ -114,7 +114,7 @@ export async function deleteUserAction(formData: FormData) {
     await logAuditEvent(caller.id, 'USER_DELETED', { target_user_id: userId });
 
     revalidatePath('/admin/users');
-    return { success: true };
+    return { success: true, message: 'User account has been permanently deleted.' };
   } catch (error: unknown) {
     return { error: error instanceof Error ? error.message : 'Failed to delete user' };
   }
@@ -136,7 +136,7 @@ export async function inviteUserAction(formData: FormData) {
     await logAuditEvent(caller.id, 'USER_INVITED', { invited_email: email, role });
 
     revalidatePath('/admin/users');
-    return { success: true };
+    return { success: true, message: 'Invitation email sent successfully.' };
   } catch (error: unknown) {
     return { error: error instanceof Error ? error.message : 'Failed to invite user' };
   }
@@ -152,10 +152,10 @@ export async function toggleStatusAction(formData: FormData) {
     
     // Safeguard: Cannot suspend the last super admin
     if (status !== 'active') {
-       const { data: target } = await supabase.from('profiles').select('role').eq('id', userId).single();
+       const { data: target } = await supabase.from('profiles').select('role, status').eq('id', userId).single();
        if (target?.role === SUPER_ADMIN) {
           const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', SUPER_ADMIN).eq('status', 'active');
-          if ((count || 0) <= 1) {
+          if ((count || 0) <= 1 && target?.status === 'active') {
              throw new Error('Cannot suspend the last active Super Admin.');
           }
        }
@@ -171,7 +171,7 @@ export async function toggleStatusAction(formData: FormData) {
     await logAuditEvent(caller.id, `USER_${status.toUpperCase()}`, { target_user_id: userId });
 
     revalidatePath('/admin/users');
-    return { success: true };
+    return { success: true, message: `User status updated to ${status}.` };
   } catch (error: unknown) {
     return { error: error instanceof Error ? error.message : 'Failed to update status' };
   }

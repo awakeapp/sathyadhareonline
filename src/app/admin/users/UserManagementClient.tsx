@@ -85,14 +85,14 @@ export default function UserManagementClient({ users: initialUsers, currentUserR
     });
   }, [initialUsers, searchQuery, roleFilter, statusFilter]);
 
-  async function handleAction(action: (fd: FormData) => Promise<{ error?: string; success?: boolean }>, fd: FormData, closeFn: () => void) {
+  async function handleAction(action: (fd: FormData) => Promise<{ error?: string; success?: boolean; message?: string }>, fd: FormData, closeFn: () => void) {
     if (isPending) return;
     startTransition(async () => {
       const res = await action(fd);
       if (res?.error) {
         toast.error(res.error);
       } else {
-        toast.success('Action completed successfully');
+        toast.success(res?.message || 'Action completed successfully');
         closeFn();
       }
     });
