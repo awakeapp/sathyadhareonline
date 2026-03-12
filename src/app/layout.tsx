@@ -70,7 +70,26 @@ export default async function RootLayout({
         .eq('id', user.id)
         .maybeSingle()
       
-      if (!error && p) profile = { ...p, avatar_url: null } as { role: string | null; full_name: string | null; avatar_url: string | null; }
+      if (!error && p) {
+        profile = { ...p, avatar_url: null } as { role: string | null; full_name: string | null; avatar_url: string | null; }
+      } else if (user) {
+        // SELF-HEALING: User exists but no profile row found? Create one immediately.
+        // This prevents the middleware from entering an infinite redirect loop.
+        const { data: newProfile } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            email: user.email,
+            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Member',
+            role: 'reader' // Default to reader, admin must promote manually later or via bootstrap.
+          })
+          .select('role, full_name')
+          .single();
+        
+        if (newProfile) {
+          profile = { ...newProfile, avatar_url: null } as any;
+        }
+      }
     } catch (e) {
       console.error('Layout profile fetch error:', e)
     }
