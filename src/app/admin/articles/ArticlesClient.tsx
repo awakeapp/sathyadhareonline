@@ -8,7 +8,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
-  bulkDeleteArticles, bulkUpdateStatus, deleteArticleAction
+  bulkDeleteArticles, bulkUpdateStatus, deleteArticleAction,
+  restoreArticleAction, featureArticleAction
 } from './actions';
 import { 
   PresenceCard, 
@@ -48,7 +49,7 @@ export default function ArticlesClient({
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [authorFilter] = useState('all');
+  const [authorFilter, setAuthorFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
 
   // Bulk Selection
@@ -154,6 +155,14 @@ export default function ArticlesClient({
               <option value="all">Categories</option>
               {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
+            <select 
+              value={authorFilter} 
+              onChange={(e) => setAuthorFilter(e.target.value)} 
+              className="h-12 px-4 rounded-2xl bg-white dark:bg-zinc-950 border-none shadow-sm font-bold text-xs focus:ring-2 focus:ring-indigo-500/20"
+            >
+              <option value="all">Authors</option>
+              {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+            </select>
           </div>
         </div>
       </PresenceCard>
@@ -255,10 +264,26 @@ export default function ArticlesClient({
                     </Link>
                     {canManage && (
                       <button 
+                         onClick={() => wrapAction(featureArticleAction(a.id, isFeatured), isFeatured ? 'Unfeatured' : 'Featured')}
+                         className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm ${isFeatured ? 'bg-amber-100 text-amber-600' : 'bg-zinc-50 dark:bg-white/5 text-zinc-400'}`}
+                      >
+                        <Sparkles className="w-5 h-5" strokeWidth={1.25} />
+                      </button>
+                    )}
+                    {canManage && !isDeleted && (
+                      <button 
                         onClick={() => { if (confirm('Delete?')) wrapAction(deleteArticleAction(a.id), 'Deleted'); }}
                          className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm"
                       >
                         <Trash2 className="w-5 h-5" strokeWidth={1.25} />
+                      </button>
+                    )}
+                    {canManage && isDeleted && (
+                      <button 
+                        onClick={() => wrapAction(restoreArticleAction(a.id), 'Restored')}
+                         className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
+                      >
+                        <CheckSquare className="w-5 h-5" strokeWidth={1.25} />
                       </button>
                     )}
                   </div>

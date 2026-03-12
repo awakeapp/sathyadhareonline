@@ -2,8 +2,6 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { logAuditEvent } from '@/lib/audit';
-import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
 import { ChevronLeft, Inbox, CheckCircle2, X, Bell, User, Mail, Calendar } from 'lucide-react';
 import { 
   PresenceWrapper, 
@@ -19,7 +17,7 @@ async function convertAction(formData: FormData) {
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).single();
   if (!profile || !['admin', 'super_admin'].includes(profile.role)) return;
 
   const id      = formData.get('id')      as string;
@@ -34,7 +32,14 @@ async function convertAction(formData: FormData) {
 
   const { error: articleError } = await supabase
     .from('articles')
-    .insert({ title, content, slug, status: 'draft', author_id: user.id });
+    .insert({ 
+      title, 
+      content, 
+      slug, 
+      status: 'draft', 
+      author_id: user.id,
+      author_name: profile.full_name || 'Admin'
+    });
 
   if (articleError) {
     console.error('Convert error:', articleError);
@@ -152,7 +157,7 @@ export default async function AdminSubmissionsPage() {
                     {sub.content && (
                       <div className="bg-zinc-50 dark:bg-white/5 rounded-2xl p-5 border-l-4 border-indigo-100 dark:border-indigo-500/20 mb-2">
                         <p className="text-sm font-medium leading-relaxed italic text-zinc-900/80 dark:text-white/80 line-clamp-4">
-                          "{sub.content}"
+                          &ldquo;{sub.content}&rdquo;
                         </p>
                       </div>
                     )}

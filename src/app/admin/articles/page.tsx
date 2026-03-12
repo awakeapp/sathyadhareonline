@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { ChevronLeft, Plus, Bell } from 'lucide-react';
+import { Plus, Bell } from 'lucide-react';
 import ArticlesClient from './ArticlesClient';
 import { 
   PresenceWrapper, 
@@ -29,7 +29,7 @@ export default async function ArticlesPage() {
   const { data: articles, error } = await supabase
     .from('articles')
     .select('id, title, slug, status, is_deleted, is_featured, created_at, published_at, author_id, category_id, profiles(full_name), categories(name)')
-    .or('is_deleted.eq.false,is_deleted.is.null')
+    .eq('is_deleted', false)
     .order('created_at', { ascending: false });
 
   if (error) console.error('Error fetching articles:', error);
