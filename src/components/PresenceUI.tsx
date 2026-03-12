@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useRef } from 'react';
 import { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
