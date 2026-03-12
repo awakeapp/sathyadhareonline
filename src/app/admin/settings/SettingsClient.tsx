@@ -1,22 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { toast } from 'sonner';
 import { updateSettingsAction } from './actions';
-import { Globe, Link as LinkIcon, Search, ToggleRight, Workflow, CheckCircle2, Save } from 'lucide-react';
+import { Globe, Link as LinkIcon, Search, ToggleRight, Workflow, Save } from 'lucide-react';
 import { 
   PresenceCard, 
   PresenceButton 
 } from '@/components/PresenceUI';
 
 interface SiteSettings {
-  general: any;
-  social_links: any;
-  seo: any;
-  integrations: any;
-  features: any;
+  general: Record<string, any>;
+  social_links: Record<string, any>;
+  seo: Record<string, any>;
+  integrations: Record<string, any>;
+  features: Record<string, any>;
 }
 
 export default function SettingsClient({ initialSettings }: { initialSettings: SiteSettings }) {
@@ -134,13 +134,14 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                       <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Cross-platform integration</p>
                     </div>
                     <div className="grid gap-4 md:grid-cols-2">
-                      {Object.keys(social).map(key => (
+                      {['facebook', 'twitter', 'instagram', 'linkedin', 'youtube'].map(key => (
                         <div key={key} className="space-y-2">
                           <label className="text-[10px] font-black uppercase text-zinc-500">{key}</label>
                           <Input 
                             value={social[key] || ''} 
                             onChange={(e) => setSocial({ ...social, [key]: e.target.value })} 
                             className="h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-mono text-[11px]" 
+                            placeholder={`https://${key}.com/...`}
                           />
                         </div>
                       ))}
@@ -220,32 +221,16 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                     <div className="flex flex-col gap-4">
                        <div className="space-y-2">
                          <label className="text-[10px] font-black uppercase text-zinc-500">Cloud Analytics ID</label>
-                         <Input value={integrations.analytics_id || ''} onChange={(e) => setIntegrations({ ...integrations, analytics_id: e.target.value })} className="h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-mono" placeholder="G-XXXXXXXXXX" />
+                         <Input value={String(integrations.analytics_id || '')} onChange={(e) => setIntegrations({ ...integrations, analytics_id: e.target.value })} className="h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-mono" placeholder="G-XXXXXXXXXX" />
                        </div>
 
-                       <div className="pt-8 border-t border-indigo-50 dark:border-white/5">
+                         <div className="pt-8 border-t border-indigo-50 dark:border-white/5">
                           <h3 className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-6">Security Protocols</h3>
-                          
-                          <label className={`cursor-pointer group flex items-center justify-between p-6 rounded-[1.5rem] border-2 transition-all mb-6 ${integrations.google_oauth_enabled ? 'bg-emerald-50/50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/30' : 'bg-white dark:bg-zinc-950 border-gray-50 dark:border-white/5 font-bold'}`}>
-                              <div className="space-y-1">
-                                <span className="font-black text-sm uppercase tracking-tight block">Google OAuth Gate</span>
-                                <span className="text-[10px] font-bold text-zinc-500">Authentication protocol bypass toggle</span>
-                              </div>
-                              <input type="checkbox" checked={integrations.google_oauth_enabled} onChange={(e) => setIntegrations({ ...integrations, google_oauth_enabled: e.target.checked })} className="hidden" />
-                              <div className={`w-12 h-7 shrink-0 rounded-full transition-all flex items-center p-1 cursor-pointer ${integrations.google_oauth_enabled ? 'bg-emerald-500' : 'bg-gray-100 dark:bg-white/5'}`}>
-                                 <div className={`h-5 w-5 bg-white rounded-full shadow-lg transition-all ${integrations.google_oauth_enabled ? 'translate-x-5' : 'translate-x-0'}`} />
-                              </div>
-                           </label>
-
-                           <div className="space-y-2 opacity-40">
-                             <label className="text-[10px] font-black uppercase text-zinc-500 flex justify-between">
-                               <span>Google Client Identity</span>
-                               <span className="text-emerald-500">Secure Vault Encrypted</span>
-                             </label>
-                             <div className="h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 flex items-center px-5 font-mono text-xs select-none">
-                               ******************************************.apps.googleusercontent.com
-                             </div>
-                           </div>
+                          <div className="p-6 rounded-[1.5rem] border-2 bg-white dark:bg-zinc-950 border-gray-50 dark:border-white/5">
+                             <p className="text-[13px] text-zinc-500 font-medium leading-relaxed">
+                               External authentication integrations such as Google OAuth are currently managed directly via the Supabase configuration dashboard. Please contact a system administrator for modifications.
+                             </p>
+                          </div>
                        </div>
                     </div>
                  </div>
