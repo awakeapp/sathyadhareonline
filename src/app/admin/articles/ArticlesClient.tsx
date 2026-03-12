@@ -256,7 +256,7 @@ export default function ArticlesClient({
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
-                    <Link href={`/${a.slug}`} target="_blank" className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-indigo-400 transition-colors">
+                    <Link href={`/articles/${a.slug}`} target="_blank" className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-indigo-400 transition-colors">
                       <Eye className="w-5 h-5" strokeWidth={1.25} />
                     </Link>
                     <Link href={`/admin/articles/${a.id}/edit`} className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50 hover:bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:text-white transition-all shadow-sm">

@@ -1,29 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  /* Light Theme */
-  --color-background: #ffffff;
-  --color-surface: #f3f4f6;
-  --color-surface-2: #e5e7eb;
-  --color-primary: #ffe500;
-  --color-accent: #0047ff;
-  --color-muted: #6b7280;
-  --color-border: #d1d5db;
-  --color-text: #111827;
+  /* WhatsApp/Meta Light Theme */
+  --color-background: #f0f2f5;
+  --color-surface: #ffffff;
+  --color-surface-2: #f9fafa;
+  --color-primary: #685de6;
+  --color-accent: #685de6;
+  --color-muted: #54656f;
+  --color-border: #d1d7db;
+  --color-text: #111b21;
   
   --font-sans: var(--font-dm-sans), var(--font-baloo-tamma), sans-serif;
 }
 
 .dark {
-  /* Dark Theme */
-  --color-background: #181623;
-  --color-surface: #242235;
-  --color-surface-2: #33304a;
-  --color-primary: #ffe500;
-  --color-accent: #3b82f6;
-  --color-muted: #a3a0b5;
-  --color-border: #353347;
-  --color-text: #ffffff;
+  /* WhatsApp/Meta Dark Theme */
+  --color-background: #0b141a;
+  --color-surface: #111b21;
+  --color-surface-2: #202c33;
+  --color-primary: #685de6;
+  --color-accent: #685de6;
+  --color-muted: #8696a0;
+  --color-border: #222e35;
+  --color-text: #e9edef;
 }
 
 @theme {
@@ -78,6 +78,14 @@
   input, textarea, select, [contenteditable] {
     user-select: text !important;
     -webkit-user-select: text !important;
+  }
+
+  /* Global Form Field Fixes for Meta/WhatsApp style */
+  input:not([type="checkbox"]):not([type="radio"]), textarea, select {
+    @apply bg-white! dark:bg-[#202c33]! border! border-[#d1d7db]! dark:border-[#222e35]! text-[#111b21]! dark:text-[#e9edef]! placeholder:text-[#8696a0]! dark:placeholder:text-[#8696a0]! outline-none! transition-all!;
+  }
+  input:focus:not([type="checkbox"]):not([type="radio"]), textarea:focus, select:focus {
+    @apply border-[#685de6]! dark:border-[#685de6]! ring-1! ring-[#685de6]! shadow-sm!;
   }
 
   .scrollbar-none {

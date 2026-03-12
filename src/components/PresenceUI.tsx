@@ -8,7 +8,7 @@ import Link from 'next/link';
 export function PresenceWrapper({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
     <div
-      className={`min-h-screen bg-[var(--color-background)] pb-[80px] ${className}`}
+      className={`min-h-screen bg-[var(--color-background)] pb-[120px] ${className}`}
       style={{ paddingTop: 'var(--admin-header-h, 80px)' }}
     >
       {children}
@@ -64,14 +64,14 @@ export function PresenceHeader({
   return (
     <div 
       ref={headerRef}
-      className="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-full max-w-[1400px] bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800/80 shadow-sm flex flex-col justify-end"
+      className="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-full max-w-[1400px] bg-[var(--color-surface)]/90 backdrop-blur-xl border-b border-[var(--color-border)] shadow-sm flex flex-col justify-end"
       style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}
     >
       <div className="flex items-center justify-between h-14 px-4 w-full">
         <div>
-          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">{title}</h1>
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-[var(--color-text)]">{title}</h1>
           {roleLabel && (
-            <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mt-0.5">{roleLabel}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)] mt-0.5">{roleLabel}</p>
           )}
         </div>
         <div className="flex items-center gap-4">
@@ -100,7 +100,7 @@ export function PresenceHeader({
             )
           )}
           {/* LOW-04: contrast-safe initials avatar */}
-          <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-white/20 border border-zinc-200 dark:border-white/30 flex items-center justify-center text-sm font-bold text-zinc-900 dark:text-zinc-50 shrink-0">
+          <div className="w-10 h-10 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-center justify-center text-sm font-bold text-[var(--color-text)] shrink-0">
             {initials || 'A'}
           </div>
         </div>
@@ -114,7 +114,7 @@ export function PresenceCard({ children, className = "", noPadding = false, onCl
   return (
     <div 
       onClick={onClick}
-      className={`bg-white/80 dark:bg-white/5 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-black/5 dark:border-white/5 overflow-hidden ${noPadding ? '' : 'p-5'} ${onClick ? 'cursor-pointer active:scale-[0.98] transition-all' : ''} ${className}`}
+      className={`bg-[var(--color-surface)] rounded-xl shadow-sm border border-[var(--color-border)] overflow-hidden ${noPadding ? '' : 'p-5'} ${onClick ? 'cursor-pointer active:scale-[0.98] hover:bg-[var(--color-surface-2)] transition-all' : ''} ${className}`}
     >
       {children}
     </div>
@@ -196,14 +196,14 @@ export function PresenceActionTile({
   return (
     <Link href={href} className={`flex flex-col items-center gap-3 p-2 transition-all active:scale-90 group min-h-[50px] min-w-[50px] ${className}`}>
       <div className="relative">
-        <div className="w-14 h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200/50 dark:border-white/10 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.2)] flex items-center justify-center text-zinc-500 dark:text-zinc-400 group-hover:bg-[#5c4ae4] group-hover:border-[#5c4ae4] dark:group-hover:bg-[#5c4ae4] group-hover:text-white dark:group-hover:text-white group-hover:shadow-[0_8px_25px_rgba(92,74,228,0.4)] transition-all duration-300">
+        <div className="w-14 h-14 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)] group-hover:bg-[var(--color-primary)] group-hover:border-[var(--color-primary)] group-hover:text-white transition-all duration-300">
           {iconNode ? iconNode : Icon ? <Icon className="w-6 h-6" strokeWidth={1.5} /> : null}
         </div>
         {badge && (
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 border-2 border-white dark:border-[#181623] rounded-full animate-pulse" />
+          <span className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 border-2 border-[var(--color-surface)] rounded-full animate-pulse" />
         )}
       </div>
-      <span className="text-[11px] font-black uppercase tracking-wider text-zinc-600 dark:text-zinc-400 group-hover:text-[#5c4ae4] dark:group-hover:text-[#5c4ae4] text-center whitespace-nowrap transition-colors duration-300">
+      <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-muted)] group-hover:text-[var(--color-primary)] text-center whitespace-nowrap transition-colors duration-300">
         {label}
       </span>
     </Link>
@@ -229,8 +229,8 @@ export function PresenceButton({
   className?: string 
 }) {
   const variantStyles = {
-    primary: "bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200",
-    outline: "bg-transparent border-2 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-900",
+    primary: "bg-[var(--color-primary)] text-white hover:opacity-90",
+    outline: "bg-transparent border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-2)]",
     destructive: "bg-rose-500 text-white shadow-rose-500/20 hover:bg-rose-600"
   };
 
@@ -253,9 +253,9 @@ export function PresenceButton({
 export function PresenceSectionHeader({ title, action, actionHref }: { title: string; action?: string; actionHref?: string }) {
   return (
     <div className="flex items-center justify-between mb-4">
-      <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-50">{title}</h2>
+      <h2 className="text-base sm:text-lg font-bold text-[var(--color-text)]">{title}</h2>
       {action && actionHref && (
-        <Link href={actionHref} className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 hover:underline min-h-[44px] flex items-center">
+        <Link href={actionHref} className="text-sm font-medium text-[var(--color-primary)] hover:underline min-h-[44px] flex items-center">
           {action}
         </Link>
       )}

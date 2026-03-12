@@ -24,12 +24,12 @@ interface Props {
 
 const COLORS = ['#5c4ae4', '#2dd4bf', '#fbbf24', '#f43f5e', '#a855f7', '#06b6d4', '#84cc16'];
 
-const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string }) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: { name: string, value: number, color: string }[]; label?: string }) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white dark:bg-[#181623] border border-indigo-100 dark:border-white/10 p-4 rounded-2xl shadow-2xl space-y-2 z-50">
         <p className="font-black text-[10px] uppercase tracking-widest text-zinc-500 mb-2 border-b border-indigo-50 dark:border-white/10 pb-2">{label}</p>
-        {payload.map((p: any) => (
+        {payload.map((p) => (
           <div key={p.name} className="flex justify-between gap-4 items-center">
              <span className="text-[10px] font-black uppercase tracking-tight" style={{ color: p.color }}>{p.name}</span>
              <span className="font-black text-sm text-zinc-900 dark:text-zinc-50 tabular-nums">{Number(p.value).toLocaleString()}</span>
@@ -110,7 +110,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
             ].map(t => (
               <button
                 key={t.id}
-                onClick={() => setActiveTab(t.id as any)}
+                onClick={() => setActiveTab(t.id as 'overview' | 'content' | 'categories')}
                 className={`px-6 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === t.id ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white shadow-xl shadow-indigo-500/20' : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-50'}`}
               >
                 {t.label}
@@ -252,7 +252,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
                          return (
                            <div key={a.id} className="group">
                               <div className="flex items-center justify-between mb-2">
-                                 <Link href={`/${a.slug}`} target="_blank" className="font-black text-sm text-zinc-900 dark:text-zinc-50 group-hover:text-zinc-900 dark:text-zinc-50 transition-colors truncate max-w-[70%]">{a.title}</Link>
+                                 <Link href={`/articles/${a.slug}`} target="_blank" className="font-black text-sm text-zinc-900 dark:text-zinc-50 group-hover:text-zinc-900 dark:text-zinc-50 transition-colors truncate max-w-[70%]">{a.title}</Link>
                                  <span className="font-black tabular-nums text-sm text-zinc-500 group-hover:text-zinc-900 dark:text-zinc-50 transition-all">{a.count.toLocaleString()}</span>
                               </div>
                               <div className="h-2 bg-zinc-50 dark:bg-white/5 rounded-full overflow-hidden">
@@ -286,7 +286,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
                          return (
                            <div key={a.id} className="group">
                               <div className="flex items-center justify-between mb-2">
-                                 <Link href={`/${a.slug}`} target="_blank" className="font-black text-sm text-zinc-900 dark:text-zinc-50 group-hover:text-zinc-900 dark:text-zinc-50 transition-colors truncate max-w-[70%]">{a.title}</Link>
+                                 <Link href={`/articles/${a.slug}`} target="_blank" className="font-black text-sm text-zinc-900 dark:text-zinc-50 group-hover:text-zinc-900 dark:text-zinc-50 transition-colors truncate max-w-[70%]">{a.title}</Link>
                                  <span className="font-black tabular-nums text-sm text-zinc-500 group-hover:text-zinc-900 dark:text-zinc-50 transition-all">{a.count.toLocaleString()}</span>
                               </div>
                               <div className="h-2 bg-zinc-50 dark:bg-white/5 rounded-full overflow-hidden">
