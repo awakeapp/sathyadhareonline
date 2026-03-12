@@ -126,11 +126,16 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
 
   // Don't render nav chrome on auth pages
   if (isAuthPage) return null;
+  // CRIT-02: On admin/editor routes the PresenceHeader handles everything.
+  // Return null so no TopHeader markup (including the reader banner) can
+  // ever overlap the PresenceHeader — even if reader mode is accidentally on.
+  if (isAdminRoute) return null;
 
   return (
     <>
       {/* ── Reader Mode Banner (only when privileged user is on reader side) ── */}
       {isPrivilegedRole && isOnReaderSide && safeReaderMode && (
+
         <div
           id="reader-mode-banner"
           className="fixed top-0 left-0 right-0 z-[200] flex items-center justify-center gap-3 px-4 py-2 text-xs font-bold"

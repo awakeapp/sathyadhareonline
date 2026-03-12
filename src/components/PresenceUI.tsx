@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 
 /* ─── Presence Layout Wrapper ─── */
 export function PresenceWrapper({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`min-h-screen bg-[var(--color-background)] pt-[80px] pb-[80px] ${className}`}>
+    <div
+      className={`min-h-screen bg-[var(--color-background)] pb-[80px] ${className}`}
+      style={{ paddingTop: 'var(--admin-header-h, 80px)' }}
+    >
       {children}
     </div>
   );
@@ -29,9 +32,29 @@ export function PresenceHeader({
   icon1Href?: string; 
   icon2Href?: string; 
 }) {
+  const headerRef = useRef<HTMLDivElement>(null);
+
+  // CRIT-03: Measure real header height (including safe-area) and expose as CSS var
+  // so PresenceWrapper can pad content exactly right on all devices / notch sizes.
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const update = () => {
+      document.documentElement.style.setProperty(
+        '--admin-header-h',
+        `${el.getBoundingClientRect().height}px`
+      );
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   return (
     <div 
-      className="fixed top-0 left-1/2 -translate-x-1/2 z-40 w-full max-w-[1400px] h-[72px] bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800/80 p-0 shadow-sm flex flex-col justify-end"
+      ref={headerRef}
+      className="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-full max-w-[1400px] bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800/80 shadow-sm flex flex-col justify-end"
       style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}
     >
       <div className="flex items-center justify-between h-14 px-4 w-full">
@@ -65,7 +88,8 @@ export function PresenceHeader({
               </div>
             )
           )}
-          <div className="w-10 h-10 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-sm font-bold shrink-0">
+          {/* LOW-04: contrast-safe initials avatar */}
+          <div className="w-10 h-10 rounded-full bg-zinc-800 dark:bg-white/20 border border-zinc-700 dark:border-white/30 flex items-center justify-center text-sm font-bold text-white dark:text-zinc-50 shrink-0">
             {initials || 'A'}
           </div>
         </div>

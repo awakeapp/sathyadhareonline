@@ -1,13 +1,15 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import Link from 'next/link';
 import RichTextEditor from '@/components/RichTextEditorClient';
-import { ChevronLeft, Bell, PenTool, Sparkles, Send, Box, FileText } from 'lucide-react';
+import { logAuditEvent } from '@/lib/audit';
+import { ChevronLeft, Bell, Sparkles, Send, FileText } from 'lucide-react';
+
 import { 
   PresenceWrapper, 
   PresenceHeader,
   PresenceCard,
-  PresenceButton 
 } from '@/components/PresenceUI';
 
 export default async function NewArticlePage() {
@@ -102,8 +104,19 @@ export default async function NewArticlePage() {
       }
     }
 
+    // CRIT-04: Audit log + cache revalidation
+    await logAuditEvent(actionUser.id, 'ARTICLE_CREATED', {
+      article_id: inserted.id,
+      title,
+      status,
+      role: actionRole,
+    });
+    revalidatePath('/');
+    revalidatePath('/admin/articles');
+
     redirect('/admin/articles');
   }
+
 
   const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
 
@@ -148,7 +161,7 @@ export default async function NewArticlePage() {
 
               <div className="space-y-3">
                 <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Author Identity</label>
-                <input required name="author_name" type="text" placeholder="Dispaly Identity" defaultValue={profile?.full_name || ''}
+                <input required name="author_name" type="text" placeholder="Display Name" defaultValue={profile?.full_name || ''}
                   className="w-full h-14 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-sm font-bold shadow-inner" />
               </div>
             </div>

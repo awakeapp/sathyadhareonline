@@ -5,11 +5,11 @@ import { revalidatePath } from 'next/cache';
 import { logAuditEvent } from '@/lib/audit';
 
 export async function updateSettingsAction(payload: {
-  general: any;
-  social_links: any;
-  seo: any;
-  integrations: any;
-  features: any;
+  general: Record<string, unknown>;
+  social_links: Record<string, unknown>;
+  seo: Record<string, unknown>;
+  integrations: Record<string, unknown>;
+  features: Record<string, unknown>;
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -22,15 +22,18 @@ export async function updateSettingsAction(payload: {
 
   const { error } = await supabase
     .from('site_settings')
-    .update({
-      general: payload.general,
-      social_links: payload.social_links,
-      seo: payload.seo,
-      integrations: payload.integrations,
-      features: payload.features,
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', 1);
+    .upsert(
+      {
+        id: 1,
+        general: payload.general,
+        social_links: payload.social_links,
+        seo: payload.seo,
+        integrations: payload.integrations,
+        features: payload.features,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'id' }
+    );
 
   if (error) {
     console.error('Settings update error:', error);

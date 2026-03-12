@@ -29,19 +29,32 @@ export default async function SettingsPage() {
     .from('site_settings')
     .select('general, social_links, seo, integrations, features')
     .eq('id', 1)
-    .single();
+    .maybeSingle();
 
-  if (error) {
-    console.error('Error fetching global settings:', error);
+  // CRIT-05: If no row exists, upsert the default row so saves never silently no-op
+  if (!settings) {
+    await supabase.from('site_settings').upsert(
+      {
+        id: 1,
+        general: { site_name: 'Sathyadhare', tagline: '', logo_url: '', favicon_url: '', contact_email: '' },
+        social_links: { twitter: '', facebook: '', instagram: '', youtube: '' },
+        seo: { meta_title: 'Sathyadhare', meta_description: '', og_image: '' },
+        integrations: { google_oauth_enabled: false, google_client_id: '', analytics_id: '' },
+        features: { comments_enabled: true, guest_submissions_enabled: true, newsletter_enabled: true, registration_enabled: true },
+      },
+      { onConflict: 'id' }
+    );
+    if (error) console.error('Error fetching/creating settings:', error);
   }
 
   const safeSettings = settings || {
-    general: {},
-    social_links: {},
-    seo: {},
-    integrations: {},
-    features: {}
+    general: { site_name: 'Sathyadhare', tagline: '', logo_url: '', favicon_url: '', contact_email: '' },
+    social_links: { twitter: '', facebook: '', instagram: '', youtube: '' },
+    seo: { meta_title: 'Sathyadhare', meta_description: '', og_image: '' },
+    integrations: { google_oauth_enabled: false, google_client_id: '', analytics_id: '' },
+    features: { comments_enabled: true, guest_submissions_enabled: true, newsletter_enabled: true, registration_enabled: true },
   };
+
 
   const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
 
