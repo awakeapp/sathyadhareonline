@@ -61,21 +61,12 @@ export default async function AdminPage() {
   try {
     const results = await Promise.allSettled([
       /* 0 */ supabase.from('articles').select('*', { count: 'exact', head: true }).eq('is_deleted', false),
-      /* 1 */ supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'published').gte('published_at', startOfToday.toISOString()),
-      /* 2 */ supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'draft'),
-      /* 3 */ supabase.from('article_views').select('*', { count: 'exact', head: true }),
-      /* 4 */ supabase.from('categories').select('*', { count: 'exact', head: true }),
-      /* 5 */ supabase.from('comments').select('*', { count: 'exact', head: true }),
-      /* 6 */ supabase.from('comments').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-      /* 7 */ supabase.from('profiles').select('*', { count: 'exact', head: true }),
-      /* 8 */ supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', sevenDaysAgo.toISOString()),
-      /* 9 */ supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo.toISOString()),
-      /* 10 */ supabase.from('audit_logs').select('action, created_at').order('created_at', { ascending: false }).limit(1).maybeSingle(),
-      /* 11 */ supabase.from('articles').select('id, title, status, created_at, author:profiles!author_id(full_name)').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
-      /* 12 */ supabase.from('profiles').select('id, full_name, email, avatar_url, role, created_at').order('created_at', { ascending: false }).limit(4),
-      /* 13 */ supabase.from('guest_submissions').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-      /* 14 */ supabase.from('article_views').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo.toISOString()),
-      /* 15 */ supabase.from('comments').select('id, content, created_at, profiles(full_name, avatar_url), articles(title)').order('created_at', { ascending: false }).limit(4),
+      /* 1 */ supabase.from('comments').select('*', { count: 'exact', head: true }),
+      /* 2 */ supabase.from('comments').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      /* 3 */ supabase.from('profiles').select('*', { count: 'exact', head: true }),
+      /* 4 */ supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', sevenDaysAgo.toISOString()),
+      /* 5 */ supabase.from('articles').select('id, title, status, created_at, author:profiles!author_id(full_name)').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
+      /* 6 */ supabase.from('guest_submissions').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     ]);
 
     // Fast 7-day view aggregates directly mapped
@@ -93,21 +84,12 @@ export default async function AdminPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const g = (i: number) => results[i].status === 'fulfilled' ? (results[i] as PromiseFulfilledResult<any>).value : null;
     metrics.totalArticles      = g(0)?.count  ?? 0;
-    metrics.publishedToday     = g(1)?.count  ?? 0;
-    metrics.draftArticles      = g(2)?.count  ?? 0;
-    metrics.totalViews         = g(3)?.count  ?? 0;
-    metrics.totalCategories    = g(4)?.count  ?? 0;
-    metrics.totalComments      = g(5)?.count  ?? 0;
-    metrics.pendingComments    = g(6)?.count  ?? 0;
-    metrics.totalUsers         = g(7)?.count  ?? 0;
-    metrics.newUsers7d         = g(8)?.count  ?? 0;
-    metrics.newUsers30d        = g(9)?.count  ?? 0;
-    metrics.lastAudit          = g(10)?.data  || null;
-    metrics.recentArticles     = g(11)?.data  || [];
-    metrics.recentUsers        = g(12)?.data  || [];
-    metrics.pendingSubmissions = g(13)?.count ?? 0;
-    metrics.totalViews30d      = g(14)?.count ?? 0;
-    metrics.recentComments     = g(15)?.data  || [];
+    metrics.totalComments      = g(1)?.count  ?? 0;
+    metrics.pendingComments    = g(2)?.count  ?? 0;
+    metrics.totalUsers         = g(3)?.count  ?? 0;
+    metrics.newUsers7d         = g(4)?.count  ?? 0;
+    metrics.recentArticles     = g(5)?.data  || [];
+    metrics.pendingSubmissions = g(6)?.count ?? 0;
 
     // HIGH-01: Compute weekly dots from actual publish data
     // Get all articles published in the last 7 days

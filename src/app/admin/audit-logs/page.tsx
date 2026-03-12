@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { ChevronLeft, Bell } from 'lucide-react';
 import AuditLogsClient from './AuditLogsClient';
+import { getAuditLogsAction } from './actions';
 import { 
   PresenceWrapper, 
   PresenceHeader 
@@ -42,6 +43,24 @@ export default async function AuditLogsPage() {
 
   const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let initialLogs: any[] = [];
+  let initialCount = 0;
+  try {
+    const res = await getAuditLogsAction({
+      page: 1,
+      limit: 20,
+      userId: 'all',
+      actionSearch: '',
+      startDate: '',
+      endDate: ''
+    });
+    initialLogs = res.logs;
+    initialCount = res.count;
+  } catch (err) {
+    console.error('Failed to prefetch audit logs', err);
+  }
+
   return (
     <PresenceWrapper>
       <PresenceHeader 
@@ -54,7 +73,7 @@ export default async function AuditLogsPage() {
       />
       
       <div className="p-4 flex flex-col gap-4 relative z-20">
-        <AuditLogsClient usersList={usersList} />
+        <AuditLogsClient usersList={usersList} initialLogs={initialLogs as never[]} initialCount={initialCount} />
       </div>
     </PresenceWrapper>
   );

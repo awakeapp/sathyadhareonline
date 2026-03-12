@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useTransition, useCallback } from 'react';
-import { Button } from '@/components/ui/Button';
+import React, { useState, useEffect, useTransition, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { getAuditLogsAction } from './actions';
-import { Search, ScrollText, Calendar, ChevronLeft, ChevronRight, User, Eye, Activity, FileJson } from 'lucide-react';
+import { Search, ScrollText, Calendar, ChevronLeft, ChevronRight, User, Eye, FileJson } from 'lucide-react';
 import { 
   PresenceCard, 
   PresenceButton 
@@ -34,14 +33,18 @@ interface UserOption {
 }
 
 export default function AuditLogsClient({
-  usersList
+  usersList,
+  initialLogs = [],
+  initialCount = 0
 }: {
-  usersList: UserOption[]
+  usersList: UserOption[];
+  initialLogs?: AuditLog[];
+  initialCount?: number;
 }) {
   const [isPending, startTransition] = useTransition();
   
-  const [logs, setLogs] = useState<AuditLog[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [logs, setLogs] = useState<AuditLog[]>(initialLogs);
+  const [totalCount, setTotalCount] = useState(initialCount);
   
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
@@ -52,6 +55,7 @@ export default function AuditLogsClient({
   const [endDate, setEndDate] = useState('');
 
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const hasMounted = useRef(false);
 
   const loadLogs = useCallback(() => {
     startTransition(async () => {
@@ -66,13 +70,17 @@ export default function AuditLogsClient({
         });
         setLogs(res.logs as unknown as AuditLog[]);
         setTotalCount(res.count || 0);
-      } catch (err) {
+      } catch {
         toast.error('Scan Failed');
       }
     });
   }, [page, limit, userFilter, actionSearch, startDate, endDate]);
 
   useEffect(() => {
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      return;
+    }
     loadLogs();
   }, [loadLogs]);
   
