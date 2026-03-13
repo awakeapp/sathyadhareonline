@@ -39,12 +39,8 @@ export default async function EmailTemplatesPage() {
   return (
     <PresenceWrapper>
       <PresenceHeader 
-        title="Super Admin"
-        roleLabel="Delivery Protocol · SMTP Routing"
-        initials={initials}
-        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Href="/admin"
+        title="Email" 
+        hideActions={true} 
       />
       
       <div className="p-4 flex flex-col gap-4 relative z-20">

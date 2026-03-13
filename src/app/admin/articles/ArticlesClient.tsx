@@ -174,11 +174,7 @@ export default function ArticlesClient({
     <div className="flex flex-col gap-4 max-w-[1400px] mx-auto w-full pb-20 md:pb-0">
       
       {/* ── Page Header & Desktop Actions ── */}
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--color-text)] tracking-tight">Content</h1>
-          <p className="text-[14px] text-[var(--color-muted)] mt-1">Manage all articles across the platform.</p>
-        </div>
+      <div className="flex items-center justify-end mb-2">
         <div className="hidden md:flex gap-3">
           <Link href="/admin/articles/new">
             <PresenceButton className="shadow-sm">

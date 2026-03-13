@@ -62,12 +62,8 @@ export default async function FridayMessagesPage() {
   return (
     <PresenceWrapper>
       <PresenceHeader 
-        title="Super Admin"
-        roleLabel={`Friday Dispatch · ${messages?.length || 0} Nodes`}
-        initials={initials}
-        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Node={<Plus className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Href="/admin/friday/new"
+        title="Friday Message" 
+        hideActions={true} 
       />
       
       <div className="p-4 flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
