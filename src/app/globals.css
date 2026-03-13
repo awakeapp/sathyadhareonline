@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   /* WhatsApp/Meta Light Theme */
   --color-background: #f0f2f5;
