@@ -91,7 +91,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-4xl mx-auto pb-24">
+    <div className="flex flex-col gap-6 w-full pb-24">
       
       {/* Segmented Controls */}
       <div className="bg-[#e3e3e8] dark:bg-[#1c1c1e] p-1 rounded-[10px] flex">
