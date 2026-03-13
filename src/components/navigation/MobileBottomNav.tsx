@@ -8,7 +8,7 @@ import {
   LayoutDashboard, FileText, Users, MessageSquare,
   Layers, Eye, Home, Search, Mic, Menu,
   SquarePen, PlusCircle, BarChart2,
-  Image as ImageIcon, Library, X
+  Library, X, Mail, Presentation
 } from 'lucide-react';
 
 interface MobileBottomNavProps {
@@ -76,33 +76,47 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 p-5">
-                <Link href="/admin/articles/new" onClick={() => setIsCreateOpen(false)} className="flex items-center gap-4 p-4 rounded-2xl bg-[var(--color-surface-2)] hover:bg-[var(--color-primary)] hover:text-white transition-all group">
+              <div className="grid grid-cols-3 gap-3 p-5">
+                <Link href="/admin/articles/new" onClick={() => setIsCreateOpen(false)} className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-[var(--color-surface-2)] hover:bg-[var(--color-primary)] hover:text-white transition-all group text-center">
                   <div className="w-12 h-12 rounded-xl bg-[var(--color-surface)] shadow-sm flex items-center justify-center text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors">
                     <SquarePen size={22} strokeWidth={1.5} />
                   </div>
-                  <span className="text-[15px] font-bold text-[var(--color-text)] group-hover:text-white">Article</span>
+                  <span className="text-[12px] font-bold text-[var(--color-text)] group-hover:text-white leading-tight">Article</span>
                 </Link>
 
-                <Link href="/admin/media" onClick={() => setIsCreateOpen(false)} className="flex items-center gap-4 p-4 rounded-2xl bg-[var(--color-surface-2)] hover:bg-[var(--color-primary)] hover:text-white transition-all group">
-                  <div className="w-12 h-12 rounded-xl bg-[var(--color-surface)] shadow-sm flex items-center justify-center text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors">
-                    <ImageIcon size={22} strokeWidth={1.5} />
-                  </div>
-                  <span className="text-[15px] font-bold text-[var(--color-text)] group-hover:text-white">Media</span>
-                </Link>
-
-                <Link href="/admin/users?action=new-author" onClick={() => setIsCreateOpen(false)} className="flex items-center gap-4 p-4 rounded-2xl bg-[var(--color-surface-2)] hover:bg-[var(--color-primary)] hover:text-white transition-all group">
+                <Link href="/admin/users?action=new-author" onClick={() => setIsCreateOpen(false)} className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-[var(--color-surface-2)] hover:bg-[var(--color-primary)] hover:text-white transition-all group text-center">
                   <div className="w-12 h-12 rounded-xl bg-[var(--color-surface)] shadow-sm flex items-center justify-center text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors">
                     <Users size={22} strokeWidth={1.5} />
                   </div>
-                  <span className="text-[15px] font-bold text-[var(--color-text)] group-hover:text-white">Author</span>
+                  <span className="text-[12px] font-bold text-[var(--color-text)] group-hover:text-white leading-tight">People</span>
                 </Link>
 
-                <Link href="/admin/categories" onClick={() => setIsCreateOpen(false)} className="flex items-center gap-4 p-4 rounded-2xl bg-[var(--color-surface-2)] hover:bg-[var(--color-primary)] hover:text-white transition-all group">
+                <Link href="/admin/friday/new" onClick={() => setIsCreateOpen(false)} className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-[var(--color-surface-2)] hover:bg-[var(--color-primary)] hover:text-white transition-all group text-center">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--color-surface)] shadow-sm flex items-center justify-center text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors">
+                    <Mail size={22} strokeWidth={1.5} />
+                  </div>
+                  <span className="text-[12px] font-bold text-[var(--color-text)] group-hover:text-white leading-tight">Message</span>
+                </Link>
+
+                <Link href="/admin/categories" onClick={() => setIsCreateOpen(false)} className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-[var(--color-surface-2)] hover:bg-[var(--color-primary)] hover:text-white transition-all group text-center">
                   <div className="w-12 h-12 rounded-xl bg-[var(--color-surface)] shadow-sm flex items-center justify-center text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors">
                     <Library size={22} strokeWidth={1.5} />
                   </div>
-                  <span className="text-[15px] font-bold text-[var(--color-text)] group-hover:text-white">Category</span>
+                  <span className="text-[12px] font-bold text-[var(--color-text)] group-hover:text-white leading-tight">Category</span>
+                </Link>
+
+                <Link href="/admin/sequels" onClick={() => setIsCreateOpen(false)} className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-[var(--color-surface-2)] hover:bg-[var(--color-primary)] hover:text-white transition-all group text-center">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--color-surface)] shadow-sm flex items-center justify-center text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors">
+                    <Layers size={22} strokeWidth={1.5} />
+                  </div>
+                  <span className="text-[12px] font-bold text-[var(--color-text)] group-hover:text-white leading-tight">Sequel</span>
+                </Link>
+
+                <Link href="/admin/settings?section=banners" onClick={() => setIsCreateOpen(false)} className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-[var(--color-surface-2)] hover:bg-[var(--color-primary)] hover:text-white transition-all group text-center">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--color-surface)] shadow-sm flex items-center justify-center text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors">
+                    <Presentation size={22} strokeWidth={1.5} />
+                  </div>
+                  <span className="text-[12px] font-bold text-[var(--color-text)] group-hover:text-white leading-tight">Banner</span>
                 </Link>
               </div>
 
