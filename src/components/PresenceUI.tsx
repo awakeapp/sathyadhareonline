@@ -8,10 +8,9 @@ import Link from 'next/link';
 export function PresenceWrapper({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
     <div
-      className={`min-h-screen bg-[var(--color-background)] pb-[120px] pt-[var(--admin-header-h,64px)] flex flex-col items-center ${className}`}
+      className={`min-h-screen bg-[var(--color-background)] pb-[100px] pt-[var(--admin-header-h,60px)] flex flex-col items-center ${className}`}
     >
-      {/* 16px screen margin (p-4), 24px section spacing (space-y-6) */}
-      <div className="w-full max-w-[1400px] p-4 space-y-6">
+      <div className="w-full max-w-[1400px] p-2 sm:p-4 space-y-4 sm:space-y-6">
         {children}
       </div>
     </div>

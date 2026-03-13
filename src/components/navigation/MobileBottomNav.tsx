@@ -101,10 +101,11 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
           style={{
             borderTop: '1px solid var(--color-border)',
             boxShadow: '0 -4px 24px rgba(0,0,0,0.04)',
+            paddingBottom: 'env(safe-area-inset-bottom)'
           }}
         >
           {/* Target minimum 48px tap heights */}
-          <div className="flex items-stretch h-[60px] px-2 pb-[env(safe-area-inset-bottom)] max-w-[430px] mx-auto">
+          <div className="flex items-stretch h-[60px] px-2 max-w-[430px] mx-auto">
             <NavTabLink
               href="/admin"
               icon={LayoutDashboard}
@@ -156,7 +157,7 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
     return (
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 backdrop-blur-2xl bg-white/80 dark:bg-[#0f0e17]/80"
         style={{ borderTop: '1px solid var(--color-border)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        <div className="flex items-stretch h-16 px-2">
+        <div className="flex items-stretch h-[60px] px-2">
           {[
             { label: 'Dashboard', href: '/admin',          icon: LayoutDashboard, exact: true  },
             { label: 'Articles',  href: '/admin/articles', icon: FileText,        exact: false },
@@ -183,7 +184,7 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
     return (
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 backdrop-blur-2xl bg-white/80 dark:bg-[#0f0e17]/80"
         style={{ borderTop: '1px solid var(--color-border)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        <div className="flex items-stretch h-16 px-2">
+        <div className="flex items-stretch h-[60px] px-2">
           {[
             { label: 'Dashboard', href: '/editor',               icon: LayoutDashboard, exact: true  },
             { label: 'Articles',  href: '/editor/articles',      icon: FileText,        exact: false },
@@ -208,7 +209,7 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 backdrop-blur-2xl bg-white/80 dark:bg-[#0f0e17]/80"
       style={{ borderTop: '1px solid var(--color-border)', paddingBottom: 'env(safe-area-inset-bottom)', boxShadow: '0 -2px 20px rgba(0,0,0,0.08)' }}>
-      <div className="flex items-stretch h-16 px-2">
+      <div className="flex items-stretch h-[60px] px-2">
         {[
           { label: 'Home',    href: '/',        icon: Home,   exact: true  },
           { label: 'Sequels', href: '/sequels', icon: Layers, exact: false },

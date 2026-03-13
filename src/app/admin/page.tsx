@@ -110,7 +110,7 @@ export default async function AdminPage() {
         icon2Badge={metrics.pendingComments > 0}
       />
 
-      <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 pt-5 pb-24 space-y-6">
+      <div className="w-full space-y-4 sm:space-y-6">
         
         {/* Analytics Summary */}
         <div>
