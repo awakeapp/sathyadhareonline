@@ -59,7 +59,7 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
       <>
         {/* Create Quick Action Panel (Modal) */}
         {isCreateOpen && (
-          <div className="fixed inset-0 z-[100] flex flex-col justify-end bg-black/60 backdrop-blur-sm"
+          <div className="fixed inset-0 z-[100] flex flex-col justify-end bg-black/20 dark:bg-black/60 backdrop-blur-md"
                onClick={() => setIsCreateOpen(false)}>
             <div className="bg-[var(--color-surface)] rounded-t-3xl w-full max-w-[430px] mx-auto overflow-hidden animate-slide-up shadow-2xl"
                  style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 24px)' }}

@@ -55,7 +55,7 @@ export function PresenceHeader({
     <>
       {/* Notifications Panel Modal */}
       {isNotifOpen && (
-        <div className="fixed inset-0 z-[60] flex sm:items-start justify-end sm:pt-16 sm:pr-4 bg-black/20 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none" onClick={() => setIsNotifOpen(false)}>
+        <div className="fixed inset-0 z-[60] flex sm:items-start justify-end sm:pt-16 sm:pr-4 bg-black/20 dark:bg-black/60 backdrop-blur-md sm:bg-transparent sm:backdrop-blur-none" onClick={() => setIsNotifOpen(false)}>
           <div className="bg-[var(--color-surface)] sm:rounded-2xl w-full h-full sm:h-auto sm:w-[380px] sm:max-h-[80vh] shadow-2xl border border-[var(--color-border)] flex flex-col animate-slide-up sm:animate-in sm:fade-in sm:slide-in-from-top-4" onClick={e => e.stopPropagation()}>
             <div className="p-4 border-b border-[var(--color-border)] flex items-center justify-between">
               <h3 className="text-[18px] font-bold text-[var(--color-text)]">Notifications</h3>
@@ -91,7 +91,7 @@ export function PresenceHeader({
 
       {/* Profile/Settings Drawer Modal */}
       {isProfileOpen && (
-        <div className="fixed inset-0 z-[60] flex sm:items-start justify-end sm:pt-16 sm:pr-4 bg-black/20 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none" onClick={() => setIsProfileOpen(false)}>
+        <div className="fixed inset-0 z-[60] flex sm:items-start justify-end sm:pt-16 sm:pr-4 bg-black/20 dark:bg-black/60 backdrop-blur-md sm:bg-transparent sm:backdrop-blur-none" onClick={() => setIsProfileOpen(false)}>
           <div className="bg-[var(--color-surface)] sm:rounded-2xl w-full h-full sm:h-auto sm:w-[360px] sm:max-h-[85vh] shadow-2xl border border-[var(--color-border)] flex flex-col animate-slide-left sm:animate-in sm:fade-in sm:slide-in-from-right-4" onClick={e => e.stopPropagation()}>
             <div className="p-4 border-b border-[var(--color-border)] flex items-center justify-between">
               <h3 className="text-[18px] font-bold text-[var(--color-text)]">Account</h3>
@@ -134,7 +134,7 @@ export function PresenceHeader({
 
       {/* Global Search Modal */}
       {isSearchOpen && (
-        <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[calc(env(safe-area-inset-top)+60px)] sm:pt-[100px] bg-black/60 backdrop-blur-sm px-4 pb-4" onClick={() => setIsSearchOpen(false)}>
+        <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[calc(env(safe-area-inset-top)+60px)] sm:pt-[100px] bg-black/20 dark:bg-black/60 backdrop-blur-md px-4 pb-4" onClick={() => setIsSearchOpen(false)}>
           <div className="bg-[var(--color-surface)] rounded-2xl w-full max-w-[600px] max-h-full shadow-2xl overflow-hidden flex flex-col animate-slide-up sm:animate-in sm:fade-in sm:zoom-in-95" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 p-3 border-b border-[var(--color-border)]">
               <Search className="w-5 h-5 text-[var(--color-muted)] ml-2 shrink-0" />
