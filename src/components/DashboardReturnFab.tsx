@@ -15,7 +15,7 @@ interface Props {
  * has reader mode active. Rendered from the root layout so it always
  * exists regardless of what page is being shown.
  */
-export default function DashboardReturnFab({ role, dashboardHref, dashboardLabel }: Props) {
+export default function DashboardReturnFab({ role, dashboardHref }: Props) {
   const router = useRouter()
   const { readerMode, disableReaderMode } = useReaderMode()
 
@@ -55,16 +55,28 @@ export default function DashboardReturnFab({ role, dashboardHref, dashboardLabel
       <button
         id="fab-return-dashboard"
         onClick={handleReturn}
-        className="flex items-center gap-2.5 px-5 py-3 rounded-2xl font-black text-white text-sm uppercase tracking-widest transition-all active:scale-95 hover:scale-105 hover:brightness-110"
-        style={{
-          background: roleColor.bg,
-          boxShadow: `0 8px 32px ${roleColor.shadow}, 0 2px 8px rgba(0,0,0,0.3)`,
-        }}
+        className="flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform"
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 flex-shrink-0">
-          <path d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        <span>Return to {dashboardLabel}</span>
+        <div
+          className="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-xl transition-transform hover:scale-105 hover:brightness-110"
+          style={{
+            background: roleColor.bg,
+            boxShadow: `0 8px 24px ${roleColor.shadow}, 0 2px 8px rgba(0,0,0,0.3)`,
+          }}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+            <rect width="7" height="9" x="3" y="3" rx="1" />
+            <rect width="7" height="5" x="14" y="3" rx="1" />
+            <rect width="7" height="9" x="14" y="12" rx="1" />
+            <rect width="7" height="5" x="3" y="16" rx="1" />
+          </svg>
+        </div>
+        <span 
+          className="text-[10px] font-black uppercase tracking-widest drop-shadow-sm" 
+          style={{ color: roleColor.bg }}
+        >
+          Dashboard
+        </span>
       </button>
     </div>
   )

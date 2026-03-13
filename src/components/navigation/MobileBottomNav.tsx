@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useReaderMode } from '@/context/ReaderModeContext';
+
 import {
   LayoutDashboard, FileText, Users, MessageSquare,
-  Layers, Eye, Home, Search, Mic, Menu,
+  Layers, Home, Search, Mic, Menu,
   SquarePen, PlusCircle, BarChart2,
   Library, X, Mail, Presentation
 } from 'lucide-react';
@@ -35,7 +35,6 @@ interface MobileBottomNavProps {
 
 export default function MobileBottomNav({ role }: MobileBottomNavProps) {
   const pathname = usePathname();
-  const { enableReaderMode } = useReaderMode();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const isAuthPage  = pathname === '/login' || pathname === '/signup';
@@ -179,14 +178,6 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
           <NavTabLink key={tab.href} href={tab.href} icon={tab.icon} label={tab.label}
             active={tab.exact ? pathname === tab.href : pathname.startsWith(tab.href)} />
         ))}
-        <button onClick={() => { enableReaderMode(); window.location.href = '/'; }}
-          className="flex-1 flex flex-col items-center justify-center gap-1 active:scale-95 focus:outline-none transition-transform"
-          style={{ color: 'var(--color-muted)' }}>
-          <div className="relative flex items-center justify-center w-[48px] h-[32px] rounded-full transition-colors duration-200">
-             <Eye size={22} strokeWidth={1.75} />
-          </div>
-          <span className="text-[10px] font-bold tracking-wide">Reader</span>
-        </button>
       </FloatingContainer>
     );
   }
@@ -205,14 +196,6 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
           <NavTabLink key={tab.href} href={tab.href} icon={tab.icon} label={tab.label}
             active={tab.exact ? pathname === tab.href : pathname.startsWith(tab.href)} />
         ))}
-        <button onClick={() => { enableReaderMode(); window.location.href = '/'; }}
-          className="flex-1 flex flex-col items-center justify-center gap-1 active:scale-95 focus:outline-none transition-transform"
-          style={{ color: 'var(--color-muted)' }}>
-          <div className="relative flex items-center justify-center w-[48px] h-[32px] rounded-full transition-colors duration-200">
-            <Eye size={22} strokeWidth={1.75} />
-          </div>
-          <span className="text-[10px] font-bold tracking-wide">Reader</span>
-        </button>
       </FloatingContainer>
     );
   }

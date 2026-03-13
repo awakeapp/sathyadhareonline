@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import {
-  FileText, MessageSquare,
+  FileText, MessageSquare, Search,
   CheckCircle, Users, Activity,
   Send, Bell, ChevronRight, ArrowRight
 } from 'lucide-react';
@@ -110,8 +110,24 @@ export default async function AdminPage() {
         icon2Badge={metrics.pendingComments > 0}
       />
 
-      <div className="w-full space-y-4 sm:space-y-6">
+      <div className="w-full space-y-4 sm:space-y-6 pt-2">
         
+        {/* Modern Horizontal Search Bar */}
+        <div 
+           onClick={() => {
+             const btn = document.getElementById('global-search-trigger');
+             if(btn) btn.click();
+           }}
+           className="w-full h-[52px] bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-sm flex items-center px-4 cursor-text transition-all hover:border-[var(--color-primary)] hover:shadow-md active:scale-[0.99] group mt-2"
+        >
+           <Search className="w-5 h-5 text-[var(--color-muted)] group-hover:text-[var(--color-primary)] transition-colors" />
+           <span className="ml-3 text-[15px] font-medium text-[var(--color-muted)] group-hover:text-[var(--color-text)] transition-colors">Search the platform globally...</span>
+           <div className="ml-auto flex items-center gap-1.5 opacity-60">
+             <span className="text-[10px] font-bold bg-[var(--color-surface-2)] border border-[var(--color-border)] px-2 py-1 rounded-md text-[var(--color-muted)]">CMD</span>
+             <span className="text-[10px] font-bold bg-[var(--color-surface-2)] border border-[var(--color-border)] px-2 py-1 rounded-md text-[var(--color-muted)]">K</span>
+           </div>
+        </div>
+
         {/* Analytics Summary */}
         <div>
           <h2 className="text-[18px] font-bold text-[var(--color-text)] mb-4">Account Analytics</h2>

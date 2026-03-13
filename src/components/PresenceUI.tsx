@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import { LucideIcon, Search, Bell, Plus, Settings } from 'lucide-react';
+import { LucideIcon, Search, Bell, Plus, Settings, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 
@@ -166,12 +166,38 @@ export function PresenceHeader({
           <div className="flex flex-col justify-center">
             {/* Page Title: 22px */}
             <h1 className="text-[22px] font-bold tracking-tight text-[var(--color-text)] leading-[1.5]">{title}</h1>
+            <button id="global-search-trigger" onClick={() => setIsSearchOpen(true)} className="hidden" aria-hidden="true"></button>
           </div>
           
           <div className="flex items-center gap-2 sm:gap-4">
-            {/* Search Action */}
-            <button onClick={() => setIsSearchOpen(true)} className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors">
-              <Search className="w-5 h-5 text-[var(--color-text)]" strokeWidth={1.5} />
+            {/* Reader Mode Action */}
+            <button 
+               onClick={() => {
+                 try {
+                   localStorage.setItem('sathyadhare:readerMode', 'true');
+                   document.cookie = `sathyadhare:readerMode=true; path=/; max-age=31536000`;
+                 } catch {}
+                 window.location.href = '/';
+               }} 
+               className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full font-bold transition-all active:scale-95 hover:bg-[var(--color-surface-2)] border border-[var(--color-border)]"
+               title="Switch to Reader Mode"
+               style={{ color: 'var(--color-primary)' }}
+            >
+               <Eye className="w-4 h-4" />
+               <span className="text-[11px] uppercase tracking-widest">Reader Mode</span>
+            </button>
+            <button 
+               onClick={() => {
+                 try {
+                   localStorage.setItem('sathyadhare:readerMode', 'true');
+                   document.cookie = `sathyadhare:readerMode=true; path=/; max-age=31536000`;
+                 } catch {}
+                 window.location.href = '/';
+               }} 
+               className="sm:hidden flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors text-[var(--color-primary)]"
+               title="Switch to Reader Mode"
+            >
+               <Eye className="w-5 h-5" />
             </button>
             
             {/* Create Quick Link (Desktop primarily, mobile has + tab) */}
