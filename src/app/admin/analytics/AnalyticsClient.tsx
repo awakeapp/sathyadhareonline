@@ -23,12 +23,12 @@ const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'
 const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: { name: string, value: number, color: string }[]; label?: string }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white dark:bg-[#1c1c1e] border border-black/5 dark:border-white/10 p-4 rounded-2xl shadow-xl z-50">
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-4 rounded-2xl shadow-xl z-50">
         <p className="font-semibold text-[12px] text-zinc-500 mb-2">{label}</p>
         {payload.map((p) => (
           <div key={p.name} className="flex justify-between gap-6 items-center">
              <span className="text-[13px] font-medium" style={{ color: p.color }}>{p.name}</span>
-             <span className="font-semibold text-[14px] text-black dark:text-white tabular-nums">{Number(p.value).toLocaleString()}</span>
+             <span className="font-semibold text-[14px] text-[var(--color-text)] tabular-nums">{Number(p.value).toLocaleString()}</span>
           </div>
         ))}
       </div>
@@ -103,7 +103,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id as 'overview' | 'content' | 'categories')}
-            className={`flex-1 py-1.5 rounded-[8px] text-[13px] font-medium transition-all ${activeTab === t.id ? 'bg-white dark:bg-[#2c2c2e] text-black dark:text-white shadow-sm' : 'text-zinc-500'}`}
+            className={`flex-1 py-1.5 rounded-[8px] text-[13px] font-medium transition-all ${activeTab === t.id ? 'bg-[var(--color-surface-2)] text-[var(--color-text)] shadow-sm' : 'text-zinc-500'}`}
           >
             {t.label}
           </button>
@@ -112,15 +112,15 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
 
       {/* Date Filters */}
       <div className="flex flex-wrap items-center gap-2">
-         <button onClick={() => applyPreset(7)} className="px-4 py-[6px] rounded-full bg-white dark:bg-[#1c1c1e] border border-black/5 dark:border-white/5 text-[13px] font-medium text-zinc-600 dark:text-zinc-300">7 Days</button>
-         <button onClick={() => applyPreset(30)} className="px-4 py-[6px] rounded-full bg-white dark:bg-[#1c1c1e] border border-black/5 dark:border-white/5 text-[13px] font-medium text-zinc-600 dark:text-zinc-300">30 Days</button>
-         <button onClick={() => setIsCustom(!isCustom)} className={`px-4 py-[6px] rounded-full flex items-center gap-2 text-[13px] font-medium border border-black/5 dark:border-white/5 ${isCustom ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600' : 'bg-white dark:bg-[#1c1c1e] text-zinc-600 dark:text-zinc-300'}`}>
+         <button onClick={() => applyPreset(7)} className="px-4 py-[6px] rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[13px] font-medium text-[var(--color-text)]">7 Days</button>
+         <button onClick={() => applyPreset(30)} className="px-4 py-[6px] rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[13px] font-medium text-[var(--color-text)]">30 Days</button>
+         <button onClick={() => setIsCustom(!isCustom)} className={`px-4 py-[6px] rounded-full flex items-center gap-2 text-[13px] font-medium border border-[var(--color-border)] ${isCustom ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600' : 'bg-[var(--color-surface)] text-[var(--color-text)]'}`}>
            <Calendar className="w-4 h-4" strokeWidth={1.5} /> Custom
          </button>
       </div>
       
       {isCustom && (
-         <div className="flex items-center gap-2 bg-white dark:bg-[#1c1c1e] p-2 rounded-xl border border-black/5 dark:border-white/5">
+         <div className="flex items-center gap-2 bg-[var(--color-surface)] p-2 rounded-xl border border-[var(--color-border)]">
             <input type="date" className="h-10 px-3 flex-1 rounded-lg bg-transparent text-[14px] text-zinc-800 dark:text-zinc-200 outline-none" value={customStart} onChange={e => setCustomStart(e.target.value)} />
             <span className="text-zinc-400">→</span>
             <input type="date" className="h-10 px-3 flex-1 rounded-lg bg-transparent text-[14px] text-zinc-800 dark:text-zinc-200 outline-none" value={customEnd} onChange={e => setCustomEnd(e.target.value)} />
@@ -134,32 +134,32 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
             
             {/* Top Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-               <div className="bg-white dark:bg-[#1c1c1e] p-5 rounded-3xl border border-black/5 dark:border-white/5">
+               <div className="bg-[var(--color-surface)] p-5 rounded-3xl border border-[var(--color-border)]">
                   <div className="flex items-center gap-2 mb-2 text-zinc-500">
                     <Eye className="w-5 h-5" />
                     <span className="text-[13px] font-medium">Views</span>
                   </div>
-                  <p className="text-3xl font-semibold text-black dark:text-white tabular-nums">{totals.viewsInRange.toLocaleString()}</p>
+                  <p className="text-3xl font-semibold text-[var(--color-text)] tabular-nums">{totals.viewsInRange.toLocaleString()}</p>
                </div>
-               <div className="bg-white dark:bg-[#1c1c1e] p-5 rounded-3xl border border-black/5 dark:border-white/5">
+               <div className="bg-[var(--color-surface)] p-5 rounded-3xl border border-[var(--color-border)]">
                   <div className="flex items-center gap-2 mb-2 text-zinc-500">
                     <Users className="w-5 h-5" />
                     <span className="text-[13px] font-medium">New Accounts</span>
                   </div>
-                  <p className="text-3xl font-semibold text-black dark:text-white tabular-nums">{totalUsers.toLocaleString()}</p>
+                  <p className="text-3xl font-semibold text-[var(--color-text)] tabular-nums">{totalUsers.toLocaleString()}</p>
                </div>
-               <div className="bg-white dark:bg-[#1c1c1e] p-5 rounded-3xl border border-black/5 dark:border-white/5 col-span-2 lg:col-span-1">
+               <div className="bg-[var(--color-surface)] p-5 rounded-3xl border border-[var(--color-border)] col-span-2 lg:col-span-1">
                   <div className="flex items-center gap-2 mb-2 text-zinc-500">
                     <MessageSquare className="w-5 h-5" />
                     <span className="text-[13px] font-medium">Comments</span>
                   </div>
-                  <p className="text-3xl font-semibold text-black dark:text-white tabular-nums">{totalComments.toLocaleString()}</p>
+                  <p className="text-3xl font-semibold text-[var(--color-text)] tabular-nums">{totalComments.toLocaleString()}</p>
                </div>
             </div>
 
             {/* Charts */}
-            <div className="bg-white dark:bg-[#1c1c1e] p-5 rounded-3xl border border-black/5 dark:border-white/5">
-                <h3 className="text-[15px] font-semibold text-black dark:text-white mb-6">Audience Growth</h3>
+            <div className="bg-[var(--color-surface)] p-5 rounded-3xl border border-[var(--color-border)]">
+                <h3 className="text-[15px] font-semibold text-[var(--color-text)] mb-6">Audience Growth</h3>
                 <div className="h-[250px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={timeSeries}>
@@ -183,14 +183,14 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
         {activeTab === 'content' && (
            <div className="flex flex-col gap-6">
               <div className="flex justify-end">
-                 <button onClick={() => handleExport('content')} disabled={isExporting} className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1c1c1e] rounded-full border border-black/5 dark:border-white/5 text-[13px] font-medium text-zinc-600 dark:text-zinc-300">
+                 <button onClick={() => handleExport('content')} disabled={isExporting} className="flex items-center gap-2 px-4 py-2 bg-[var(--color-surface)] rounded-full border border-[var(--color-border)] text-[13px] font-medium text-[var(--color-text)]">
                    <Download className="w-4 h-4" /> Export CSV
                  </button>
               </div>
               
-              <div className="bg-white dark:bg-[#1c1c1e] rounded-3xl border border-black/5 dark:border-white/5 overflow-hidden">
-                 <div className="p-5 border-b border-black/5 dark:border-white/5">
-                    <h2 className="text-[16px] font-semibold text-black dark:text-white">Top Articles by Views</h2>
+              <div className="bg-[var(--color-surface)] rounded-3xl border border-[var(--color-border)] overflow-hidden">
+                 <div className="p-5 border-b border-[var(--color-border)]">
+                    <h2 className="text-[16px] font-semibold text-[var(--color-text)]">Top Articles by Views</h2>
                  </div>
                  <div className="flex flex-col">
                    {topArticlesByViews.length === 0 ? (
@@ -199,7 +199,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
                      topArticlesByViews.map((a) => {
                        return (
                          <Link key={a.id} href={`/articles/${a.slug}`} target="_blank" className="flex items-center justify-between p-4 active:bg-zinc-50 dark:active:bg-[#2c2c2e] transition-colors">
-                            <span className="text-[15px] font-medium text-black dark:text-white truncate max-w-[75%] pr-4">{a.title}</span>
+                            <span className="text-[15px] font-medium text-[var(--color-text)] truncate max-w-[75%] pr-4">{a.title}</span>
                             <div className="flex items-center gap-3">
                               <span className="text-[14px] text-zinc-500 tabular-nums">{a.count.toLocaleString()}</span>
                               <ChevronRight className="w-4 h-4 text-zinc-300" />
@@ -211,9 +211,9 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
                  </div>
               </div>
 
-              <div className="bg-white dark:bg-[#1c1c1e] rounded-3xl border border-black/5 dark:border-white/5 overflow-hidden">
-                 <div className="p-5 border-b border-black/5 dark:border-white/5">
-                    <h2 className="text-[16px] font-semibold text-black dark:text-white">Most Discussed</h2>
+              <div className="bg-[var(--color-surface)] rounded-3xl border border-[var(--color-border)] overflow-hidden">
+                 <div className="p-5 border-b border-[var(--color-border)]">
+                    <h2 className="text-[16px] font-semibold text-[var(--color-text)]">Most Discussed</h2>
                  </div>
                  <div className="flex flex-col">
                    {topArticlesByComments.length === 0 ? (
@@ -222,7 +222,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
                      topArticlesByComments.map((a) => {
                        return (
                          <Link key={a.id} href={`/articles/${a.slug}`} target="_blank" className="flex items-center justify-between p-4 active:bg-zinc-50 dark:active:bg-[#2c2c2e] transition-colors">
-                            <span className="text-[15px] font-medium text-black dark:text-white truncate max-w-[75%] pr-4">{a.title}</span>
+                            <span className="text-[15px] font-medium text-[var(--color-text)] truncate max-w-[75%] pr-4">{a.title}</span>
                             <div className="flex items-center gap-3">
                               <span className="text-[14px] text-zinc-500 tabular-nums">{a.count.toLocaleString()}</span>
                               <ChevronRight className="w-4 h-4 text-zinc-300" />
@@ -239,13 +239,13 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
         {activeTab === 'categories' && (
            <div className="flex flex-col gap-6">
               <div className="flex justify-end">
-                 <button onClick={() => handleExport('categories')} disabled={isExporting} className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1c1c1e] rounded-full border border-black/5 dark:border-white/5 text-[13px] font-medium text-zinc-600 dark:text-zinc-300">
+                 <button onClick={() => handleExport('categories')} disabled={isExporting} className="flex items-center gap-2 px-4 py-2 bg-[var(--color-surface)] rounded-full border border-[var(--color-border)] text-[13px] font-medium text-[var(--color-text)]">
                    <Download className="w-4 h-4" /> Export CSV
                  </button>
               </div>
 
-              <div className="bg-white dark:bg-[#1c1c1e] p-6 rounded-3xl border border-black/5 dark:border-white/5 flex flex-col items-center">
-                 <h2 className="text-[16px] font-semibold text-black dark:text-white w-full mb-6 text-left">Views by Category</h2>
+              <div className="bg-[var(--color-surface)] p-6 rounded-3xl border border-[var(--color-border)] flex flex-col items-center">
+                 <h2 className="text-[16px] font-semibold text-[var(--color-text)] w-full mb-6 text-left">Views by Category</h2>
                   <div className="h-[250px] w-[250px] relative">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
@@ -271,17 +271,17 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
                   </div>
               </div>
 
-              <div className="bg-white dark:bg-[#1c1c1e] rounded-3xl border border-black/5 dark:border-white/5 overflow-hidden">
-                 <div className="p-5 border-b border-black/5 dark:border-white/5">
-                    <h2 className="text-[16px] font-semibold text-black dark:text-white">Content Library</h2>
+              <div className="bg-[var(--color-surface)] rounded-3xl border border-[var(--color-border)] overflow-hidden">
+                 <div className="p-5 border-b border-[var(--color-border)]">
+                    <h2 className="text-[16px] font-semibold text-[var(--color-text)]">Content Library</h2>
                  </div>
                  <div className="flex flex-col">
                    {categoryStats.map((cat, i) => {
                      return (
-                         <div key={cat.id} className="flex items-center justify-between p-4 border-b border-black/5 dark:border-white/5 last:border-0">
+                         <div key={cat.id} className="flex items-center justify-between p-4 border-b border-[var(--color-border)] last:border-0">
                            <div className="flex items-center gap-3">
                               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                              <span className="text-[15px] text-black dark:text-white">{cat.name}</span>
+                              <span className="text-[15px] text-[var(--color-text)]">{cat.name}</span>
                            </div>
                            <span className="text-[14px] text-zinc-500">{cat.count} articles</span>
                          </div>

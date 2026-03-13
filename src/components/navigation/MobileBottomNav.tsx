@@ -24,7 +24,7 @@ interface MobileBottomNavProps {
   ────────────────────────────────────────────────────────────── */
   const FloatingContainer = ({ children }: { children: React.ReactNode }) => (
     <nav
-      className="md:hidden fixed z-[90] bottom-0 left-0 right-0 bg-white/95 dark:bg-[#0b141a]/95 backdrop-blur-2xl border-t border-black/5 dark:border-white/10"
+      className="md:hidden fixed z-[90] bottom-0 left-0 right-0 bg-[var(--color-surface)]/95 backdrop-blur-2xl border-t border-[var(--color-border)]"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="flex items-center justify-between h-[60px] px-1 relative w-full max-w-[500px] mx-auto">

@@ -54,12 +54,12 @@ export default async function MorePage() {
       
       <div className="px-4 py-4 max-w-2xl mx-auto space-y-8">
         {/* Profile Card */}
-        <div className="flex items-center gap-4 bg-white dark:bg-[#1c1c1e] p-4 rounded-2xl shadow-sm border border-black/5 dark:border-white/5">
+        <div className="flex items-center gap-4 bg-[var(--color-surface)] p-4 rounded-2xl shadow-sm border border-[var(--color-border)]">
            <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xl font-bold uppercase shrink-0">
              {(profile?.full_name || 'A').charAt(0)}
            </div>
            <div className="flex-1">
-             <h1 className="text-[20px] font-semibold text-black dark:text-white leading-tight">{profile.full_name || 'Administrator'}</h1>
+             <h1 className="text-[20px] font-semibold text-[var(--color-text)] leading-tight">{profile.full_name || 'Administrator'}</h1>
              <p className="text-[14px] text-zinc-500 mt-1">Super Admin • System Access</p>
            </div>
            <ChevronRight size={20} className="text-zinc-400" />
@@ -71,15 +71,15 @@ export default async function MorePage() {
             {group.title && (
                <h3 className="text-[13px] font-medium text-zinc-500 uppercase tracking-widest pl-4 mb-2">{group.title}</h3>
             )}
-            <div className="bg-white dark:bg-[#1c1c1e] rounded-2xl shadow-sm border border-black/5 dark:border-white/5 overflow-hidden">
+            <div className="bg-[var(--color-surface)] rounded-2xl shadow-sm border border-[var(--color-border)] overflow-hidden">
                {group.items.map((item, itemIdx) => {
                  const isLast = itemIdx === group.items.length - 1;
                  const Icon = item.icon;
                  return (
-                   <Link key={item.href} href={item.href} className="flex items-center gap-4 pl-4 min-h-[50px] active:bg-zinc-50 dark:active:bg-white/5 transition-colors">
+                   <Link key={item.href} href={item.href} className="flex items-center gap-4 pl-4 min-h-[50px] active:bg-[var(--color-surface-2)] transition-colors">
                      <Icon size={22} className="text-zinc-700 dark:text-zinc-300 stroke-[1.5px]" />
-                     <div className={`flex-1 flex flex-row items-center justify-between min-h-[50px] pr-4 ${!isLast ? 'border-b border-black/5 dark:border-white/5' : ''}`}>
-                        <span className="text-[16px] text-black dark:text-white">{item.label}</span>
+                     <div className={`flex-1 flex flex-row items-center justify-between min-h-[50px] pr-4 ${!isLast ? 'border-b border-[var(--color-border)]' : ''}`}>
+                        <span className="text-[16px] text-[var(--color-text)]">{item.label}</span>
                         <ChevronRight size={20} className="text-zinc-300 dark:text-zinc-600" />
                      </div>
                    </Link>
