@@ -238,6 +238,26 @@ export function PresenceCard({ children, className = "", noPadding = false, onCl
   );
 }
 
+/* ─── Global Search Bar Client Component ─── */
+export function GlobalSearchBar() {
+  return (
+    <div 
+       onClick={() => {
+         const btn = document.getElementById('global-search-trigger');
+         if(btn) btn.click();
+       }}
+       className="w-full h-[52px] bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-sm flex items-center px-4 cursor-text transition-all hover:border-[var(--color-primary)] hover:shadow-md active:scale-[0.99] group mt-2"
+    >
+       <Search className="w-5 h-5 text-[var(--color-muted)] group-hover:text-[var(--color-primary)] transition-colors" />
+       <span className="ml-3 text-[15px] font-medium text-[var(--color-muted)] group-hover:text-[var(--color-text)] transition-colors">Search the platform globally...</span>
+       <div className="ml-auto flex items-center gap-1.5 opacity-60">
+         <span className="text-[10px] font-bold bg-[var(--color-surface-2)] border border-[var(--color-border)] px-2 py-1 rounded-md text-[var(--color-muted)]">CMD</span>
+         <span className="text-[10px] font-bold bg-[var(--color-surface-2)] border border-[var(--color-border)] px-2 py-1 rounded-md text-[var(--color-muted)]">K</span>
+       </div>
+    </div>
+  );
+}
+
 /* ─── Presence Stat Circle (Refined) ─── */
 export function PresenceStatCircle({ 
   percent, 
