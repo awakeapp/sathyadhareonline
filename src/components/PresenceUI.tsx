@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import { LucideIcon, Search, Bell, Plus } from 'lucide-react';
+import { LucideIcon, Search, Bell, Plus, Settings } from 'lucide-react';
 import Link from 'next/link';
+import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 
 /* ─── Presence Layout Wrapper ─── */
 export function PresenceWrapper({ children, className = '' }: { children: React.ReactNode; className?: string }) {
@@ -22,6 +23,7 @@ export function PresenceWrapper({ children, className = '' }: { children: React.
 export function PresenceHeader({ 
   title = "Super Admin", 
   roleLabel,
+  profileName,
   initials,
   icon1: Icon1,
   icon2: Icon2,
@@ -34,6 +36,7 @@ export function PresenceHeader({
 }: { 
   title?: string; 
   roleLabel?: string; 
+  profileName?: string;
   initials?: string; 
   icon1?: LucideIcon; 
   icon2?: LucideIcon;
@@ -46,6 +49,7 @@ export function PresenceHeader({
 }) {
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
   const [isNotifOpen, setIsNotifOpen] = React.useState(false);
+  const [isProfileOpen, setIsProfileOpen] = React.useState(false);
 
   return (
     <>
@@ -80,6 +84,49 @@ export function PresenceHeader({
               <Link href="/admin/audit-logs" onClick={() => setIsNotifOpen(false)} className="block w-full text-center py-2 text-[14px] font-medium text-[var(--color-primary)] hover:bg-[var(--color-surface-2)] rounded-lg">
                 View All Activity
               </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Profile/Settings Drawer Modal */}
+      {isProfileOpen && (
+        <div className="fixed inset-0 z-[60] flex sm:items-start justify-end sm:pt-16 sm:pr-4 bg-black/20 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none" onClick={() => setIsProfileOpen(false)}>
+          <div className="bg-[var(--color-surface)] sm:rounded-2xl w-full h-full sm:h-auto sm:w-[360px] sm:max-h-[85vh] shadow-2xl border border-[var(--color-border)] flex flex-col animate-slide-left sm:animate-in sm:fade-in sm:slide-in-from-right-4" onClick={e => e.stopPropagation()}>
+            <div className="p-4 border-b border-[var(--color-border)] flex items-center justify-between">
+              <h3 className="text-[18px] font-bold text-[var(--color-text)]">Account</h3>
+              <button onClick={() => setIsProfileOpen(false)} className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-border)] transition-colors">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5 pb-safe flex flex-col gap-6">
+              
+              <div className="flex items-center gap-4 bg-[var(--color-surface)]">
+                <div className="w-14 h-14 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] font-bold text-xl border border-[var(--color-primary)]/20 shadow-sm">
+                  {initials || 'A'}
+                </div>
+                <div>
+                  <h4 className="text-[16px] font-bold text-[var(--color-text)] leading-tight">{profileName || 'Super Admin'}</h4>
+                  <p className="text-[12px] font-medium text-[var(--color-muted)] uppercase tracking-wider mt-1">{roleLabel || 'Administrator'}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-[var(--color-surface-2)] rounded-2xl border border-[var(--color-border)]">
+                <span className="text-[14px] font-bold text-[var(--color-text)]">Theme Mode</span>
+                <ThemeSwitcher />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <Link href="/profile" onClick={() => setIsProfileOpen(false)} className="flex items-center justify-between w-full px-4 py-3.5 text-[14px] font-bold text-[var(--color-text)] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] transition-colors rounded-2xl border border-[var(--color-border)]">
+                  Edit Profile
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-muted)]"><path d="M9 18l6-6-6-6"/></svg>
+                </Link>
+                <Link href="/logout" onClick={() => setIsProfileOpen(false)} className="flex items-center justify-between w-full px-4 py-3.5 text-[14px] font-bold text-rose-500 bg-rose-500/5 hover:bg-rose-500/10 transition-colors rounded-2xl border border-rose-500/10 mt-2">
+                  Logout
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                </Link>
+              </div>
+
             </div>
           </div>
         </div>
@@ -138,10 +185,13 @@ export function PresenceHeader({
               {icon2Badge && <span className="absolute top-2 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-[var(--color-surface)]" />}
             </button>
 
-            {/* User Avatar */}
-            <div className="w-9 h-9 rounded-full bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center text-[14px] font-bold text-[var(--color-primary)] ml-1 shrink-0 cursor-pointer">
-              {initials || 'A'}
-            </div>
+            {/* User Settings Trigger */}
+            <button
+               onClick={() => setIsProfileOpen(true)}
+               className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[var(--color-surface-2)] transition-colors ml-1 shrink-0 text-[var(--color-text)]"
+            >
+              <Settings className="w-5 h-5" strokeWidth={1.5} />
+            </button>
           </div>
         </div>
       </div>

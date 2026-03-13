@@ -272,9 +272,12 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
         </div>
 
 
-        {/* ── Drawer overlay ────────────────────────────────────────── */}
-        {isMenuOpen && (
-          <div
+      </header>
+      )}
+
+      {/* ── Drawer overlay (moved out of header to escape backdrop stacking context) ────────────────────────────────────────── */}
+      {isMenuOpen && (
+        <div
             className="fixed inset-0 z-[100] flex justify-end bg-black/60 backdrop-blur-sm"
             onClick={() => setIsMenuOpen(false)}
           >
@@ -476,8 +479,6 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
             </div>
           </div>
         )}
-      </header>
-      )}
     </>
   );
 }
