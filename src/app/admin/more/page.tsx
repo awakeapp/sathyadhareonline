@@ -3,29 +3,27 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import {
   Settings, Mail, Shield, IndianRupee,
-  LucideIcon, ChevronRight, MoreHorizontal, ChevronLeft, Bell
+  ChevronRight, ChevronLeft, Search, QrCode
 } from 'lucide-react';
-import { 
-  PresenceWrapper, 
-  PresenceHeader,
-  PresenceCard 
-} from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
 
-interface CardItem {
-  label: string;
-  sub: string;
-  href: string;
-  icon: LucideIcon;
-  color: string;
-}
-
-const MORE_ITEMS: CardItem[] = [
-  { label: 'Settings', sub: 'Site configuration & branding', href: '/admin/settings', icon: Settings, color: '#94a3b8' },
-  { label: 'Email Templates', sub: 'Welcome & notifications', href: '/admin/email-templates', icon: Mail, color: '#5c4ae4' },
-  { label: 'Security', sub: 'API keys & login history', href: '/admin/security', icon: Shield, color: '#f87171' },
-  { label: 'Financial', sub: 'Revenue & subscriptions', href: '/admin/financial', icon: IndianRupee, color: '#34d399' },
+const MORE_GROUPS = [
+  {
+    title: 'Settings',
+    items: [
+      { label: 'Avatar & Branding', href: '/admin/settings', icon: Settings },
+      { label: 'Lists & Navigation', href: '/admin/settings?section=lists', icon: Search },
+      { label: 'Broadcast Messages', href: '/admin/friday', icon: Mail },
+    ]
+  },
+  {
+    title: 'System & Privacy',
+    items: [
+      { label: 'Security & Privacy', href: '/admin/security', icon: Shield },
+      { label: 'Payments & Subscriptions', href: '/admin/financial', icon: IndianRupee },
+    ]
+  }
 ];
 
 export default async function MorePage() {
@@ -38,51 +36,59 @@ export default async function MorePage() {
     .select('full_name, role')
     .eq('id', user.id)
     .maybeSingle();
+  
   if (!profile || profile.role !== 'super_admin') redirect('/admin?error=unauthorized');
 
-  const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
-
   return (
-    <PresenceWrapper>
-      <PresenceHeader 
-        title="Super Admin"
-        roleLabel="System Utility · More Protocols"
-        initials={initials}
-        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Href="/admin"
-      />
-      
-      <div className="p-4 flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
-        <PresenceCard>
-           <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-zinc-50 dark:bg-white/5 flex items-center justify-center text-zinc-500 shadow-inner">
-                 <MoreHorizontal className="w-6 h-6" strokeWidth={1.25} />
-              </div>
-              <div>
-                 <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">System Utility</h2>
-                 <p className="text-xs font-medium text-zinc-500 uppercase tracking-widest mt-1">Peripheral Protocol Configuration</p>
-              </div>
-           </div>
-
-           <div className="flex flex-col gap-4">
-             {MORE_ITEMS.map((item) => (
-                <Link key={item.href} href={item.href} className="group min-h-[44px]">
-                   <div className="p-4 rounded-xl bg-zinc-50 dark:bg-white/5 border border-transparent group-hover:border-indigo-100 dark:group-hover:border-indigo-500/20 transition-all duration-300 flex items-center gap-4 active:scale-[0.98]">
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-sm" style={{ backgroundColor: `${item.color}15` }}>
-                         <item.icon size={24} style={{ color: item.color }} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                         <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-tight group-hover:text-zinc-900 dark:text-zinc-50 transition-colors">{item.label}</h3>
-                         <p className="text-xs font-medium text-zinc-500 tracking-wide mt-1 truncate">{item.sub}</p>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-zinc-400 group-hover:text-zinc-900 dark:text-zinc-50 group-hover:translate-x-1 transition-all" strokeWidth={1.25} />
-                   </div>
-                </Link>
-             ))}
-           </div>
-        </PresenceCard>
+    <div className="min-h-screen bg-[#f2f2f6] dark:bg-black pt-[var(--admin-header-h,60px)] pb-[80px]">
+      {/* Top native-style header */}
+      <div className="fixed top-0 left-0 right-0 h-[var(--admin-header-h,60px)] bg-[#f2f2f6] dark:bg-black z-40 flex items-center justify-between px-4">
+        <div className="flex items-center gap-4">
+           <Link href="/admin"><ChevronLeft size={28} className="text-blue-500" /></Link>
+        </div>
+        <div className="flex items-center gap-4 text-zinc-800 dark:text-zinc-200">
+           <Search size={24} strokeWidth={1.5} />
+           <QrCode size={24} strokeWidth={1.5} />
+        </div>
       </div>
-    </PresenceWrapper>
+      
+      <div className="px-4 py-4 max-w-2xl mx-auto space-y-8">
+        {/* Profile Card */}
+        <div className="flex items-center gap-4 bg-white dark:bg-[#1c1c1e] p-4 rounded-2xl shadow-sm border border-black/5 dark:border-white/5">
+           <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xl font-bold uppercase shrink-0">
+             {(profile?.full_name || 'A').charAt(0)}
+           </div>
+           <div className="flex-1">
+             <h1 className="text-[20px] font-semibold text-black dark:text-white leading-tight">{profile.full_name || 'Administrator'}</h1>
+             <p className="text-[14px] text-zinc-500 mt-1">Super Admin • System Access</p>
+           </div>
+           <ChevronRight size={20} className="text-zinc-400" />
+        </div>
+
+        {/* List Groups */}
+        {MORE_GROUPS.map((group, groupIdx) => (
+          <div key={groupIdx}>
+            {group.title && (
+               <h3 className="text-[13px] font-medium text-zinc-500 uppercase tracking-widest pl-4 mb-2">{group.title}</h3>
+            )}
+            <div className="bg-white dark:bg-[#1c1c1e] rounded-2xl shadow-sm border border-black/5 dark:border-white/5 overflow-hidden">
+               {group.items.map((item, itemIdx) => {
+                 const isLast = itemIdx === group.items.length - 1;
+                 const Icon = item.icon;
+                 return (
+                   <Link key={item.href} href={item.href} className="flex items-center gap-4 pl-4 min-h-[50px] active:bg-zinc-50 dark:active:bg-white/5 transition-colors">
+                     <Icon size={22} className="text-zinc-700 dark:text-zinc-300 stroke-[1.5px]" />
+                     <div className={`flex-1 flex flex-row items-center justify-between min-h-[50px] pr-4 ${!isLast ? 'border-b border-black/5 dark:border-white/5' : ''}`}>
+                        <span className="text-[16px] text-black dark:text-white">{item.label}</span>
+                        <ChevronRight size={20} className="text-zinc-300 dark:text-zinc-600" />
+                     </div>
+                   </Link>
+                 );
+               })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

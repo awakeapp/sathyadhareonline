@@ -19,23 +19,19 @@ interface MobileBottomNavProps {
    Floating Bottom Nav (Island / Pill style)
 ═══════════════════════════════════════════════════════════════════ */
 
-/* ──────────────────────────────────────────────────────────────
-   Wrapper for Floating Nav Background / Shadow
-────────────────────────────────────────────────────────────── */
-const FloatingContainer = ({ children }: { children: React.ReactNode }) => (
-  <nav
-    className="md:hidden fixed z-[90] left-0 right-0 mx-auto px-4"
-    style={{ bottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}
-  >
-    <div 
-      className="bg-white/85 dark:bg-[#121215]/85 backdrop-blur-[24px] saturate-[1.8] border border-black/5 dark:border-white/10 shadow-[0_16px_40px_-5px_rgba(0,0,0,0.15)] dark:shadow-[0_16px_40px_-5px_rgba(0,0,0,0.5)] rounded-[2rem] max-w-[400px] mx-auto overflow-hidden"
+  /* ──────────────────────────────────────────────────────────────
+     Wrapper for Edge-to-Edge Nav (WhatsApp Style)
+  ────────────────────────────────────────────────────────────── */
+  const FloatingContainer = ({ children }: { children: React.ReactNode }) => (
+    <nav
+      className="md:hidden fixed z-[90] bottom-0 left-0 right-0 bg-white/95 dark:bg-[#0b141a]/95 backdrop-blur-2xl border-t border-black/5 dark:border-white/10"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <div className="flex items-center justify-between h-[64px] px-2 sm:px-4 relative w-full">
+      <div className="flex items-center justify-between h-[60px] px-1 relative w-full max-w-[500px] mx-auto">
         {children}
       </div>
-    </div>
-  </nav>
-);
+    </nav>
+  );
 
 export default function MobileBottomNav({ role }: MobileBottomNavProps) {
   const pathname = usePathname();
@@ -251,7 +247,7 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
   );
 }
 
-/* ── Helper: Floating Tab Link ─────────────────────────────── */
+/* ── Helper: WhatsApp-style Action Tab Link ─────────────────────────────── */
 function NavTabLink({
   href, icon: Icon, label, active, accentColor = 'var(--color-primary)', activeStyle = "color", onTap,
 }: {
@@ -276,15 +272,13 @@ function NavTabLink({
         }
         if (onTap) onTap();
       }}
-      className="relative flex-1 flex flex-col items-center justify-center gap-1 transition-transform active:scale-95 focus:outline-none select-none tap-highlight-none group"
-      style={{ color: active && activeStyle === 'color' ? accentColor : 'var(--color-muted)' }}
+      className="relative flex-1 flex flex-col items-center justify-center gap-1 transition-none active:opacity-70 focus:outline-none select-none tap-highlight-none"
+      style={{ color: active && activeStyle === 'color' ? accentColor : '#667781' }}
     >
-      <div 
-        className={`relative flex items-center justify-center w-[48px] h-[32px] rounded-full transition-all duration-300 ${active && activeStyle === 'badge' ? 'bg-[#ffe500]/20 text-[#ffe500] dark:bg-[#ffe500]/10 dark:text-[#ffe500]' : ''}`}
-      >
-        <Icon size={22} strokeWidth={active ? 2.5 : 1.75} className={`transition-all duration-300 ${active && activeStyle === 'badge' ? 'text-[#ffe500]' : ''}`} />
+      <div className="relative flex items-center justify-center">
+        <Icon size={24} strokeWidth={active ? 2.5 : 1.75} className={`transition-colors ${active && activeStyle === 'badge' ? 'text-[#ffe500]' : ''} ${active && activeStyle === 'color' ? '' : 'dark:text-[#8696a0]'}`} />
       </div>
-      <span className={`text-[10px] font-bold tracking-wide leading-none select-none transition-colors duration-300 ${active && activeStyle === 'badge' ? 'text-[var(--color-text)]' : ''}`}>
+      <span className={`text-[10px] font-medium tracking-tight leading-none transition-colors ${active && activeStyle === 'badge' ? 'text-[var(--color-text)]' : ''} ${active && activeStyle === 'color' ? '' : 'dark:text-[#8696a0]'}`}>
         {label}
       </span>
     </Link>
