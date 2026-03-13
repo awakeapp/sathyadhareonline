@@ -58,7 +58,7 @@ export default async function SequelsPage() {
         hideActions={true} 
       />
       
-      <div className="p-4 flex flex-col gap-4 relative z-20">
+      <div className="w-full flex flex-col gap-4 relative z-20">
         <SequelsClient initialSequels={sequelsWithCounts} />
       </div>
     </PresenceWrapper>

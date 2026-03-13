@@ -66,7 +66,7 @@ export default async function FridayMessagesPage() {
         hideActions={true} 
       />
       
-      <div className="p-4 flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
+      <div className="w-full flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
         {!messages || messages.length === 0 ? (
           <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
             <Calendar className="w-16 h-16 mb-5 text-indigo-100" />

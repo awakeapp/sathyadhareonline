@@ -94,7 +94,7 @@ export default async function EditSequelPage({ params }: { params: Promise<{ id:
         icon2Href="/admin/sequels"
       />
       
-      <div className="p-4 flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
+      <div className="w-full flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
         
         <div className="flex items-center gap-5 mb-6">
            <div className="w-12 h-12 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">

@@ -33,7 +33,7 @@ export default async function PlansPage() {
         icon2Href="/admin"
       />
       
-      <div className="p-4 flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
+      <div className="w-full flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
         <PlansClient initialPlans={plans || []} />
       </div>
     </PresenceWrapper>

@@ -19,7 +19,7 @@ export default function AdminLoading() {
          </div>
       </div>
 
-      <div className="p-4 flex flex-col gap-4 relative z-20 max-w-[1400px] mx-auto">
+      <div className="w-full flex flex-col gap-4 relative z-20 max-w-[1400px] mx-auto">
         {/* Attendance Card Skeleton */}
         <div className="h-28 bg-white dark:bg-[#181623] rounded-[2.5rem] shadow-sm border border-indigo-50 dark:border-white/5 p-8" />
 

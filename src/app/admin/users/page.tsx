@@ -99,7 +99,7 @@ export default async function AdminUsersPage() {
         hideActions={true} 
       />
       
-      <div className="p-4 flex flex-col gap-4 relative z-20">
+      <div className="w-full flex flex-col gap-4 relative z-20">
         <UserManagementClient users={(users as UserProfile[]) || []} currentUserRole={profile.role} />
       </div>
     </PresenceWrapper>

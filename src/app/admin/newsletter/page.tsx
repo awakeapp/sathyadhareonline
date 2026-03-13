@@ -38,7 +38,7 @@ export default async function AdminNewsletterPage() {
         hideActions={true} 
       />
       
-      <div className="p-4 flex flex-col gap-4 relative z-20 max-w-3xl mx-auto">
+      <div className="w-full flex flex-col gap-4 relative z-20 max-w-3xl mx-auto">
         <NewsletterClient subscribers={subscribers ?? []} />
       </div>
     </PresenceWrapper>

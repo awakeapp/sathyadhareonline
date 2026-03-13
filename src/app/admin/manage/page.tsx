@@ -67,7 +67,7 @@ export default async function ManagePage() {
         hideActions={true} 
       />
       
-      <div className="p-4 flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
+      <div className="w-full flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
         <PresenceCard>
            <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50 shadow-inner">
