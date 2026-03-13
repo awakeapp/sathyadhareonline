@@ -211,14 +211,11 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
               <button
                 id="return-dashboard-btn"
                 onClick={handleReturnToDashboard}
-                className="tap-highlight flex items-center gap-2 px-3.5 h-9 rounded-xl font-bold transition-all active:scale-95 hover:scale-105"
-                style={{ background: 'rgba(0,71,255,0.18)', color: '#4f8ef7', border: '1px solid rgba(0,71,255,0.35)' }}
+                className="tap-highlight flex items-center gap-1.5 px-3.5 h-8 rounded-full font-bold transition-all active:scale-95 hover:bg-[var(--color-surface-2)] text-[var(--color-text)] border border-[var(--color-border)]"
                 title={`Return to ${dashboardLabel}`}
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 flex-shrink-0">
-                  <path d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                <span className="text-[11px] uppercase tracking-widest">Dashboard</span>
+                <ArrowLeft className="w-4 h-4" strokeWidth={2} />
+                <span className="text-[10px] uppercase tracking-widest leading-none mt-px font-black">Dashboard</span>
               </button>
             )}
 
