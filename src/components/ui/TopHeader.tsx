@@ -165,40 +165,12 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
 
   return (
     <>
-      {/* ── Reader Mode Banner (only when privileged user is on reader side) ── */}
-      {isPrivilegedRole && isOnReaderSide && safeReaderMode && (
-
-        <div
-          id="reader-mode-banner"
-          className="fixed top-0 left-0 right-0 z-[200] flex items-center justify-center gap-3 px-4 py-2 text-xs font-bold"
-          style={{
-            background: 'linear-gradient(90deg, #7c3aed 0%, #0047ff 100%)',
-            color: '#fff',
-            paddingTop: 'calc(0.5rem + env(safe-area-inset-top, 0px))',
-          }}
-        >
-          <span className="flex items-center gap-1.5">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 flex-shrink-0">
-              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
-            </svg>
-            You are in Reader Mode
-          </span>
-          <span className="opacity-60 hidden sm:inline">—</span>
-          <button
-            onClick={handleReturnToDashboard}
-            className="underline underline-offset-2 hover:no-underline transition-all flex items-center gap-1.5"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" /> Return to {dashboardLabel}
-          </button>
-        </div>
-      )}
-
       {!isAdminRoute && (
       <header
         className="fixed left-0 right-0 z-50 w-full transition-colors duration-300 backdrop-blur-2xl bg-white/80 dark:bg-[#181623]/80 border-b border-[var(--color-border)]"
         style={{
-          top: (isPrivilegedRole && isOnReaderSide && safeReaderMode) ? 'calc(32px + env(safe-area-inset-top, 0px))' : '0px',
-          paddingTop: (isPrivilegedRole && isOnReaderSide && safeReaderMode) ? '0px' : 'env(safe-area-inset-top, 0px)',
+          top: '0px',
+          paddingTop: 'env(safe-area-inset-top, 0px)',
         }}
       >
         {/* ── Main bar ──────────────────────────────────────────────── */}
