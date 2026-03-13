@@ -8,9 +8,10 @@ import Link from 'next/link';
 export function PresenceWrapper({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
     <div
-      className={`min-h-screen bg-[var(--color-background)] pb-[100px] pt-[var(--admin-header-h,60px)] flex flex-col items-center ${className}`}
+      className={`min-h-[100svh] bg-[var(--color-background)] pb-[100px] flex flex-col items-center ${className}`}
+      style={{ paddingTop: 'calc(env(safe-area-inset-top) + 60px)' }}
     >
-      <div className="w-full max-w-[1400px] px-2 sm:px-4 pb-6 pt-2 flex flex-col gap-4 sm:gap-6">
+      <div className="w-full max-w-[1400px] px-2 sm:px-4 pb-6 pt-4 flex flex-col gap-4 sm:gap-6">
         {children}
       </div>
     </div>
@@ -43,24 +44,8 @@ export function PresenceHeader({
   icon1Badge?: boolean;
   icon2Badge?: boolean;
 }) {
-  const headerRef = React.useRef<HTMLDivElement>(null);
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
   const [isNotifOpen, setIsNotifOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    const el = headerRef.current;
-    if (!el) return;
-    const update = () => {
-      document.documentElement.style.setProperty(
-        '--admin-header-h',
-        `${el.getBoundingClientRect().height}px`
-      );
-    };
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
 
   return (
     <>
@@ -126,9 +111,8 @@ export function PresenceHeader({
       )}
 
       <div 
-        ref={headerRef}
         className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-surface)]/95 backdrop-blur-xl border-b border-[var(--color-border)] shadow-sm flex flex-col justify-end"
-        style={{ paddingTop: 'calc(env(safe-area-inset-top))' }}
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
         {/* 56-64px Header Height */}
         <div className="flex items-center justify-between h-[60px] px-4 w-full max-w-[1400px] mx-auto">
