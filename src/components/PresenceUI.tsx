@@ -12,7 +12,7 @@ export function PresenceWrapper({ children, className = '' }: { children: React.
       className={`min-h-[100svh] bg-[var(--color-background)] pb-[100px] flex flex-col items-center ${className}`}
       style={{ paddingTop: 'calc(env(safe-area-inset-top) + 60px)' }}
     >
-      <div className="w-full max-w-[1400px] px-2 sm:px-4 pb-6 pt-4 flex flex-col gap-4 sm:gap-6">
+      <div className="w-full max-w-[1400px] px-4 pb-6 pt-4 flex flex-col gap-4 sm:gap-6">
         {children}
       </div>
     </div>
