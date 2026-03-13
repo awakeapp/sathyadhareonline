@@ -10,7 +10,7 @@ export function PresenceWrapper({ children, className = '' }: { children: React.
     <div
       className={`min-h-screen bg-[var(--color-background)] pb-[100px] pt-[var(--admin-header-h,60px)] flex flex-col items-center ${className}`}
     >
-      <div className="w-full max-w-[1400px] p-2 sm:p-4 space-y-4 sm:space-y-6">
+      <div className="w-full max-w-[1400px] px-2 sm:px-4 pb-6 pt-2 flex flex-col gap-4 sm:gap-6">
         {children}
       </div>
     </div>
