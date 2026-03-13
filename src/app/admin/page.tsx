@@ -3,8 +3,8 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import {
   FileText, MessageSquare,
-  CheckCircle,
-  Send, Bell, ChevronRight
+  CheckCircle, Users, Activity,
+  Send, Bell, ChevronRight, ArrowRight
 } from 'lucide-react';
 import ReaderModeSwitch from '@/components/ReaderModeSwitch';
 import { 
@@ -116,21 +116,41 @@ export default async function AdminPage() {
         <div>
           <h2 className="text-[18px] font-bold text-[var(--color-text)] mb-4">Account Analytics</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <PresenceCard className="flex flex-col p-4">
-              <span className="text-[13px] font-semibold text-[var(--color-muted)] mb-1">Total Articles</span>
-              <span className="text-[24px] font-bold text-[var(--color-text)]">{metrics.totalArticles}</span>
+            <PresenceCard className="flex flex-col p-5 relative overflow-hidden group hover:shadow-md hover:border-[var(--color-border)] transition-all cursor-default">
+              <div className="flex justify-between items-start mb-3">
+                <span className="text-[13px] font-bold text-[var(--color-muted)] tracking-wide">Total Articles</span>
+                <div className="w-9 h-9 rounded-[10px] bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-text)] group-hover:bg-[#0047ff]/10 group-hover:text-[#0047ff] transition-colors">
+                  <FileText className="w-[18px] h-[18px]" strokeWidth={2} />
+                </div>
+              </div>
+              <span className="text-[32px] font-extrabold text-[var(--color-text)] tracking-tight leading-none">{metrics.totalArticles}</span>
             </PresenceCard>
-            <PresenceCard className="flex flex-col p-4">
-              <span className="text-[13px] font-semibold text-[var(--color-muted)] mb-1">Monthly Readers</span>
-              <span className="text-[24px] font-bold text-[var(--color-text)]">{metrics.monthlyReaders}</span>
+            <PresenceCard className="flex flex-col p-5 relative overflow-hidden group hover:shadow-md hover:border-[var(--color-border)] transition-all cursor-default">
+              <div className="flex justify-between items-start mb-3">
+                <span className="text-[13px] font-bold text-[var(--color-muted)] tracking-wide">Monthly Readers</span>
+                <div className="w-9 h-9 rounded-[10px] bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-text)] group-hover:bg-[#0047ff]/10 group-hover:text-[#0047ff] transition-colors">
+                  <Users className="w-[18px] h-[18px]" strokeWidth={2} />
+                </div>
+              </div>
+              <span className="text-[32px] font-extrabold text-[var(--color-text)] tracking-tight leading-none">{metrics.monthlyReaders}</span>
             </PresenceCard>
-            <PresenceCard className="flex flex-col p-4">
-              <span className="text-[13px] font-semibold text-[var(--color-muted)] mb-1">Active Authors</span>
-              <span className="text-[24px] font-bold text-[var(--color-text)]">{metrics.activeAuthors}</span>
+            <PresenceCard className="flex flex-col p-5 relative overflow-hidden group hover:shadow-md hover:border-[var(--color-border)] transition-all cursor-default">
+              <div className="flex justify-between items-start mb-3">
+                <span className="text-[13px] font-bold text-[var(--color-muted)] tracking-wide">Active Authors</span>
+                <div className="w-9 h-9 rounded-[10px] bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-text)] group-hover:bg-[#0047ff]/10 group-hover:text-[#0047ff] transition-colors">
+                  <Activity className="w-[18px] h-[18px]" strokeWidth={2} />
+                </div>
+              </div>
+              <span className="text-[32px] font-extrabold text-[var(--color-text)] tracking-tight leading-none">{metrics.activeAuthors}</span>
             </PresenceCard>
-            <PresenceCard className="flex flex-col p-4">
-              <span className="text-[13px] font-semibold text-[var(--color-muted)] mb-1">Community Acts</span>
-              <span className="text-[24px] font-bold text-[var(--color-text)]">{metrics.communityEngagement}</span>
+            <PresenceCard className="flex flex-col p-5 relative overflow-hidden group hover:shadow-md hover:border-[var(--color-border)] transition-all cursor-default">
+              <div className="flex justify-between items-start mb-3">
+                <span className="text-[13px] font-bold text-[var(--color-muted)] tracking-wide">Community Acts</span>
+                <div className="w-9 h-9 rounded-[10px] bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-text)] group-hover:bg-[#0047ff]/10 group-hover:text-[#0047ff] transition-colors">
+                  <MessageSquare className="w-[18px] h-[18px]" strokeWidth={2} />
+                </div>
+              </div>
+              <span className="text-[32px] font-extrabold text-[var(--color-text)] tracking-tight leading-none">{metrics.communityEngagement}</span>
             </PresenceCard>
           </div>
         </div>
@@ -140,47 +160,68 @@ export default async function AdminPage() {
           <h2 className="text-[18px] font-bold text-[var(--color-text)] mb-4">Operations Overview</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             
-            <PresenceCard className="p-4 flex flex-col justify-between min-h-[140px]">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                    <Send className="w-4 h-4" strokeWidth={2} />
+            <Link href="/admin/submissions" className="block focus:outline-none rounded-3xl group">
+              <PresenceCard className="p-6 flex flex-col justify-between min-h-[160px] border-2 border-transparent group-hover:border-blue-500/20 group-hover:shadow-[0_8px_30px_rgb(59,130,246,0.12)] transition-all cursor-pointer relative overflow-hidden bg-white dark:bg-[#111b21]">
+                <div className="absolute -right-6 -top-6 w-32 h-32 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-colors pointer-events-none" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                      <Send className="w-5 h-5" strokeWidth={2} />
+                    </div>
+                    <h3 className="text-[16px] font-extrabold text-[var(--color-text)]">New Submissions</h3>
                   </div>
-                  <h3 className="text-[15px] font-bold text-[var(--color-text)]">New Submissions</h3>
+                  <p className="text-[40px] font-extrabold text-[var(--color-text)] leading-none mb-1">{metrics.pendingSubmissions}</p>
                 </div>
-                <p className="text-[28px] font-black text-[var(--color-text)] leading-none">{metrics.pendingSubmissions}</p>
-                <p className="text-[12px] text-[var(--color-muted)] mt-1">Pending guest articles</p>
-              </div>
-              <Link href="/admin/submissions" className="mt-4 text-[13px] font-semibold text-[var(--color-primary)] hover:underline">Review all</Link>
-            </PresenceCard>
+                <div className="mt-4 pt-4 border-t border-[var(--color-border)] flex items-center justify-between relative z-10">
+                  <p className="text-[13px] font-semibold text-[var(--color-muted)]">Pending guest articles</p>
+                  <div className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-text)] group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
+                    <ArrowRight className="w-4 h-4" strokeWidth={2} />
+                  </div>
+                </div>
+              </PresenceCard>
+            </Link>
 
-            <PresenceCard className="p-4 flex flex-col justify-between min-h-[140px]">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-600 dark:text-orange-400">
-                    <MessageSquare className="w-4 h-4" strokeWidth={2} />
+            <Link href="/admin/comments" className="block focus:outline-none rounded-3xl group">
+              <PresenceCard className="p-6 flex flex-col justify-between min-h-[160px] border-2 border-transparent group-hover:border-orange-500/20 group-hover:shadow-[0_8px_30px_rgb(249,115,22,0.12)] transition-all cursor-pointer relative overflow-hidden bg-white dark:bg-[#111b21]">
+                <div className="absolute -right-6 -top-6 w-32 h-32 bg-orange-500/5 dark:bg-orange-500/10 rounded-full blur-2xl group-hover:bg-orange-500/10 transition-colors pointer-events-none" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-600 dark:text-orange-400">
+                      <MessageSquare className="w-5 h-5" strokeWidth={2} />
+                    </div>
+                    <h3 className="text-[16px] font-extrabold text-[var(--color-text)]">Recent Comments</h3>
                   </div>
-                  <h3 className="text-[15px] font-bold text-[var(--color-text)]">Recent Comments</h3>
+                  <p className="text-[40px] font-extrabold text-[var(--color-text)] leading-none mb-1">{metrics.pendingComments}</p>
                 </div>
-                <p className="text-[28px] font-black text-[var(--color-text)] leading-none">{metrics.pendingComments}</p>
-                <p className="text-[12px] text-[var(--color-muted)] mt-1">Comments needing review</p>
-              </div>
-              <Link href="/admin/comments" className="mt-4 text-[13px] font-semibold text-[var(--color-primary)] hover:underline">Moderate</Link>
-            </PresenceCard>
+                <div className="mt-4 pt-4 border-t border-[var(--color-border)] flex items-center justify-between relative z-10">
+                  <p className="text-[13px] font-semibold text-[var(--color-muted)]">Comments needing review</p>
+                  <div className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-text)] group-hover:bg-orange-500 group-hover:text-white transition-all shadow-sm">
+                    <ArrowRight className="w-4 h-4" strokeWidth={2} />
+                  </div>
+                </div>
+              </PresenceCard>
+            </Link>
 
-            <PresenceCard className="p-4 flex flex-col justify-between min-h-[140px]">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center text-green-600 dark:text-green-400">
-                    <CheckCircle className="w-4 h-4" strokeWidth={2} />
+            <Link href="/admin/articles" className="block focus:outline-none rounded-3xl group">
+              <PresenceCard className="p-6 flex flex-col justify-between min-h-[160px] border-2 border-transparent group-hover:border-green-500/20 group-hover:shadow-[0_8px_30px_rgb(34,197,94,0.12)] transition-all cursor-pointer relative overflow-hidden bg-white dark:bg-[#111b21]">
+                <div className="absolute -right-6 -top-6 w-32 h-32 bg-green-500/5 dark:bg-green-500/10 rounded-full blur-2xl group-hover:bg-green-500/10 transition-colors pointer-events-none" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600 dark:text-green-400">
+                      <CheckCircle className="w-5 h-5" strokeWidth={2} />
+                    </div>
+                    <h3 className="text-[16px] font-extrabold text-[var(--color-text)]">Scheduled Articles</h3>
                   </div>
-                  <h3 className="text-[15px] font-bold text-[var(--color-text)]">Scheduled Articles</h3>
+                  <p className="text-[40px] font-extrabold text-[var(--color-text)] leading-none mb-1">{metrics.scheduledArticles}</p>
                 </div>
-                <p className="text-[28px] font-black text-[var(--color-text)] leading-none">{metrics.scheduledArticles}</p>
-                <p className="text-[12px] text-[var(--color-muted)] mt-1">Set for future publishing</p>
-              </div>
-              <Link href="/admin/articles" className="mt-4 text-[13px] font-semibold text-[var(--color-primary)] hover:underline">Manage pipeline</Link>
-            </PresenceCard>
+                <div className="mt-4 pt-4 border-t border-[var(--color-border)] flex items-center justify-between relative z-10">
+                  <p className="text-[13px] font-semibold text-[var(--color-muted)]">Set for future publishing</p>
+                  <div className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-text)] group-hover:bg-green-500 group-hover:text-white transition-all shadow-sm">
+                    <ArrowRight className="w-4 h-4" strokeWidth={2} />
+                  </div>
+                </div>
+              </PresenceCard>
+            </Link>
 
           </div>
         </div>
