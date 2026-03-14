@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Shield, ShieldAlert, Key } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
+import { PresenceWrapper } from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,8 +16,8 @@ export default function SecurityLayout({ children }: { children: React.ReactNode
   ];
 
   return (
-    <div className="min-h-screen pb-24 px-4 pt-6 bg-[var(--color-background)] font-sans antialiased text-white">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <PresenceWrapper>
+      <div className="w-full flex flex-col gap-6 relative z-20 max-w-5xl mx-auto">
         
         {/* ── Header ──────────────────────────────────────────────── */}
         <div className="flex items-center gap-4 mb-2">
@@ -55,6 +56,6 @@ export default function SecurityLayout({ children }: { children: React.ReactNode
         {children}
         
       </div>
-    </div>
+    </PresenceWrapper>
   );
 }

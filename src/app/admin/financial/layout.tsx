@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { IndianRupee, Layers, ChevronLeft } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { PresenceWrapper, PresenceHeader } from '@/components/PresenceUI';
 
 export default function FinancialLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -14,8 +15,8 @@ export default function FinancialLayout({ children }: { children: React.ReactNod
   ];
 
   return (
-    <div className="min-h-screen pb-24 px-4 pt-6 bg-[var(--color-background)] font-sans antialiased text-white">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <PresenceWrapper>
+      <div className="w-full flex flex-col gap-6 relative z-20">
         
         {/* ── Header ──────────────────────────────────────────────── */}
         <div className="flex items-center gap-4 mb-2 mt-2">
@@ -59,6 +60,6 @@ export default function FinancialLayout({ children }: { children: React.ReactNod
         {children}
         
       </div>
-    </div>
+    </PresenceWrapper>
   );
 }

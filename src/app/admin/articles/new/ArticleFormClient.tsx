@@ -66,18 +66,15 @@ export default function ArticleFormClient({ categories, users, role, onSubmit, c
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-[13px] font-semibold text-[var(--color-text)]">Author *</label>
-                <select 
+                <label className="text-[13px] font-semibold text-[var(--color-text)]">Author Name *</label>
+                <input 
                   required
-                  name="author_id" 
-                  defaultValue={currentUserId}
-                  className="w-full h-12 px-4 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[14px] font-medium focus:ring-2 focus:ring-[var(--color-primary)] outline-none transition-all appearance-none"
-                >
-                  <option value="" disabled>Select Author</option>
-                  {users.map((u) => (
-                    <option key={u.id} value={u.id}>{u.name}</option>
-                  ))}
-                </select>
+                  name="author_name" 
+                  type="text"
+                  placeholder="Enter Author Name"
+                  defaultValue={users.find(u => u.id === currentUserId)?.name || ''}
+                  className="w-full h-12 px-4 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[14px] font-medium focus:ring-2 focus:ring-[var(--color-primary)] outline-none transition-all"
+                />
               </div>
 
               <div className="space-y-2">
