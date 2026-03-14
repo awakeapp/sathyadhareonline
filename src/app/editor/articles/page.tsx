@@ -65,7 +65,7 @@ export default async function EditorArticlesPage() {
         icon2Href="/editor/articles/new"
       />
       
-      <div className="px-5 -mt-12 pb-10 space-y-6 relative z-20 max-w-4xl mx-auto">
+      <div className="-mt-12 space-y-4 relative z-20 max-w-4xl mx-auto">
         
         {/* Workflow Legend */}
         <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-5 flex flex-wrap gap-4 items-center justify-center">

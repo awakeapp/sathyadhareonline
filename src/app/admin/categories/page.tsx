@@ -55,10 +55,7 @@ export default async function CategoriesPage() {
 
   return (
     <PresenceWrapper>
-      <PresenceHeader 
-        title="Categories" 
-        hideActions={true} 
-      />
+      <PresenceHeader title="Categories" />
       
       <div className="w-full flex flex-col gap-4 relative z-20">
         <CategoryManagerClient categories={categories} />

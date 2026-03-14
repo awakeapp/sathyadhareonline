@@ -158,7 +158,7 @@ export default function ArticlesClientPage({ categories, initialArticles, active
         ) : (
           <div className="flex flex-col gap-5">
             {initialArticles.map(article => (
-              <ArticleCard key={article.id} variant="list" article={article as unknown as React.ComponentProps<typeof ArticleCard>['article']} />
+              <ArticleCard key={article.id} variant="list-horizontal" article={article as unknown as React.ComponentProps<typeof ArticleCard>['article']} />
             ))}
           </div>
         )}

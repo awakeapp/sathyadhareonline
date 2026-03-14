@@ -99,7 +99,7 @@ export default function BannersClient({ initialBanners }: Props) {
   const inputClass = 'w-full bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-2xl px-4 py-3.5 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] outline-none focus:border-[#685de6]/60 focus:ring-2 focus:ring-[#685de6]/10 transition-colors';
 
   return (
-    <div className="min-h-screen pb-40">
+    <div>
 
       {/* ── Hidden file input ── */}
       <input
@@ -271,7 +271,7 @@ export default function BannersClient({ initialBanners }: Props) {
       )}
 
       {/* ── Page header ── */}
-      <div className="flex items-center justify-between px-4 pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] pb-4 border-b border-[var(--color-border)]">
+      <div className="flex items-center justify-between mb-4 pb-4 border-b border-[var(--color-border)]">
         <div>
           <h1 className="text-xl font-black text-[var(--color-text)] tracking-tight">Home Banners</h1>
           <p className="text-[11px] text-[var(--color-muted)] font-semibold uppercase tracking-widest mt-0.5">
@@ -288,7 +288,7 @@ export default function BannersClient({ initialBanners }: Props) {
       </div>
 
       {/* ── Banner list ── */}
-      <div className="px-4 py-4 flex flex-col gap-4 max-w-2xl">
+      <div className="flex flex-col gap-4 max-w-2xl">
         {banners.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="w-20 h-20 rounded-3xl bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-center justify-center mb-5 text-[var(--color-muted)]">

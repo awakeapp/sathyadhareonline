@@ -63,18 +63,27 @@ export default async function AdminPage() {
 
 function DashboardSkeleton() {
   return (
-    <div className="space-y-8 animate-pulse">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[1, 2, 3, 4].map(i => (
-          <div key={i} className="h-32 bg-[var(--color-surface-2)] rounded-3xl" />
-        ))}
+    <>
+      <div className="animate-pulse">
+        <div className="h-6 w-48 bg-[var(--color-surface-2)] rounded-md mb-4" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="h-32 bg-[var(--color-surface-2)] rounded-3xl" />
+          ))}
+        </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {[1, 2, 3].map(i => (
-          <div key={i} className="h-40 bg-[var(--color-surface-2)] rounded-3xl" />
-        ))}
+      <div className="animate-pulse">
+        <div className="h-6 w-48 bg-[var(--color-surface-2)] rounded-md mb-4" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-[160px] bg-[var(--color-surface-2)] rounded-3xl" />
+          ))}
+        </div>
       </div>
-      <div className="h-64 bg-[var(--color-surface-2)] rounded-3xl" />
-    </div>
+      <div className="animate-pulse">
+        <div className="h-10 w-full mb-4 bg-[var(--color-surface-2)] rounded-xl" />
+        <div className="h-64 bg-[var(--color-surface-2)] rounded-3xl" />
+      </div>
+    </>
   );
 }

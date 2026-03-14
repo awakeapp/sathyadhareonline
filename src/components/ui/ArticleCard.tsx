@@ -2,7 +2,10 @@
 
 import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
-import { Bookmark } from 'lucide-react';
+import { Share2, Link as LinkIcon, Bookmark, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { toast } from 'sonner';
 
 interface Article {
   id: string;
@@ -18,7 +21,7 @@ interface Article {
 
 interface ArticleCardProps {
   article: Article;
-  variant?: 'list' | 'grid-dark' | 'grid-white';
+  variant?: 'list' | 'list-horizontal' | 'grid-dark' | 'grid-white';
 }
 
 function getCategory(article: Article) {
@@ -51,16 +54,74 @@ function calcReadTime(article: Article): string {
   return '3 MIN READ';
 }
 
-export default function ArticleCard({ article, variant = 'list' }: ArticleCardProps) {
-  const categoryName = getCategory(article);
-  const readTime = calcReadTime(article);
-  const date = formatDate(article.published_at);
+function HorizontalCard({ article, readTime, date, categoryName }: { article: Article, readTime: string, date: string | null, categoryName: string | null }) {
+  const [isSaved, setIsSaved] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  if (variant === 'list') {
-    return (
-      <div className="group relative block w-full mb-3">
-        <Card hoverable className="relative rounded-[2rem] border-transparent bg-white dark:bg-[#1a222c] shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] overflow-visible flex flex-row p-3 gap-4 group-hover:bg-gray-50/80 dark:group-hover:bg-[#222a36] transition-colors">
-          
+  useEffect(() => {
+    let mounted = true;
+    async function checkSaved() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      const { data } = await supabase.from('bookmarks').select('id').eq('user_id', user.id).eq('article_id', article.id).maybeSingle();
+      if (data && mounted) setIsSaved(true);
+    }
+    checkSaved();
+    return () => { mounted = false; };
+  }, [article.id]);
+
+  async function handleToggleSave(e: React.MouseEvent) {
+    e.preventDefault();
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error('Please sign in to save articles.');
+      return;
+    }
+    const nextSaved = !isSaved;
+    setIsSaved(nextSaved); // optimistic UI
+    try {
+      if (nextSaved) {
+        await supabase.from('bookmarks').insert({ user_id: user.id, article_id: article.id });
+        toast.success('Saved to your collection.');
+      } else {
+        await supabase.from('bookmarks').delete().match({ user_id: user.id, article_id: article.id });
+        toast.success('Removed from collection.');
+      }
+    } catch {
+      setIsSaved(!nextSaved); // rollback
+      toast.error('Failed to update bookmark.');
+    }
+  }
+
+  const getUrl = () => `${typeof window !== 'undefined' ? window.location.origin : 'https://sathyadhare.com'}/articles/${article.slug}`;
+
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    const url = getUrl();
+    try { await navigator.clipboard.writeText(url); } catch { /* ignore */ }
+    setCopied(true);
+    toast.success('Link copied!');
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    const url = getUrl();
+    if (navigator.share) {
+      try { await navigator.share({ title: article.title, url }); } catch {}
+    } else {
+      handleCopy(e);
+    }
+  };
+
+  return (
+    <div className="group relative block w-full mb-3">
+      <Card hoverable className="relative rounded-[2rem] border-transparent bg-white dark:bg-[#1a222c] shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] overflow-visible flex flex-col p-3 gap-4 group-hover:bg-gray-50/80 dark:group-hover:bg-[#222a36] transition-colors">
+        
+        <div className="flex flex-row gap-4">
           {/* Left: Image Side */}
           <Link href={`/articles/${article.slug}`} className="relative shrink-0 block w-[110px] h-[110px] sm:w-[130px] sm:h-[130px] tap-highlight">
             <div className="w-full h-full rounded-[1.5rem] overflow-hidden bg-[var(--color-surface-2)] relative shadow-sm">
@@ -87,42 +148,121 @@ export default function ArticleCard({ article, variant = 'list' }: ArticleCardPr
 
           {/* Right: Content Side */}
           <div className="flex flex-col flex-1 py-1 min-w-0 justify-center">
-            <Link href={`/articles/${article.slug}`} className="block tap-highlight pr-2">
+            <Link href={`/articles/${article.slug}`} className="block tap-highlight pr-3">
               <h3 className="text-[15px] sm:text-[17px] font-black leading-[1.3] text-[var(--color-text)] line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors mb-1.5 break-words">
                 {article.title}
               </h3>
               {article.excerpt && (
-                <p className="text-[var(--color-muted)] text-[11px] sm:text-xs leading-relaxed line-clamp-3 font-semibold break-words">
+                <p className="text-[var(--color-muted)] text-[11px] sm:text-xs leading-relaxed line-clamp-2 font-semibold break-words">
                   {article.excerpt}
                 </p>
               )}
             </Link>
             
-            <div className="mt-3 flex items-center gap-1.5 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[var(--color-muted)] pt-3 border-t border-[var(--color-border)] opacity-80">
-              {article.title.toUpperCase().includes('SEQUEL') ? (
-                <><span>SEQUEL</span><span className="opacity-40">|</span></>
-              ) : null}
-              {date && <span>{date}</span>}
-              {date && <span className="opacity-40">|</span>}
-              <span className="flex items-center gap-1 shrink-0">
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {readTime}
-              </span>
+            <div className="mt-3 flex flex-wrap items-center justify-between text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[var(--color-muted)] pt-3 border-t border-[var(--color-border)] opacity-80 pl-1 mr-2">
+              <div className="flex items-center flex-wrap gap-1.5 shrink-0">
+                {article.title.toUpperCase().includes('SEQUEL') ? (
+                  <><span className="text-[#685de6]">SEQUEL</span><span className="opacity-40">|</span></>
+                ) : null}
+                {date && <span>{date}</span>}
+                {date && <span className="opacity-40">|</span>}
+                <span className="flex items-center gap-1 shrink-0">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {readTime}
+                </span>
+              </div>
+
+              {/* Share & Copy logic inline */}
+              <div className="flex items-center gap-2 pl-2">
+                <button onClick={handleShare} className="w-6 h-6 flex items-center justify-center rounded-lg bg-[var(--color-surface-2)] text-[var(--color-muted)] hover:text-[#685de6] active:scale-90 transition-all shrink-0">
+                  <Share2 size={11} strokeWidth={2.5} />
+                </button>
+                <button onClick={handleCopy} className={`w-6 h-6 flex items-center justify-center rounded-lg bg-[var(--color-surface-2)] transition-all active:scale-90 shrink-0 ${copied ? 'text-green-500' : 'text-[var(--color-muted)] hover:text-[#685de6]'}`}>
+                  {copied ? <Check size={11} strokeWidth={3} /> : <LinkIcon size={11} strokeWidth={2.5} />}
+                </button>
+              </div>
             </div>
           </div>
+        </div>
 
-          {/* Bookmark floating button bottom-right matching the image */}
-          <div className="absolute -bottom-3 right-5 z-20">
-            <button
-              onClick={e => { e.preventDefault(); /* add save handler */ }}
-              className="w-8 h-8 rounded-xl bg-[#ffeb3b] text-[#111] shadow-[0_4px_12px_rgba(255,235,59,0.3)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
-            >
-              <Bookmark size={14} strokeWidth={2.5} className="fill-[#111]" />
-            </button>
+        {/* Bookmark floating button bottom-right matching the image */}
+        <div className="absolute -bottom-3 right-5 z-20">
+          <button
+            onClick={handleToggleSave}
+            className={`w-8 h-8 rounded-[0.85rem] shadow-[0_4px_12px_rgba(100,100,100,0.1)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all ${isSaved ? 'bg-[#ffeb3b] text-[#111] shadow-[0_4px_12px_rgba(255,235,59,0.3)]' : 'bg-white dark:bg-[#222a36] text-[var(--color-muted)] border border-[var(--color-border)]'}`}
+            title={isSaved ? "Saved" : "Save article"}
+          >
+            <Bookmark size={14} strokeWidth={2.5} className={isSaved ? 'fill-[#111]' : ''} />
+          </button>
+        </div>
+
+      </Card>
+    </div>
+  );
+}
+
+export default function ArticleCard({ article, variant = 'list' }: ArticleCardProps) {
+  const categoryName = getCategory(article);
+  const readTime = calcReadTime(article);
+  const date = formatDate(article.published_at);
+
+  if (variant === 'list-horizontal') {
+    return <HorizontalCard article={article} readTime={readTime} date={date} categoryName={categoryName} />;
+  }
+
+  if (variant === 'list') {
+    return (
+      <div className="group relative block w-full mb-3">
+        <Card hoverable className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-none overflow-hidden h-full flex flex-col group-hover:bg-[var(--color-surface-2)] transition-colors">
+          {/* Image Side */}
+          <Link href={`/articles/${article.slug}`} className="relative block w-full aspect-[16/9] overflow-hidden tap-highlight">
+            {article.cover_image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={article.cover_image}
+                alt={article.title}
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-[var(--color-surface-2)]" />
+            )}
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            {/* Category badge overlaid on image */}
+            {categoryName && (
+              <div className="absolute bottom-3 left-3 z-10">
+                <span className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest text-white bg-[#685de6] shadow-sm">
+                  {categoryName}
+                </span>
+              </div>
+            )}
+          </Link>
+
+          {/* Content Side */}
+          <div className="flex flex-col flex-1 px-4 py-4">
+            <Link href={`/articles/${article.slug}`} className="block tap-highlight">
+              <h3 className="text-[17px] font-black leading-snug text-[var(--color-text)] line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors">
+                {article.title}
+              </h3>
+              {article.excerpt && (
+                <p className="text-[var(--color-muted)] text-sm leading-relaxed line-clamp-2 mt-1.5 font-medium">
+                  {article.excerpt}
+                </p>
+              )}
+              <div className="mt-2.5 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted)] opacity-80">
+                {date && <span>{date}</span>}
+                {date && <span className="opacity-30">•</span>}
+                <span className="flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {readTime}
+                </span>
+              </div>
+            </Link>
           </div>
-
         </Card>
       </div>
     );
