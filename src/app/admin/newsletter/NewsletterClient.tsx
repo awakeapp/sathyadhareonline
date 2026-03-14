@@ -52,7 +52,7 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
         setSubs(prev => prev.filter(s => s.id !== sub.id));
       } else {
         const j = await res.json();
-        alert(j.error ?? 'Atomic Rejection');
+        alert(j.error ?? 'Failed to unsubscribe');
       }
       setRemovingId(null);
       return;
@@ -79,7 +79,7 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
     } else {
       const j = await res.json();
       setSendStatus('error');
-      setErrorMsg(j.error ?? 'Transmission Failed');
+      setErrorMsg(j.error ?? 'Failed to send email');
     }
   }
 
@@ -94,13 +94,13 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
                 <Mail className="w-6 h-6" strokeWidth={1.25} />
              </div>
              <div>
-                <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Signal Broadcast</h2>
-                <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-0.5">Control direct communication nodes</p>
+                <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Newsletters</h2>
+                <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-0.5">Send emails to your subscribers</p>
              </div>
           </div>
           <div className="flex gap-3">
             <PresenceButton onClick={() => setShowCompose(true)} className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black tracking-widest text-[10px] uppercase shadow-xl shadow-indigo-500/20">
-               Compose Dispatch
+               Compose Email
             </PresenceButton>
             <PresenceButton onClick={handleExport} className="bg-white dark:bg-zinc-950 !text-zinc-500 hover:!text-zinc-900 dark:text-zinc-50 shadow-sm">
                <Download className="w-5 h-5" strokeWidth={1.25} />
@@ -113,8 +113,8 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
       <PresenceCard noPadding>
         <div className="p-4 border-b border-indigo-50 dark:border-white/5 flex items-center justify-between">
            <div>
-              <h3 className="text-sm font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-widest">Active Receivers</h3>
-              <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mt-1">Verified communication channels</p>
+              <h3 className="text-sm font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-widest">Active Subscribers</h3>
+              <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mt-1">Subscribed users</p>
            </div>
            <Users className="w-6 h-6 text-indigo-100" strokeWidth={1.25} />
         </div>
@@ -122,7 +122,7 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
         {subs.length === 0 ? (
           <div className="py-24 text-center flex flex-col items-center">
              <Users className="w-16 h-16 mb-5 text-indigo-100" />
-             <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">Network Empty</p>
+             <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">No Subscribers Yet</p>
           </div>
         ) : (
           <div className="divide-y divide-indigo-50 dark:divide-white/5">
@@ -131,7 +131,7 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-black text-zinc-900 dark:text-zinc-50 truncate uppercase tracking-tight">{sub.email}</p>
                   <p className="text-[10px] font-black text-zinc-400 mt-1 uppercase tracking-widest">
-                    Link Established · {new Date(sub.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    Subscribed · {new Date(sub.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                   </p>
                 </div>
                 <button
@@ -147,14 +147,14 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
         )}
       </PresenceCard>
 
-      {/* ── DISPATCH MODAL ── */}
+      {/* ── COMPOSE MODAL ── */}
       {showCompose && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-zinc-950/80 backdrop-blur-xl animate-in fade-in duration-300">
            <div className="w-full max-w-2xl bg-white dark:bg-[#181623] rounded-[3rem] shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
               <div className="p-10 border-b border-indigo-50 dark:border-white/5 flex items-center justify-between bg-indigo-50/30">
                  <div>
-                    <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Signal Dispatch</h2>
-                    <p className="text-[10px] font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-widest mt-1">Targeting {subs.length} active nodes</p>
+                    <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Send Email</h2>
+                    <p className="text-[10px] font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-widest mt-1">Sending to {subs.length} subscribers</p>
                  </div>
                  <button className="w-12 h-12 rounded-full bg-white dark:bg-zinc-950 text-zinc-500 flex items-center justify-center shadow-sm" onClick={() => setShowCompose(false)}>
                     <X className="w-6 h-6" strokeWidth={1.25} />
@@ -163,7 +163,7 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
               
               <form onSubmit={handleSend} className="p-10 flex flex-col gap-4">
                  <div className="space-y-3">
-                   <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Communication Subject</label>
+                   <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Email Subject</label>
                    <input 
                      value={subject} 
                      onChange={e => setSubject(e.target.value)} 
@@ -173,7 +173,7 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
                    />
                  </div>
                  <div className="space-y-3">
-                   <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Manifest Message</label>
+                   <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Email Message</label>
                    <textarea 
                      value={body} 
                      onChange={e => setBody(e.target.value)} 
@@ -182,7 +182,7 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
                      placeholder="Write the transmission content..." 
                      className="w-full p-6 rounded-[2rem] bg-zinc-50 dark:bg-zinc-950 border-none text-sm font-bold shadow-inner placeholder-gray-300 resize-none"
                    />
-                   <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest text-right">UTF-8 Plaintext Protocol Only</p>
+                   <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest text-right">Plain text formatting only</p>
                  </div>
 
                  <div className="flex flex-col gap-4">
@@ -193,7 +193,7 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
                    )}
                    {sendStatus === 'sent' && (
                      <div className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-emerald-50 text-emerald-500 text-xs font-black uppercase tracking-widest">
-                       <CheckCircle2 className="w-5 h-5" strokeWidth={1.25} /> Transmission Acknowledged
+                       <CheckCircle2 className="w-5 h-5" strokeWidth={1.25} /> Email sent successfully
                      </div>
                    )}
                    
@@ -203,7 +203,7 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
                      loading={sendStatus === 'sending'} 
                      disabled={sendStatus === 'sending' || sendStatus === 'sent'}
                    >
-                     {sendStatus === 'sent' ? 'DISPATCHED' : 'INITIALIZE BROADCAST'}
+                     {sendStatus === 'sent' ? 'SENT' : 'SEND EMAIL'}
                    </PresenceButton>
                  </div>
               </form>

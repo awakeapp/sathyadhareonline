@@ -24,7 +24,7 @@ export default function ArticleFormClient({ categories, users, role, onSubmit, c
   
   const displayedSlug = isSlugManual ? slug : title
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/[^a-z0-9\u0080-\uFFFF]+/g, '-')
     .replace(/^-|-$/g, '')
     .slice(0, 80);
 
@@ -37,7 +37,7 @@ export default function ArticleFormClient({ categories, users, role, onSubmit, c
   };
 
   return (
-    <form action={onSubmit} encType="multipart/form-data" className="w-full h-full flex flex-col">
+    <form id="admin-article-form" action={onSubmit} encType="multipart/form-data" className="w-full h-full flex flex-col">
       {/* ── STAGE 1: METADATA FORM ── */}
       <div className={stage === 'metadata' ? 'block w-full max-w-3xl mx-auto p-4 md:p-8 pt-6 md:pt-12 animate-in fade-in' : 'hidden'}>
          <div className="mb-8">
@@ -136,7 +136,7 @@ export default function ArticleFormClient({ categories, users, role, onSubmit, c
       <div className={stage === 'editor' ? 'fixed inset-0 z-[100] bg-[var(--color-surface)] flex flex-col w-full h-full animate-in slide-in-from-bottom-4 duration-300' : 'hidden'}>
         
         {/* Editor Header */}
-        <header className="h-[60px] shrink-0 border-b border-[var(--color-border)] bg-[var(--color-surface)] flex items-center justify-between px-4 w-full">
+        <header className="h-[72px] shrink-0 border-b border-[var(--color-border)] bg-[var(--color-surface)] flex items-center justify-between px-4 w-full sticky top-0 z-50">
            <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
              <button type="button" onClick={() => setStage('metadata')} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[var(--color-surface-2)] text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors shrink-0">
                <ArrowLeft className="w-5 h-5" strokeWidth={2} />
@@ -145,13 +145,43 @@ export default function ArticleFormClient({ categories, users, role, onSubmit, c
                <h2 className="text-[15px] md:text-[16px] font-bold text-[var(--color-text)] truncate">{title || 'Untitled Article'}</h2>
                <div className="flex items-center gap-1.5 mt-0.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
-                  <span className="text-[11px] font-medium text-[var(--color-muted)]">Draft Unsaved</span>
+                  <span className="text-[11px] font-medium text-[var(--color-muted)]">Drafting...</span>
                </div>
              </div>
            </div>
            
-           <div className="hidden md:flex items-center gap-4 shrink-0 px-4">
-              <span className="text-[12px] font-medium text-[var(--color-muted)] bg-[var(--color-surface-2)] px-3 py-1 rounded-full">Editorial Canvas</span>
+           <div className="flex items-center gap-2 md:gap-3 shrink-0">
+              <button 
+                type="submit" 
+                name="action_type" 
+                value="draft"
+                form="admin-article-form"
+                className="h-10 px-4 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[var(--color-text)] font-bold text-[11px] uppercase tracking-widest hover:bg-[var(--color-border)] transition-all flex items-center gap-2"
+              >
+                <Save className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Save</span>
+              </button>
+
+              {role === 'editor' ? (
+                <button 
+                  type="submit" 
+                  name="action_type" 
+                  value="submit"
+                  form="admin-article-form"
+                  className="h-10 px-5 rounded-xl bg-[var(--color-primary)] hover:opacity-90 text-white font-bold text-[11px] uppercase tracking-widest shadow-sm transition-all flex items-center gap-2"
+                >
+                  <Send className="w-3.5 h-3.5" /> Submit
+                </button>
+              ) : (
+                <button 
+                  type="submit" 
+                  name="action_type" 
+                  value="publish"
+                  form="admin-article-form"
+                  className="h-10 px-5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] uppercase tracking-widest rounded-xl shadow-lg shadow-emerald-500/20 transition-all active:scale-95 flex items-center gap-2"
+                >
+                  <CheckCircle className="w-3.5 h-3.5" /> Publish
+                </button>
+              )}
            </div>
         </header>
 

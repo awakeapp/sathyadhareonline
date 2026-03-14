@@ -2,14 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/Tooltip';
 import {
-  LayoutDashboard, FileText, Users, BarChart2, MessageSquare,
-  Image as ImageIcon, Layers, ScrollText, Settings, Shield,
-  IndianRupee, Mail, Eye, Home, Search, Mic, SquarePen,
-  PanelLeftClose, PanelLeftOpen, LucideIcon, ChevronRight,
-  Library, Send, Trash2, Calendar
+  PanelLeftClose, PanelLeftOpen,
+  Home, Layers, Search, Mic
 } from 'lucide-react';
 import { SA_SECTIONS, ADMIN_SECTIONS, EDITOR_SECTIONS, NavSection, NavSectionItem } from './nav-items';
 
@@ -226,7 +223,7 @@ function DesktopSidebar({ role }: SidebarProps) {
             </div>
           ))
         ) : (
-          READER_ITEMS.map((item, idx) => {
+          READER_ITEMS.map((item) => {
             const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
             return (
               <Tooltip key={item.href}>
@@ -238,11 +235,11 @@ function DesktopSidebar({ role }: SidebarProps) {
                         ${collapsed ? 'justify-center px-0 py-3' : 'px-3 py-2.5 gap-3'}
                         text-sm font-semibold
                         ${isActive
-                          ? 'border-[#ffe500]/20 font-bold'
+                          ? 'border-[#685de6]/20 font-bold'
                           : 'border-transparent text-[var(--color-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text)]'
                         }
                       `}
-                      style={isActive ? { background: '#ffe50015', color: '#ffe500', borderColor: '#ffe50025' } : {}}
+                      style={isActive ? { background: '#685de615', color: '#685de6', borderColor: '#685de625' } : {}}
                     >
                       <item.icon size={18} />
                       {!collapsed && <span className="truncate">{item.label}</span>}

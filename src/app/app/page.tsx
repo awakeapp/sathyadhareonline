@@ -72,7 +72,7 @@ export default async function AppPage() {
     .order('published_at', { ascending: false }).limit(6)
 
   return (
-    <div className="min-h-[100svh] px-4 pt-1 pb-32 max-w-lg mx-auto sm:max-w-2xl lg:max-w-5xl">
+    <div className="min-h-[100svh] px-4 pt-1 pb-0 max-w-lg mx-auto sm:max-w-2xl lg:max-w-5xl">
 
       {/* Hero */}
       {featured && (

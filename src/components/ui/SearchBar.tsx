@@ -40,7 +40,7 @@ export default function SearchBar({
         <Button
           type="submit"
           variant="primary"
-          className="absolute right-2 top-1/2 -translate-y-1/2 px-5 py-2 rounded-xl text-xs shadow-none text-black h-10"
+          className="absolute right-2 top-1/2 -translate-y-1/2 px-5 py-2 rounded-xl text-xs shadow-lg shadow-[#685de6]/20 text-white h-10 font-black uppercase tracking-widest bg-[#685de6] border-none hover:scale-105 active:scale-95 transition-all"
         >
           Search
         </Button>

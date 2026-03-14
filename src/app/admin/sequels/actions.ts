@@ -20,7 +20,7 @@ export async function createSequelAction(data: { title: string, description: str
     const { user, supabase } = await verifyStaff();
     
     // Auto generate slug
-    const slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    const slug = data.title.toLowerCase().replace(/[^a-z0-9\u0080-\uFFFF]+/g, '-').replace(/(^-|-$)+/g, '');
 
     const { error } = await supabase
       .from('sequels')

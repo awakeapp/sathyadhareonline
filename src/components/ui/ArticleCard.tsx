@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
-import { Card, CardContent } from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
+import { Bookmark } from 'lucide-react';
 
 interface Article {
   id: string;
@@ -10,6 +13,7 @@ interface Article {
   category?: { name: string } | { name: string }[] | null;
   published_at?: string | null;
   read_time?: number | null;
+  content?: string | null;   // if passed, used for more accurate read time
 }
 
 interface ArticleCardProps {
@@ -29,77 +33,98 @@ function formatDate(dateStr?: string | null) {
   }).toUpperCase();
 }
 
+/* Unified read-time: uses content if available, else excerpt, else DB value, else 3 */
+function calcReadTime(article: Article): string {
+  const WPM = 200;
+  if (article.content) {
+    const text = article.content.replace(/<[^>]*>?/gm, '');
+    const words = text.trim().split(/\s+/).filter(Boolean).length;
+    return `${Math.max(1, Math.ceil(words / WPM))} MIN READ`;
+  }
+  if (article.excerpt) {
+    const words = article.excerpt.trim().split(/\s+/).filter(Boolean).length;
+    // Excerpts are short; multiply to approximate full article
+    const approxMins = Math.max(1, Math.ceil(words * 10 / WPM));
+    return `${approxMins} MIN READ`;
+  }
+  if (article.read_time) return `${article.read_time} MIN READ`;
+  return '3 MIN READ';
+}
+
 export default function ArticleCard({ article, variant = 'list' }: ArticleCardProps) {
   const categoryName = getCategory(article);
-  const readTime = article.read_time ? `${article.read_time} MIN READ` : '3 MIN READ';
+  const readTime = calcReadTime(article);
   const date = formatDate(article.published_at);
 
   if (variant === 'list') {
     return (
-      <Link href={`/articles/${article.slug}`} className="group relative block w-full tap-highlight transition-transform duration-300 active:scale-[0.98] outline-none">
-        <Card hoverable className="rounded-3xl border-transparent bg-[var(--color-surface)] shadow-none overflow-hidden h-full flex flex-col sm:flex-row group-hover:bg-[var(--color-surface-2)]">
-          {/* Image Side */}
-          <div className="relative w-full sm:w-[35%] aspect-[16/10] sm:aspect-auto sm:h-auto overflow-hidden">
-            {article.cover_image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={article.cover_image}
-                alt={article.title}
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
-              />
-            ) : (
-              <div className="absolute inset-0 bg-[var(--color-surface-2)]" />
-            )}
-            
-            {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent sm:hidden" />
-
-            {/* Mobile Badge */}
+      <div className="group relative block w-full mb-3">
+        <Card hoverable className="relative rounded-[2rem] border-transparent bg-white dark:bg-[#1a222c] shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] overflow-visible flex flex-row p-3 gap-4 group-hover:bg-gray-50/80 dark:group-hover:bg-[#222a36] transition-colors">
+          
+          {/* Left: Image Side */}
+          <Link href={`/articles/${article.slug}`} className="relative shrink-0 block w-[110px] h-[110px] sm:w-[130px] sm:h-[130px] tap-highlight">
+            <div className="w-full h-full rounded-[1.5rem] overflow-hidden bg-[var(--color-surface-2)] relative shadow-sm">
+              {article.cover_image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={article.cover_image}
+                  alt={article.title}
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-[var(--color-surface-2)]" />
+              )}
+            </div>
+            {/* Category badge overlaid on center bottom of image */}
             {categoryName && (
-              <div className="absolute top-3 left-3 z-10 sm:hidden">
-                <span className="px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest text-black bg-[var(--color-primary)] shadow-sm">
+              <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 z-10 w-max max-w-[95%]">
+                <span className="block px-3 py-1 rounded-[10px] text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#111] bg-[#ffeb3b] shadow-md truncate text-center">
                   {categoryName}
                 </span>
               </div>
             )}
-          </div>
+          </Link>
 
-          {/* Content Side */}
-          <CardContent className="flex flex-col flex-1 p-5 sm:p-6 justify-between border-t sm:border-t-0 sm:border-l border-[var(--color-border)]">
-            <div>
-              {/* Desktop Badge */}
-              {categoryName && (
-                <div className="hidden sm:inline-block mb-3">
-                  <span className="px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest text-[var(--color-primary)] bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20">
-                    {categoryName}
-                  </span>
-                </div>
-              )}
-              
-              <h3 className="text-base sm:text-lg font-bold leading-snug text-[var(--color-text)] line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors">
+          {/* Right: Content Side */}
+          <div className="flex flex-col flex-1 py-1 min-w-0 justify-center">
+            <Link href={`/articles/${article.slug}`} className="block tap-highlight pr-2">
+              <h3 className="text-[15px] sm:text-[17px] font-black leading-[1.3] text-[var(--color-text)] line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors mb-1.5 break-words">
                 {article.title}
               </h3>
-              
               {article.excerpt && (
-                <p className="text-[var(--color-muted)] text-sm leading-relaxed line-clamp-2 mt-2 font-medium">
+                <p className="text-[var(--color-muted)] text-[11px] sm:text-xs leading-relaxed line-clamp-3 font-semibold break-words">
                   {article.excerpt}
                 </p>
               )}
-            </div>
-
-            <div className="mt-4 flex items-center flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted)]">
+            </Link>
+            
+            <div className="mt-3 flex items-center gap-1.5 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[var(--color-muted)] pt-3 border-t border-[var(--color-border)] opacity-80">
+              {article.title.toUpperCase().includes('SEQUEL') ? (
+                <><span>SEQUEL</span><span className="opacity-40">|</span></>
+              ) : null}
               {date && <span>{date}</span>}
-              {date && <span className="opacity-30">•</span>}
-              <span className="flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              {date && <span className="opacity-40">|</span>}
+              <span className="flex items-center gap-1 shrink-0">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 {readTime}
               </span>
             </div>
-          </CardContent>
+          </div>
+
+          {/* Bookmark floating button bottom-right matching the image */}
+          <div className="absolute -bottom-3 right-5 z-20">
+            <button
+              onClick={e => { e.preventDefault(); /* add save handler */ }}
+              className="w-8 h-8 rounded-xl bg-[#ffeb3b] text-[#111] shadow-[0_4px_12px_rgba(255,235,59,0.3)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+            >
+              <Bookmark size={14} strokeWidth={2.5} className="fill-[#111]" />
+            </button>
+          </div>
+
         </Card>
-      </Link>
+      </div>
     );
   }
 
@@ -118,7 +143,6 @@ export default function ArticleCard({ article, variant = 'list' }: ArticleCardPr
               loading="lazy"
             />
           )}
-          {/* Subtle gradient overlay to ensure badge readability if added later */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
         

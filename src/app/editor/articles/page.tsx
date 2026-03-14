@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronLeft, Plus, Eye, Edit2, FileText, BarChart2, Bell, Sparkles } from 'lucide-react';
+import { Plus, Eye, FileText, BarChart2, Bell, Sparkles } from 'lucide-react';
 import { 
   PresenceWrapper, 
   PresenceHeader,
@@ -12,10 +12,10 @@ import {
 export const dynamic = 'force-dynamic';
 
 const STATUS_META: Record<string, { label: string; color: string }> = {
-  draft:     { label: 'Cold Draft',     color: '#94a3b8' },
-  in_review: { label: 'Awaiting Audit', color: '#f59e0b' },
-  published: { label: 'Broadcast Live', color: '#10b981' },
-  archived:  { label: 'Deep Storage',  color: '#8b5cf6' },
+  draft:     { label: 'Draft',          color: '#94a3b8' },
+  in_review: { label: 'Under Review',  color: '#f59e0b' },
+  published: { label: 'Published',     color: '#10b981' },
+  archived:  { label: 'Archived',      color: '#8b5cf6' },
 };
 
 export default async function EditorArticlesPage() {
@@ -39,7 +39,7 @@ export default async function EditorArticlesPage() {
   if (error) console.error('Error fetching articles:', error);
 
   const articleIds = (articles ?? []).map(a => a.id);
-  let viewCounts: Record<string, number> = {};
+  const viewCounts: Record<string, number> = {};
 
   if (articleIds.length > 0) {
     const { data: viewRows } = await supabase
@@ -58,7 +58,7 @@ export default async function EditorArticlesPage() {
     <PresenceWrapper>
       <PresenceHeader 
         title="Presence"
-        roleLabel={`Editor Registry · ${articles?.length ?? 0} Nodes`}
+        roleLabel={`Author Dashboard · ${articles?.length ?? 0} Articles`}
         initials={initials}
         icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
         icon2Node={<Plus className="w-6 h-6" strokeWidth={1.25} />}
@@ -81,8 +81,8 @@ export default async function EditorArticlesPage() {
         {!articles || articles.length === 0 ? (
           <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
             <FileText className="w-16 h-16 mb-5 text-indigo-100" />
-            <p className="font-black text-xl text-gray-400 uppercase tracking-widest">Workspace Empty</p>
-            <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mt-2">Initialize your first narrative node</p>
+            <p className="font-black text-xl text-gray-400 uppercase tracking-widest">No Articles Found</p>
+            <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mt-2">Start writing your first article now.</p>
           </PresenceCard>
         ) : (
           <div className="space-y-4">
@@ -109,7 +109,7 @@ export default async function EditorArticlesPage() {
                                     {meta.label}
                                   </span>
                                   <span className="flex items-center gap-1.5 text-[9px] font-black text-indigo-300 uppercase tracking-[0.2em]">
-                                     <BarChart2 className="w-3 h-3" /> {views.toLocaleString()} Intercepts
+                                     <BarChart2 className="w-3 h-3" /> {views.toLocaleString()} Views
                                   </span>
                                </div>
                             </div>
@@ -125,7 +125,7 @@ export default async function EditorArticlesPage() {
                             )}
                             <Link href={`/editor/articles/${article.id}/edit`}>
                                <PresenceButton className="px-8 h-12 bg-indigo-50 border-none text-[#5c4ae4] hover:bg-[#5c4ae4] hover:text-white font-black text-[10px] uppercase tracking-widest">
-                                  Modify Node
+                                  Edit Article
                                </PresenceButton>
                             </Link>
                          </div>

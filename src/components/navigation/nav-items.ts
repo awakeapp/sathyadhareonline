@@ -16,7 +16,7 @@ export const SUPER_ADMIN_NAV: NavItem[] = [
   { name: 'Dashboard', href: '/admin', exact: true, icon: LayoutDashboard },
   { name: 'Articles', href: '/admin/articles', exact: false, icon: FileText },
   { name: 'Categories', href: '/admin/categories', exact: false, icon: Library },
-  { name: 'Sequel', href: '/admin/sequels', exact: false, icon: Layers },
+  { name: 'Sequels', href: '/admin/sequels', exact: false, icon: Layers },
   { name: 'Users', href: '/admin/users', exact: false, icon: Users },
   { name: 'Financials', href: '/admin/financial', exact: false, icon: IndianRupee },
   { name: 'Audit Logs', href: '/admin/audit-logs', exact: false, icon: ScrollText },
@@ -71,7 +71,7 @@ export const SA_SECTIONS: NavSection[] = [
     items: [
       { label: 'User Management', href: '/admin/users', icon: Users },
       { label: 'Roles & Permissions', href: '/admin/security', icon: Shield },
-      { label: 'System Logs', href: '/admin/audit-logs', icon: ScrollText },
+      { label: 'Audit Logs', href: '/admin/audit-logs', icon: ScrollText },
       { label: 'Settings', href: '/admin/settings', icon: Settings },
     ],
   },
@@ -104,7 +104,7 @@ export const ADMIN_SECTIONS: NavSection[] = [
     title: 'System',
     items: [
       { label: 'Newsletter', href: '/admin/newsletter', icon: Mail },
-      { label: 'Friday Msg', href: '/admin/friday',     icon: Calendar },
+      { label: 'Friday Message', href: '/admin/friday',     icon: Calendar },
       { label: 'Trash',      href: '/admin/trash',      icon: Trash2 },
     ],
   },

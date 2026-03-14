@@ -87,7 +87,7 @@ export default async function EditSequelPage({ params }: { params: Promise<{ id:
     <PresenceWrapper>
       <PresenceHeader 
         title="Super Admin"
-        roleLabel="Sequence Manager · Data Linking"
+        roleLabel="Series Manager"
         initials={initials}
         icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
         icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
@@ -111,15 +111,15 @@ export default async function EditSequelPage({ params }: { params: Promise<{ id:
             
             <div className="space-y-4">
                <div className="flex items-center justify-between">
-                  <h3 className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Available Matrix Nodes</h3>
-                  <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Temporal Order Binding</span>
+                  <h3 className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Select Articles</h3>
+                  <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Select articles to include</span>
                </div>
                
                <div className="space-y-3 max-h-[600px] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-indigo-100">
                  {!articles || articles.length === 0 ? (
                    <div className="py-20 text-center flex flex-col items-center">
                       <BookOpen className="w-12 h-12 mb-4 text-indigo-100" />
-                      <p className="font-black text-zinc-500 uppercase tracking-widest text-sm">No Published Nodes</p>
+                      <p className="font-black text-zinc-500 uppercase tracking-widest text-sm">No Published Articles</p>
                    </div>
                  ) : (
                    articles.map((article) => (
@@ -142,7 +142,7 @@ export default async function EditSequelPage({ params }: { params: Promise<{ id:
                        <div className="min-w-0">
                          <span className="block text-lg font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight group-hover:text-zinc-900 dark:text-zinc-50 transition-colors">{article.title}</span>
                          <span className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">
-                           Broadcasted · {new Date(article.published_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                           Published · {new Date(article.published_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                          </span>
                        </div>
                      </label>
@@ -156,7 +156,7 @@ export default async function EditSequelPage({ params }: { params: Promise<{ id:
                 type="submit" 
                 className="h-16 px-12 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3"
               >
-                <Check className="w-5 h-5" strokeWidth={1.25} /> Synchronize Sequence
+                <Check className="w-5 h-5" strokeWidth={1.25} /> Save Changes
               </button>
             </div>
           </form>

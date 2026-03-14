@@ -56,8 +56,8 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
     const formData = new FormData();
     formData.append('id', id);
     const res = await refundTransactionAction(formData);
-    if (res?.error) toast.error(`Atomic failure: ${res.error}`);
-    else toast.success(`Reversal Successful`);
+    if (res?.error) toast.error(`Refund failed: ${res.error}`);
+    else toast.success(`Refund Successful`);
   };
 
   return (
@@ -70,12 +70,12 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
                 <ShieldCheck className="w-6 h-6" strokeWidth={1.25} />
              </div>
              <div>
-                <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Financial Registry</h2>
-                <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-0.5">Super Admin Ledger Control</p>
+                <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Financial Revenue</h2>
+                <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-0.5">Super Admin Revenue Control</p>
              </div>
           </div>
           <PresenceButton onClick={handleExport} disabled={isExporting} className="bg-white dark:bg-zinc-950 !text-zinc-500 hover:!text-zinc-900 dark:text-zinc-50 shadow-sm">
-             <Download className="w-5 h-5 mr-3" strokeWidth={1.25} /> Export Transaction Log
+             <Download className="w-5 h-5 mr-3" strokeWidth={1.25} /> Export Transactions
           </PresenceButton>
         </div>
       </PresenceCard>
@@ -90,7 +90,7 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
               <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50 mb-8 shadow-inner shadow-indigo-500/5">
                  <DollarSign className="w-6 h-6" strokeWidth={1.25} />
               </div>
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-zinc-50 mb-3">Lifetime Asset Mass</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-zinc-50 mb-3">Lifetime Revenue</p>
               <h3 className="text-5xl font-black text-zinc-900 dark:text-zinc-50 tabular-nums tracking-tighter">
                 ₹{totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 0 })}
               </h3>
@@ -105,7 +105,7 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
               <div className="w-12 h-12 rounded-2xl bg-emerald-50/50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-500 mb-8 shadow-inner shadow-emerald-500/5">
                  <RefreshCcw className="w-6 h-6" strokeWidth={1.25} />
               </div>
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-500 mb-3">Monthly Recurring Velocity</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-500 mb-3">Monthly Recurring Revenue</p>
               <h3 className="text-5xl font-black text-zinc-900 dark:text-zinc-50 tabular-nums tracking-tighter">
                 ₹{mrr.toLocaleString(undefined, { minimumFractionDigits: 0 })}
               </h3>
@@ -117,8 +117,8 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
       <PresenceCard noPadding>
         <div className="p-4 border-b border-indigo-50 dark:border-white/5 flex items-center justify-between">
            <div>
-              <h3 className="text-sm font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-widest">Global Cache</h3>
-              <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mt-1">Natively intercepted payment vectors</p>
+              <h3 className="text-sm font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-widest">All Transactions</h3>
+              <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mt-1">All payment transactions</p>
            </div>
            <Activity className="w-6 h-6 text-indigo-100" strokeWidth={1.25} />
         </div>
@@ -126,19 +126,19 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
         {transactions.length === 0 ? (
           <div className="py-24 text-center flex flex-col items-center">
              <AlertCircle className="w-16 h-16 mb-5 text-indigo-100" />
-             <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">Registry Null</p>
+             <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">No Transactions Found</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs whitespace-nowrap">
               <thead>
                 <tr className="bg-gray-50/50 dark:bg-white/5 border-b border-indigo-50 dark:border-white/5 font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">
-                  <th className="px-8 py-5 text-[10px]">Temporal Index</th>
-                  <th className="px-8 py-5 text-[10px]">Actor Identity</th>
-                  <th className="px-8 py-5 text-[10px]">Manifest</th>
-                  <th className="px-8 py-5 text-[10px] text-right">Value</th>
-                  <th className="px-8 py-5 text-[10px] text-center">Protocol</th>
-                  <th className="px-8 py-5 text-[10px] text-right">Interrupt</th>
+                  <th className="px-8 py-5 text-[10px]">Date / Time</th>
+                  <th className="px-8 py-5 text-[10px]">User Email</th>
+                  <th className="px-8 py-5 text-[10px]">Plan</th>
+                  <th className="px-8 py-5 text-[10px] text-right">Amount</th>
+                  <th className="px-8 py-5 text-[10px] text-center">Status</th>
+                  <th className="px-8 py-5 text-[10px] text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-indigo-50 dark:divide-white/5">
@@ -150,7 +150,7 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
                     <td className="px-8 py-6">
                        <div>
                           <p className="font-black text-zinc-900 dark:text-zinc-50">{t.userEmail}</p>
-                          <p className="text-[9px] font-black text-indigo-300 uppercase mt-0.5">Citizen-ID: {t.id.slice(0, 8)}</p>
+                          <p className="text-[9px] font-black text-indigo-300 uppercase mt-0.5">Transaction ID: {t.id.slice(0, 8)}</p>
                        </div>
                     </td>
                     <td className="px-8 py-6">
@@ -173,7 +173,7 @@ export default function RevenueClient({ totalRevenue, mrr, transactions }: Reven
                     <td className="px-8 py-6 text-right">
                       {t.status === 'completed' && t.type === 'payment' && (
                          <button onClick={() => handleRefund(t.id, t.amount)} className="h-9 px-5 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all font-black text-[9px] uppercase tracking-widest shadow-sm">
-                           Reverse
+                           Refund
                          </button>
                       )}
                       {t.status === 'refunded' && (

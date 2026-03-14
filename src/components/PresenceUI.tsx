@@ -1,9 +1,12 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { LucideIcon, Search, Bell, Plus, Settings, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
+import { globalSearchAction, SearchResult, ADMIN_PAGES } from '@/app/admin/search-actions';
+import { useTransition, useEffect, useRef } from 'react';
+import { ArrowRight, FileText, Library, Users, Send, Layers, MessageSquare, LayoutDashboard } from 'lucide-react';
 
 /* ─── Presence Layout Wrapper ─── */
 export function PresenceWrapper({ children, className = '' }: { children: React.ReactNode; className?: string }) {
@@ -19,37 +22,89 @@ export function PresenceWrapper({ children, className = '' }: { children: React.
   );
 }
 
-/* ─── Presence Header ─── */
 export function PresenceHeader({ 
   title = "Super Admin", 
   roleLabel,
   profileName,
   initials,
-  icon1: Icon1,
-  icon2: Icon2,
   icon1Node,
   icon2Node,
   icon1Href,
   icon2Href,
-  icon1Badge = false,
-  icon2Badge = false
+  icon2Badge = false,
+  renderActions
 }: { 
   title?: string; 
   roleLabel?: string; 
   profileName?: string;
   initials?: string; 
-  icon1?: LucideIcon; 
-  icon2?: LucideIcon;
+  renderActions?: React.ReactNode;
   icon1Node?: React.ReactNode;
   icon2Node?: React.ReactNode;
   icon1Href?: string; 
   icon2Href?: string; 
-  icon1Badge?: boolean;
   icon2Badge?: boolean;
 }) {
-  const [isSearchOpen, setIsSearchOpen] = React.useState(false);
-  const [isNotifOpen, setIsNotifOpen] = React.useState(false);
-  const [isProfileOpen, setIsProfileOpen] = React.useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  
+  const [searchQuery, setSearchQuery] = useState('');
+  const [serverResults, setServerResults] = useState<SearchResult[]>([]);
+  const [isSearching, startSearch] = useTransition();
+  const searchTimeoutRef = useRef<NodeJS.Timeout>(null);
+
+  // Truly instant local filtering
+  const localResults = React.useMemo(() => {
+    if (searchQuery.length < 2) return [];
+    const q = searchQuery.toLowerCase();
+    return ADMIN_PAGES
+      .filter(p => p.title.toLowerCase().includes(q) || p.subtitle.toLowerCase().includes(q))
+      .map((p, i) => ({
+        id: `local-page-${i}`,
+        title: p.title,
+        subtitle: p.subtitle,
+        type: 'page' as const,
+        href: p.href
+      }));
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (searchQuery.length < 2) {
+      setServerResults(prev => prev.length > 0 ? [] : prev);
+      return;
+    }
+
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+
+    searchTimeoutRef.current = setTimeout(() => {
+      startSearch(async () => {
+        const results = await globalSearchAction(searchQuery);
+        setServerResults(results.filter(r => r.type !== 'page'));
+      });
+    }, 150);
+
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  }, [searchQuery, serverResults.length]);
+
+  const displayResults = React.useMemo(() => {
+    return [...localResults, ...serverResults];
+  }, [localResults, serverResults]);
+
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'article': return <FileText className="w-4 h-4" />;
+      case 'category': return <Library className="w-4 h-4" />;
+      case 'user': return <Users className="w-4 h-4" />;
+      case 'submission': return <Send className="w-4 h-4" />;
+      case 'sequel': return <Layers className="w-4 h-4" />;
+      case 'comment': return <MessageSquare className="w-4 h-4" />;
+      case 'page': return <LayoutDashboard className="w-4 h-4" />;
+      default: return <Search className="w-4 h-4" />;
+    }
+  };
 
   return (
     <>
@@ -140,18 +195,62 @@ export function PresenceHeader({
               <Search className="w-5 h-5 text-[var(--color-muted)] ml-2 shrink-0" />
               <input 
                 type="text" 
-                placeholder="Search articles, authors, categories, or users..." 
-                className="flex-1 bg-transparent border-none focus:ring-0 text-[16px] text-[var(--color-text)] placeholder:text-[var(--color-muted)] py-2 outline-none! shadow-none!"
+                placeholder="Search" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 bg-transparent border-none focus:ring-0 text-[16px] text-[var(--color-text)] placeholder:text-[var(--color-muted)]/50 py-2 outline-none! shadow-none!"
                 autoFocus
               />
-              <button onClick={() => setIsSearchOpen(false)} className="px-3 py-1.5 text-[13px] font-medium bg-[var(--color-surface-2)] rounded-lg text-[var(--color-muted)]">
+              <button onClick={() => { setIsSearchOpen(false); setSearchQuery(''); }} className="px-3 py-1.5 text-[13px] font-medium bg-[var(--color-surface-2)] rounded-lg text-[var(--color-muted)]">
                 ESC
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center justify-center text-center min-h-[200px]">
-              <Search className="w-10 h-10 text-[var(--color-muted)] opacity-30 mb-3" />
-              <p className="text-[14px] font-medium text-[var(--color-text)]">Start typing to search globally.</p>
-              <p className="text-[13px] text-[var(--color-muted)] mt-1">Results will appear here categorized.</p>
+            <div className="flex-1 overflow-y-auto min-h-[300px] max-h-[60vh]">
+              {isSearching && (
+                <div className="p-8 flex items-center justify-center">
+                  <div className="w-6 h-6 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
+
+              {!isSearching && searchQuery.length >= 2 && displayResults.length === 0 && (
+                <div className="p-12 text-center">
+                   <Search className="w-12 h-12 text-[var(--color-muted)] opacity-20 mx-auto mb-4" />
+                   <p className="text-[15px] font-bold text-[var(--color-text)]">No results found for &ldquo;{searchQuery}&rdquo;</p>
+                   <p className="text-[13px] text-[var(--color-muted)] mt-1">Try a different search term.</p>
+                </div>
+              )}
+
+              {!isSearching && searchQuery.length < 2 && (
+                <div className="p-12 text-center">
+                  <Search className="w-12 h-12 text-[var(--color-muted)] opacity-20 mx-auto mb-4" />
+                  <p className="text-[15px] font-bold text-[var(--color-text)]">Global Search</p>
+                  <p className="text-[13px] text-[var(--color-muted)] mt-1">Search across articles, users, categories and more.</p>
+                </div>
+              )}
+
+              {displayResults.length > 0 && (
+                <div className="p-2 flex flex-col gap-1">
+                  {displayResults.map((res) => (
+                    <Link 
+                      key={`${res.type}-${res.id}`} 
+                      href={res.href} 
+                      onClick={() => { setIsSearchOpen(false); setSearchQuery(''); }}
+                      className="flex items-center justify-between p-4 rounded-xl hover:bg-[var(--color-surface-2)] transition-all group border border-transparent hover:border-[var(--color-border)]"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] group-hover:bg-[var(--color-primary)]/10 group-hover:text-[var(--color-primary)] transition-colors">
+                          {getIcon(res.type)}
+                        </div>
+                        <div>
+                          <h4 className="text-[15px] font-bold text-[var(--color-text)] leading-tight">{res.title}</h4>
+                          <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--color-muted)] mt-1">{res.subtitle}</p>
+                        </div>
+                      </div>
+                      <ArrowRight className="w-5 h-5 text-[var(--color-muted)] opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -170,6 +269,7 @@ export function PresenceHeader({
           </div>
           
           <div className="flex items-center gap-2 sm:gap-4">
+            {renderActions}
             {/* Reader Mode Action */}
             <button 
                onClick={() => {
@@ -200,14 +300,22 @@ export function PresenceHeader({
                <Eye className="w-5 h-5" />
             </button>
             
-            {/* Create Quick Link (Desktop primarily, mobile has + tab) */}
-            <Link href="/admin/articles/new" className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors">
-              <Plus className="w-5 h-5 text-[var(--color-text)]" strokeWidth={1.5} />
-            </Link>
+            {/* Dynamic Action 1 (e.g. Submissions) */}
+            {icon1Node && (
+              <Link href={icon1Href || '#'} className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors">
+                {icon1Node}
+              </Link>
+            )}
 
-            {/* Notifications Action */}
+            {!icon1Node && (
+              <Link href="/admin/articles/new" className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors">
+                <Plus className="w-5 h-5 text-[var(--color-text)]" strokeWidth={1.5} />
+              </Link>
+            )}
+
+            {/* Dynamic Action 2 (e.g. Notifications/Logs) */}
             <button onClick={() => setIsNotifOpen(true)} className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors">
-              <Bell className="w-5 h-5 text-[var(--color-text)]" strokeWidth={1.5} />
+              {icon2Node || <Bell className="w-5 h-5 text-[var(--color-text)]" strokeWidth={1.5} />}
               {icon2Badge && <span className="absolute top-2 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-[var(--color-surface)]" />}
             </button>
 
@@ -246,14 +354,10 @@ export function GlobalSearchBar() {
          const btn = document.getElementById('global-search-trigger');
          if(btn) btn.click();
        }}
-       className="w-full h-[52px] bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-sm flex items-center px-4 cursor-text transition-all hover:border-[var(--color-primary)] hover:shadow-md active:scale-[0.99] group mt-2"
+       className="w-full h-[52px] bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-sm flex items-center px-4 cursor-text transition-all hover:bg-[var(--color-surface-2)] active:scale-[0.99] mt-2"
     >
-       <Search className="w-5 h-5 text-[var(--color-muted)] group-hover:text-[var(--color-primary)] transition-colors" />
-       <span className="ml-3 text-[15px] font-medium text-[var(--color-muted)] group-hover:text-[var(--color-text)] transition-colors">Search the platform globally...</span>
-       <div className="ml-auto flex items-center gap-1.5 opacity-60">
-         <span className="text-[10px] font-bold bg-[var(--color-surface-2)] border border-[var(--color-border)] px-2 py-1 rounded-md text-[var(--color-muted)]">CMD</span>
-         <span className="text-[10px] font-bold bg-[var(--color-surface-2)] border border-[var(--color-border)] px-2 py-1 rounded-md text-[var(--color-muted)]">K</span>
-       </div>
+       <Search className="w-5 h-5 text-[var(--color-muted)]/50" />
+       <span className="ml-3 text-[15px] font-medium text-[var(--color-muted)]/50">Search</span>
     </div>
   );
 }
@@ -263,14 +367,12 @@ export function PresenceStatCircle({
   percent, 
   label, 
   value,
-  color = "#685de6",
-  showPercent = false
+  color = "#685de6"
 }: { 
   percent: number; 
   label: string; 
   value: string | number;
   color?: string;
-  showPercent?: boolean;
 }) {
   const radius = 30;
   const circumference = 2 * Math.PI * radius;

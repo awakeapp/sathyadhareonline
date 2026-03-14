@@ -11,19 +11,18 @@ import { BookmarkButton } from './BookmarkButton';
 import { revalidatePath } from 'next/cache';
 import { Card } from '@/components/ui/Card';
 import { CommentBox } from './CommentBox';
+import ShareButtons from '@/components/ShareButtons';
+import ArticleReaderControls, { CopyProtected } from './ArticleReaderControls';
+
+function calculateReadTime(content: string) {
+  const wordsPerMinute = 200;
+  const noHtml = content?.replace(/<[^>]*>?/gm, '') || '';
+  const words = noHtml.trim().split(/\s+/).length || 1;
+  return Math.ceil(words / wordsPerMinute);
+}
 
 export const revalidate = 60;
 
-const MOCKS: Record<string, any> = {
-  'mock-hero': { title: 'ವಿದ್ಯುತ್ ವಾಹನಗಳ ಭವಿಷ್ಯ ಮತ್ತು ಸವಾಲುಗಳು', cover_image: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=1200&q=80', category: { name: 'TECHNOLOGY' } },
-  'l1': { title: 'ಭಾರತೀಯ ಬಾಹ್ಯಾಕಾಶ ಸಂಶೋಧನಾ ಸಂಸ್ಥೆಯ (ISRO) ಐತಿಹಾಸಿಕ ನೆಗೆತ', cover_image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&q=80', category: { name: 'SCIENCE' } },
-  'l2': { title: 'ದೈನಂದಿನ ಜೀವನದಲ್ಲಿ ಯೋಗ: ಮಾನಸಿಕ ಮತ್ತು ದೈಹಿಕ ಶಾಂತಿಗಾಗಿ', cover_image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=1200&q=80', category: { name: 'LIFE' } },
-  'l3': { title: 'ಆರ್ಟಿಫಿಶಿಯಲ್ ಇಂಟೆಲಿಜೆನ್ಸ್ ಭವಿಷ್ಯವನ್ನು ಹೇಗೆ ಬದಲಾಯಿಸುತ್ತಿದೆ?', cover_image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&q=80', category: { name: 'TECH' } },
-  'l4': { title: 'ಕರ್ನಾಟಕದ ಪ್ರಾಚೀನ ದೇವಾಲಯಗಳ ವಾಸ್ತುಶಿಲ್ಪದ ಪರಂಪರೆ', cover_image: 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=1200&q=80', category: { name: 'HISTORY' } },
-  't1': { title: 'ಮಳೆಗಾಲದಲ್ಲಿ ಸಹಜ ಪ್ರಕೃತಿಯ ಸೌಂದರ್ಯದ ದರ್ಶನ', cover_image: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1200&q=80', category: { name: 'NATURE' } },
-  't2': { title: 'ಮಕ್ಕಳಲ್ಲಿ ಕಥೆ ಓದುವ ಹವ್ಯಾಸವನ್ನು ಹೇಗೆ ಬೆಳೆಸುವುದು?', cover_image: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1200&q=80', category: { name: 'LITERATURE' } },
-  't3': { title: 'ಡಿಜಿಟಲ್ ಜಗತ್ತಿನಲ್ಲಿ ಡೇಟಾ ಸುರಕ್ಷತೆಯ ಸವಾಲುಗಳು', cover_image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&q=80', category: { name: 'TECH' } },
-};
 
 // ── View tracker server action ───────────────────────────────
 async function trackView(articleId: string, sessionId: string): Promise<void> {
@@ -82,16 +81,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const supabase = await createClient();
   const { data: dbArticle } = await supabase
-    .from('articles').select('title, excerpt, cover_image').eq('slug', slug).single();
+    .from('articles').select('title, excerpt, cover_image').eq('slug', decodeURIComponent(slug)).single();
     
-  let article: any = dbArticle;
-  if (!article) {
-    if (MOCKS[slug]) {
-      article = { title: MOCKS[slug].title, excerpt: 'Mock article preview.', cover_image: MOCKS[slug].cover_image };
-    } else {
-      return {};
-    }
-  }
+  if (!dbArticle) return {};
+  const article = dbArticle;
   return {
     title: `${article.title} | Sathyadhare`,
     description: article.excerpt || '',
@@ -107,38 +100,15 @@ export default async function ArticlePage({ params }: Props) {
   const { data: dbArticle, error } = await supabase
     .from('articles')
     .select('*, author:profiles(id, full_name), category:categories(name)')
-    .eq('slug', slug).single();
+    .eq('slug', decodeURIComponent(slug)).single();
     
-  let article: any = dbArticle;
-  
-  if (error || !article) {
-    if (MOCKS[slug]) {
-      article = {
-        id: slug,
-        title: MOCKS[slug].title,
-        slug: slug,
-        content: `
-          <p><strong>ಸೂಚನೆ:</strong> ಇದು ಕೇವಲ ಉದಾಹರಣೆಗಾಗಿ ರಚಿಸಲಾದ ಕೃತಕ (Mock) ಲೇಖನ. ಡೇಟಾಬೇಸ್‌ನಲ್ಲಿ ಇದುವರೆಗೆ ನೈಜ ಲೇಖನವಿಲ್ಲ, ಆದ್ದರಿಂದ ಈ ಡಮ್ಮಿ ಡೇಟಾವನ್ನು ತೋರಿಸಲಾಗುತ್ತಿದೆ.</p>
-          <br/>
-          <p>ಇದು ಹೋಮ್‌ಪೇಜ್ ವಿನ್ಯಾಸಕ್ಕಾಗಿ ಒದಗಿಸಲಾದ ಕೃತಕ (Mock) ಲೇಖನ. ನಿಜವಾದ ಡೇಟಾವನ್ನು ಡೇಟಾಬೇಸ್‌ಗೆ ಸೇರಿಸಿದಾಗ ಈ ಲೇಖನ ಇರುವುದಿಲ್ಲ.</p>
-          <p>This is a mock placeholder article to demonstrate the reading view. You clicked on a demo card from the homepage.</p>
-          <br/>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam nec efficitur enim. Nullam ultricies tincidunt risus. Fusce scelerisque tellus et libero hendrerit congue. Aenean quis tristique nibh. Nunc nec nisl non velit viverra luctus. Integer vehicula tempor magna convallis egestas. Nulla volutpat pretium purus a ornare.</p>
-        `,
-        cover_image: MOCKS[slug].cover_image,
-        published_at: new Date().toISOString(),
-        read_time: 3,
-        category: MOCKS[slug].category,
-        author: { full_name: 'Sathyadhare Editor' },
-        category_id: 'mock-category',
-      } as any;
-    } else {
-      notFound();
-    }
-  }
+  if (error || !dbArticle) notFound();
+  const article = dbArticle;
+
+  // Check user
+  const { data: { user } } = await supabase.auth.getUser();
 
   // Check initial bookmark state
-  const { data: { user } } = await supabase.auth.getUser();
   let initialSaved = false;
   if (user) {
     const { data: bookmark } = await supabase
@@ -155,13 +125,15 @@ export default async function ArticlePage({ params }: Props) {
     .select('id, title, slug, excerpt, cover_image, published_at, category:categories(name)')
     .eq('category_id', article.category_id).eq('status', 'published').neq('id', article.id).limit(4);
 
-  const readTime = article.read_time ? `${article.read_time} MIN READ` : '3 MIN READ';
+  const autoReadTime = calculateReadTime(article.content || '');
+  const readTimeLabel = `${autoReadTime} MIN READ`;
   const category = Array.isArray(article.category) ? article.category[0] : article.category;
   const categoryName = category?.name || 'ARTICLE';
   const date = formatDate(article.published_at || article.created_at);
 
   return (
-    <div className="font-sans antialiased min-h-[100svh] px-4 py-8 pb-32 max-w-lg mx-auto sm:max-w-2xl lg:max-w-3xl">
+    <div className="font-sans antialiased min-h-[100svh] px-4 pb-0 max-w-lg mx-auto sm:max-w-2xl lg:max-w-3xl article-page-container">
+      <style dangerouslySetInnerHTML={{ __html: `html.is-fullscreen main { padding-top: 0 !important; }` }} />
       {/* Specifically re-enable scrollbars for the reading view */}
       <style dangerouslySetInnerHTML={{ __html: `
         ::-webkit-scrollbar {
@@ -183,34 +155,61 @@ export default async function ArticlePage({ params }: Props) {
         ::-webkit-scrollbar-thumb:hover {
           background: var(--color-muted) !important;
         }
+        /* Fade-in for article hero image */
       `}} />
 
       {/* View tracker — fires once per article per browser session */}
       <ArticleViewTracker articleId={article.id} trackView={trackView} />
       <ReadingProgress />
 
-      {/* Header Info */}
-      <header className="mb-6 space-y-4">
-        {categoryName && (
-          <span className="inline-block px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.1em] leading-none bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20">
-            {categoryName}
-          </span>
-        )}
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-[var(--color-text)] leading-[1.15] tracking-tight mt-0">
+      {/* ─── Reader Controls: theme toggle, fullscreen, scroll buttons ─── */}
+      {/* For privileged roles, this also renders a minimal overlay header */}
+      <ArticleReaderControls />
+
+      {/* ─── Article Header — hide in fullscreen ─── */}
+      <header className="hide-in-fullscreen pt-3 pb-5 border-b border-[var(--color-border)] mb-6">
+
+        {/* Title */}
+        <h1 className="text-[1.75rem] sm:text-4xl font-black text-[var(--color-text)] leading-[1.1] tracking-tighter mb-4">
           {article.title}
         </h1>
-        <div className="flex items-center justify-between mt-2 pt-2">
-          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted)]">
-            {date && <span>{date}</span>}
-            {date && <span>•</span>}
-            <span className="flex items-center gap-1.5">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>{readTime}</span>
-            </span>
-          </div>
 
+        {/* Author + Meta row */}
+        <div className="flex items-center gap-3 mb-4">
+          {/* Avatar circle */}
+          <div className="w-9 h-9 rounded-full bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center shrink-0">
+            <svg className="w-4.5 h-4.5 text-[var(--color-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-[13px] font-black text-[var(--color-text)] leading-none mb-1">
+              {(Array.isArray(article.author) ? article.author[0] : article.author)?.full_name || 'Sathyadhare Editorial'}
+            </p>
+            {/* Category · Date · Read time — one compact pill row */}
+            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-[var(--color-muted)] uppercase tracking-wider flex-wrap">
+              {categoryName && (
+                <span className="px-2 py-0.5 rounded-md bg-[var(--color-primary)] text-white font-black text-[9px] tracking-widest">
+                  {categoryName}
+                </span>
+              )}
+              {date && <>
+                <span className="opacity-40">·</span>
+                <span>{date}</span>
+              </>}
+              <span className="opacity-40">·</span>
+              <span className="flex items-center gap-1">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {readTimeLabel}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Share + Save row — full width, balanced */}
+        <ShareButtons title={article.title} slug={article.slug}>
           <BookmarkButton
             articleId={article.id}
             initialSaved={initialSaved}
@@ -218,12 +217,12 @@ export default async function ArticlePage({ params }: Props) {
             saveAction={saveArticle}
             removeAction={removeArticle}
           />
-        </div>
+        </ShareButtons>
       </header>
 
-      {/* Hero Image */}
+      {/* Hero Image — reduced height for better focus on reading */}
       {article.cover_image && (
-        <Card className="w-full aspect-[4/3] sm:aspect-video rounded-[2rem] overflow-hidden shadow-none border-transparent mb-10 bg-[var(--color-surface-2)]">
+        <Card className="w-full aspect-[21/9] rounded-[2rem] overflow-hidden shadow-none border-transparent mb-10 bg-[var(--color-surface-2)]">
           <Image
             src={article.cover_image}
             alt={article.title}
@@ -235,29 +234,33 @@ export default async function ArticlePage({ params }: Props) {
         </Card>
       )}
 
-      {/* Article content — ONLY this section is copy-pasteable */}
-      <div 
-        className="allow-select prose-article whitespace-pre-wrap mt-6 mb-12"
-        dangerouslySetInnerHTML={{ __html: article.content }}
+      {/* Article content — copy-protected */}
+      <CopyProtected
+        html={article.content}
+        className="prose-article mt-6 mb-12"
       />
 
-      {/* Comment Section (Fake Input) */}
-      <CommentBox userInitial={user?.email?.charAt(0).toUpperCase() || '?'} isAuthenticated={!!user} />
+      {/* Comment Section */}
+      <div className="hide-in-fullscreen">
+        <CommentBox 
+          articleId={article.id}
+          isAuthenticated={!!user} 
+        />
 
-      {/* Related Articles Scroller */}
-      {related && related.length > 0 && (
-        <div className="mt-12 pt-8 border-t border-[var(--color-border)]">
-          <SectionHeader title="Related Articles" />
-          <HorizontalScroller className="-mx-4 px-4 sm:mx-0 sm:px-0 flex gap-4 mt-6">
-            {related.map((item) => (
-              <div key={item.id} style={{ minWidth: '160px', width: '45vw', maxWidth: '200px' }}>
-                <ArticleCard variant="grid-dark" article={item} />
-              </div>
-            ))}
-          </HorizontalScroller>
-        </div>
-      )}
-
+        {/* Related Articles Scroller */}
+        {related && related.length > 0 && (
+          <div className="mt-12 pt-8 border-t border-[var(--color-border)]">
+            <SectionHeader title="Related Articles" />
+            <HorizontalScroller className="-mx-4 px-4 sm:mx-0 sm:px-0 flex gap-4 mt-6">
+              {related.map((item) => (
+                <div key={item.id} style={{ minWidth: '160px', width: '45vw', maxWidth: '200px' }}>
+                  <ArticleCard variant="grid-dark" article={item} />
+                </div>
+              ))}
+            </HorizontalScroller>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

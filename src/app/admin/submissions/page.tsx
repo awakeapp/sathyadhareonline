@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { logAuditEvent } from '@/lib/audit';
-import { ChevronLeft, Inbox, CheckCircle2, X, Bell, User, Mail, Calendar } from 'lucide-react';
+import { Inbox, CheckCircle2, X, User, Mail, Calendar } from 'lucide-react';
 import { 
   PresenceWrapper, 
   PresenceHeader,
@@ -26,7 +26,7 @@ async function convertAction(formData: FormData) {
 
   const slug = title
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/[^a-z0-9\u0080-\uFFFF]+/g, '-')
     .replace(/^-|-$/g, '')
     .slice(0, 80);
 
@@ -94,22 +94,23 @@ export default async function AdminSubmissionsPage() {
 
   if (error) console.error('Error fetching submissions:', error);
 
-  const pendingCount = submissions?.filter(s => s.status === 'pending').length ?? 0;
   const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
 
   return (
     <PresenceWrapper>
       <PresenceHeader 
         title="Submissions" 
-        hideActions={true} 
+        profileName={profile?.full_name || 'Admin'}
+        initials={initials}
+        roleLabel={profile?.role}
       />
       
       <div className="w-full flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
         {!submissions || submissions.length === 0 ? (
           <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
             <Inbox className="w-16 h-16 mb-5 text-indigo-100" />
-            <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">Inbox Void</p>
-            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mt-2">No guest communications intercepted</p>
+            <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">No Submissions Found</p>
+            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mt-2">You have no new message submissions.</p>
           </PresenceCard>
         ) : (
           <div className="space-y-4">
@@ -129,7 +130,7 @@ export default async function AdminSubmissionsPage() {
                         sub.status === 'rejected' ? 'bg-rose-50 text-rose-500 border-rose-100' :
                         'bg-amber-50 text-amber-500 border-amber-100'
                       }`}>
-                        {sub.status}
+                        {sub.status.charAt(0).toUpperCase() + sub.status.slice(1)}
                       </span>
                     </div>
 
@@ -145,7 +146,7 @@ export default async function AdminSubmissionsPage() {
                        <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-indigo-300" strokeWidth={1.25} />
                           <span className="text-[10px] font-black text-zinc-400 uppercase">
-                             Received · {new Date(sub.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                             Date · {new Date(sub.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                           </span>
                        </div>
                     </div>
@@ -170,7 +171,7 @@ export default async function AdminSubmissionsPage() {
                           className="w-12 h-12 rounded-xl bg-emerald-500 text-white flex items-center justify-center hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/20 transition-all"
                           title="Convert to Draft"
                         >
-                          <CheckCircle2 className="w-6 h-6" strokeWidth={1.25} />
+                          < CheckCircle2 className="w-6 h-6" strokeWidth={1.25} />
                         </button>
                       </form>
                       <form action={rejectAction}>

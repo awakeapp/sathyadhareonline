@@ -8,8 +8,7 @@ import { Send, ChevronLeft, Bell, PenTool, Sparkles, AlertTriangle, Check } from
 import { 
   PresenceWrapper, 
   PresenceHeader,
-  PresenceCard,
-  PresenceButton 
+  PresenceCard
 } from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
@@ -99,10 +98,10 @@ export default async function EditorEditArticlePage({
   }
 
   const statusColors: Record<string, { label: string; color: string }> = {
-    draft:     { label: 'Cold Draft',     color: '#94a3b8' },
-    in_review: { label: 'Awaiting Audit', color: '#f59e0b' },
-    published: { label: 'Broadcast Live', color: '#10b981' },
-    archived:  { label: 'Deep Storage',  color: '#8b5cf6' },
+    draft:     { label: 'Draft',        color: '#94a3b8' },
+    in_review: { label: 'Under Review', color: '#f59e0b' },
+    published: { label: 'Published',    color: '#10b981' },
+    archived:  { label: 'Archived',     color: '#8b5cf6' },
   };
 
   const meta = statusColors[article.status ?? 'draft'] || statusColors.draft;
@@ -112,11 +111,23 @@ export default async function EditorEditArticlePage({
     <PresenceWrapper>
       <PresenceHeader 
         title="Presence"
-        roleLabel="Article Weaver · Narrative Mutation"
+        roleLabel="Edit and manage your article"
         initials={initials}
         icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
         icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
         icon2Href="/editor/articles"
+        renderActions={
+          isEditable && (
+            <button 
+              type="submit" 
+              form="editor-edit-form"
+              className="flex items-center gap-2 px-4 h-9 rounded-full bg-[#5c4ae4] text-white font-bold text-[11px] uppercase tracking-widest shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
+            >
+              <Check className="w-3.5 h-3.5" />
+              <span>Save Changes</span>
+            </button>
+          )
+        }
       />
       
       <div className="px-5 pb-10 space-y-6 relative z-20 max-w-4xl mx-auto">
@@ -128,8 +139,8 @@ export default async function EditorEditArticlePage({
                  <PenTool className="w-6 h-6" />
               </div>
               <div>
-                 <h2 className="text-xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight">Edit Narrative</h2>
-                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Self-Authored Node</p>
+                 <h2 className="text-xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight">Edit Article</h2>
+                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Draft by you</p>
               </div>
            </div>
 
@@ -142,18 +153,18 @@ export default async function EditorEditArticlePage({
           <PresenceCard className="bg-amber-50 border-amber-100 p-6 flex items-start gap-4">
              <AlertTriangle className="w-6 h-6 text-amber-500 shrink-0 mt-0.5" />
              <div>
-                <p className="font-black text-amber-600 uppercase tracking-tight text-sm">Protected Registry</p>
-                <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest mt-1">This document has been finalized or archived. Mutation is restricted.</p>
+                 <p className="font-black text-amber-600 uppercase tracking-tight text-sm">Published Article</p>
+                 <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest mt-1">This article is published and cannot be modified directly.</p>
              </div>
           </PresenceCard>
         )}
 
         <PresenceCard className="p-0 overflow-hidden">
-          <form action={updateAction} encType="multipart/form-data" className="p-10 space-y-10">
+          <form id="editor-edit-form" action={updateAction} encType="multipart/form-data" className="p-10 space-y-10">
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                <div className="space-y-4">
-                 <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Visual Identifier (Cover)</label>
+                 <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Cover Image</label>
                  <div className="bg-gray-50 dark:bg-[#1b1929] rounded-[2rem] p-4 shadow-inner border-none">
                     <CoverImageUpload currentImageUrl={article.cover_image} />
                  </div>
@@ -161,20 +172,20 @@ export default async function EditorEditArticlePage({
 
                <div className="space-y-10">
                   <div className="space-y-3">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Narrative Headline</label>
+                    <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Article Title</label>
                     <input name="title" required disabled={!isEditable} defaultValue={article.title} className="w-full h-16 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-md font-bold shadow-inner disabled:opacity-50" />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">
-                      <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Network Slug</label>
+                       <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">URL Shortcut / Link</label>
                       <input name="slug" required disabled={!isEditable} defaultValue={article.slug} className="w-full h-14 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none font-mono text-xs font-bold shadow-inner text-indigo-400 disabled:opacity-50" />
                     </div>
                     
                     <div className="space-y-3">
-                      <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Network Category</label>
+                       <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Category</label>
                       <select name="category_id" disabled={!isEditable} defaultValue={article.category_id ?? ''} className="w-full h-14 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-xs font-black uppercase tracking-widest shadow-inner disabled:opacity-50">
-                        <option value="">Detached Segment</option>
+                        <option value="">Uncategorized</option>
                         {categories?.map((cat) => (
                           <option key={cat.id} value={cat.id}>{cat.name}</option>
                         ))}
@@ -185,13 +196,13 @@ export default async function EditorEditArticlePage({
             </div>
 
             <div className="space-y-3">
-              <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Manifest Overview (Excerpt)</label>
+              <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Short Description (Excerpt)</label>
               <textarea name="excerpt" rows={3} disabled={!isEditable} defaultValue={article.excerpt ?? ''} className="w-full p-6 rounded-[2rem] bg-gray-50 dark:bg-[#1b1929] border-none text-md font-bold shadow-inner resize-none leading-relaxed disabled:opacity-50" />
             </div>
 
             <div className="space-y-4">
               <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4] flex items-center gap-3">
-                 <Sparkles className="w-4 h-4" /> Core Content Stream
+                 <Sparkles className="w-4 h-4" /> Article Body
               </label>
               <div className="min-h-[600px] rounded-[2rem] overflow-hidden border-none shadow-2xl bg-white dark:bg-[#1b1929]">
                  <RichTextEditor name="content" defaultValue={article.content ?? ''} />
@@ -200,9 +211,9 @@ export default async function EditorEditArticlePage({
 
             {isEditable && (
               <div className="pt-10 border-t border-indigo-50 dark:border-white/5 flex flex-col sm:flex-row justify-end gap-4">
-                <Link href="/editor/articles" className="h-16 px-10 rounded-2xl bg-gray-50 dark:bg-white/5 border-none font-black text-[11px] uppercase tracking-widest text-gray-400 flex items-center justify-center hover:bg-gray-100 transition-all">Discard Mutation</Link>
+                <Link href="/editor/articles" className="h-16 px-10 rounded-2xl bg-gray-50 dark:bg-white/5 border-none font-black text-[11px] uppercase tracking-widest text-gray-400 flex items-center justify-center hover:bg-gray-100 transition-all">Cancel</Link>
                 <button type="submit" className="h-16 px-12 bg-[#5c4ae4] text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all">
-                  Synchronize Article
+                  Save Article
                 </button>
               </div>
             )}
@@ -213,10 +224,10 @@ export default async function EditorEditArticlePage({
                <form action={submitForReviewAction}>
                   <input type="hidden" name="id" value={article.id} />
                   <button type="submit" className="w-full h-16 bg-amber-500 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-amber-500/20 hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-3">
-                     <Send className="w-5 h-5" /> Submit for Audit Registry
+                     <Send className="w-5 h-5" /> Submit for Review
                   </button>
                </form>
-               <p className="text-[9px] font-black text-gray-300 uppercase tracking-[0.4em] text-center mt-6">Awaiting Admin Interception after Submission</p>
+               <p className="text-[9px] font-black text-gray-300 uppercase tracking-[0.4em] text-center mt-6">Your article will be reviewed by an administrator.</p>
             </div>
           )}
         </PresenceCard>

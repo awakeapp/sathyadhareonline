@@ -45,7 +45,7 @@ export default function EmailTemplatesClient({ initialTemplates }: { initialTemp
       if (res.error) {
         toast.error(res.error);
       } else {
-        toast.success('Protocol Reconfigured');
+        toast.success('Template Saved Successfully');
         setTemplates(prev => prev.map(t => 
           t.id === editingTemplate.id ? { ...t, subject, body, updated_at: new Date().toISOString() } : t
         ));
@@ -80,7 +80,7 @@ export default function EmailTemplatesClient({ initialTemplates }: { initialTemp
                 
                 <div className="flex items-center gap-2 mt-6 pt-6 border-t border-indigo-50 dark:border-white/5 text-[9px] font-black uppercase tracking-widest text-indigo-300">
                    <Calendar className="w-3.5 h-3.5" strokeWidth={1.25} />
-                   Last Sync · {new Date(t.updated_at).toLocaleDateString()}
+                   Last Updated · {new Date(t.updated_at).toLocaleDateString()}
                 </div>
               </div>
             </PresenceCard>
@@ -88,7 +88,7 @@ export default function EmailTemplatesClient({ initialTemplates }: { initialTemp
           {templates.length === 0 && (
              <PresenceCard className="md:col-span-2 lg:col-span-3 py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
                 <Mail className="w-16 h-16 mb-5 text-indigo-100" />
-                <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">Protocol Bank Empty</p>
+                <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">No Templates Found</p>
              </PresenceCard>
           )}
         </div>
@@ -100,18 +100,18 @@ export default function EmailTemplatesClient({ initialTemplates }: { initialTemp
                    <ArrowLeft className="w-6 h-6" strokeWidth={1.25} />
                 </button>
                 <div>
-                   <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">{editingTemplate.name.replace(/_/g, ' ')} Node</h2>
-                   <p className="text-[10px] font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-widest mt-1">Direct Communication Reconfiguration</p>
+                   <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">{editingTemplate.name.replace(/_/g, ' ')} Template</h2>
+                   <p className="text-[10px] font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-widest mt-1">Edit Email Template</p>
                 </div>
              </div>
              <PresenceButton onClick={handleSave} loading={isPending} className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-xl shadow-indigo-500/20 px-10">
-               <Check className="w-5 h-5 mr-3" strokeWidth={1.25} /> Synchronize Matrix
+               <Check className="w-5 h-5 mr-3" strokeWidth={1.25} /> Save Changes
              </PresenceButton>
           </div>
 
           <div className="p-10 space-y-10">
              <div className="space-y-3">
-               <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Identity Dispatch Subject</label>
+               <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Email Subject</label>
                <input 
                  value={subject} 
                  onChange={(e) => setSubject(e.target.value)} 
@@ -122,7 +122,7 @@ export default function EmailTemplatesClient({ initialTemplates }: { initialTemp
              <div className="grid gap-10 lg:grid-cols-2">
                <div className="space-y-4">
                  <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50 flex items-center gap-3">
-                   <Terminal className="w-4 h-4" strokeWidth={1.25} /> Protocol Buffer (HTML)
+                   <Terminal className="w-4 h-4" strokeWidth={1.25} /> HTML Email Code
                  </label>
                  <textarea
                    value={body}
@@ -134,7 +134,7 @@ export default function EmailTemplatesClient({ initialTemplates }: { initialTemp
                
                <div className="space-y-4">
                  <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50 flex items-center gap-3">
-                   <Layout className="w-4 h-4" strokeWidth={1.25} /> Visual Intercept (Preview)
+                   <Layout className="w-4 h-4" strokeWidth={1.25} /> Live Preview
                  </label>
                  <div className="w-full h-[500px] rounded-[2rem] bg-gray-100 dark:bg-white p-10 overflow-hidden shadow-2xl relative">
                    <iframe 
@@ -147,7 +147,7 @@ export default function EmailTemplatesClient({ initialTemplates }: { initialTemp
              </div>
 
              <div className="p-4 rounded-[2rem] bg-zinc-50 dark:bg-white/5 border-none">
-               <h4 className="text-[10px] font-black uppercase text-zinc-900 dark:text-zinc-50 tracking-[0.3em] mb-4">Injection Pointers</h4>
+               <h4 className="text-[10px] font-black uppercase text-zinc-900 dark:text-zinc-50 tracking-[0.3em] mb-4">Dynamic Variables</h4>
                <div className="flex flex-wrap gap-3">
                  {["{{name}}", "{{email}}", "{{reset_link}}", "{{invite_link}}", "{{role}}"].map(v => (
                    <span key={v} className="px-4 py-2 rounded-xl bg-white dark:bg-zinc-950 text-[10px] font-black text-indigo-400 shadow-sm border border-indigo-50">

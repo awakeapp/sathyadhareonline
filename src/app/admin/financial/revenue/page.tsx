@@ -46,8 +46,8 @@ export default async function RevenuePage() {
     status: t.status,
     type: t.type,
     created_at: t.created_at,
-    userEmail: (t.profiles as any)?.email || 'Unknown Protocol',
-    planName: (t.subscription_plans as any)?.name || 'Direct Deposit'
+    userEmail: (t.profiles as any)?.email || 'Unknown User',
+    planName: (t.subscription_plans as any)?.name || 'Direct Payment'
   }));
 
   const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
@@ -56,7 +56,7 @@ export default async function RevenuePage() {
     <PresenceWrapper>
       <PresenceHeader 
         title="Super Admin"
-        roleLabel="Financial Intelligence · Capital Matrix"
+        roleLabel="Financial Intelligence · Revenue"
         initials={initials}
         icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
         icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}

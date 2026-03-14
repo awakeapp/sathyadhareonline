@@ -2,12 +2,11 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import RichTextEditor from '@/components/RichTextEditorClient';
-import { ChevronLeft, Bell, PenTool, Sparkles, Send, FileText } from 'lucide-react';
+import { ChevronLeft, Bell, Sparkles, Send, FileText } from 'lucide-react';
 import { 
   PresenceWrapper, 
   PresenceHeader,
-  PresenceCard,
-  PresenceButton 
+  PresenceCard 
 } from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
@@ -84,11 +83,21 @@ export default async function EditorNewArticlePage() {
     <PresenceWrapper>
       <PresenceHeader 
         title="Presence"
-        roleLabel="Article Weaver · Creation Matrix"
+        roleLabel="Create a new article for publication"
         initials={initials}
         icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
         icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
         icon2Href="/editor/articles"
+        renderActions={
+          <button 
+            type="submit" 
+            form="editor-article-form"
+            className="flex items-center gap-2 px-4 h-9 rounded-full bg-[#5c4ae4] text-white font-bold text-[11px] uppercase tracking-widest shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
+          >
+            <Send className="w-3.5 h-3.5" />
+            <span>Save Draft</span>
+          </button>
+        }
       />
       
       <div className="px-5 pb-10 space-y-6 relative z-20 max-w-4xl mx-auto">
@@ -98,29 +107,29 @@ export default async function EditorNewArticlePage() {
               <FileText className="w-6 h-6" />
            </div>
            <div>
-              <h2 className="text-2xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight">Birth of Narrative</h2>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Initializing new document sequence</p>
+              <h2 className="text-2xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight">New Article</h2>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Drafting a new story</p>
            </div>
         </div>
 
         <PresenceCard className="p-0 overflow-hidden">
-          <form action={createArticleAction} encType="multipart/form-data" className="p-10 space-y-10">
+          <form id="editor-article-form" action={createArticleAction} encType="multipart/form-data" className="p-10 space-y-10">
 
             <div className="space-y-3">
-              <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Narrative Headline</label>
+                <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Article Title</label>
               <input required name="title" type="text" placeholder="The Core Statement..."
                 className="w-full h-16 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-md font-bold shadow-inner" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <div className="space-y-3">
-                <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Network Slug</label>
-                <input required name="slug" type="text" placeholder="article-slug-vector"
+                 <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">URL Shortcut / Link</label>
+                <input required name="slug" type="text" placeholder="example-article-shortcut"
                   className="w-full h-14 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none font-mono text-xs font-bold shadow-inner text-indigo-400" />
               </div>
 
               <div className="space-y-3">
-                <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Author Identity</label>
+                 <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Author Name</label>
                 <input required name="author_name" type="text" placeholder="Display Identity" defaultValue={authorName}
                   className="w-full h-14 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-sm font-bold shadow-inner" />
               </div>
@@ -128,10 +137,10 @@ export default async function EditorNewArticlePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <div className="space-y-3">
-                <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Network Category</label>
+                 <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Category</label>
                 <select name="category_id"
                   className="w-full h-16 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-xs font-black uppercase tracking-widest shadow-inner accent-[#5c4ae4]">
-                  <option value="">Detached Segment</option>
+                   <option value="">Uncategorized</option>
                   {categories?.map((cat) => (
                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
@@ -139,21 +148,21 @@ export default async function EditorNewArticlePage() {
               </div>
 
               <div className="space-y-3">
-                <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Visual Identifier (Cover)</label>
+                 <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Cover Image</label>
                 <input name="cover_image" type="file" accept="image/*"
                   className="w-full h-16 px-6 py-4 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none shadow-inner text-xs font-black text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-[#5c4ae4] file:text-white file:text-[10px] file:uppercase file:tracking-widest" />
               </div>
             </div>
 
             <div className="space-y-3">
-              <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Manifest Overview (Excerpt)</label>
-              <textarea required name="excerpt" rows={3} placeholder="Condensed narrative summary..."
+               <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Short Description (Excerpt)</label>
+              <textarea required name="excerpt" rows={3} placeholder="Brief summary of the article..."
                 className="w-full p-6 rounded-[2rem] bg-gray-50 dark:bg-[#1b1929] border-none text-md font-bold shadow-inner resize-none leading-relaxed" />
             </div>
 
             <div className="space-y-4">
               <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4] flex items-center gap-3">
-                 <Sparkles className="w-4 h-4" /> Core Content Stream
+                  <Sparkles className="w-4 h-4" /> Article Body
               </label>
               <div className="min-h-[600px] rounded-[2rem] overflow-hidden border-none shadow-2xl bg-white dark:bg-[#1b1929]">
                  <RichTextEditor name="content" />
@@ -169,7 +178,7 @@ export default async function EditorNewArticlePage() {
                 type="submit" 
                 className="h-16 px-12 bg-[#5c4ae4] text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3"
               >
-                <Send className="w-5 h-5" /> Save Cold Draft
+                 <Send className="w-5 h-5" /> Save Draft
               </button>
             </div>
           </form>

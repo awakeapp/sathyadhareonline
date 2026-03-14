@@ -6,9 +6,9 @@ import { usePathname } from 'next/navigation';
 
 import {
   LayoutDashboard, FileText, Users, MessageSquare,
-  Layers, Home, Search, Mic, Menu,
+  Layers, Home, Search, Mic, Menu, Play, Bookmark, Newspaper,
   SquarePen, PlusCircle, BarChart2,
-  Library, X, Mail, Presentation
+  Library, X, Mail, Presentation, BookOpen
 } from 'lucide-react';
 
 interface MobileBottomNavProps {
@@ -107,11 +107,18 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
                   <span className="text-[12px] font-bold text-[var(--color-text)] group-hover:text-white leading-tight">Sequel</span>
                 </Link>
 
-                <Link href="/admin/settings?section=banners" onClick={() => setIsCreateOpen(false)} className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-[var(--color-surface-2)] hover:bg-[var(--color-primary)] hover:text-white transition-all group text-center">
+                <Link href="/admin/banners" onClick={() => setIsCreateOpen(false)} className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-[var(--color-surface-2)] hover:bg-[var(--color-primary)] hover:text-white transition-all group text-center">
                   <div className="w-12 h-12 rounded-xl bg-[var(--color-surface)] shadow-sm flex items-center justify-center text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors">
                     <Presentation size={22} strokeWidth={1.5} />
                   </div>
                   <span className="text-[12px] font-bold text-[var(--color-text)] group-hover:text-white leading-tight">Banner</span>
+                </Link>
+
+                <Link href="/admin/books" onClick={() => setIsCreateOpen(false)} className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-[var(--color-surface-2)] hover:bg-[var(--color-primary)] hover:text-white transition-all group text-center">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--color-surface)] shadow-sm flex items-center justify-center text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors">
+                    <BookOpen size={22} strokeWidth={1.5} />
+                  </div>
+                  <span className="text-[12px] font-bold text-[var(--color-text)] group-hover:text-white leading-tight">Book</span>
                 </Link>
               </div>
 
@@ -140,7 +147,7 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
           <button onClick={() => setIsCreateOpen(true)}
             className="flex-1 flex flex-col items-center justify-center gap-1 active:scale-90 focus:outline-none transition-transform"
             style={{ color: 'var(--color-text)' }}>
-            <PlusCircle size={36} strokeWidth={1.25} className="text-[var(--color-primary)] drop-shadow-[0_4px_10px_rgba(79,70,229,0.3)]" />
+            <PlusCircle size={36} strokeWidth={1.25} className="text-[#685de6] drop-shadow-[0_4px_10px_rgba(104,93,230,0.3)]" />
           </button>
 
           <NavTabLink
@@ -204,29 +211,80 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
      READER / GUEST nav
   ────────────────────────────────────────────────────────────── */
   return (
-    <FloatingContainer>
-      {[
-        { label: 'Home',    href: '/',        icon: Home,   exact: true  },
-        { label: 'Sequels', href: '/sequels', icon: Layers, exact: false },
-        { label: 'Search',  href: '/search',  icon: Search, exact: false },
-        { label: 'Podcast', href: '/podcast', icon: Mic,    exact: false },
-      ].map(tab => (
-        <NavTabLink key={tab.href} href={tab.href} icon={tab.icon} label={tab.label}
-          active={tab.exact ? pathname === tab.href : pathname.startsWith(tab.href)}
-          accentColor="var(--color-text)" 
-          activeStyle="badge" />
-      ))}
-      <button
-        onClick={() => window.dispatchEvent(new Event('toggle-drawer'))}
-        className="flex-1 flex flex-col items-center justify-center gap-1 active:scale-95 focus:outline-none transition-transform"
-        style={{ color: 'var(--color-muted)' }}
-      >
-        <div className="relative flex items-center justify-center w-[48px] h-[32px] rounded-full transition-colors duration-200">
-           <Menu size={22} strokeWidth={1.75} />
+    <>
+      {/* More quick-action sheet */}
+      {isCreateOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex flex-col justify-end bg-black/30 backdrop-blur-sm"
+          onClick={() => setIsCreateOpen(false)}
+        >
+          <div
+            className="bg-[var(--color-surface)] rounded-t-3xl w-full max-w-[430px] mx-auto overflow-hidden shadow-2xl"
+            style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 24px)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-5 border-b border-[var(--color-border)]">
+              <h3 className="text-[17px] font-black text-[var(--color-text)] tracking-tight">More</h3>
+              <button
+                onClick={() => setIsCreateOpen(false)}
+                className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)]"
+              >
+                <X size={18} strokeWidth={2.5} />
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-3 p-5">
+              {[
+                { label: 'Podcast',   href: '/podcast',  icon: Mic,        color: '#685de6' },
+                { label: 'Videos',    href: '/videos',   icon: Play,       color: '#ef4444' },
+                { label: 'Friday',    href: '/friday',   icon: Mail,       color: '#10b981' },
+                { label: 'Write',     href: '/write',    icon: SquarePen,  color: '#f59e0b' },
+                { label: 'Saved',     href: '/saved',    icon: Bookmark,   color: '#685de6' },
+                { label: 'Editorial', href: '/editorial',icon: Newspaper,  color: '#0ea5e9' },
+              ].map(item => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setIsCreateOpen(false)}
+                  className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-[var(--color-surface-2)] active:scale-95 transition-all text-center"
+                >
+                  <div
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm"
+                    style={{ background: `${item.color}15`, color: item.color }}
+                  >
+                    <item.icon size={22} strokeWidth={1.75} />
+                  </div>
+                  <span className="text-[11px] font-bold text-[var(--color-text)] leading-tight">{item.label}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
-        <span className="text-[10px] font-bold tracking-wide">More</span>
-      </button>
-    </FloatingContainer>
+      )}
+
+      <FloatingContainer>
+        {[
+          { label: 'Home',     href: '/',         icon: Home,    exact: true  },
+          { label: 'Articles', href: '/articles',  icon: FileText,exact: false },
+          { label: 'Sequels',  href: '/sequels',   icon: Layers,  exact: false },
+          { label: 'Books',    href: '/books',     icon: BookOpen,exact: false },
+        ].map(tab => (
+          <NavTabLink key={tab.href} href={tab.href} icon={tab.icon} label={tab.label}
+            active={tab.exact ? pathname === tab.href : pathname.startsWith(tab.href)}
+            accentColor="var(--color-text)"
+            activeStyle="badge" />
+        ))}
+        <button
+          onClick={() => setIsCreateOpen(true)}
+          className="flex-1 flex flex-col items-center justify-center gap-1 active:scale-95 focus:outline-none transition-transform"
+          style={{ color: 'var(--color-muted)' }}
+        >
+          <div className="flex items-center justify-center w-[48px] h-[32px]">
+            <Menu size={22} strokeWidth={1.75} />
+          </div>
+          <span className="text-[10px] font-bold tracking-wide">More</span>
+        </button>
+      </FloatingContainer>
+    </>
   );
 }
 
@@ -259,9 +317,9 @@ function NavTabLink({
       style={{ color: active && activeStyle === 'color' ? accentColor : '#667781' }}
     >
       <div className="relative flex items-center justify-center">
-        <Icon size={24} strokeWidth={active ? 2.5 : 1.75} className={`transition-colors ${active && activeStyle === 'badge' ? 'text-[#ffe500]' : ''} ${active && activeStyle === 'color' ? '' : 'dark:text-[#8696a0]'}`} />
+        <Icon size={24} strokeWidth={active ? 2.5 : 1.75} className={`transition-colors ${active && activeStyle === 'badge' ? 'text-[#685de6]' : ''} ${active && activeStyle === 'color' ? '' : 'dark:text-[#8696a0]'}`} />
       </div>
-      <span className={`text-[10px] font-medium tracking-tight leading-none transition-colors ${active && activeStyle === 'badge' ? 'text-[var(--color-text)]' : ''} ${active && activeStyle === 'color' ? '' : 'dark:text-[#8696a0]'}`}>
+      <span className={`text-[10px] font-medium tracking-tight leading-none transition-colors ${active && activeStyle === 'badge' ? 'text-[var(--color-primary)]' : ''} ${active && activeStyle === 'color' ? '' : 'dark:text-[#8696a0]'}`}>
         {label}
       </span>
     </Link>

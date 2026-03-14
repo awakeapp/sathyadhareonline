@@ -12,6 +12,7 @@ import DashboardReturnFab from '@/components/DashboardReturnFab'
 import { Toaster } from 'sonner'
 import { RippleEffect } from '@/components/RippleEffect'
 import { PageTransition } from '@/components/PageTransition'
+import NavigationProgressBar from '@/components/NavigationProgressBar'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -107,6 +108,7 @@ export default async function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ReaderModeProvider>
+            <NavigationProgressBar />
             <div className="flex min-h-screen">
               <NavigationWrapper role={profile?.role || null} />
               

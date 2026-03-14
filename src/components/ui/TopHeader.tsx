@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useReaderMode } from '@/context/ReaderModeContext';
 import { useTheme } from 'next-themes';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
-import { ArrowLeft, Eye } from 'lucide-react';
+import { ArrowLeft, Eye, Maximize2, User as UserIcon } from 'lucide-react';
 import { SA_SECTIONS, ADMIN_SECTIONS, EDITOR_SECTIONS } from '../navigation/nav-items';
 
 
@@ -31,6 +31,8 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
   const isAuthPage       = pathname === '/login' || pathname === '/signup';
   const isAdminRoute     = pathname.startsWith('/admin') || pathname.startsWith('/editor');
   const isPrivilegedRole = role === 'super_admin' || role === 'admin' || role === 'editor';
+  // Check if we are on ANY article reading page
+  const isArticlePage    = pathname.includes('/articles/') && !pathname.includes('/new') && !pathname.includes('/edit');
 
   // "Reader Mode" is active when a privileged user is NOT on an admin route
   // AND has explicitly activated it (or is browsing the reader site)
@@ -49,37 +51,6 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
 
 
   const [clientUser, setClientUser] = useState<User | null>(user);
-  const [categories, setCategories] = useState<{name: string, slug: string, highlight?: boolean}[]>([
-    { name: 'Editorials', slug: 'editorials' },
-    { name: 'Education', slug: 'education' },
-    { name: 'Friday Message', slug: 'friday-message', highlight: true },
-    { name: 'Readers Corner', slug: 'readers-corner', highlight: true },
-    { name: 'History', slug: 'history', highlight: true },
-    { name: 'Literature', slug: 'literature' },
-    { name: 'Politics', slug: 'politics' },
-    { name: 'Interview', slug: 'interview' },
-    { name: 'Religion', slug: 'religion', highlight: true },
-    { name: 'Science', slug: 'science' },
-  ]);
-
-  useEffect(() => {
-    async function fetchCats() {
-      try {
-        const { data } = await createClient()
-          .from('categories')
-          .select('name, slug')
-          .is('deleted_at', null)
-          .order('name');
-          
-        if (data && data.length > 0) {
-          setCategories(data.map(c => ({ name: c.name, slug: c.slug, highlight: false })));
-        }
-      } catch (e) {
-        console.error('Failed to fetch categories dynamically:', e);
-      }
-    }
-    fetchCats();
-  }, []);
 
   useEffect(() => {
     const { data: authListener } = createClient().auth.onAuthStateChange((_event, session) => {
@@ -105,7 +76,6 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
     const id = requestAnimationFrame(() => setReaderModeMounted(true));
     return () => cancelAnimationFrame(id);
   }, []);
-  const safeReaderMode = readerModeMounted ? readerMode : false;
 
   useEffect(() => {
     const handleToggleMenu = () => setIsMenuOpen((prev) => !prev);
@@ -124,6 +94,11 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
   const dashboardHref =
     role === 'super_admin' || role === 'admin' ? '/admin' :
     role === 'editor' ? '/editor' : '/';
+
+  // Handler: trigger fullscreen via custom event
+  function handleToggleFullscreen() {
+    window.dispatchEvent(new CustomEvent('toggle-fullscreen'));
+  }
 
   // Handler: enable reader mode and navigate to reader homepage
   function handleSwitchToReader() {
@@ -206,37 +181,55 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
               </button>
             )}
 
-            {/* ── Return to Dashboard button — always visible for ALL privileged users on reader side ── */}
-            {isPrivilegedRole && isOnReaderSide && (
-              <button
+            {/* ── Return to Dashboard button — ONLY on home page ── */}
+            {isPrivilegedRole && isOnReaderSide && pathname === '/' && (
+              <Link
                 id="return-dashboard-btn"
-                onClick={handleReturnToDashboard}
-                className="tap-highlight flex items-center gap-1.5 px-3.5 h-8 rounded-full font-bold transition-all active:scale-95 hover:bg-[var(--color-surface-2)] text-[var(--color-text)] border border-[var(--color-border)]"
+                href={role === 'super_admin' || role === 'admin' ? '/admin' : '/editor'}
+                className="tap-highlight flex items-center gap-1 px-2.5 h-7 rounded-full font-bold transition-all active:scale-95 hover:bg-[var(--color-surface-2)] text-[var(--color-text)] border border-[var(--color-border)] mr-1"
                 title={`Return to ${dashboardLabel}`}
               >
-                <ArrowLeft className="w-4 h-4" strokeWidth={2} />
-                <span className="text-[10px] uppercase tracking-widest leading-none mt-px font-black">Dashboard</span>
-              </button>
+                <ArrowLeft className="w-3.5 h-3.5" strokeWidth={2.5} />
+                <span className="text-[9px] uppercase tracking-wider leading-none font-black mt-px">Dash</span>
+              </Link>
             )}
 
+            {/* ── Article reading controls in header ── */}
+            {isArticlePage && (
+              <div className="flex items-center gap-1 mr-1">
+                <button
+                  onClick={handleToggleFullscreen}
+                  className="w-9 h-9 rounded-xl flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-all active:scale-90"
+                  title="Fit to Screen"
+                >
+                  <Maximize2 className="w-4.5 h-4.5" strokeWidth={2.2} />
+                </button>
+                <div className="w-9 h-9 flex items-center justify-center">
+                  <ThemeSwitcher />
+                </div>
+              </div>
+            )}
 
-            {/* ── Profile / User Icon ─────────────────────────── */}
-            <button
-              onClick={() => setIsMenuOpen(true)}
-              className="tap-highlight w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-all active:scale-95"
-              title="Profile"
-              aria-label="Open profile"
-            >
-              {profile?.avatar_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={profile.avatar_url} alt={profile.full_name || ''} className="w-full h-full object-cover" />
-              ) : (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-[20px] h-[20px]">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-              )}
-            </button>
+            {/* ── Global Header Actions (Theme, Profile) — hidden on ALL article pages ── */}
+            {!isArticlePage && !(isPrivilegedRole && isArticlePage) && (
+              <div className="flex items-center gap-1.5 ml-1">
+
+                {/* Global Theme Switcher */}
+                <div className="w-8 h-8 flex items-center justify-center">
+                  <ThemeSwitcher />
+                </div>
+
+                {/* Profile Drawer Trigger */}
+                <button
+                  onClick={() => setIsMenuOpen(true)}
+                  className="tap-highlight w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-all active:scale-95 ml-1 shadow-sm"
+                  title="Profile"
+                  aria-label="Open profile"
+                >
+                  <UserIcon className="w-[15px] h-[15px]" strokeWidth={2.5} />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -336,88 +329,102 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                     </Link>
                   </nav>
                 ) : (
-                  /* ─── READER drawer: full content ───────────────── */
-                  <div className="px-5 py-6 flex flex-col gap-0">
-                    {/* Donate */}
-                    <div className="flex justify-center mb-6">
-                      <button className="flex items-center gap-2 bg-[#ffe500] text-black px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-sm shadow-md hover:scale-105 active:scale-95 transition-all">
-                        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="black">
-                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-                        </svg>
-                        Donate Now
-                      </button>
-                    </div>
+                  /* ─── SETTINGS / ACCOUNT PANEL ───────────────── */
+                  <div className="px-5 py-5 flex flex-col gap-2">
 
-                    <nav className="flex flex-col">
-                      {[...categories, { name: 'About Us', slug: 'about-us' }].map((item) => (
-                        <Link
-                          key={item.name}
-                          href={item.slug === 'about-us' ? '/about' : `/categories/${item.slug}`}
-                          className={`py-3.5 text-[15px] font-semibold border-b border-[var(--color-border)] transition-colors ${
-                            item.highlight ? 'text-[#ffe500]' : 'text-[var(--color-text)] hover:text-[var(--color-primary)]'
-                          }`}
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          {item.name}
-                        </Link>
-                      ))}
-
-                      <div className="mt-5 flex flex-col gap-1">
-                        {/* Privileged role in reader mode — show return + disable buttons */}
-                        {isPrivilegedRole && safeReaderMode && (
-                          <>
-                            <button
-                              onClick={() => { setIsMenuOpen(false); handleReturnToDashboard(); }}
-                              className="py-3 text-[13px] font-black text-[#0047ff] dark:text-[#ffe500] uppercase tracking-widest text-left flex items-center gap-1.5"
-                            >
-                              <ArrowLeft className="w-4 h-4" /> Back to {dashboardLabel}
-                            </button>
-                          </>
-                        )}
-                        {/* Privileged role NOT in reader mode — show passive link */}
-                        {isPrivilegedRole && !safeReaderMode && (
-                          <Link
-                            href={dashboardHref}
-                            onClick={() => setIsMenuOpen(false)}
-                            className="py-3 text-[13px] font-black text-[#0047ff] dark:text-[#ffe500] uppercase tracking-widest"
-                          >
-                            Back to {dashboardLabel}
-                          </Link>
-                        )}
-                        {clientUser ? (
-                          <div className="py-2 mt-2">
-                            <div className="text-[10px] uppercase font-bold text-[var(--color-muted)] tracking-widest">Signed in as</div>
-                            <div className="text-sm font-bold text-[var(--color-text)] truncate mb-4">{clientUser.email}</div>
-                            <Link href="/logout" onClick={() => setIsMenuOpen(false)}
-                              className="py-2 inline-block text-[13px] font-bold text-red-500 uppercase tracking-widest">
-                              Logout
-                            </Link>
-                          </div>
-                        ) : (
-                          <Link href="/login" onClick={() => setIsMenuOpen(false)}
-                            className="py-3 text-[13px] font-bold text-[var(--color-text)] uppercase tracking-widest">
-                            Login
-                          </Link>
-                        )}
-                        
-                        <div className="h-px bg-[var(--color-border)] my-2" />
-                        
-                        {/* Theme Toggle in Drawer */}
-                        <div className="flex items-center justify-between py-2">
-                          <span className="text-[13px] font-bold text-[var(--color-text)] uppercase tracking-widest">Theme</span>
-                          <ThemeSwitcher />
-                        </div>
-
-                        <Link href="/profile" onClick={() => setIsMenuOpen(false)}
-                          className="py-3.5 text-[15px] font-semibold text-[var(--color-text)] hover:text-[var(--color-primary)] transition-colors border-t border-[var(--color-border)] flex items-center gap-3">
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
+                    {/* User identity card */}
+                    {clientUser ? (
+                      <div className="flex items-center gap-3 p-4 rounded-2xl bg-[var(--color-surface-2)] mb-3">
+                        <div className="w-12 h-12 rounded-full bg-[#685de6]/10 border-2 border-[#685de6]/20 flex items-center justify-center shrink-0">
+                          <svg className="w-6 h-6 text-[#685de6]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                           </svg>
-                          My Profile
-                        </Link>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-black uppercase tracking-[0.15em] text-[var(--color-muted)] mb-0.5">Signed in as</p>
+                          <p className="text-sm font-bold text-[var(--color-text)] truncate">{clientUser.email}</p>
+                        </div>
                       </div>
-                    </nav>
+                    ) : (
+                      <div className="p-4 rounded-2xl bg-[#685de6]/5 border border-[#685de6]/15 mb-3 text-center">
+                        <p className="text-sm font-bold text-[var(--color-text)] mb-3">Sign in to unlock full access</p>
+                        <div className="flex gap-2">
+                          <Link href="/login" onClick={() => setIsMenuOpen(false)}
+                            className="flex-1 py-2.5 rounded-xl bg-[#685de6] text-white text-[12px] font-black uppercase tracking-widest text-center active:scale-95 transition-all">
+                            Log In
+                          </Link>
+                          <Link href="/signup" onClick={() => setIsMenuOpen(false)}
+                            className="flex-1 py-2.5 rounded-xl border border-[#685de6]/30 text-[#685de6] text-[12px] font-black uppercase tracking-widest text-center active:scale-95 transition-all">
+                            Sign Up
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Settings rows */}
+                    <div className="flex flex-col divide-y divide-[var(--color-border)] rounded-2xl bg-[var(--color-surface-2)] overflow-hidden">
+                      {/* Profile */}
+                      <Link href="/profile" onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center gap-3.5 px-4 py-3.5 hover:bg-[var(--color-surface)] transition-colors active:scale-[0.98]">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)]">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
+                        <span className="text-sm font-semibold text-[var(--color-text)] flex-1">My Profile</span>
+                        <svg className="w-4 h-4 text-[var(--color-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" /></svg>
+                      </Link>
+
+                      {/* Theme toggle */}
+                      <div className="flex items-center gap-3.5 px-4 py-3.5">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)]">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707" /></svg>
+                        </div>
+                        <span className="text-sm font-semibold text-[var(--color-text)] flex-1">Appearance</span>
+                        <ThemeSwitcher />
+                      </div>
+
+                      {/* About Us */}
+                      <Link href="/about" onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center gap-3.5 px-4 py-3.5 hover:bg-[var(--color-surface)] transition-colors active:scale-[0.98]">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)]">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="10"/><path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" /></svg>
+                        </div>
+                        <span className="text-sm font-semibold text-[var(--color-text)] flex-1">About Us</span>
+                        <svg className="w-4 h-4 text-[var(--color-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" /></svg>
+                      </Link>
+
+                      {/* Dashboard link for privileged users */}
+                      {isPrivilegedRole && (
+                        <button onClick={() => { setIsMenuOpen(false); handleReturnToDashboard(); }}
+                          className="flex items-center gap-3.5 px-4 py-3.5 w-full hover:bg-[var(--color-surface)] transition-colors active:scale-[0.98]">
+                          <div className="w-9 h-9 rounded-xl bg-[#685de6]/10 border border-[#685de6]/20 flex items-center justify-center text-[#685de6]">
+                            <ArrowLeft className="w-4 h-4" />
+                          </div>
+                          <span className="text-sm font-semibold text-[#685de6] flex-1 text-left">{dashboardLabel}</span>
+                        </button>
+                      )}
+
+                      {/* Login / Logout */}
+                      {clientUser ? (
+                        <Link href="/logout" onClick={() => setIsMenuOpen(false)}
+                          className="flex items-center gap-3.5 px-4 py-3.5 hover:bg-red-500/5 transition-colors active:scale-[0.98]">
+                          <div className="w-9 h-9 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7" /></svg>
+                          </div>
+                          <span className="text-sm font-semibold text-red-400 flex-1">Sign Out</span>
+                        </Link>
+                      ) : (
+                        <Link href="/login" onClick={() => setIsMenuOpen(false)}
+                          className="flex items-center gap-3.5 px-4 py-3.5 hover:bg-[var(--color-surface)] transition-colors active:scale-[0.98]">
+                          <div className="w-9 h-9 rounded-xl bg-[#685de6]/10 border border-[#685de6]/20 flex items-center justify-center text-[#685de6]">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14" /></svg>
+                          </div>
+                          <span className="text-sm font-semibold text-[#685de6] flex-1">Log In</span>
+                          <svg className="w-4 h-4 text-[var(--color-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" /></svg>
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

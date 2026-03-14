@@ -41,10 +41,10 @@ export default function TrashManagerClient({
   const [isPending, startTransition] = useTransition();
 
   const tabs: { id: TrashItem['type']; label: string; icon: React.ComponentType<{ className?: string }>; count: number }[] = [
-    { id: 'article', label: 'Article Cache', icon: FileText, count: initialArticles.length },
-    { id: 'category', label: 'Taxonomy', icon: Shapes, count: initialCategories.length },
-    { id: 'sequel', label: 'Archives', icon: Archive, count: initialSequels.length },
-    { id: 'comment', label: 'Communications', icon: MessageSquare, count: initialComments.length },
+    { id: 'article', label: 'Articles', icon: FileText, count: initialArticles.length },
+    { id: 'category', label: 'Categories', icon: Shapes, count: initialCategories.length },
+    { id: 'sequel', label: 'Sequels', icon: Archive, count: initialSequels.length },
+    { id: 'comment', label: 'Comments', icon: MessageSquare, count: initialComments.length },
   ];
 
   const currentItems = activeTab === 'article' ? initialArticles : 
@@ -57,7 +57,7 @@ export default function TrashManagerClient({
       if (res?.error) {
         toast.error(res.error);
       } else {
-        toast.success('System record updated');
+        toast.success('Record updated');
         setShowDelete(false);
         setSelectedItem(null);
       }
@@ -99,8 +99,8 @@ export default function TrashManagerClient({
         {currentItems.length === 0 ? (
           <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
              <History className="w-16 h-16 mb-5 text-indigo-100" />
-             <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">Archive Void</p>
-             <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mt-2">No records found in {activeTab} cache</p>
+             <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">Trash is Empty</p>
+             <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mt-2">No items found in {activeTab}</p>
           </PresenceCard>
         ) : (
           currentItems.map((item) => {
@@ -118,7 +118,7 @@ export default function TrashManagerClient({
                      <h3 className="font-black text-lg text-zinc-900 dark:text-zinc-50 truncate">{title}</h3>
                      {subtitle && <p className="text-xs font-bold text-zinc-900 dark:text-zinc-50 uppercase mt-0.5">{subtitle}</p>}
                      <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">
-                        Purged · {formatDate(item.deleted_at)}
+                        Deleted · {formatDate(item.deleted_at)}
                      </p>
                   </div>
 
@@ -148,7 +148,7 @@ export default function TrashManagerClient({
           {selectedItem && (
             <>
               <ModalHeader>
-                <ModalTitle className="text-rose-500">Atomic Purge?</ModalTitle>
+                <ModalTitle className="text-rose-500">Permanent Delete?</ModalTitle>
                 <ModalDescription>
                   Permanently erase <span className="font-black">&ldquo;{selectedItem.title || selectedItem.name || 'this item'}&rdquo;</span>. Irreversible operation.
                 </ModalDescription>
@@ -158,8 +158,8 @@ export default function TrashManagerClient({
                 <input type="hidden" name="id" value={selectedItem.id} />
                 <input type="hidden" name="type" value={selectedItem.type} />
                 <ModalFooter>
-                  <Button variant="outline" onClick={() => setShowDelete(false)} disabled={isPending}>Abort</Button>
-                  <Button type="submit" variant="destructive" disabled={isPending} className="bg-rose-500 font-black">Expunge Forever</Button>
+                  <Button variant="outline" onClick={() => setShowDelete(false)} disabled={isPending}>Cancel</Button>
+                  <Button type="submit" variant="destructive" disabled={isPending} className="bg-rose-500 font-black">Delete Permanently</Button>
                 </ModalFooter>
               </form>
             </>

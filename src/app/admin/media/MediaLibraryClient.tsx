@@ -152,7 +152,7 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
         <div className="relative">
           <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400" strokeWidth={1.25} />
           <input 
-            placeholder="Search cloud assets..." 
+            placeholder="Search files..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full h-14 pl-12 pr-4 rounded-2xl bg-white dark:bg-zinc-950 border-none shadow-sm focus:ring-2 focus:ring-indigo-500/20 transition-all font-bold text-sm"
@@ -181,7 +181,7 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
                <div className="w-20 h-20 rounded-full border-4 border-indigo-100 border-t-[#5c4ae4] animate-spin" />
                <div className="absolute inset-0 flex items-center justify-center font-black text-xs text-zinc-900 dark:text-zinc-50">{uploadProgress}%</div>
             </div>
-            <p className="text-sm font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Synchronising Assets...</p>
+            <p className="text-sm font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Uploading...</p>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-4">
@@ -191,7 +191,7 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
             </div>
             <div>
               <p className="text-xl font-black text-zinc-900 dark:text-zinc-50">
-                {dragOver ? 'Release to Upload' : 'Deploy Assets to Cloud'}
+                {dragOver ? 'Release to Upload' : 'Upload Files'}
               </p>
               <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mt-2">Maximum resolution supported · 10MB Limit</p>
             </div>
@@ -204,19 +204,19 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
         <div className="flex items-center justify-between px-2">
            <div>
               <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
-                {filteredItems.length} Identified Assets
+                {filteredItems.length} Files
               </p>
            </div>
            <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-black text-emerald-500 uppercase">Live connection</span>
+              <span className="text-[10px] font-black text-emerald-500 uppercase">Live</span>
            </div>
         </div>
 
         {filteredItems.length === 0 ? (
           <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
             <ImageIcon className="w-16 h-16 mb-5 text-indigo-100" />
-            <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">Vault is Empty</p>
+            <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">No Files Found</p>
           </PresenceCard>
         ) : (
           <>
@@ -264,7 +264,7 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
             {hasMore && (
               <div className="pt-8 text-center">
                 <Button variant="outline" onClick={() => setPage(p => p + 1)} className="rounded-2xl h-12 px-8 border-indigo-100 dark:border-white/5 text-zinc-500 hover:text-zinc-900 dark:text-zinc-50 hover:bg-indigo-50 transition-all font-black uppercase tracking-widest text-[10px]">
-                  <ChevronDown className="w-4 h-4 mr-2" strokeWidth={1.25} /> Decrypt more assets
+                  <ChevronDown className="w-4 h-4 mr-2" strokeWidth={1.25} /> Load more
                 </Button>
               </div>
             )}

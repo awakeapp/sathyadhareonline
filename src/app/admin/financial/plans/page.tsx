@@ -26,7 +26,7 @@ export default async function PlansPage() {
     <PresenceWrapper>
       <PresenceHeader 
         title="Super Admin"
-        roleLabel="Capital Config · Plan Matrix"
+        roleLabel="Subscription Plans"
         initials={initials}
         icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
         icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}

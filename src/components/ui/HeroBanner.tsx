@@ -34,7 +34,7 @@ export default function HeroBanner({ article }: { article: Article }) {
           {/* Text Content inside the hero */}
           <CardContent className="absolute inset-x-0 bottom-0 p-6 sm:p-10 flex flex-col items-start pointer-events-none z-10 w-full">
             {category && (
-              <span className="inline-block px-4 py-1.5 mb-4 rounded-full bg-[var(--color-primary)] text-black text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] shadow-lg">
+              <span className="inline-block px-4 py-1.5 mb-4 rounded-full bg-[var(--color-primary)] text-white text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] shadow-lg">
                 {category}
               </span>
             )}

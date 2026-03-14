@@ -209,7 +209,7 @@ export default function ArticlesClient({
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" />
             <input
               type="text"
-              placeholder="Search by title or slug..."
+              placeholder="Search by title or link..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full h-10 pl-9 pr-4 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-[14px] focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all outline-none"

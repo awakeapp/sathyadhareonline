@@ -94,15 +94,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 1b. Check status for non-protected routes too if logged in
-  if (user && !pathname.startsWith('/auth') && pathname !== '/login') {
-    // Gracefully handle missing status column here too
-    const { data: profile } = await supabase
-      .from('profiles').select('status').eq('id', user.id).maybeSingle()
-    if (profile?.status === 'suspended' || profile?.status === 'banned') {
-      return redirectWithCookies('/login?error=account_suspended')
-    }
-  }
+  // 1b. Status check already happens above for protected routes.
+  // We skip it for public routes to speed up response times.
 
   // 2. Auth Pages Routing (Skip login/signup if already logged in)
   if (user && (pathname === '/login' || pathname === '/signup')) {

@@ -53,7 +53,7 @@ export default async function NewFridayMessagePage() {
     <PresenceWrapper>
       <PresenceHeader 
         title="Super Admin"
-        roleLabel="Temporal Dispatch · Friday Node"
+        roleLabel="Friday Message · New"
         initials={initials}
         icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
         icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
@@ -68,13 +68,13 @@ export default async function NewFridayMessagePage() {
               </div>
               <div>
                  <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Initialize Message</h2>
-                 <p className="text-[10px] font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-widest mt-1">New communication node deployment</p>
+                 <p className="text-[10px] font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-widest mt-1">Create a new Friday Message</p>
               </div>
            </div>
 
            <form action={createMessageAction} className="p-10 space-y-10">
               <div className="space-y-3">
-                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Dispatch Title</label>
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Message Title</label>
                 <input 
                   type="text" 
                   name="title" 
@@ -84,7 +84,7 @@ export default async function NewFridayMessagePage() {
               </div>
 
               <div className="space-y-3">
-                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Visual Asset (URL)</label>
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Image URL</label>
                 <input 
                   type="text" 
                   name="image_url" 
@@ -94,14 +94,14 @@ export default async function NewFridayMessagePage() {
               </div>
 
               <div className="space-y-3">
-                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Manifest Message</label>
+                <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Message Content</label>
                 <textarea 
                   name="message_text" 
                   rows={8}
                   placeholder="The spiritual essence of this communication..."
                   className="w-full p-8 rounded-[2rem] bg-zinc-50 dark:bg-zinc-950 border-none text-md font-bold shadow-inner text-zinc-900 dark:text-zinc-50 leading-relaxed resize-none focus:ring-0"
                 />
-                <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest text-right">Encoded spiritual data packet</p>
+                <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest text-right">Enter the message content</p>
               </div>
 
               <div className="flex justify-end pt-4 border-t border-indigo-50 dark:border-white/5">
@@ -109,7 +109,7 @@ export default async function NewFridayMessagePage() {
                   type="submit" 
                   className="h-16 px-12 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-3"
                 >
-                  <Send className="w-5 h-5" strokeWidth={1.25} /> Deploy Node
+                  <Send className="w-5 h-5" strokeWidth={1.25} /> Save Message
                 </button>
               </div>
            </form>

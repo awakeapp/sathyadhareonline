@@ -358,9 +358,17 @@ export default function RichTextEditor({ name, defaultValue = '' }: Props) {
             {editor?.isActive('blockquote') && <span>Quote</span>}
             {editor?.isActive('codeBlock') && <span>Code</span>}
           </div>
-          <span className="text-[10px] text-white/20 font-mono">
-            {editor?.storage?.characterCount?.characters?.() ?? markdown.length} chars · markdown
-          </span>
+          <div className="flex items-center gap-4">
+            <span className="text-[10px] text-white/20 font-mono">
+              {editor?.storage?.characterCount?.characters?.() ?? markdown.length} chars · markdown
+            </span>
+            <button 
+              type="submit"
+              className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-white/40 hover:bg-white/10 hover:text-white transition-all active:scale-95"
+            >
+              Quick Save
+            </button>
+          </div>
         </div>
       </div>
 

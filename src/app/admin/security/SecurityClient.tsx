@@ -51,12 +51,14 @@ export default function SecurityClient({
 
   useEffect(() => {
     if (activeTab === 'logins' && logins.length === 0 && !isLoadingLogins) {
-      setIsLoadingLogins(true);
-      getLoginHistoryAction().then(res => {
-        if (res.error) toast.error('History Extraction Failed');
+      const fetchLogins = async () => {
+        setIsLoadingLogins(true);
+        const res = await getLoginHistoryAction();
+        if (res.error) toast.error('Failed to load history');
         if (res.data) setLogins(res.data);
         setIsLoadingLogins(false);
-      });
+      };
+      fetchLogins();
     }
   }, [activeTab, logins.length, isLoadingLogins]);
 
@@ -68,8 +70,8 @@ export default function SecurityClient({
   };
 
   const handleCreateKey = () => {
-    if (!newKeyName.trim()) return toast.error('Missing ID Label');
-    if (newKeyPerms.size === 0) return toast.error('Perms Required');
+    if (!newKeyName.trim()) return toast.error('Key name is required');
+    if (newKeyPerms.size === 0) return toast.error('Please select at least one permission');
 
     startTransition(async () => {
       const res = await createApiKeyAction(newKeyName, Array.from(newKeyPerms));
@@ -80,19 +82,19 @@ export default function SecurityClient({
         setGeneratedKey(res.rawKey);
         setNewKeyName('');
         setIsCreatingKey(false);
-        toast.success('Key Forged');
+        toast.success('Key Created');
       }
       return;
     });
   };
 
   const handleRevokeKey = (id: string) => {
-    if (!confirm('Authorize Permanent Revocation?')) return;
+    if (!confirm('Are you sure you want to revoke this key?')) return;
     startTransition(async () => {
       const res = await deleteApiKeyAction(id);
       if (res.error) toast.error(res.error);
       else {
-        toast.success('Key Purged');
+        toast.success('Key Revoked');
         setKeys(prev => prev.filter(k => k.id !== id));
       }
       return;
@@ -101,7 +103,7 @@ export default function SecurityClient({
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success('Copy Successful');
+    toast.success('Key copied to clipboard');
   };
 
   const filteredLogins = logins.filter(l => l.email?.toLowerCase().includes(searchEmail.toLowerCase()));
@@ -116,8 +118,8 @@ export default function SecurityClient({
       <PresenceCard className="bg-zinc-50 dark:bg-white/5 border-none p-2">
         <div className="flex gap-2 w-full overflow-x-auto hide-scrollbar">
           {[
-            { id: 'keys', label: 'Cryptographic Vault', icon: Key },
-            { id: 'logins', label: 'Forensic Timeline', icon: Shield },
+            { id: 'keys', label: 'API Keys', icon: Key },
+            { id: 'logins', label: 'Login History', icon: Shield },
           ].map(t => {
             const Icon = t.icon;
             return (
@@ -144,8 +146,8 @@ export default function SecurityClient({
                 </div>
                 <div className="flex items-center justify-between relative z-10">
                    <div>
-                      <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Forge Access Token</h2>
-                      <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">High-Privilege Authorization Vector</p>
+                      <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Create API Key</h2>
+                      <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">System access token for integrations</p>
                    </div>
                    <button onClick={() => setIsCreatingKey(false)} className="w-10 h-10 rounded-full bg-zinc-50 dark:bg-white/5 text-zinc-500 flex items-center justify-center">
                       <X className="w-5 h-5" strokeWidth={1.25} />
@@ -154,7 +156,7 @@ export default function SecurityClient({
                 
                 <div className="flex flex-col gap-4 relative z-10">
                    <div className="space-y-3">
-                     <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Identity Label</label>
+                     <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Key Name</label>
                      <input 
                        value={newKeyName} 
                        onChange={e => setNewKeyName(e.target.value)} 
@@ -164,13 +166,13 @@ export default function SecurityClient({
                    </div>
 
                    <div className="space-y-4">
-                      <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Protocol Permissions</label>
+                      <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Permissions</label>
                       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                         {[
-                          { id: 'read:articles', label: 'Index Articles' },
-                          { id: 'write:articles', label: 'Mutate Data' },
-                          { id: 'read:users', label: 'Intercept Profiles' },
-                          { id: 'manage:billing', label: 'Control Capital' }
+                          { id: 'read:articles', label: 'Read Articles' },
+                          { id: 'write:articles', label: 'Write Articles' },
+                          { id: 'read:users', label: 'Read Users' },
+                          { id: 'manage:billing', label: 'Manage Billing' }
                         ].map(p => {
                            const active = newKeyPerms.has(p.id);
                            return (
@@ -188,7 +190,7 @@ export default function SecurityClient({
                    </div>
 
                    <PresenceButton onClick={handleCreateKey} loading={isPending} className="w-full h-16 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black tracking-[0.2em] text-xs uppercase shadow-2xl shadow-indigo-500/20">
-                      Initialize Key Forging
+                      Create Key
                    </PresenceButton>
                 </div>
              </PresenceCard>
@@ -202,8 +204,8 @@ export default function SecurityClient({
                       <AlertTriangle className="w-8 h-8" strokeWidth={1.25} />
                    </div>
                    <div>
-                      <h3 className="text-2xl font-black text-rose-600 uppercase tracking-tighter">Raw Key Intercepted</h3>
-                      <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mt-1">One-time exposure event detected</p>
+                      <h3 className="text-2xl font-black text-rose-600 uppercase tracking-tighter">API Key Created</h3>
+                      <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mt-1">Please copy and save this key somewhere safe. You won&apos;t see it again.</p>
                    </div>
                 </div>
 
@@ -212,12 +214,12 @@ export default function SecurityClient({
                       {generatedKey}
                    </code>
                    <PresenceButton onClick={() => copyToClipboard(generatedKey)} className="bg-rose-500 shadow-xl shadow-rose-500/20 text-xs px-10">
-                      Secure to Clipboard
+                      Copy Key
                    </PresenceButton>
                 </div>
 
                 <div className="flex justify-center">
-                   <button onClick={() => setGeneratedKey(null)} className="text-[10px] font-black text-rose-300 uppercase underline tracking-[0.3em]">I have secured this asset</button>
+                   <button onClick={() => setGeneratedKey(null)} className="text-[10px] font-black text-rose-300 uppercase underline tracking-[0.3em]">I have saved the key</button>
                 </div>
              </PresenceCard>
            )}
@@ -226,11 +228,11 @@ export default function SecurityClient({
              <PresenceCard className="bg-zinc-50 dark:bg-white/5 border-none p-6">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                   <div>
-                    <h2 className="text-sm font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-[0.2em]">Active Cipher Nodes</h2>
-                    <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mt-1">Authorized system access points</p>
+                    <h2 className="text-sm font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-[0.2em]">Active API Keys</h2>
+                    <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mt-1">Authorized system access points for integrations</p>
                   </div>
                   <PresenceButton onClick={() => setIsCreatingKey(true)} className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-xl shadow-indigo-500/20 px-8">
-                    <Plus className="w-5 h-5 mr-3" strokeWidth={1.25} /> Forge New Node
+                    <Plus className="w-5 h-5 mr-3" strokeWidth={1.25} /> Create New Key
                   </PresenceButton>
                 </div>
              </PresenceCard>
@@ -251,11 +253,11 @@ export default function SecurityClient({
                         <div className="flex flex-wrap items-center gap-4">
                            <div className="flex items-center gap-3">
                               <Calendar className="w-4 h-4 text-indigo-300" strokeWidth={1.25} />
-                              <span className="text-[10px] font-black text-zinc-500 uppercase">Deployed · {new Date(k.created_at).toLocaleDateString()}</span>
+                              <span className="text-[10px] font-black text-zinc-500 uppercase">Created · {new Date(k.created_at).toLocaleDateString()}</span>
                            </div>
                            <div className="flex items-center gap-3">
                               <Clock className="w-4 h-4 text-indigo-300" strokeWidth={1.25} />
-                              <span className="text-[10px] font-black text-zinc-500 uppercase">Pulse · {k.last_used_at ? new Date(k.last_used_at).toLocaleDateString() : 'Zero Activity'}</span>
+                              <span className="text-[10px] font-black text-zinc-500 uppercase">Last Used · {k.last_used_at ? new Date(k.last_used_at).toLocaleDateString() : 'Never'}</span>
                            </div>
                         </div>
                      </div>
@@ -266,7 +268,7 @@ export default function SecurityClient({
                            ))}
                         </div>
                         <button onClick={() => handleRevokeKey(k.id)} className="h-11 px-8 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition-all font-black text-[10px] uppercase tracking-widest shadow-sm">
-                           Purge
+                           Revoke
                         </button>
                      </div>
                   </div>
@@ -275,7 +277,7 @@ export default function SecurityClient({
              {keys.length === 0 && !isCreatingKey && (
                <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
                   <KeyRound className="w-16 h-16 mb-5 text-indigo-100" />
-                  <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">Vault Empty</p>
+                  <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">No Keys Found</p>
                </PresenceCard>
              )}
            </div>
@@ -306,10 +308,10 @@ export default function SecurityClient({
                 <table className="w-full text-left text-xs whitespace-nowrap">
                   <thead>
                     <tr className="bg-gray-50/50 dark:bg-white/5 border-b border-indigo-50 dark:border-white/5 font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">
-                      <th className="px-8 py-5 text-[10px]">Temporal Event</th>
-                      <th className="px-8 py-5 text-[10px]">Target Subject</th>
-                      <th className="px-8 py-5 text-[10px]">Vector Origin (IP)</th>
-                      <th className="px-8 py-5 text-[10px] text-right">Environment ID</th>
+                      <th className="px-8 py-5 text-[10px]">Date / Time</th>
+                      <th className="px-8 py-5 text-[10px]">User Account</th>
+                      <th className="px-8 py-5 text-[10px]">IP Address</th>
+                      <th className="px-8 py-5 text-[10px] text-right">Browser / Device</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-indigo-50 dark:divide-white/5">
@@ -360,7 +362,7 @@ export default function SecurityClient({
               {totalPages > 1 && (
                 <div className="p-4 bg-gray-50/30 dark:bg-white/5 border-t border-indigo-50 dark:border-white/5 flex items-center justify-between">
                   <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
-                    Cluster {loginPage} <span className="mx-2 text-indigo-100">|</span> Total {totalPages}
+                    Page {loginPage} <span className="mx-2 text-indigo-100">|</span> Total {totalPages}
                   </span>
                   <div className="flex gap-3">
                      <button disabled={loginPage === 1} onClick={() => setLoginPage(loginPage - 1)} className="w-12 h-12 rounded-xl bg-white dark:bg-zinc-950 text-zinc-400 hover:text-zinc-900 dark:text-zinc-50 disabled:opacity-20 shadow-sm flex items-center justify-center"><ChevronLeft className="w-6 h-6" strokeWidth={1.25} /></button>

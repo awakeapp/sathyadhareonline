@@ -141,8 +141,8 @@ export default function BottomNavigation({ role }: BottomNavigationProps) {
 
   if (isAuthPage) return null
 
-  // WhatsApp brand colors
-  const ACTIVE_COLOR   = isAdminView ? '#4f8ef7' : '#ffe500';
+  // Brand colors
+  const ACTIVE_COLOR   = isAdminView ? '#4f8ef7' : '#685de6';
   const INACTIVE_COLOR = 'var(--color-muted)';
   const BG_COLOR       = isAdminView ? 'var(--color-surface)' : 'var(--color-background)';
   const BORDER_COLOR   = isAdminView ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.05)';

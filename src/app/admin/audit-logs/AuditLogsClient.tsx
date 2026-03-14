@@ -71,7 +71,7 @@ export default function AuditLogsClient({
         setLogs(res.logs as unknown as AuditLog[]);
         setTotalCount(res.count || 0);
       } catch {
-        toast.error('Scan Failed');
+        toast.error('Search Failed');
       }
     });
   }, [page, limit, userFilter, actionSearch, startDate, endDate]);
@@ -102,13 +102,13 @@ export default function AuditLogsClient({
   return (
     <div className="flex flex-col gap-4">
       
-      {/* ── Protocol Filters ── */}
+      {/* ── Search Filters ── */}
       <PresenceCard className="bg-zinc-50 dark:bg-white/5 border-none p-4">
         <form onSubmit={handleSearchSubmit} className="flex flex-col xl:flex-row gap-4 items-end">
           
           <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
              <div className="space-y-2">
-               <label className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Target Action</label>
+               <label className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Action Type</label>
                <div className="relative">
                  <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-300" strokeWidth={1.25} />
                  <input 
@@ -121,7 +121,7 @@ export default function AuditLogsClient({
              </div>
 
              <div className="space-y-2">
-               <label className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Actor Identity</label>
+               <label className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Performed By</label>
                <div className="relative">
                  <User className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-300" strokeWidth={1.25} />
                  <select 
@@ -129,7 +129,7 @@ export default function AuditLogsClient({
                    onChange={(e) => { setUserFilter(e.target.value); setPage(1); }} 
                    className="w-full h-12 pl-12 pr-4 rounded-2xl bg-white dark:bg-zinc-950 border-none shadow-sm focus:ring-2 focus:ring-indigo-500/20 font-bold text-xs appearance-none"
                  >
-                   <option value="all">Global (All Actors)</option>
+                   <option value="all">All Users</option>
                    {usersList.map(u => (
                      <option key={u.id} value={u.id}>{u.name || u.email}</option>
                    ))}
@@ -138,7 +138,7 @@ export default function AuditLogsClient({
              </div>
              
              <div className="space-y-2">
-               <label className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Chronology Start</label>
+               <label className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Start Date</label>
                <div className="relative">
                  <Calendar className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-300" strokeWidth={1.25} />
                  <input 
@@ -151,7 +151,7 @@ export default function AuditLogsClient({
              </div>
 
              <div className="space-y-2">
-               <label className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Chronology End</label>
+               <label className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">End Date</label>
                <div className="relative">
                  <Calendar className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-300" strokeWidth={1.25} />
                  <input 
@@ -165,21 +165,21 @@ export default function AuditLogsClient({
           </div>
 
           <PresenceButton type="submit" className="h-12 px-8 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black text-[10px] uppercase tracking-widest shadow-xl shadow-indigo-500/20" loading={isPending}>
-             Initiate Scan
+             Search Logs
           </PresenceButton>
         </form>
       </PresenceCard>
 
-      {/* ── Timeline Matrix ── */}
+      {/* ── Audit Logs ── */}
       <PresenceCard noPadding className="overflow-hidden">
         <div className="overflow-x-auto min-h-[400px]">
            <table className="w-full text-left text-xs whitespace-nowrap">
              <thead>
                <tr className="bg-gray-50/50 dark:bg-white/5 border-b border-indigo-50 dark:border-white/5 font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">
-                 <th className="px-4 py-5 text-[10px]">Temporal Index</th>
-                 <th className="px-4 py-5 text-[10px]">Primary Actor</th>
-                 <th className="px-4 py-5 text-[10px]">Protocol Action</th>
-                 <th className="px-4 py-5 text-[10px] text-right">Payload</th>
+                 <th className="px-4 py-5 text-[10px]">Date / Time</th>
+                 <th className="px-4 py-5 text-[10px]">User</th>
+                 <th className="px-4 py-5 text-[10px]">Action</th>
+                 <th className="px-4 py-5 text-[10px] text-right">Details</th>
                </tr>
              </thead>
              <tbody className="divide-y divide-indigo-50 dark:divide-white/5">
@@ -187,14 +187,14 @@ export default function AuditLogsClient({
                  <tr>
                     <td colSpan={4} className="py-24 text-center">
                        <div className="w-12 h-12 rounded-2xl border-4 border-indigo-100 border-t-[#5c4ae4] animate-spin mx-auto mb-4"></div>
-                       <p className="text-zinc-400 font-black uppercase tracking-widest text-[10px]">Decrypting History...</p>
+                       <p className="text-zinc-400 font-black uppercase tracking-widest text-[10px]">Loading Logs...</p>
                     </td>
                  </tr>
                ) : logs.length === 0 ? (
                  <tr>
                     <td colSpan={4} className="py-24 text-center">
                        <ScrollText className="w-16 h-16 text-indigo-50 dark:text-white/5 mx-auto mb-5" />
-                       <p className="font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-widest">Protocol Void</p>
+                       <p className="font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-widest">No Logs Found</p>
                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-2">No activity records found</p>
                     </td>
                  </tr>
@@ -239,10 +239,10 @@ export default function AuditLogsClient({
                                onClick={() => toggleExpand(log.id)}
                                className={`h-9 px-5 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all ${isExpanded ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white shadow-lg' : 'bg-white dark:bg-zinc-950 text-zinc-500 hover:text-zinc-900 dark:text-zinc-50 shadow-sm'}`}
                              >
-                                <Eye className="w-3 h-3 inline mr-2" strokeWidth={1.25} /> {isExpanded ? 'Retract' : 'Analyze'}
+                                <Eye className="w-3 h-3 inline mr-2" strokeWidth={1.25} /> {isExpanded ? 'Hide' : 'View'}
                              </button>
                            ) : (
-                             <span className="text-[9px] font-black text-zinc-300 uppercase tracking-widest">Null Payload</span>
+                             <span className="text-[9px] font-black text-zinc-300 uppercase tracking-widest">No Details</span>
                            )}
                          </td>
                        </tr>
@@ -267,10 +267,10 @@ export default function AuditLogsClient({
            </table>
         </div>
 
-        {/* ── Matrix Controls ── */}
+        {/* ── Pagination ── */}
         <div className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50/30 dark:bg-white/5 border-t border-indigo-50 dark:border-white/5">
            <div className="flex items-center gap-4">
-             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Registry Density</span>
+             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Logs per page</span>
              <select 
                value={limit} 
                onChange={(e) => { setLimit(Number(e.target.value)); setPage(1); }} 
@@ -284,9 +284,9 @@ export default function AuditLogsClient({
            </div>
            
            <div className="flex items-center gap-4">
-             <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
-                Entry Index {logs.length > 0 ? (page - 1) * limit + 1 : 0} — {Math.min(page * limit, totalCount)} <span className="mx-2 text-indigo-100">|</span> Total {totalCount}
-             </span>
+              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                 Showing {logs.length > 0 ? (page - 1) * limit + 1 : 0} — {Math.min(page * limit, totalCount)} <span className="mx-2 text-indigo-100">|</span> Total {totalCount}
+              </span>
              <div className="flex gap-3">
                 <button 
                   onClick={() => setPage(Math.max(1, page - 1))} 

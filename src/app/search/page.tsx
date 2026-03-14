@@ -30,10 +30,10 @@ export default async function SearchPage({ searchParams }: Props) {
   }
 
   return (
-    <div className="font-sans antialiased min-h-[100svh] px-4 py-8 pb-32 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl border-t border-[var(--color-border)]">
+    <div className="font-sans antialiased min-h-[100svh] px-4 py-4 pb-0 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl border-t border-[var(--color-border)]">
       
       {/* Header */}
-      <section className="space-y-6 pt-4 mb-10 text-center">
+      <section className="space-y-6 pt-2 mb-10 text-center">
         <div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-[var(--color-text)] tracking-tight">
             Search

@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from '@/components/ui/Modal';
 import {
-  Plus, Edit2, Trash2, Tag, AlertCircle, ChevronUp,
-  ChevronDown, GripVertical, FileText, Loader2, FolderOpen,
+  Plus, Edit2, Trash2, ChevronUp,
+  ChevronDown, FolderOpen,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { 
@@ -163,7 +163,7 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
     <>
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
         <div className="text-center sm:text-left">
-           <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50">Active Taxonomy</h2>
+           <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50">Content Categories</h2>
            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Structure & Navigation</p>
         </div>
         <PresenceButton onClick={() => setCreateOpen(true)} className="h-11 px-6 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900">
@@ -177,7 +177,7 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
             <FolderOpen className="w-16 h-16 mb-5 text-indigo-100" />
             <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">No Categories</p>
             <PresenceButton onClick={() => setCreateOpen(true)} className="mt-8 bg-indigo-50 !text-zinc-900 dark:text-zinc-50 hover:bg-indigo-100 shadow-none">
-              Initialise Taxonomy
+              Create Category
             </PresenceButton>
           </PresenceCard>
         ) : (
@@ -246,7 +246,7 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
                <Input placeholder="e.g. Science" value={createName} onChange={e => { setCreateName(e.target.value); if(!slugTouched) setCreateSlug(toSlug(e.target.value)); }} />
              </div>
              <div className="space-y-1.5">
-               <label className="text-[11px] font-black uppercase text-zinc-500">Slug</label>
+               <label className="text-[11px] font-black uppercase text-zinc-500">URL Link / Path</label>
                <Input value={createSlug} onChange={e => { setSlugTouched(true); setCreateSlug(e.target.value); }} />
              </div>
              <div className="space-y-1.5">
@@ -273,7 +273,7 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
                <Input value={editName} onChange={e => setEditName(e.target.value)} />
              </div>
              <div className="space-y-1.5">
-               <label className="text-[11px] font-black uppercase text-zinc-500">Slug</label>
+               <label className="text-[11px] font-black uppercase text-zinc-500">URL Link / Path</label>
                <Input value={editSlug} onChange={e => setEditSlug(e.target.value)} />
              </div>
              <div className="space-y-1.5">

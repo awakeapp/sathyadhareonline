@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import {
   Users, BarChart2, MessageSquare, Image as ImageIcon,
   Layers, ScrollText, Library, LucideIcon,
-  ChevronLeft, Bell, SlidersHorizontal
+  SlidersHorizontal
 } from 'lucide-react';
 import { 
   PresenceWrapper, 
@@ -64,7 +64,9 @@ export default async function ManagePage() {
     <PresenceWrapper>
       <PresenceHeader 
         title="Manage Platform" 
-        hideActions={true} 
+        profileName={profile?.full_name || 'Admin'}
+        initials={initials}
+        roleLabel={profile?.role}
       />
       
       <div className="w-full flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
@@ -74,8 +76,8 @@ export default async function ManagePage() {
                  <SlidersHorizontal className="w-6 h-6" strokeWidth={1.25} />
               </div>
               <div>
-                 <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">System Operations</h2>
-                 <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide mt-1">High-Privilege Vector Control</p>
+                 <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Super Admin Controls</h2>
+                 <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide mt-1">Super Admin Access Only</p>
               </div>
            </div>
 

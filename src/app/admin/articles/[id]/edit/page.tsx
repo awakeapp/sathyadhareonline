@@ -9,8 +9,7 @@ import { logAuditEvent } from '@/lib/audit';
 import { 
   PresenceWrapper, 
   PresenceHeader,
-  PresenceCard,
-  PresenceButton 
+  PresenceCard 
 } from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
@@ -146,11 +145,29 @@ export default async function EditArticlePage({
     <PresenceWrapper>
       <PresenceHeader 
         title="Super Admin"
-        roleLabel="Article Weaver · Data Mutation"
+        roleLabel="Edit and refine article content"
         initials={initials}
         icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
         icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
         icon2Href="/admin/articles"
+        renderActions={
+          <div className="flex items-center gap-2">
+            <button 
+              type="submit" 
+              form="admin-edit-form"
+              className="h-9 px-4 rounded-full bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-bold text-[11px] uppercase tracking-widest shadow-lg active:scale-95 transition-all"
+            >
+              Save
+            </button>
+            {['admin', 'super_admin'].includes(role) && article.status !== 'published' && (
+              <form action={publishNowAction}>
+                <button type="submit" className="h-9 px-4 bg-emerald-500 text-white font-bold text-[11px] uppercase tracking-widest rounded-full shadow-lg shadow-emerald-500/20 active:scale-95 transition-all">
+                  Publish
+                </button>
+              </form>
+            )}
+          </div>
+        }
       />
       
       <div className="w-full flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
@@ -162,8 +179,8 @@ export default async function EditArticlePage({
                  <PenTool className="w-6 h-6" strokeWidth={1.25} />
               </div>
               <div>
-                 <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Edit Narrative</h2>
-                 <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">Registry-ID: {id.slice(0, 8)}</p>
+                 <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Edit Article</h2>
+                 <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">Article ID: {id.slice(0, 8)}</p>
               </div>
            </div>
 
@@ -177,18 +194,11 @@ export default async function EditArticlePage({
               }`}>
                 {article.status.replace('_', ' ')}
               </span>
-              {['admin', 'super_admin'].includes(role) && article.status !== 'published' && (
-                <form action={publishNowAction}>
-                  <button type="submit" className="h-10 px-6 bg-emerald-500 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-xl shadow-xl shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
-                     <Send className="w-4 h-4" strokeWidth={1.25} /> Publish Now
-                  </button>
-                </form>
-              )}
            </div>
         </div>
 
         <PresenceCard className="p-0 overflow-hidden">
-          <form action={updateArticleAction} encType="multipart/form-data" className="p-10 space-y-10">
+          <form id="admin-edit-form" action={updateArticleAction} encType="multipart/form-data" className="p-10 space-y-10">
             
             {['admin', 'super_admin'].includes(role) && (
               <div className={`flex items-center justify-between p-6 rounded-[2rem] border-2 transition-all ${
@@ -199,8 +209,8 @@ export default async function EditArticlePage({
                     <Star className="w-6 h-6" strokeWidth={1.25} fill={article.is_featured ? "currentColor" : "none"} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Highlight Priority</h3>
-                    <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mt-1">Prime Visibility Allocation</p>
+                    <h3 className="text-sm font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Featured Article</h3>
+                    <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mt-1">Prioritize this article on the homepage</p>
                   </div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -212,38 +222,38 @@ export default async function EditArticlePage({
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                <div className="space-y-4">
-                 <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Visual Identifier (Cover)</label>
+                 <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Cover Image</label>
                  <div className="bg-zinc-50 dark:bg-zinc-950 rounded-[2rem] p-4 shadow-inner border-none">
                     <CoverImageUpload currentImageUrl={article.cover_image} />
                  </div>
                </div>
 
                <div className="space-y-10">
-                  <div className="space-y-3">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Narrative Headline</label>
-                    <input name="title" required defaultValue={article.title} placeholder="The Core Statement..." className="w-full h-16 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-md font-bold shadow-inner" />
+                   <div className="space-y-3">
+                    <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Article Title</label>
+                    <input name="title" required defaultValue={article.title} placeholder="Enter article title..." className="w-full h-16 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-md font-bold shadow-inner" />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">
-                      <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Network Slug</label>
+                      <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">URL Slug / Link</label>
                       <input name="slug" required defaultValue={article.slug} className="w-full h-14 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none font-mono text-xs font-bold shadow-inner text-indigo-400" />
                     </div>
                     
                     <div className="space-y-3">
-                      <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Protocol Status</label>
+                      <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Article Status</label>
                       <select name="status" defaultValue={article.status} className="w-full h-14 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-xs font-black uppercase tracking-widest shadow-inner accent-[#5c4ae4]">
                         {role === 'editor' ? (
                           <>
-                            <option value="draft">Cold Draft</option>
-                            <option value="in_review">Awaiting Audit</option>
+                            <option value="draft">Draft</option>
+                            <option value="in_review">Waiting for Review</option>
                           </>
                         ) : (
                           <>
-                            <option value="draft">Cold Draft</option>
-                            <option value="in_review">Awaiting Audit</option>
-                            <option value="published">Broadcast Live</option>
-                            <option value="archived">Deep Storage</option>
+                            <option value="draft">Draft</option>
+                            <option value="in_review">Waiting for Review</option>
+                            <option value="published">Published</option>
+                            <option value="archived">Archived</option>
                           </>
                         )}
                       </select>
@@ -253,9 +263,9 @@ export default async function EditArticlePage({
             </div>
 
             <div className="space-y-3">
-              <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Network Category</label>
+              <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Category</label>
               <select name="category_id" defaultValue={article.category_id ?? ''} className="w-full h-16 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-xs font-black uppercase tracking-widest shadow-inner">
-                <option value="">Detached Segment</option>
+                <option value="">Uncategorized</option>
                 {categories?.map((cat) => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
@@ -263,13 +273,13 @@ export default async function EditArticlePage({
             </div>
 
             <div className="space-y-3">
-              <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Manifest Overview (Excerpt)</label>
-              <textarea name="excerpt" rows={3} defaultValue={article.excerpt ?? ''} placeholder="Condensed narrative summary..." className="w-full p-6 rounded-[2rem] bg-zinc-50 dark:bg-zinc-950 border-none text-md font-bold shadow-inner resize-none leading-relaxed" />
+              <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Short Summary (Excerpt)</label>
+              <textarea name="excerpt" rows={3} defaultValue={article.excerpt ?? ''} placeholder="Brief description for social media and search..." className="w-full p-6 rounded-[2rem] bg-zinc-50 dark:bg-zinc-950 border-none text-md font-bold shadow-inner resize-none leading-relaxed" />
             </div>
 
             <div className="space-y-4">
               <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50 flex items-center gap-3">
-                 <Sparkles className="w-4 h-4" strokeWidth={1.25} /> Core Content Stream
+                 <Sparkles className="w-4 h-4" strokeWidth={1.25} /> Article Content
               </label>
               <div className="min-h-[600px] rounded-[2rem] overflow-hidden border-none shadow-2xl bg-white dark:bg-zinc-950">
                  <RichTextEditor name="content" defaultValue={article.content ?? ''} />
@@ -277,9 +287,9 @@ export default async function EditArticlePage({
             </div>
 
             <div className="pt-10 border-t border-indigo-50 dark:border-white/5 flex flex-col sm:flex-row justify-end gap-4">
-              <Link href="/admin/articles" className="h-16 px-10 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-black text-[11px] uppercase tracking-widest text-zinc-500 flex items-center justify-center hover:bg-gray-100 transition-all">Discard Mutation</Link>
+              <Link href="/admin/articles" className="h-16 px-10 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-black text-[11px] uppercase tracking-widest text-zinc-500 flex items-center justify-center hover:bg-gray-100 transition-all">Cancel Changes</Link>
               <button type="submit" className="h-16 px-12 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all">
-                Synchronize Article
+                Save Article
               </button>
             </div>
             

@@ -41,17 +41,17 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
       if (res.error) {
         toast.error(res.error);
       } else {
-        toast.success('System configuration deployed');
+        toast.success('Settings saved successfully');
       }
     });
   };
 
   const tabs = [
-    { id: 'general', label: 'Identity', icon: Globe },
-    { id: 'social', label: 'Network', icon: LinkIcon },
-    { id: 'seo', label: 'Discovery', icon: Search },
-    { id: 'features', label: 'Modules', icon: ToggleRight },
-    { id: 'integrations', label: 'Ecosystem', icon: Workflow },
+    { id: 'general', label: 'General', icon: Globe },
+    { id: 'social', label: 'Social', icon: LinkIcon },
+    { id: 'seo', label: 'SEO', icon: Search },
+    { id: 'features', label: 'Features', icon: ToggleRight },
+    { id: 'integrations', label: 'Integrations', icon: Workflow },
   ];
 
   return (
@@ -60,7 +60,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
       {/* ── Navigator ── */}
       <div className="w-full md:w-64 shrink-0 space-y-3 flex flex-col">
         <div className="px-2 mb-2">
-           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Settings Domains</p>
+           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Settings Categories</p>
         </div>
         <div className="flex md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-2 md:pb-0 hide-scrollbar">
           {tabs.map((tab) => {
@@ -93,8 +93,8 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                {activeTab === 'general' && (
                  <div className="flex flex-col gap-4">
                    <div>
-                     <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50">Global Identity</h2>
-                     <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Foundational Branding</p>
+                     <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50">General Settings</h2>
+                     <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Basic Information</p>
                    </div>
                    <div className="grid gap-8 md:grid-cols-2">
                      <div className="space-y-2 md:col-span-2">
@@ -112,14 +112,14 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                    </div>
                    
                    <div className="pt-8 border-t border-indigo-50 dark:border-white/5">
-                      <h3 className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-6">Asset Repository</h3>
+                      <h3 className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-6">Images</h3>
                       <div className="grid gap-8 md:grid-cols-2">
                          <div className="space-y-2">
-                           <label className="text-[10px] font-black uppercase text-zinc-500">Logo Endpoint</label>
+                           <label className="text-[10px] font-black uppercase text-zinc-500">Logo URL</label>
                            <Input value={general.logo_url || ''} onChange={(e) => setGeneral({ ...general, logo_url: e.target.value })} className="h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-mono text-[11px]" placeholder="https://..." />
                          </div>
                          <div className="space-y-2">
-                           <label className="text-[10px] font-black uppercase text-zinc-500">Favicon Link</label>
+                           <label className="text-[10px] font-black uppercase text-zinc-500">Favicon URL</label>
                            <Input value={general.favicon_url || ''} onChange={(e) => setGeneral({ ...general, favicon_url: e.target.value })} className="h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-mono text-[11px]" placeholder="https://..." />
                          </div>
                       </div>
@@ -130,8 +130,8 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                {activeTab === 'social' && (
                  <div className="flex flex-col gap-4">
                     <div>
-                      <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50">Social Network</h2>
-                      <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Cross-platform integration</p>
+                      <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50">Social Links</h2>
+                      <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Connect your accounts</p>
                     </div>
                     <div className="grid gap-4 md:grid-cols-2">
                       {['facebook', 'twitter', 'instagram', 'linkedin', 'youtube'].map(key => (
@@ -152,16 +152,16 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                {activeTab === 'seo' && (
                  <div className="flex flex-col gap-4">
                     <div>
-                      <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50">Discovery & SEO</h2>
-                      <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Search Engine Optimisation</p>
+                      <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50">SEO Settings</h2>
+                      <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Search Engine Optimization</p>
                     </div>
                     <div className="flex flex-col gap-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-zinc-500">Default Architecture Title</label>
+                        <label className="text-[10px] font-black uppercase text-zinc-500">Default Meta Title</label>
                         <Input value={seo.meta_title || ''} onChange={(e) => setSeo({ ...seo, meta_title: e.target.value })} className="h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-bold" />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-zinc-500">Metadata Narrative</label>
+                        <label className="text-[10px] font-black uppercase text-zinc-500">Meta Description</label>
                         <textarea 
                           value={seo.meta_description || ''} 
                           onChange={(e) => setSeo({ ...seo, meta_description: e.target.value })} 
@@ -170,7 +170,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-zinc-500">Open Graph Manifest Image</label>
+                        <label className="text-[10px] font-black uppercase text-zinc-500">Default OG Image URL</label>
                         <Input value={seo.og_image || ''} onChange={(e) => setSeo({ ...seo, og_image: e.target.value })} className="h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-mono text-[11px]" />
                       </div>
                     </div>
@@ -180,8 +180,8 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                {activeTab === 'features' && (
                  <div className="flex flex-col gap-4">
                     <div>
-                      <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50">Module Governance</h2>
-                      <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Dynamic feature toggles</p>
+                      <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50">Features & Modules</h2>
+                      <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Enable or disable features</p>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -196,7 +196,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                                 <div className="flex items-center gap-2">
                                    <div className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-gray-300'}`} />
                                    <span className={`text-[10px] font-bold uppercase tracking-widest ${isActive ? 'text-emerald-500' : 'text-zinc-500'}`}>
-                                      {isActive ? "Operational" : "Deferred"}
+                                      {isActive ? "Enabled" : "Disabled"}
                                    </span>
                                 </div>
                               </div>
@@ -214,18 +214,18 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                {activeTab === 'integrations' && (
                  <div className="flex flex-col gap-4">
                     <div>
-                      <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50">System Ecosystem</h2>
-                      <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Cross-platform identifiers</p>
+                      <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50">Integrations</h2>
+                      <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Third-party services</p>
                     </div>
 
                     <div className="flex flex-col gap-4">
                        <div className="space-y-2">
-                         <label className="text-[10px] font-black uppercase text-zinc-500">Cloud Analytics ID</label>
+                         <label className="text-[10px] font-black uppercase text-zinc-500">Google Analytics ID</label>
                          <Input value={String(integrations.analytics_id || '')} onChange={(e) => setIntegrations({ ...integrations, analytics_id: e.target.value })} className="h-14 rounded-2xl bg-zinc-50 dark:bg-white/5 border-none font-mono" placeholder="G-XXXXXXXXXX" />
                        </div>
 
                          <div className="pt-8 border-t border-indigo-50 dark:border-white/5">
-                          <h3 className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-6">Security Protocols</h3>
+                          <h3 className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-6">Authentication</h3>
                           <div className="p-6 rounded-[1.5rem] border-2 bg-white dark:bg-zinc-950 border-gray-50 dark:border-white/5">
                              <p className="text-[13px] text-zinc-500 font-medium leading-relaxed">
                                External authentication integrations such as Google OAuth are currently managed directly via the Supabase configuration dashboard. Please contact a system administrator for modifications.
@@ -242,7 +242,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
              {isPending && (
                 <div className="flex items-center gap-2">
                    <div className="w-4 h-4 rounded-full border-2 border-indigo-50 border-t-[#5c4ae4] animate-spin" />
-                   <span className="text-[10px] font-bold uppercase text-zinc-900 dark:text-zinc-50">Synchronising...</span>
+                   <span className="text-[10px] font-bold uppercase text-zinc-900 dark:text-zinc-50">Saving...</span>
                 </div>
              )}
              <PresenceButton 
@@ -250,7 +250,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                disabled={isPending}
                className="h-14 px-12 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-2xl shadow-indigo-500/30"
              >
-                <Save className="w-5 h-5 mr-3" strokeWidth={1.25} /> Deploy Config
+                <Save className="w-5 h-5 mr-3" strokeWidth={1.25} /> Save Settings
              </PresenceButton>
           </div>
         </PresenceCard>

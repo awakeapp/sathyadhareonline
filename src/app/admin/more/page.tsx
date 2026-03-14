@@ -14,7 +14,7 @@ const MORE_GROUPS = [
     items: [
       { label: 'Avatar & Branding', href: '/admin/settings', icon: Settings },
       { label: 'Lists & Navigation', href: '/admin/settings?section=lists', icon: Search },
-      { label: 'Broadcast Messages', href: '/admin/friday', icon: Mail },
+      { label: 'Friday Messages', href: '/admin/friday', icon: Mail },
     ]
   },
   {
