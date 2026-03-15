@@ -35,7 +35,7 @@ export default async function LibraryIndexPage() {
   });
 
   return (
-    <div className="min-h-[100svh] px-4 py-2 pb-32 max-w-lg mx-auto sm:max-w-2xl lg:max-w-5xl">
+    <div className="min-h-[100svh] px-4 pt-1 pb-32 max-w-lg mx-auto sm:max-w-2xl lg:max-w-5xl">
       
       <SectionHeader title="Library" />
 

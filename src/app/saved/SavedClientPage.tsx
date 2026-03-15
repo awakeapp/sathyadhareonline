@@ -4,8 +4,6 @@ import { useState, useMemo } from 'react';
 import { Bookmark, FileText, Calendar, X, SlidersHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import ArticleCard from '@/components/ui/ArticleCard';
-import HomeSearchBar from '@/components/ui/HomeSearchBar';
-
 interface Article {
   id: string;
   title: string;
@@ -80,9 +78,7 @@ export default function SavedClientPage({ articles }: Props) {
   }
 
   return (
-    <div className="min-h-screen pb-0">
-      <HomeSearchBar />
-      
+    <div className="min-h-screen pb-0 pt-1">
       {/* Sticky header */}
       <div className="sticky top-[56px] z-40 bg-[var(--color-background)]/95 backdrop-blur-2xl border-b border-[var(--color-border)]">
         <div className="flex items-center justify-between px-4 py-3 max-w-lg mx-auto">

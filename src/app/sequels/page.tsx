@@ -16,7 +16,7 @@ export default async function SequelsPage() {
   const hasSequels = sequels && sequels.length > 0;
 
   return (
-    <div className="min-h-[100svh] px-4 py-2 pb-32 max-w-lg mx-auto sm:max-w-2xl lg:max-w-5xl">
+    <div className="min-h-[100svh] px-4 pt-1 pb-32 max-w-lg mx-auto sm:max-w-2xl lg:max-w-5xl">
       
       <SectionHeader title="Weekly Sequels" />
 
