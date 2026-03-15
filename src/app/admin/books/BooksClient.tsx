@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Plus, X, Trash2, Link as LinkIcon, Image as ImageIcon, BookOpen } from 'lucide-react';
+import { Plus, X, Trash2, Image as ImageIcon, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { createBook, updateBook, deleteBook, toggleBook } from './actions';
@@ -16,15 +16,25 @@ interface Book {
   created_at: string;
 }
 
-interface Props { initialBooks: Book[]; }
+interface ArticleLight {
+  id: string;
+  title: string;
+  category?: { name: string } | { name: string }[] | null;
+}
+
+interface Props { 
+  initialBooks: Book[];
+  availableArticles: ArticleLight[];
+}
 
 const emptyForm = { title: '', author_name: '', cover_image: '', drive_link: '', is_active: true };
 
-export default function BooksClient({ initialBooks }: Props) {
+export default function BooksClient({ initialBooks, availableArticles }: Props) {
   const [books, setBooks] = useState<Book[]>(initialBooks);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [chapters, setChapters] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -33,6 +43,7 @@ export default function BooksClient({ initialBooks }: Props) {
   function openNew() {
     setEditId(null);
     setForm(emptyForm);
+    setChapters([]);
     setShowForm(true);
   }
 
@@ -45,6 +56,19 @@ export default function BooksClient({ initialBooks }: Props) {
       drive_link: b.drive_link,
       is_active: b.is_active,
     });
+    
+    // Parse chapters safely
+    try {
+      const parsed = JSON.parse(b.drive_link);
+      if (Array.isArray(parsed)) {
+        setChapters(parsed);
+      } else {
+        setChapters([]);
+      }
+    } catch {
+      setChapters([]); // legacy string
+    }
+
     setShowForm(true);
   }
 
@@ -73,13 +97,15 @@ export default function BooksClient({ initialBooks }: Props) {
     e.preventDefault();
     if (!form.cover_image.trim()) { toast.error('Please upload a book cover'); return; }
     if (!form.title.trim()) { toast.error('Please enter a book title'); return; }
-    if (!form.drive_link.trim()) { toast.error('Please enter the Drive Link'); return; }
+    
+    // Encode chapters
+    const finalForm = { ...form, drive_link: JSON.stringify(chapters) };
 
     setLoading(true);
     try {
       const result = editId
-        ? await updateBook(editId, form)
-        : await createBook(form);
+        ? await updateBook(editId, finalForm)
+        : await createBook(finalForm);
       if (result.error) { toast.error(result.error); return; }
       toast.success(editId ? 'Book updated!' : 'Book added!');
       window.location.reload();
@@ -107,7 +133,6 @@ export default function BooksClient({ initialBooks }: Props) {
 
   return (
     <div className="min-h-screen pb-40">
-
       <input
         ref={fileRef}
         type="file"
@@ -119,7 +144,7 @@ export default function BooksClient({ initialBooks }: Props) {
       {/* ── Add / Edit form sheet ── */}
       {showForm && (
         <div
-          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 backdrop-blur-md"
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 backdrop-blur-md px-2"
           onClick={() => setShowForm(false)}
         >
           <form
@@ -221,21 +246,72 @@ export default function BooksClient({ initialBooks }: Props) {
                 />
               </div>
 
-              {/* Drive Link URL */}
+              {/* Chapters Input */}
               <div>
-                <label className="text-[10px] font-black uppercase tracking-[0.18em] text-[var(--color-muted)] block mb-2">
-                  Google Drive / PDF Link *
+                <label className="text-[10px] font-black uppercase tracking-[0.18em] text-[var(--color-muted)] block mb-2 flex items-center justify-between">
+                  <span>Book Chapters</span>
+                  <span className="bg-[#685de6]/10 text-[#685de6] px-2 py-0.5 rounded-full">{chapters.length} Total</span>
                 </label>
-                <div className="relative">
-                  <LinkIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)]" />
-                  <input
-                    required
-                    type="url"
-                    value={form.drive_link}
-                    onChange={e => setForm(f => ({ ...f, drive_link: e.target.value }))}
-                    placeholder="https://drive.google.com/..."
-                    className={`${inputClass} pl-10`}
-                  />
+                
+                <div className="flex flex-col gap-2 mb-3">
+                  {chapters.length === 0 && (
+                    <div className="text-xs text-[var(--color-muted)] italic py-2">No chapters added yet. Select an article below.</div>
+                  )}
+                  {chapters.map((chId, idx) => {
+                    const art = availableArticles.find(a => a.id === chId);
+                    // Extract categorical name if array
+                    let artCatName = 'Article';
+                    if (art?.category) {
+                       artCatName = Array.isArray(art.category) ? art.category[0]?.name : art.category.name;
+                    }
+
+                    return (
+                      <div key={`${chId}-${idx}`} className="flex items-center justify-between bg-[var(--color-surface-2)] border border-[var(--color-border)] p-3 rounded-2xl group">
+                        <div className="flex flex-col min-w-0 pr-3">
+                           <span className="text-xs font-bold uppercase tracking-widest text-[#685de6] mb-0.5">
+                              Chapter {idx + 1}
+                           </span>
+                           <span className="text-sm font-bold text-[var(--color-text)] truncate line-clamp-1">{art ? art.title : 'Missing Article'}</span>
+                           <span className="text-[10px] font-semibold text-[var(--color-muted)] uppercase">{artCatName}</span>
+                        </div>
+                        <button 
+                          type="button" 
+                          onClick={() => setChapters(c => c.filter((_, i) => i !== idx))} 
+                          className="w-8 h-8 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center shrink-0 hover:bg-red-500 hover:text-white transition-colors"
+                          title="Remove Chapter"
+                        >
+                          <Trash2 size={14} strokeWidth={2.5} />
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                <select
+                  onChange={e => {
+                    if (e.target.value) {
+                      setChapters(c => [...c, e.target.value]);
+                      e.target.value = '';
+                    }
+                  }}
+                  className={`${inputClass} font-semibold appearance-none`}
+                  defaultValue=""
+                >
+                  <option value="" disabled>+ Add existing article/editorial</option>
+                  {availableArticles.filter(a => !chapters.includes(a.id)).map(a => {
+                    let catName = 'Article';
+                    if (a.category) {
+                       catName = Array.isArray(a.category) ? a.category[0]?.name : a.category.name;
+                    }
+                    return (
+                      <option key={a.id} value={a.id}>
+                        {a.title} ({catName})
+                      </option>
+                    )
+                  })}
+                </select>
+                <div className="mt-2 text-[10px] font-medium text-[var(--color-muted)] opacity-80 pl-2">
+                  Select a published article/editorial to append it to this book.
                 </div>
               </div>
 
@@ -245,9 +321,9 @@ export default function BooksClient({ initialBooks }: Props) {
                 className="flex items-center justify-between p-4 rounded-2xl bg-[var(--color-surface-2)] border border-[var(--color-border)] cursor-pointer active:scale-[0.98] transition-all select-none"
               >
                 <div>
-                  <p className="text-sm font-bold text-[var(--color-text)] leading-none mb-0.5">Show on Home Page</p>
+                  <p className="text-sm font-bold text-[var(--color-text)] leading-none mb-0.5">Publish Book</p>
                   <p className="text-[11px] text-[var(--color-muted)]">
-                    {form.is_active ? 'Visible to all readers' : 'Hidden from readers'}
+                    {form.is_active ? 'Visible in Library' : 'Hidden from readers'}
                   </p>
                 </div>
                 <div
@@ -267,7 +343,7 @@ export default function BooksClient({ initialBooks }: Props) {
               >
                 {loading
                   ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Saving…</>
-                  : editId ? 'Save Changes' : '+ Add Book'
+                  : editId ? 'Save Changes' : '+ Save Book'
                 }
               </button>
             </div>
@@ -304,9 +380,9 @@ export default function BooksClient({ initialBooks }: Props) {
       )}
 
       {/* ── Page header ── */}
-      <div className="flex items-center justify-between px-4 pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] pb-4 border-b border-[var(--color-border)]">
+      <div className="flex items-center justify-between px-4 pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] pb-4 border-b border-[var(--color-border)] mb-4">
         <div>
-          <h1 className="text-xl font-black text-[var(--color-text)] tracking-tight">PDF Library</h1>
+          <h1 className="text-xl font-black text-[var(--color-text)] tracking-tight">Library Books</h1>
           <p className="text-[11px] text-[var(--color-muted)] font-semibold uppercase tracking-widest mt-0.5">
             {books.length} book{books.length !== 1 ? 's' : ''}
           </p>
@@ -316,12 +392,12 @@ export default function BooksClient({ initialBooks }: Props) {
           className="flex items-center gap-2 h-10 px-4 rounded-2xl bg-[#685de6] text-white text-sm font-black shadow-md shadow-[#685de6]/25 active:scale-95 transition-all"
         >
           <Plus size={16} strokeWidth={2.5} />
-          Add Book
+          Create Book
         </button>
       </div>
 
       {/* ── Book list ── */}
-      <div className="px-4 py-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      <div className="px-4 py-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {books.length === 0 ? (
           <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
             <div className="w-20 h-20 rounded-[2rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-center justify-center mb-5 text-[var(--color-muted)]">
@@ -329,31 +405,38 @@ export default function BooksClient({ initialBooks }: Props) {
             </div>
             <h2 className="text-lg font-black text-[var(--color-text)] mb-2">No Books Yet</h2>
             <p className="text-sm text-[var(--color-muted)] mb-6 max-w-[240px] leading-relaxed">
-              Add your first PDF book. Readers will see it horizontally scrolling on the home page.
+              Combine existing articles and editorials to create your first book chapter index.
             </p>
             <button
               onClick={openNew}
               className="flex items-center gap-2 h-11 px-6 rounded-2xl bg-[#685de6] text-white text-sm font-black shadow-lg shadow-[#685de6]/20 active:scale-95 transition-all"
             >
               <Plus size={16} strokeWidth={2.5} />
-              Add First Book
+              Create First Book
             </button>
           </div>
         ) : (
-          books.map(b => (
+          books.map(b => {
+             let chCount = 0;
+             try {
+                const parsed = JSON.parse(b.drive_link);
+                if (Array.isArray(parsed)) chCount = parsed.length;
+             } catch {}
+
+             return (
             <div
               key={b.id}
               className="group flex flex-col rounded-[2rem] bg-[var(--color-surface)] border border-[var(--color-border)] overflow-hidden shadow-sm"
             >
               {/* Cover thumbnail */}
-              <div className="relative w-full aspect-[2/3] bg-[var(--color-surface-2)] shrink-0">
+              <div className="relative w-full aspect-[3/4] bg-[var(--color-surface-2)] shrink-0 group-hover:bg-[#1a1c29] transition-colors">
                 {b.cover_image
                   ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={b.cover_image}
                     alt={b.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center text-[var(--color-muted)]">
@@ -361,20 +444,23 @@ export default function BooksClient({ initialBooks }: Props) {
                   </div>
                 )}
                 {/* Status pill overlaid */}
-                <div className="absolute top-3 left-3">
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider backdrop-blur-sm ${b.is_active ? 'bg-green-500/90 text-white shadow-sm' : 'bg-black/50 text-white/70'}`}>
-                    {b.is_active ? 'Active' : 'Hidden'}
+                <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start">
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider backdrop-blur-sm shadow-sm ${b.is_active ? 'bg-green-500/90 text-white' : 'bg-black/60 text-white'}`}>
+                    {b.is_active ? 'Live' : 'Hidden'}
+                  </span>
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-black/50 text-white backdrop-blur-sm shadow-sm border border-white/10">
+                    {chCount} Chapters
                   </span>
                 </div>
               </div>
 
               {/* Info + Actions */}
               <div className="flex-1 flex flex-col p-4">
-                <h4 className="text-sm font-bold text-[var(--color-text)] leading-tight line-clamp-2 mb-1">
+                <h4 className="text-[15px] font-black text-[var(--color-text)] leading-tight line-clamp-2 mb-1">
                   {b.title}
                 </h4>
                 {b.author_name && (
-                  <p className="text-[11px] text-[var(--color-muted)] truncate mb-2">{b.author_name}</p>
+                  <p className="text-[11px] font-semibold text-[var(--color-muted)] truncate mb-3">{b.author_name}</p>
                 )}
                 
                 <div className="mt-auto grid grid-cols-3 gap-1.5 pt-3 border-t border-[var(--color-border)]">
@@ -403,7 +489,8 @@ export default function BooksClient({ initialBooks }: Props) {
                 </div>
               </div>
             </div>
-          ))
+            )
+          })
         )}
       </div>
     </div>

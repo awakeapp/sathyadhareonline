@@ -32,7 +32,7 @@ export default async function EditArticlePage({
   // Fetch article data
   const { data: article, error: articleError } = await supabase
     .from('articles')
-    .select('id, title, slug, excerpt, content, category_id, status, cover_image, is_featured, published_at')
+    .select('id, title, slug, excerpt, content, category_id, status, cover_image, is_featured, published_at, author_name')
     .eq('id', id)
     .single();
 
@@ -58,6 +58,7 @@ export default async function EditArticlePage({
     const excerpt     = formData.get('excerpt') as string;
     const content     = formData.get('content') as string;
     const category_id = formData.get('category_id') as string;
+    const author_name = formData.get('author_name') as string;
     const is_featured = formData.get('is_featured') === 'on';
     const coverFile   = formData.get('cover_image') as File | null;
     
@@ -78,6 +79,7 @@ export default async function EditArticlePage({
       excerpt,
       content,
       category_id: category_id || null,
+      author_name,
       status: targetStatus,
       is_featured,
       updated_at: new Date().toISOString(),
@@ -229,10 +231,16 @@ export default async function EditArticlePage({
                </div>
 
                <div className="space-y-10">
-                   <div className="space-y-3">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Article Title</label>
-                    <input name="title" required defaultValue={article.title} placeholder="Enter article title..." className="w-full h-16 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-md font-bold shadow-inner" />
-                  </div>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <div className="space-y-3">
+                      <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Article Title</label>
+                      <input name="title" required defaultValue={article.title} placeholder="Enter article title..." className="w-full h-16 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-md font-bold shadow-inner" />
+                     </div>
+                     <div className="space-y-3">
+                      <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Author Name</label>
+                      <input name="author_name" required defaultValue={article.author_name || ''} placeholder="Author Name" className="w-full h-16 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-md font-bold shadow-inner" />
+                     </div>
+                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">

@@ -4,33 +4,63 @@ import SectionHeader from '@/components/ui/SectionHeader';
 import SearchBar from '@/components/ui/SearchBar';
 import { Card } from '@/components/ui/Card';
 import { Search, Library } from 'lucide-react';
+import SearchFilters from '@/components/SearchFilters';
 
 interface Props {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; c?: string; d?: string }>;
 }
 
 export default async function SearchPage({ searchParams }: Props) {
-  const { q } = await searchParams;
+  const { q, c: categorySlug, d: dateRange } = await searchParams;
   const supabase = await createClient();
 
+  // Fetch all categories for the filter bar
+  const { data: categoriesData } = await supabase
+    .from('categories')
+    .select('id, name, slug')
+    .order('name');
+
+  const categories = categoriesData || [];
+  
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let results: any[] = [];
   let searched = false;
 
   if (q && q.trim()) {
     searched = true;
-    const { data, error } = await supabase
+    let query = supabase
       .from('articles')
-      .select('id, title, slug, excerpt, cover_image, published_at, category:categories(name)')
+      .select('id, title, slug, excerpt, cover_image, published_at, category:categories!inner(name, id, slug)')
       .textSearch('search_vector', q.trim(), { type: 'websearch' })
-      .eq('status', 'published').eq('is_deleted', false)
-      .order('published_at', { ascending: false });
+      .eq('status', 'published')
+      .eq('is_deleted', false)
+      .lte('published_at', new Date().toISOString());
+
+    // Apply category filter
+    if (categorySlug) {
+      query = query.eq('categories.slug', categorySlug);
+    }
+
+    // Apply date range filter
+    if (dateRange) {
+      const now = new Date();
+      let startDate: Date | null = null;
+      if (dateRange === 'week') startDate = new Date(now.setDate(now.getDate() - 7));
+      else if (dateRange === 'month') startDate = new Date(now.setMonth(now.getMonth() - 1));
+      else if (dateRange === 'year') startDate = new Date(now.setFullYear(now.getFullYear() - 1));
+      
+      if (startDate) {
+        query = query.gte('published_at', startDate.toISOString());
+      }
+    }
+
+    const { data, error } = await query.order('published_at', { ascending: false });
     if (error) console.error('Search error:', error);
     results = data ?? [];
   }
 
   return (
-    <div className="font-sans antialiased min-h-[100svh] px-4 py-4 pb-0 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl border-t border-[var(--color-border)]">
+    <div className="font-sans antialiased min-h-[100svh] px-4 py-4 pb-12 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl border-t border-[var(--color-border)]">
       
       {/* Header */}
       <section className="space-y-6 pt-2 mb-10 text-center">
@@ -46,6 +76,11 @@ export default async function SearchPage({ searchParams }: Props) {
           <SearchBar defaultValue={q} autoFocus={!q} />
         </div>
       </section>
+
+      {/* Filters (Always show if categories exist) */}
+      {categories.length > 0 && (
+        <SearchFilters categories={categories} />
+      )}
 
       {/* Results */}
       {searched ? (

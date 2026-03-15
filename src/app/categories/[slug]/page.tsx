@@ -26,8 +26,12 @@ export default async function CategoryPage({ params }: Props) {
 
   const { data: articles } = await supabase
     .from('articles')
-    .select('id, title, slug, excerpt, cover_image, published_at, category:categories(name)')
-    .eq('category_id', category.id).eq('status', 'published').eq('is_deleted', false)
+    .select('id, title, slug, excerpt, cover_image, published_at, category:categories(name), reactions:article_reactions(count)')
+    .eq('article_reactions.type', 'like')
+    .eq('category_id', category.id)
+    .eq('status', 'published')
+    .eq('is_deleted', false)
+    .lte('published_at', new Date().toISOString())
     .order('published_at', { ascending: false });
 
   return (
@@ -49,6 +53,7 @@ export default async function CategoryPage({ params }: Props) {
       ) : (
         <div className="flex flex-col gap-5 mt-2">
           {articles.map((article) => (
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             <ArticleCard key={article.id} variant="list" article={article as any} />
           ))}
         </div>

@@ -31,7 +31,7 @@ export default async function EditorEditArticlePage({
 
   const { data: article, error } = await supabase
     .from('articles')
-    .select('id, title, slug, excerpt, content, category_id, status, cover_image, author_id')
+    .select('id, title, slug, excerpt, content, category_id, status, cover_image, author_id, author_name')
     .eq('id', id)
     .single();
 
@@ -57,6 +57,7 @@ export default async function EditorEditArticlePage({
     const excerpt     = formData.get('excerpt') as string;
     const content     = formData.get('content') as string;
     const category_id = formData.get('category_id') as string;
+    const author_name = formData.get('author_name') as string;
     const coverFile   = formData.get('cover_image') as File | null;
 
     const updateData: Record<string, unknown> = {
@@ -65,6 +66,7 @@ export default async function EditorEditArticlePage({
       excerpt,
       content,
       category_id: category_id || null,
+      author_name,
       updated_at:  new Date().toISOString(),
     };
 
@@ -105,7 +107,8 @@ export default async function EditorEditArticlePage({
   };
 
   const meta = statusColors[article.status ?? 'draft'] || statusColors.draft;
-  const initials = (profile?.full_name || 'E').charAt(0).toUpperCase();
+  const authorName = profile?.full_name ?? 'Editor';
+  const initials = authorName.charAt(0).toUpperCase();
 
   return (
     <PresenceWrapper>
@@ -183,6 +186,11 @@ export default async function EditorEditArticlePage({
                     </div>
                     
                     <div className="space-y-3">
+                       <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Author Name</label>
+                      <input name="author_name" required disabled={!isEditable} defaultValue={article.author_name || authorName} className="w-full h-14 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-sm font-bold shadow-inner disabled:opacity-50" />
+                    </div>
+
+                    <div className="space-y-3 md:col-span-2">
                        <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Category</label>
                       <select name="category_id" disabled={!isEditable} defaultValue={article.category_id ?? ''} className="w-full h-14 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-xs font-black uppercase tracking-widest shadow-inner disabled:opacity-50">
                         <option value="">Uncategorized</option>

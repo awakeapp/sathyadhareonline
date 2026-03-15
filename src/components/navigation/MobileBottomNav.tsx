@@ -1,14 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import {
   LayoutDashboard, FileText, Users, MessageSquare,
-  Layers, Home, Search, Mic, Menu, Play, Bookmark, Newspaper,
+  Layers, Home, Mic, Menu, Play, Bookmark, Newspaper,
   SquarePen, PlusCircle, BarChart2,
-  Library, X, Mail, Presentation, BookOpen
+  Library, X, Mail, Presentation, BookOpen, Highlighter
 } from 'lucide-react';
 
 interface MobileBottomNavProps {
@@ -22,9 +22,9 @@ interface MobileBottomNavProps {
   /* ──────────────────────────────────────────────────────────────
      Wrapper for Edge-to-Edge Nav (WhatsApp Style)
   ────────────────────────────────────────────────────────────── */
-  const FloatingContainer = ({ children }: { children: React.ReactNode }) => (
+  const FloatingContainer = ({ children, visible = true }: { children: React.ReactNode, visible?: boolean }) => (
     <nav
-      className="md:hidden fixed z-[90] bottom-0 left-0 right-0 bg-[var(--color-surface)]/95 backdrop-blur-2xl border-t border-[var(--color-border)]"
+      className={`md:hidden fixed z-[90] bottom-0 left-0 right-0 bg-[var(--color-surface)]/95 backdrop-blur-2xl border-t border-[var(--color-border)] transition-transform duration-500 ${visible ? 'translate-y-0' : 'translate-y-full'}`}
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="flex items-center justify-between h-[60px] px-1 relative w-full max-w-[500px] mx-auto">
@@ -36,6 +36,29 @@ interface MobileBottomNavProps {
 export default function MobileBottomNav({ role }: MobileBottomNavProps) {
   const pathname = usePathname();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const isArticlePage = pathname.includes('/articles/') && !pathname.includes('/new') && !pathname.includes('/edit');
+
+  const [visible, setVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    if (!isArticlePage) {
+      if (!visible) {
+        const timer = setTimeout(() => setVisible(true), 0);
+        return () => clearTimeout(timer);
+      }
+      return;
+    }
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY < 100) setVisible(true);
+      else if (currentScrollY > lastScrollY && currentScrollY > 100) setVisible(false);
+      else if (currentScrollY < lastScrollY - 2) setVisible(true);
+      setLastScrollY(currentScrollY);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY, isArticlePage, visible]);
 
   const isAuthPage  = pathname === '/login' || pathname === '/signup';
   const isPrivileged = role === 'super_admin' || role === 'admin' || role === 'editor';
@@ -126,7 +149,7 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
           </div>
         )}
 
-        <FloatingContainer>
+        <FloatingContainer visible={visible}>
           <NavTabLink
             href="/admin"
             icon={LayoutDashboard}
@@ -239,6 +262,7 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
                 { label: 'Friday',    href: '/friday',   icon: Mail,       color: '#10b981' },
                 { label: 'Write',     href: '/write',    icon: SquarePen,  color: '#f59e0b' },
                 { label: 'Saved',     href: '/saved',    icon: Bookmark,   color: '#685de6' },
+                { label: 'Highlights',href: '/highlights',icon: Highlighter, color: '#f59e0b' },
                 { label: 'Editorial', href: '/editorial',icon: Newspaper,  color: '#0ea5e9' },
               ].map(item => (
                 <Link

@@ -14,7 +14,16 @@
   --color-text: #111b21;
   
   --font-sans: var(--font-dm-sans), var(--font-baloo-tamma), sans-serif;
+  --article-font-size: 18px;
+  --article-line-height: 1.85;
+  --article-max-width: 768px;
+  --article-font-family: var(--font-noto-serif-kannada), serif;
 }
+
+.font-kannada-serif { font-family: var(--font-noto-serif-kannada), serif; }
+.font-tiro-kannada { font-family: var(--font-tiro-kannada), serif; }
+.font-kannada-sans { font-family: var(--font-noto-sans-kannada), sans-serif; }
+.font-kannada-modern { font-family: var(--font-baloo-tamma), sans-serif; }
 
 .dark {
   /* WhatsApp/Meta Dark Theme */
@@ -26,6 +35,17 @@
   --color-muted: #8696a0;
   --color-border: #222e35;
   --color-text: #e9edef;
+}
+
+.sepia {
+  --color-background: #f4ecd8;
+  --color-surface: #fdf6e3;
+  --color-surface-2: #efe5c9;
+  --color-primary: #926b0a;
+  --color-accent: #b58900;
+  --color-muted: #8b6d5a;
+  --color-border: #d4b896;
+  --color-text: #3d2b1f;
 }
 
 @theme {
@@ -142,9 +162,26 @@
   /* ── Article Prose ────────────────────────────────── */
   .prose-article {
     color: var(--color-text);
-    font-size: 1.15rem;
-    line-height: 1.85;
+    font-size: var(--article-font-size);
+    font-family: var(--article-font-family);
+    line-height: var(--article-line-height);
     font-weight: 450;
+  }
+
+  .article-page-container {
+    max-width: var(--article-max-width) !important;
+  }
+
+  /* Inline Formatting */
+  .prose-article b,
+  .prose-article strong {
+    font-weight: 700;
+    color: var(--color-text);
+  }
+  
+  .prose-article i,
+  .prose-article em {
+    font-style: italic;
   }
 
   /* Paragraphs */

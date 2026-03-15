@@ -1,10 +1,12 @@
 import { createClient } from '@/lib/supabase/server';
+import Link from 'next/link';
 import HeroBanner from '@/components/ui/HeroBanner';
 import BannerCarousel from '@/components/ui/BannerCarousel';
 import HomeSearchBar from '@/components/ui/HomeSearchBar';
 import HomeBooksWidget from '@/components/ui/HomeBooksWidget';
 import ArticleCard from '@/components/ui/ArticleCard';
 import SectionHeader from '@/components/ui/SectionHeader';
+import HomeLatestArticles from '@/components/HomeLatestArticles';
 import { ChevronRight } from 'lucide-react';
 
 export const revalidate = 60;
@@ -16,7 +18,8 @@ interface ArticleWithCategory {
   excerpt?: string | null;
   cover_image?: string | null;
   published_at?: string | null;
-  category: { name: string } | null;
+  category: { name: string } | { name: string }[] | null;
+  reactions?: { count: number }[];
 }
 
 export default async function HomePage() {
@@ -25,24 +28,27 @@ export default async function HomePage() {
   // 1) Hero
   const { data: featuredData } = await supabase
     .from('articles')
-    .select('id, title, slug, excerpt, cover_image, category:categories(name)')
+    .select('id, title, slug, excerpt, cover_image, category:categories(name), reactions:article_reactions(count)')
+    .eq('article_reactions.type', 'like')
     .eq('is_featured', true).eq('status', 'published').eq('is_deleted', false)
     .single();
 
-  let featured = featuredData as ArticleWithCategory | null;
+  let featured = featuredData as unknown as ArticleWithCategory | null;
   if (!featured) {
     const { data: fb } = await supabase
       .from('articles')
-      .select('id, title, slug, excerpt, cover_image, category:categories(name)')
+      .select('id, title, slug, excerpt, cover_image, category:categories(name), reactions:article_reactions(count)')
+      .eq('article_reactions.type', 'like')
       .eq('status', 'published').eq('is_deleted', false)
       .order('published_at', { ascending: false }).limit(1).single();
-    featured = fb as ArticleWithCategory | null;
+    featured = fb as unknown as ArticleWithCategory | null;
   }
 
   // 2) Latest Articles
   let { data: latestArticles } = await supabase
     .from('articles')
-    .select('id, title, slug, excerpt, cover_image, published_at, category:categories(name)')
+    .select('id, title, slug, excerpt, cover_image, published_at, category:categories(name), reactions:article_reactions(count)')
+    .eq('article_reactions.type', 'like')
     .eq('status', 'published').eq('is_deleted', false)
     .order('published_at', { ascending: false }).limit(6);
 
@@ -72,13 +78,14 @@ export default async function HomePage() {
   if (topIds.length > 0) {
     const { data: td } = await supabase
       .from('articles')
-      .select('id, title, slug, cover_image, category:categories(name), published_at')
+      .select('id, title, slug, cover_image, category:categories(name), published_at, reactions:article_reactions(count)')
+      .eq('article_reactions.type', 'like')
       .in('id', topIds)
       .eq('status', 'published')
       .eq('is_deleted', false);
     
     if (td) {
-      trending = (td as ArticleWithCategory[]).sort((a, b) => (viewCounts[b.id] ?? 0) - (viewCounts[a.id] ?? 0));
+      trending = (td as unknown as ArticleWithCategory[]).sort((a, b) => (viewCounts[b.id] ?? 0) - (viewCounts[a.id] ?? 0));
     }
   }
 
@@ -100,11 +107,34 @@ export default async function HomePage() {
 
   const activeBooks = booksData || [];
 
+  // 6) Categories for chips
+  const { data: categoriesData } = await supabase
+    .from('categories')
+    .select('id, name, slug')
+    .order('name');
+  
+  const categories = categoriesData || [];
+
   return (
     <div className="font-sans antialiased min-h-[100svh] px-4 pt-2 pb-0 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl scroll-smooth">
 
       {/* ── 0. Inline search bar (Translates Eng -> Kannada) ── */}
       <HomeSearchBar />
+
+      {/* ── 0.1. Category Chips Row ── */}
+      {categories.length > 0 && (
+        <div className="flex items-center gap-2 overflow-x-auto pb-4 hide-scrollbar -mx-4 px-4 mb-2">
+          {categories.map((cat) => (
+            <Link
+              key={cat.id}
+              href={`/categories/${cat.slug}`}
+              className="whitespace-nowrap px-4 py-2 rounded-full bg-[var(--color-surface-2)] text-[var(--color-text)] text-[10px] font-black uppercase tracking-widest border border-transparent hover:border-[var(--color-primary)]/20 active:scale-95 transition-all"
+            >
+              {cat.name}
+            </Link>
+          ))}
+        </div>
+      )}
 
       {/* ── 0.5. PDF Library (horizontally scrollable books) ── */}
       {activeBooks.length > 0 && (
@@ -132,14 +162,12 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Latest Articles - List View */}
+      {/* Latest Articles - Interactive List */}
       {latestArticles && latestArticles.length > 0 && (
         <section className="mb-12">
           <SectionHeader title="Latest Articles" href="/articles" />
-          <div className="flex flex-col gap-5 mt-5">
-            {latestArticles.map((item) => (
-              <ArticleCard key={item.id} variant="list" article={item as unknown as ArticleWithCategory} />
-            ))}
+          <div className="mt-5">
+            <HomeLatestArticles initialArticles={latestArticles as unknown as ArticleWithCategory[]} />
           </div>
         </section>
       )}

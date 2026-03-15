@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server';
-import ArticleCard from '@/components/ui/ArticleCard';
 import ArticlesClientPage from './ArticlesClientPage';
 
 export const revalidate = 60;
@@ -23,7 +22,8 @@ export default async function ArticlesPage({
   // Fetch articles, filter by category if selected
   let query = supabase
     .from('articles')
-    .select('id, title, slug, excerpt, cover_image, published_at, category:categories(name)')
+    .select('id, title, slug, excerpt, cover_image, published_at, category:categories(name), reactions:article_reactions(count)')
+    .eq('article_reactions.type', 'like')
     .eq('status', 'published');
 
   if (cat) {
@@ -44,7 +44,7 @@ export default async function ArticlesPage({
   return (
     <ArticlesClientPage
       categories={categories || []}
-      initialArticles={(articles || []) as any}
+      initialArticles={(articles || []) as unknown as any[]}
       activeCategory={cat || null}
       sortOrder={sort || 'newest'}
     />

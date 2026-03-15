@@ -1,228 +1,181 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
-import { ShieldCheck, Mail, User, UserCircle, Upload, Check } from 'lucide-react';
+import Link from 'next/link';
+import { 
+  ShieldCheck, User, Check, 
+  BookOpen, Bookmark, MessageSquare, 
+  Quote, Highlighter
+} from 'lucide-react';
+import ReadingStreak from '@/components/ReadingStreak';
 import { Input, Label } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 
-interface Profile {
-  id: string;
-  full_name: string | null;
-  avatar_url: string | null;
-  role: string | null;
-  created_at?: string;
-}
-
-interface Props {
-  profile: Profile;
+interface ProfileFormProps {
+  profile: {
+    id: string;
+    full_name: string | null;
+    role: string;
+    avatar_url: string | null;
+    bio: string | null;
+    reading_streak: number;
+  };
+  stats: {
+    articlesRead: number;
+    bookmarks: number;
+    comments: number;
+    highlights: number;
+  };
   userEmail?: string;
 }
 
-export function ProfileForm({ profile: initialProfile, userEmail }: Props) {
+export default function ProfileForm({ profile: initialProfile, stats }: ProfileFormProps) {
   const router = useRouter();
   const supabase = createClient();
-  const [profile, setProfile] = useState<Profile>(initialProfile);
-  const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+  const [isPending, startTransition] = useTransition();
 
-  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const [profile, setProfile] = useState(initialProfile);
+  const [fullName, setFullName] = useState(initialProfile.full_name || '');
+  const [bio, setBio] = useState(initialProfile.bio || '');
+  const [isSaving, setIsSaving] = useState(false);
 
-    try {
-      setUploading(true);
-      const fileExt = file.name.split('.').pop();
-      const filePath = `avatars/${profile.id}-${Math.random()}.${fileExt}`;
+  // Use a generated avatar from DiceBear
+  const avatarUrl = profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.id}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
 
-      // Upload the file to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from('article-images') // Reusing article-images bucket since it's already configured
-        .upload(filePath, file, { 
-          upsert: true,
-          contentType: file.type 
-        });
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('article-images')
-        .getPublicUrl(filePath);
-
-      const avatarUrl = `${publicUrl}?t=${new Date().getTime()}`;
-      setPreview(avatarUrl);
-      
-      // Update the profile immediately with the new avatar_url
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: avatarUrl })
-        .eq('id', profile.id);
-
-      if (updateError) throw updateError;
-
-      setProfile(prev => ({ ...prev, avatar_url: avatarUrl }));
-      toast.success('Profile picture updated!');
-      router.refresh();
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : String(error)
-      toast.error('Error uploading avatar: ' + msg);
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
+  const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setIsSaving(true);
 
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          full_name: profile.full_name,
-        })
-        .eq('id', profile.id);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ 
+        full_name: fullName,
+        bio: bio,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', profile.id);
 
-      if (error) throw error;
-
-      toast.success('Profile updated successfully!');
+    if (error) {
+      toast.error('Failed to update profile');
+    } else {
+      toast.success('Profile updated successfully');
+      setProfile(prev => ({ ...prev, full_name: fullName, bio: bio }));
       router.refresh();
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : String(error)
-      toast.error('Error updating profile: ' + msg);
-    } finally {
-      setLoading(false);
     }
-  }
+    setIsSaving(false);
+  };
 
   return (
-    <div className="space-y-10">
-      {/* Avatar Section */}
-      <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[2.5rem] p-8 shadow-sm">
-        <h2 className="text-xs font-black uppercase tracking-widest text-[var(--color-muted)] mb-6">Profile Picture</h2>
-        <div className="flex flex-col sm:flex-row items-center gap-8">
-          <div className="relative group w-32 h-32">
-            <div className="w-full h-full rounded-full overflow-hidden border-4 border-[var(--color-background)] bg-gradient-to-br from-[var(--color-primary)] to-amber-400 shadow-xl flex items-center justify-center">
-              {preview || profile.avatar_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img 
-                  src={preview || profile.avatar_url || ''} 
-                  alt={profile.full_name || 'Profile'} 
-                  className="w-full h-full object-cover" 
-                />
-              ) : (
-                <UserCircle className="w-20 h-20 text-black/60" />
-              )}
-            </div>
-            
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-black text-white flex items-center justify-center border-2 border-[var(--color-background)] hover:scale-110 active:scale-95 transition-all shadow-lg shadow-black/20 disabled:opacity-50"
-            >
-              {uploading ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <Upload className="w-5 h-5" />
-              )}
-            </button>
-          </div>
+    <div className="space-y-12 pb-20">
+      
+      {/* ── PROFILE HEADER & STREAK ── */}
+      <section className="flex flex-col items-center sm:flex-row sm:items-end gap-6 mb-12">
+        <div className="relative group">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img 
+            src={avatarUrl} 
+            alt={profile.full_name || 'User'} 
+            className="w-32 h-32 rounded-[2.5rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] shadow-sm object-cover"
+          />
+        </div>
 
-          <div className="flex-1 space-y-2 text-center sm:text-left">
-            <h3 className="font-bold text-[var(--color-text)]">Change Photo</h3>
-            <p className="text-xs text-[var(--color-muted)] leading-relaxed max-w-[240px]">
-              Better an original version of yourself than a copy of someone else. 
-              JPG, PNG or GIF. Max size 2MB.
-            </p>
-            <input 
-              ref={fileInputRef}
-              type="file" 
-              accept="image/*" 
-              onChange={handleAvatarUpload}
-              className="hidden" 
-            />
+        <div className="flex flex-col items-center sm:items-start text-center sm:text-left flex-1 min-w-0">
+          <h1 className="text-3xl font-black text-[var(--color-text)] tracking-tight truncate w-full">{profile.full_name || 'Reader'}</h1>
+          <div className="flex items-center gap-3 mt-2 flex-wrap justify-center sm:justify-start">
+            <div className="flex items-center gap-1 bg-indigo-50 dark:bg-indigo-500/10 px-2 py-0.5 rounded-md text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest border border-indigo-100 dark:border-indigo-500/20">
+              <ShieldCheck size={10} strokeWidth={3} />
+              {profile.role}
+            </div>
+            <ReadingStreak streak={profile.reading_streak || 0} />
           </div>
         </div>
       </section>
 
-      {/* Basic Info */}
-      <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[2.5rem] p-8 shadow-sm">
-        <h2 className="text-xs font-black uppercase tracking-widest text-[var(--color-muted)] mb-8">Personal Details</h2>
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 gap-6">
-            <div>
-              <Label className="flex items-center gap-2 mb-2">
-                <User className="w-3.5 h-3.5" /> Full Name
-              </Label>
-              <Input 
-                value={profile.full_name || ''} 
-                onChange={(e) => setProfile(prev => ({ ...prev, full_name: e.target.value }))}
-                placeholder="Janme Jayaswal"
-              />
-            </div>
+      {/* ── STATS GRID ── */}
+      <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Link href="/profile/history" className="p-5 rounded-3xl bg-[var(--color-surface)] border border-[var(--color-border)] flex flex-col items-center text-center hover:border-[var(--color-primary)]/40 hover:shadow-lg hover:shadow-indigo-500/5 transition-all group active:scale-95">
+          <BookOpen className="text-indigo-500 mb-2 group-hover:scale-110 transition-transform" size={24} />
+          <span className="text-xl font-black text-[var(--color-text)]">{stats.articlesRead}</span>
+          <span className="text-[9px] font-bold text-[var(--color-muted)] uppercase tracking-widest mt-1">History</span>
+        </Link>
+        <Link href="/saved" className="p-5 rounded-3xl bg-[var(--color-surface)] border border-[var(--color-border)] flex flex-col items-center text-center hover:border-[var(--color-primary)]/40 hover:shadow-lg hover:shadow-emerald-500/5 transition-all group active:scale-95">
+          <Bookmark className="text-emerald-500 mb-2 group-hover:scale-110 transition-transform" size={24} />
+          <span className="text-xl font-black text-[var(--color-text)]">{stats.bookmarks}</span>
+          <span className="text-[9px] font-bold text-[var(--color-muted)] uppercase tracking-widest mt-1">Saved</span>
+        </Link>
+        <Link href="/profile/comments" className="p-5 rounded-3xl bg-[var(--color-surface)] border border-[var(--color-border)] flex flex-col items-center text-center hover:border-[var(--color-primary)]/40 hover:shadow-lg hover:shadow-amber-500/5 transition-all group active:scale-95">
+          <MessageSquare className="text-amber-500 mb-2 group-hover:scale-110 transition-transform" size={24} />
+          <span className="text-xl font-black text-[var(--color-text)]">{stats.comments}</span>
+          <span className="text-[9px] font-bold text-[var(--color-muted)] uppercase tracking-widest mt-1">Comments</span>
+        </Link>
+        <Link href="/highlights" className="p-5 rounded-3xl bg-[var(--color-surface)] border border-[var(--color-border)] flex flex-col items-center text-center hover:border-[var(--color-primary)]/40 hover:shadow-lg hover:shadow-orange-500/5 transition-all group active:scale-95">
+          <Highlighter className="text-orange-500 mb-2 group-hover:scale-110 transition-transform" size={24} />
+          <span className="text-xl font-black text-[var(--color-text)]">{stats.highlights}</span>
+          <span className="text-[9px] font-bold text-[var(--color-muted)] uppercase tracking-widest mt-1">Highlights</span>
+        </Link>
+      </section>
 
-            <div>
-              <Label className="flex items-center gap-2 mb-2">
-                <Mail className="w-3.5 h-3.5" /> Email Address
-              </Label>
-              <Input 
-                value={userEmail || ''} 
-                disabled 
-                className="opacity-60 bg-black/5"
-              />
-              <p className="text-[10px] text-[var(--color-muted)] mt-1.5 font-semibold px-1">
-                Email address is derived from your account and cannot be changed here.
-              </p>
-            </div>
+      {/* ── EDIT FORM ── */}
+      <section className="max-w-xl">
+        <div className="mb-6">
+          <h2 className="text-lg font-black text-[var(--color-text)] uppercase tracking-tight">Account Settings</h2>
+          <p className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest mt-1">Manage your identity and bio</p>
+        </div>
 
-            <div>
-              <Label className="flex items-center gap-2 mb-2">
-                <ShieldCheck className="w-3.5 h-3.5" /> Account Role
-              </Label>
-              <div className="inline-flex items-center px-4 py-2 rounded-2xl bg-[var(--color-background)] border border-[var(--color-border)]">
-                <span className="text-xs font-black uppercase tracking-widest text-[var(--color-text)] opacity-80">
-                  {profile.role?.replace('_', ' ')}
-                </span>
-              </div>
-            </div>
-
-            <div>
-              <Label className="flex items-center gap-2 mb-2">
-                User ID
-              </Label>
-              <code className="block w-full p-3 bg-black/10 rounded-2xl text-[10px] text-[var(--color-muted)] font-mono break-all border border-[var(--color-border)]/50">
-                {profile.id}
-              </code>
-            </div>
+        <form onSubmit={handleUpdateProfile} className="space-y-6 bg-[var(--color-surface)] p-8 rounded-[2rem] border border-[var(--color-border)]">
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 mb-2 text-[11px] font-black uppercase tracking-widest text-[var(--color-muted)]">
+              <User size={13} strokeWidth={2.5} /> Full Name
+            </Label>
+            <Input 
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Display Name"
+              className="h-14 rounded-2xl bg-[var(--color-surface-2)] border-none text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
+            />
           </div>
 
-          <div className="pt-4 flex justify-end">
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 mb-2 text-[11px] font-black uppercase tracking-widest text-[var(--color-muted)]">
+              <Quote size={13} strokeWidth={2.5} /> Short Bio
+            </Label>
+            <textarea 
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder="Tell us about yourself..."
+              rows={3}
+              className="w-full p-4 rounded-2xl bg-[var(--color-surface-2)] border-none text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none resize-none"
+            />
+          </div>
+
+          <div className="pt-4 flex gap-4">
             <Button 
               type="submit" 
-              disabled={loading}
-              variant="primary"
-              className="h-12 px-8 rounded-2xl text-black font-bold shadow-lg shadow-[var(--color-primary)]/10"
+              disabled={isSaving}
+              className="w-full flex-[2] h-14 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] bg-[var(--color-text)] text-[var(--color-surface)] hover:opacity-90 disabled:opacity-50 transition-all"
             >
-              {loading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                  Saving...
-                </div>
+              {isSaving ? (
+                <div className="w-5 h-5 border-2 border-[var(--color-surface)] border-t-transparent rounded-full animate-spin" />
               ) : (
                 <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4" /> Save Changes
+                  <Check size={16} strokeWidth={3} />
+                  Save Changes
                 </div>
               )}
+            </Button>
+            <Button asChild variant="outline" className="w-full flex-1 h-14 rounded-2xl font-black text-[11px] uppercase tracking-[0.15em] border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-2)]">
+              <Link href="/profile/analytics">
+                Analytics
+              </Link>
             </Button>
           </div>
         </form>
       </section>
+
     </div>
   );
 }

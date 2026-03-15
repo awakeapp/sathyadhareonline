@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { DM_Sans, Baloo_Tamma_2 } from 'next/font/google'
+import { DM_Sans, Baloo_Tamma_2, Noto_Serif_Kannada, Noto_Sans_Kannada, Tiro_Kannada } from 'next/font/google'
 import './globals.css'
 import { createClient } from '@/lib/supabase/server'
 import InstallPrompt from '@/components/InstallPrompt'
@@ -13,6 +13,7 @@ import { Toaster } from 'sonner'
 import { RippleEffect } from '@/components/RippleEffect'
 import { PageTransition } from '@/components/PageTransition'
 import NavigationProgressBar from '@/components/NavigationProgressBar'
+import OneSignalInitializer from '@/components/OneSignalInitializer'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -23,6 +24,25 @@ const dmSans = DM_Sans({
 const balooTamma = Baloo_Tamma_2({
   subsets: ['kannada'],
   variable: '--font-baloo-tamma',
+  display: 'swap',
+})
+
+const notoSerifKannada = Noto_Serif_Kannada({
+  subsets: ['kannada'],
+  variable: '--font-noto-serif-kannada',
+  display: 'swap',
+})
+
+const notoSansKannada = Noto_Sans_Kannada({
+  subsets: ['kannada'],
+  variable: '--font-noto-sans-kannada',
+  display: 'swap',
+})
+
+const tiroKannada = Tiro_Kannada({
+  weight: '400',
+  subsets: ['kannada'],
+  variable: '--font-tiro-kannada',
   display: 'swap',
 })
 
@@ -87,7 +107,7 @@ export default async function RootLayout({
           .maybeSingle();
         
         if (newProfile) {
-          profile = { ...newProfile, avatar_url: null } as any;
+          profile = { ...newProfile, avatar_url: null } as { role: string | null; full_name: string | null; avatar_url: string | null; }
         }
       }
     } catch (e) {
@@ -96,7 +116,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" className={`${dmSans.variable} ${balooTamma.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${dmSans.variable} ${balooTamma.variable} ${notoSerifKannada.variable} ${notoSansKannada.variable} ${tiroKannada.variable}`} suppressHydrationWarning>
       <body
         className="font-sans antialiased transition-colors duration-300"
         style={{ 
@@ -125,7 +145,23 @@ export default async function RootLayout({
             
             <RippleEffect />
             <InstallPrompt />
+            <OneSignalInitializer />
             <Toaster position="top-center" theme="system" richColors />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  if ('serviceWorker' in navigator) {
+                    window.addEventListener('load', function() {
+                      navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                        console.log('SW Registered');
+                      }).catch(function(err) {
+                        console.log('SW Failed', err);
+                      });
+                    });
+                  }
+                `
+              }}
+            />
 
             {/* ── Floating Return-to-Dashboard button (reader mode active) ── */}
             <DashboardReturnFab

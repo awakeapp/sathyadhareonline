@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Mail, Download, Trash2, CheckCircle2, AlertCircle, Users, X } from 'lucide-react';
+import { Mail, Download, Trash2, CheckCircle2, AlertCircle, Users, X, Bell } from 'lucide-react';
 import { 
   PresenceCard, 
   PresenceButton 
@@ -22,6 +22,12 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
   const [errorMsg, setErrorMsg] = useState('');
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  // Push Notification state
+  const [showPushCompose, setShowPushCompose] = useState(false);
+  const [pushTitle, setPushTitle] = useState('');
+  const [pushMsg, setPushMsg] = useState('');
+  const [pushStatus, setPushStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
 
   function handleExport() {
     const header = 'Email,Subscribed';
@@ -83,6 +89,35 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
     }
   }
 
+  async function handleSendPush(e: React.FormEvent) {
+    e.preventDefault();
+    if (!pushTitle.trim() || !pushMsg.trim()) return;
+    setPushStatus('sending');
+    setErrorMsg('');
+
+    try {
+      const res = await fetch('/api/admin/push/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: pushTitle, message: pushMsg }),
+      });
+
+      if (res.ok) {
+        setPushStatus('sent');
+        setPushTitle('');
+        setPushMsg('');
+        setTimeout(() => { setPushStatus('idle'); setShowPushCompose(false); }, 3000);
+      } else {
+        const j = await res.json();
+        setPushStatus('error');
+        setErrorMsg(j.error ?? 'Failed to send push notification');
+      }
+    } catch {
+      setPushStatus('error');
+      setErrorMsg('Network error sending push notification');
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4">
       
@@ -91,14 +126,17 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50">
-                <Mail className="w-6 h-6" strokeWidth={1.25} />
+                <Bell className="w-6 h-6" strokeWidth={1.25} />
              </div>
              <div>
-                <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Newsletters</h2>
-                <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-0.5">Send emails to your subscribers</p>
+                <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Broadcasting</h2>
+                <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-0.5">Send emails and push alerts</p>
              </div>
           </div>
           <div className="flex gap-3">
+            <PresenceButton onClick={() => setShowPushCompose(true)} className="bg-rose-500 text-white font-black tracking-widest text-[10px] uppercase shadow-xl shadow-rose-500/20">
+               Send Push
+            </PresenceButton>
             <PresenceButton onClick={() => setShowCompose(true)} className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black tracking-widest text-[10px] uppercase shadow-xl shadow-indigo-500/20">
                Compose Email
             </PresenceButton>
@@ -147,7 +185,7 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
         )}
       </PresenceCard>
 
-      {/* ── COMPOSE MODAL ── */}
+      {/* ── EMAIL MODAL ── */}
       {showCompose && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-zinc-950/80 backdrop-blur-xl animate-in fade-in duration-300">
            <div className="w-full max-w-2xl bg-white dark:bg-[#181623] rounded-[3rem] shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
@@ -204,6 +242,69 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
                      disabled={sendStatus === 'sending' || sendStatus === 'sent'}
                    >
                      {sendStatus === 'sent' ? 'SENT' : 'SEND EMAIL'}
+                   </PresenceButton>
+                 </div>
+              </form>
+           </div>
+        </div>
+      )}
+
+      {/* ── PUSH NOTIFICATION MODAL ── */}
+      {showPushCompose && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-zinc-950/80 backdrop-blur-xl animate-in fade-in duration-300">
+           <div className="w-full max-w-2xl bg-white dark:bg-[#181623] rounded-[3rem] shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
+              <div className="p-10 border-b border-rose-50 dark:border-white/5 flex items-center justify-between bg-rose-50/30">
+                 <div>
+                    <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Broadcast Push</h2>
+                    <p className="text-[10px] font-black text-rose-600 uppercase tracking-widest mt-1">Instant Alert to all devices</p>
+                 </div>
+                 <button className="w-12 h-12 rounded-full bg-white dark:bg-zinc-950 text-zinc-500 flex items-center justify-center shadow-sm" onClick={() => setShowPushCompose(false)}>
+                    <X className="w-6 h-6" strokeWidth={1.25} />
+                 </button>
+              </div>
+              
+              <form onSubmit={handleSendPush} className="p-10 flex flex-col gap-4">
+                 <div className="space-y-3">
+                   <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Push Title</label>
+                   <input 
+                     value={pushTitle} 
+                     onChange={e => setPushTitle(e.target.value)} 
+                     required 
+                     placeholder="Breaking News: Sathyadhare Exclusive..." 
+                     className="w-full h-14 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-sm font-bold shadow-inner" 
+                   />
+                 </div>
+                 <div className="space-y-3">
+                   <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Push Message</label>
+                   <textarea 
+                     value={pushMsg} 
+                     onChange={e => setPushMsg(e.target.value)} 
+                     required 
+                     rows={4} 
+                     placeholder="Brief message appearing on lock screens..." 
+                     className="w-full p-6 rounded-[2rem] bg-zinc-50 dark:bg-zinc-950 border-none text-sm font-bold shadow-inner placeholder-gray-300 resize-none"
+                   />
+                 </div>
+
+                 <div className="flex flex-col gap-4">
+                   {pushStatus === 'error' && (
+                     <div className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-rose-50 text-rose-500 text-xs font-black uppercase tracking-widest">
+                       <AlertCircle className="w-5 h-5" strokeWidth={1.25} /> {errorMsg}
+                     </div>
+                   )}
+                   {pushStatus === 'sent' && (
+                     <div className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-emerald-50 text-emerald-500 text-xs font-black uppercase tracking-widest">
+                       <CheckCircle2 className="w-5 h-5" strokeWidth={1.25} /> Push alert sent!
+                     </div>
+                   )}
+                   
+                   <PresenceButton 
+                     type="submit" 
+                     className="w-full h-16 bg-rose-500 text-white font-black tracking-[0.2em] text-xs uppercase shadow-2xl shadow-rose-500/20 underline-offset-4" 
+                     loading={pushStatus === 'sending'} 
+                     disabled={pushStatus === 'sending' || pushStatus === 'sent'}
+                   >
+                     {pushStatus === 'sent' ? 'BLASTED!' : 'BLAST PUSH ALERT'}
                    </PresenceButton>
                  </div>
               </form>

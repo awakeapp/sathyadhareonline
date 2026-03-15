@@ -13,5 +13,19 @@ export default async function BooksPage() {
     .select('*')
     .order('created_at', { ascending: false });
 
-  return <BooksClient initialBooks={books || []} />;
+  // Fetch articles to allow adding them as chapters
+  const { data: articles } = await supabase
+    .from('articles')
+    .select('id, title, category:categories(name)')
+    .eq('is_deleted', false)
+    .eq('status', 'published')
+    .order('created_at', { ascending: false });
+
+  const mappedArticles = (articles || []).map(a => ({
+    id: a.id,
+    title: a.title,
+    category: a.category as { name: string } | { name: string }[] | null,
+  }));
+
+  return <BooksClient initialBooks={books || []} availableArticles={mappedArticles} />;
 }

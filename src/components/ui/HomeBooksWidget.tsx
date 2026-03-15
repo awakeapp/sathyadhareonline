@@ -1,6 +1,7 @@
 'use client';
 
 import { BookOpen } from 'lucide-react';
+import Link from 'next/link';
 
 interface Book {
   id: string;
@@ -22,25 +23,23 @@ export default function HomeBooksWidget({ books }: Props) {
     <div className="mb-8">
       <div className="flex items-center gap-2 mb-4 px-1">
         <BookOpen className="w-5 h-5 text-[#685de6]" />
-        <h2 className="text-lg font-black tracking-tight text-[var(--color-text)]">Library</h2>
-        <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-muted)] ml-auto bg-[var(--color-surface-2)] px-2 py-1 rounded-full">
-          PDFs
-        </span>
+        <Link href="/books" className="text-lg font-black tracking-tight text-[var(--color-text)] hover:text-[#685de6] transition-colors">Library</Link>
+        <Link href="/books" className="text-[10px] font-black uppercase tracking-widest text-[#685de6] ml-auto bg-[#685de6]/10 px-3 py-1.5 rounded-full hover:bg-[#685de6]/20 transition-colors">
+          View All
+        </Link>
       </div>
 
       {/* Horizontal scrolling container */}
       <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory hide-scrollbar -mx-4 px-4">
         {books.map((b) => (
-          <a
+          <Link
             key={b.id}
-            href={b.drive_link}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={`/books/${b.id}`}
             className="group flex flex-col shrink-0 w-[120px] sm:w-[140px] snap-start tap-highlight"
             title={`Read ${b.title}`}
           >
-            {/* Cover image (approx aspect ratio of a standard book ~2:3) */}
-            <div className="w-full aspect-[2/3] rounded-2xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)] shadow-md group-hover:shadow-[0_8px_20px_rgba(104,93,230,0.15)] group-hover:-translate-y-1 transition-all duration-300 relative">
+            {/* Cover image (approx 3:4 aspect ratio) */}
+            <div className="w-full aspect-[3/4] rounded-2xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)] shadow-md group-hover:shadow-[0_8px_20px_rgba(104,93,230,0.15)] group-hover:-translate-y-1 transition-all duration-300 relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={b.cover_image}
@@ -48,7 +47,8 @@ export default function HomeBooksWidget({ books }: Props) {
                 className="w-full h-full object-cover"
                 loading="lazy"
               />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+              <div className="absolute inset-y-0 left-0 w-3 bg-gradient-to-r from-white/20 to-transparent pointer-events-none" />
             </div>
             {/* Metadata */}
             <div className="pt-3 pb-1">
@@ -61,7 +61,7 @@ export default function HomeBooksWidget({ books }: Props) {
                 </p>
               )}
             </div>
-          </a>
+          </Link>
         ))}
       </div>
     </div>

@@ -40,8 +40,8 @@ export default async function NewArticlePage() {
     const excerpt = formData.get('excerpt') as string;
     const content = formData.get('content') as string;
     const category_id = formData.get('category_id') as string;
-    // We now use author_id from the dropdown
-    const author_id = formData.get('author_id') as string;
+    // We now use author_name from the text input
+    const author_name = formData.get('author_name') as string;
     const coverFile = formData.get('cover_image') as File | null;
     const action_type = formData.get('action_type') as string;
 
@@ -85,7 +85,8 @@ export default async function NewArticlePage() {
         content,
         category_id: category_id || null,
         status,
-        author_id: author_id || actionUser.id,
+        author_id: actionUser.id,
+        author_name,
         published_at,
       })
       .select('id')

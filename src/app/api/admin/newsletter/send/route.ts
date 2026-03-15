@@ -12,12 +12,13 @@ export async function POST(req: NextRequest) {
 
   const { data: profile } = await supabase
     .from('profiles').select('role').eq('id', user.id).single();
-  if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
+  
+  if (!profile || !['admin', 'super_admin', 'editor'].includes(profile.role || '')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const body = await req.json();
-  const { subject, body: content, recipients } = body as {
+  const resBody = await req.json();
+  const { subject, body: content, recipients } = resBody as {
     subject: string; body: string; recipients: string[];
   };
 
@@ -25,20 +26,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing subject, body, or recipients' }, { status: 400 });
   }
 
-  // ── Option A: Supabase Edge Function ─────────────────────────
-  // If you have a "send-newsletter" edge function deployed, uncomment:
-  // const { data, error } = await supabase.functions.invoke('send-newsletter', {
-  //   body: { subject, content, recipients },
-  // });
-  // if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-
-  // ── Option B: Resend REST API ─────────────────────────────────
   const resendKey = process.env.RESEND_API_KEY;
   if (resendKey) {
     try {
-      const batchSize = 50; // Resend batch limit
+      const batchSize = 50; 
       for (let i = 0; i < recipients.length; i += batchSize) {
         const batch = recipients.slice(i, i + batchSize);
+        const fromEmail = process.env.NEWSLETTER_FROM_EMAIL ?? 'onboarding@resend.dev';
+        const fromName = 'Sathyadhare';
+        
         const response = await fetch('https://api.resend.com/emails/batch', {
           method: 'POST',
           headers: {
@@ -46,9 +42,23 @@ export async function POST(req: NextRequest) {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(batch.map(to => ({
-            from: process.env.NEWSLETTER_FROM_EMAIL ?? 'Sathyadhare <newsletter@sathyadhare.com>',
+            from: `${fromName} <${fromEmail}>`,
             to,
             subject,
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #111; line-height: 1.6;">
+                <h1 style="color: #685de6; font-size: 24px; font-weight: 900; letter-spacing: -0.02em; text-transform: uppercase;">
+                  Sathyadhare
+                </h1>
+                <div style="margin-top: 32px; font-size: 16px;">
+                  ${content.replace(/\n/g, '<br/>')}
+                </div>
+                <hr style="margin-top: 48px; border: none; border-top: 1px solid #eee;" />
+                <p style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; text-align: center;">
+                  Truth Always Triumphs
+                </p>
+              </div>
+            `,
             text: content,
           }))),
         });
@@ -56,13 +66,13 @@ export async function POST(req: NextRequest) {
         if (!response.ok) {
           const err = await response.text();
           console.error('Resend error:', err);
-          return NextResponse.json({ error: `Resend batch ${i / batchSize + 1} failed: ${err}` }, { status: 500 });
+          return NextResponse.json({ error: `Resend failed: ${err}` }, { status: 500 });
         }
       }
       return NextResponse.json({ ok: true, count: recipients.length });
     } catch (e) {
       console.error('Newsletter send error:', e);
-      return NextResponse.json({ error: 'Failed to send via Resend' }, { status: 500 });
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
   }
 

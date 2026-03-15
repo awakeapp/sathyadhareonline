@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import type { Metadata } from 'next';
@@ -8,11 +9,30 @@ import SectionHeader from '@/components/ui/SectionHeader';
 import HorizontalScroller from '@/components/ui/HorizontalScroller';
 import { ArticleViewTracker } from './ArticleViewTracker';
 import { BookmarkButton } from './BookmarkButton';
+import { ScrollRestorer } from '@/components/ScrollRestorer';
 import { revalidatePath } from 'next/cache';
 import { Card } from '@/components/ui/Card';
 import { CommentBox } from './CommentBox';
 import ShareButtons from '@/components/ShareButtons';
 import ArticleReaderControls, { CopyProtected } from './ArticleReaderControls';
+import { marked } from 'marked';
+import ArticleLikeButton from '@/components/ArticleLikeButton';
+import ArticleReadingTools from '@/components/ArticleReadingTools';
+import TableOfContents from '@/components/TableOfContents';
+import ChapterNav from '@/components/ChapterNav';
+import ContinueReading from './ContinueReading';
+import { ReadingProgressTracker } from './ReadingProgressTracker';
+
+// Convert Kannada digits to English digits
+const KANNADA_NUMS = ['೦', '೧', '೨', '೩', '೪', '೫', '೬', '೭', '೮', '೯'];
+function translateNum(str: string) {
+  if (!str) return str;
+  let res = str;
+  for (let i = 0; i < 10; i++) {
+    res = res.split(KANNADA_NUMS[i]).join(i.toString());
+  }
+  return res;
+}
 
 function calculateReadTime(content: string) {
   const wordsPerMinute = 200;
@@ -31,15 +51,51 @@ async function trackView(articleId: string, sessionId: string): Promise<void> {
 
   const supabase = await createClient();
 
-  // Optional: attach the logged-in user_id if available
   const { data: { user } } = await supabase.auth.getUser();
 
+  // 1. Record the view
   await supabase.from('article_views').insert({
     article_id: articleId,
     session_id: sessionId,
     user_id: user?.id ?? null,
     viewed_at: new Date().toISOString(),
   });
+
+  // 2. Update Streak if logged in
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('reading_streak, last_read_date')
+      .eq('id', user.id)
+      .single();
+
+    if (profile) {
+      const lastRead = profile.last_read_date ? new Date(profile.last_read_date) : null;
+      const now = new Date();
+      
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const lastDate = lastRead ? new Date(lastRead.getFullYear(), lastRead.getMonth(), lastRead.getDate()) : null;
+
+      if (!lastDate || today.getTime() > lastDate.getTime()) {
+        let newStreak = 1;
+        
+        if (lastDate) {
+          const diffDays = Math.floor((today.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+          if (diffDays === 1) {
+            newStreak = (profile.reading_streak || 0) + 1;
+          }
+        }
+
+        await supabase
+          .from('profiles')
+          .update({
+            reading_streak: newStreak,
+            last_read_date: now.toISOString(),
+          })
+          .eq('id', user.id);
+      }
+    }
+  }
 }
 
 // ── Bookmark server actions ──────────────────────────────────
@@ -81,15 +137,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const supabase = await createClient();
   const { data: dbArticle } = await supabase
-    .from('articles').select('title, excerpt, cover_image').eq('slug', decodeURIComponent(slug)).single();
+    .from('articles')
+    .select('title, excerpt, cover_image, content, author:profiles(full_name), category:categories(name)')
+    .eq('slug', decodeURIComponent(slug)).single();
     
   if (!dbArticle) return {};
   const article = dbArticle;
+  const category = Array.isArray(article.category) ? article.category[0] : article.category;
+  const author = Array.isArray(article.author) ? article.author[0] : article.author;
+  const readTime = article.content ? `${Math.ceil(article.content.replace(/<[^>]*>/g, '').split(/\s+/).length / 200)} MIN READ` : '';
+  const baseUrl = 'https://sathyadhare.com';
+  const ogImageUrl = `${baseUrl}/api/og?title=${encodeURIComponent(article.title)}&category=${encodeURIComponent(category?.name || '')}&author=${encodeURIComponent(author?.full_name || 'Sathyadhare')}&readTime=${encodeURIComponent(readTime)}${article.cover_image ? `&image=${encodeURIComponent(article.cover_image)}` : ''}`;
+
   return {
     title: `${article.title} | Sathyadhare`,
     description: article.excerpt || '',
-    openGraph: { title: article.title, description: article.excerpt || '', images: article.cover_image ? [article.cover_image] : [] },
-    twitter: { card: 'summary_large_image', title: article.title, description: article.excerpt || '', images: article.cover_image ? [article.cover_image] : [] },
+    openGraph: {
+      title: article.title,
+      description: article.excerpt || '',
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: article.title }],
+      type: 'article',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.title,
+      description: article.excerpt || '',
+      images: [ogImageUrl],
+    },
   };
 }
 
@@ -104,6 +178,7 @@ export default async function ArticlePage({ params }: Props) {
     
   if (error || !dbArticle) notFound();
   const article = dbArticle;
+  const author = Array.isArray(article.author) ? article.author[0] : article.author;
 
   // Check user
   const { data: { user } } = await supabase.auth.getUser();
@@ -125,11 +200,59 @@ export default async function ArticlePage({ params }: Props) {
     .select('id, title, slug, excerpt, cover_image, published_at, category:categories(name)')
     .eq('category_id', article.category_id).eq('status', 'published').neq('id', article.id).limit(4);
 
+  // Check if this article belongs to a sequel for chapter nav
+  const { data: sequelArticleRow } = await supabase
+    .from('sequel_articles')
+    .select('sequel_id, order_index, sequel:sequels(id, title, slug)')
+    .eq('article_id', article.id)
+    .maybeSingle();
+
+  let prevChapter = null;
+  let nextChapter = null;
+  let sequelInfo: { title: string; slug: string } | null = null;
+  let currentChapterIndex = 1;
+  let totalChapters = 1;
+
+  if (sequelArticleRow && sequelArticleRow.sequel_id) {
+    const seqData = Array.isArray(sequelArticleRow.sequel) ? sequelArticleRow.sequel[0] : sequelArticleRow.sequel;
+    if (seqData) {
+      sequelInfo = { title: seqData.title, slug: seqData.slug };
+    }
+
+    // Get all chapters in order
+    const { data: allChapters } = await supabase
+      .from('sequel_articles')
+      .select('order_index, article:articles(id, title, slug, status, is_deleted)')
+      .eq('sequel_id', sequelArticleRow.sequel_id)
+      .order('order_index', { ascending: true });
+
+    type ChapterRow = { id: string; title: string; slug: string; status: string; is_deleted: boolean };
+    const published = (allChapters ?? [])
+      .map(c => c.article as unknown as ChapterRow)
+      .filter(a => a && a.status === 'published' && !a.is_deleted);
+
+    totalChapters = published.length;
+    const thisIdx = published.findIndex(a => a.id === article.id);
+    currentChapterIndex = thisIdx + 1;
+
+    if (thisIdx > 0) {
+      const p = published[thisIdx - 1];
+      prevChapter = { id: p.id, title: p.title, slug: p.slug, order_index: thisIdx - 1 };
+    }
+    if (thisIdx < published.length - 1) {
+      const n = published[thisIdx + 1];
+      nextChapter = { id: n.id, title: n.title, slug: n.slug, order_index: thisIdx + 1 };
+    }
+  }
+
   const autoReadTime = calculateReadTime(article.content || '');
   const readTimeLabel = `${autoReadTime} MIN READ`;
   const category = Array.isArray(article.category) ? article.category[0] : article.category;
   const categoryName = category?.name || 'ARTICLE';
   const date = formatDate(article.published_at || article.created_at);
+
+  // Rendered HTML for TOC and TTS
+  const renderedHtml = marked.parse(translateNum(article.content || '')) as string;
 
   return (
     <div className="font-sans antialiased min-h-[100svh] px-4 pb-0 max-w-lg mx-auto sm:max-w-2xl lg:max-w-3xl article-page-container">
@@ -160,11 +283,18 @@ export default async function ArticlePage({ params }: Props) {
 
       {/* View tracker — fires once per article per browser session */}
       <ArticleViewTracker articleId={article.id} trackView={trackView} />
-      <ReadingProgress />
+      <ScrollRestorer storageKey={article.id} isAuthenticated={!!user} userId={user?.id} />
+      <ReadingProgress estimatedMinutes={autoReadTime} />
+      <ReadingProgressTracker articleId={article.id} userId={user?.id} />
 
       {/* ─── Reader Controls: theme toggle, fullscreen, scroll buttons ─── */}
       {/* For privileged roles, this also renders a minimal overlay header */}
-      <ArticleReaderControls />
+      <ArticleReaderControls 
+        articleId={article.id} 
+        userId={user?.id} 
+        contentHtml={article.content} 
+        title={article.title}
+      />
 
       {/* ─── Article Header — hide in fullscreen ─── */}
       <header className="hide-in-fullscreen pt-3 pb-5 border-b border-[var(--color-border)] mb-6">
@@ -184,7 +314,16 @@ export default async function ArticlePage({ params }: Props) {
           </div>
           <div>
             <p className="text-[13px] font-black text-[var(--color-text)] leading-none mb-1">
-              {(Array.isArray(article.author) ? article.author[0] : article.author)?.full_name || 'Sathyadhare Editorial'}
+              {author?.id ? (
+                <Link 
+                  href={`/authors/${author.id}`}
+                  className="hover:text-[var(--color-primary)] transition-colors"
+                >
+                  {article.author_name || author?.full_name || 'Sathyadhare Editorial'}
+                </Link>
+              ) : (
+                article.author_name || author?.full_name || 'Sathyadhare Editorial'
+              )}
             </p>
             {/* Category · Date · Read time — one compact pill row */}
             <div className="flex items-center gap-1.5 text-[10px] font-semibold text-[var(--color-muted)] uppercase tracking-wider flex-wrap">
@@ -208,16 +347,24 @@ export default async function ArticlePage({ params }: Props) {
           </div>
         </div>
 
-        {/* Share + Save row — full width, balanced */}
-        <ShareButtons title={article.title} slug={article.slug}>
-          <BookmarkButton
-            articleId={article.id}
-            initialSaved={initialSaved}
-            isAuthenticated={!!user}
-            saveAction={saveArticle}
-            removeAction={removeArticle}
-          />
-        </ShareButtons>
+        {/* Share + Save row */}
+        <div className="flex items-center gap-2 mb-4">
+          <ShareButtons title={article.title} slug={article.slug}>
+            <BookmarkButton
+              articleId={article.id}
+              initialSaved={initialSaved}
+              isAuthenticated={!!user}
+              saveAction={saveArticle}
+              removeAction={removeArticle}
+            />
+          </ShareButtons>
+        </div>
+
+        {/* Like Button */}
+        <div className="flex items-center gap-2">
+          <ArticleLikeButton articleId={article.id} />
+          <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Express your appreciation</span>
+        </div>
       </header>
 
       {/* Hero Image — reduced height for better focus on reading */}
@@ -234,18 +381,54 @@ export default async function ArticlePage({ params }: Props) {
         </Card>
       )}
 
-      {/* Article content — copy-protected */}
-      <CopyProtected
-        html={article.content}
-        className="prose-article mt-6 mb-12"
+      {/* Premium Reading Tools: AI Summary + Audio Row */}
+      <ArticleReadingTools
+        articleId={article.id}
+        content={article.content || ''}
+        title={article.title}
+        existingSummary={article.ai_summary || null}
       />
+
+      {/* Desktop: TOC + Content side by side; Mobile: TOC floating button */}
+      <div className="relative">
+        <TableOfContents contentHtml={renderedHtml} />
+        <div className="w-full">
+          {/* Article content — copy-protected */}
+          <CopyProtected
+            html={renderedHtml}
+            className="prose-article mt-4 mb-12"
+            articleId={article.id}
+            userId={user?.id}
+          />
+        </div>
+      </div>
 
       {/* Comment Section */}
       <div className="hide-in-fullscreen">
+        {/* Continue Reading CTA */}
+        {related && related[0] && !nextChapter && (
+          <ContinueReading article={related[0] as unknown as { title: string; slug: string; cover_image?: string | null; category?: { name: string } | null }} />
+        )}
+        {nextChapter && (
+          <ContinueReading article={nextChapter as unknown as { title: string; slug: string; cover_image?: string | null; category?: { name: string } | null }} label="Next Chapter" />
+        )}
+
         <CommentBox 
           articleId={article.id}
           isAuthenticated={!!user} 
         />
+
+        {/* Chapter Navigation (only if part of a sequel) */}
+        {sequelInfo && (
+          <ChapterNav
+            prev={prevChapter}
+            next={nextChapter}
+            currentIndex={currentChapterIndex}
+            totalChapters={totalChapters}
+            sequelTitle={sequelInfo.title}
+            sequelSlug={sequelInfo.slug}
+          />
+        )}
 
         {/* Related Articles Scroller */}
         {related && related.length > 0 && (

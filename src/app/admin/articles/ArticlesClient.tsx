@@ -313,7 +313,16 @@ export default function ArticlesClient({
                     </td>
                     <td className="py-3 px-4 text-right">
                       <div className="flex items-center justify-end gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                        <button 
+                          disabled={isPending}
+                          onClick={() => wrapAction(bulkUpdateStatus([a.id], a.status === 'published' ? 'draft' : 'published'), a.status === 'published' ? 'Article drafted' : 'Article published')}
+                          className={`p-2 rounded-lg transition-colors ${a.status === 'published' ? 'text-emerald-500 hover:bg-emerald-500/10' : 'text-amber-500 hover:bg-amber-500/10'}`}
+                          title={a.status === 'published' ? 'Change to Draft' : 'Publish Now'}
+                        >
+                          {a.status === 'published' ? <CheckCircle2 className="w-4 h-4" strokeWidth={2} /> : <FileText className="w-4 h-4" strokeWidth={2} />}
+                        </button>
                         <Link href={`/articles/${a.slug}`} target="_blank" className="p-2 text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-border)] rounded-lg transition-colors" title="Preview">
+
                           <Eye className="w-4 h-4" strokeWidth={2} />
                         </Link>
                         <Link href={`/admin/articles/${a.id}/edit`} className="p-2 text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 rounded-lg transition-colors" title="Edit">

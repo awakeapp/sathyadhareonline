@@ -5,6 +5,7 @@ export const revalidate = 60;
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ScrollRestorer } from '@/components/ScrollRestorer';
 
 export default async function SequelPage({ params }: { params: { slug: string } }) {
   const { slug } = await params;
@@ -22,6 +23,8 @@ export default async function SequelPage({ params }: { params: { slug: string } 
   if (sequelError || !sequel) {
     return notFound();
   }
+
+  const { data: { user } } = await supabase.auth.getUser();
 
   // Fetch attached articles
   // Using an inner join to only fetch related articles.
@@ -57,6 +60,7 @@ export default async function SequelPage({ params }: { params: { slug: string } 
 
   return (
     <article className="min-h-screen bg-gray-50 pb-24">
+      <ScrollRestorer storageKey={`sequel_${sequel.id}`} isAuthenticated={!!user} userId={user?.id} />
       {/* Header / Banner Section */}
       <header className="relative w-full h-[400px] md:h-[500px] bg-indigo-900 overflow-hidden shadow-inner">
         {sequel.banner_image && (

@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import ReaderModeBar from '@/components/ReaderModeBar'
+import ScrollToTop from '@/components/ui/ScrollToTop'
 
 const AUTH_PATHS = ['/login', '/signup']
 
@@ -25,6 +26,9 @@ export default function MainWrapper({ children }: { children: React.ReactNode })
       <ReaderModeBar />
 
       {children}
+
+      {/* Global ScrollToTop for reader pages, hiding on auth and admin routes */}
+      {!isAuthPage && !isAdminRoute && <ScrollToTop />}
     </main>
   )
 }

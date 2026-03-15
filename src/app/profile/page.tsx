@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { ProfileForm } from './ProfileForm';
+import ProfileForm from './ProfileForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +19,6 @@ export default async function ProfilePage() {
     .single();
 
   if (!profile) {
-    // This shouldn't happen if auth is working correctly, but handle it
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <p className="text-[var(--color-muted)] font-bold">Profile not found.</p>
@@ -27,16 +26,52 @@ export default async function ProfilePage() {
     );
   }
 
+  // ── FETCH STATS ───────────────────────────────────────────
+  // 1. Articles Read (Views)
+  const { count: readCount } = await supabase
+    .from('article_views')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id);
+
+  // 2. Bookmarks
+  const { count: bookmarkCount } = await supabase
+    .from('bookmarks')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id);
+
+  // 3. Comments
+  const { count: commentCount } = await supabase
+    .from('comments')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id);
+
+  // 4. Highlights
+  const { count: highlightCount } = await supabase
+    .from('article_highlights')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id);
+
+  const stats = {
+    articlesRead: readCount || 0,
+    bookmarks: bookmarkCount || 0,
+    comments: commentCount || 0,
+    highlights: highlightCount || 0
+  };
+
   return (
     <div className="max-w-xl mx-auto py-8 px-4 sm:px-6">
       <header className="mb-8">
         <h1 className="text-3xl font-black tracking-tight text-[var(--color-text)]">My Profile</h1>
         <p className="text-sm text-[var(--color-muted)] font-medium mt-1">
-          Manage your personal information and public profile.
+          Manage your personal information and see your reading stats.
         </p>
       </header>
 
-      <ProfileForm profile={profile} userEmail={user.email} />
+      <ProfileForm 
+        profile={profile} 
+        userEmail={user.email} 
+        stats={stats}
+      />
     </div>
   );
 }

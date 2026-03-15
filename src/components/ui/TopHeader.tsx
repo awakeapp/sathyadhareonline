@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useReaderMode } from '@/context/ReaderModeContext';
 import { useTheme } from 'next-themes';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
-import { ArrowLeft, Eye, Maximize2, User as UserIcon } from 'lucide-react';
+import { ArrowLeft, Bell, Eye, Maximize2, User as UserIcon } from 'lucide-react';
 import { SA_SECTIONS, ADMIN_SECTIONS, EDITOR_SECTIONS } from '../navigation/nav-items';
 
 
@@ -22,11 +22,11 @@ interface TopHeaderProps {
   } | null;
 }
 
-export default function TopHeader({ user, role, profile }: TopHeaderProps) {
+export default function TopHeader({ user, role }: TopHeaderProps) {
   const pathname = usePathname();
 
   // ── Reader‑mode context ──────────────────────────────────────────────────
-  const { readerMode, disableReaderMode } = useReaderMode();
+  const { disableReaderMode } = useReaderMode();
 
   const isAuthPage       = pathname === '/login' || pathname === '/signup';
   const isAdminRoute     = pathname.startsWith('/admin') || pathname.startsWith('/editor');
@@ -69,13 +69,12 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
   // readerMode is read from localStorage on the client. During SSR/first render
   // it is always `false`. We wait one frame after mount before trusting it, so
   // the banner and return buttons don't flicker in/out on page load.
-  const [readerModeMounted, setReaderModeMounted] = useState(false);
   useEffect(() => {
-    // requestAnimationFrame defers until after the browser has painted, ensuring
-    // the localStorage value has been read and React state is settled.
-    const id = requestAnimationFrame(() => setReaderModeMounted(true));
+    const id = requestAnimationFrame(() => {});
     return () => cancelAnimationFrame(id);
   }, []);
+
+  /* ── Scroll Tracking ────────────────────────────────────────── */
 
   useEffect(() => {
     const handleToggleMenu = () => setIsMenuOpen((prev) => !prev);
@@ -142,9 +141,8 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
     <>
       {!isAdminRoute && (
       <header
-        className="fixed left-0 right-0 z-50 w-full transition-colors duration-300 backdrop-blur-2xl bg-white/80 dark:bg-[#181623]/80 border-b border-[var(--color-border)]"
+        className="fixed top-0 left-0 right-0 z-50 w-full backdrop-blur-2xl bg-white/80 dark:bg-[#181623]/80 border-b border-[var(--color-border)] transition-colors duration-300"
         style={{
-          top: '0px',
           paddingTop: 'env(safe-area-inset-top, 0px)',
         }}
       >
@@ -213,6 +211,18 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
             {/* ── Global Header Actions (Theme, Profile) — hidden on ALL article pages ── */}
             {!isArticlePage && !(isPrivilegedRole && isArticlePage) && (
               <div className="flex items-center gap-1.5 ml-1">
+
+                {/* Notification Bell */}
+                {clientUser && (
+                  <Link
+                    href="/profile/history"
+                    className="tap-highlight w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-all active:scale-95 shadow-sm relative"
+                    title="Notifications"
+                  >
+                    <Bell className="w-[15px] h-[15px]" strokeWidth={2.5} />
+                    <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 border-2 border-white dark:border-[#181623] rounded-full" />
+                  </Link>
+                )}
 
                 {/* Global Theme Switcher */}
                 <div className="w-8 h-8 flex items-center justify-center">

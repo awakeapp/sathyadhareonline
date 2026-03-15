@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
-import { Share2, Link as LinkIcon, Bookmark, Check } from 'lucide-react';
+import { Share2, Link as LinkIcon, Bookmark, Check, Heart } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
@@ -17,6 +17,8 @@ interface Article {
   published_at?: string | null;
   read_time?: number | null;
   content?: string | null;   // if passed, used for more accurate read time
+  reactions?: { count: number }[] | null;
+  like_count?: number;
 }
 
 interface ArticleCardProps {
@@ -172,6 +174,11 @@ function HorizontalCard({ article, readTime, date, categoryName }: { article: Ar
                   </svg>
                   {readTime}
                 </span>
+                <span className="opacity-40">|</span>
+                <span className="flex items-center gap-1 shrink-0 text-rose-500/80">
+                  <Heart size={10} strokeWidth={3} className="fill-current" />
+                  {article.like_count ?? (Array.isArray(article.reactions) ? article.reactions[0]?.count : 0) ?? 0}
+                </span>
               </div>
 
               {/* Share & Copy logic inline */}
@@ -259,6 +266,11 @@ export default function ArticleCard({ article, variant = 'list' }: ArticleCardPr
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   {readTime}
+                </span>
+                <span className="opacity-30">•</span>
+                <span className="flex items-center gap-1 text-rose-500/80">
+                  <Heart size={11} strokeWidth={2.5} className="fill-current" />
+                  {article.like_count ?? (Array.isArray(article.reactions) ? article.reactions[0]?.count : 0) ?? 0}
                 </span>
               </div>
             </Link>

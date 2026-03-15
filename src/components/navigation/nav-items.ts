@@ -63,7 +63,7 @@ export const SA_SECTIONS: NavSection[] = [
     items: [
       { label: 'Comments', href: '/admin/comments', icon: MessageSquare },
       { label: 'Analytics', href: '/admin/analytics', icon: BarChart2 },
-      { label: 'Notifications', href: '/admin/audit-logs', icon: ScrollText },
+      { label: 'Audit Logs', href: '/admin/audit-logs', icon: ScrollText },
     ],
   },
   {
