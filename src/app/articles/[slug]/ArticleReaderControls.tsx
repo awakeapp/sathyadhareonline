@@ -1,28 +1,16 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { 
-  ChevronUp, ChevronDown, Minimize2, 
-  Settings, Plus, Minus, Maximize, 
+  ChevronUp, ChevronDown, Minimize2,
+  Settings, Plus, Minus, 
   List, RotateCcw, Highlighter, Share2, 
-  Clipboard, Eye, EyeOff, X, Loader2,
-  AlignCenter, AlignLeft, AlignJustify,
-  Type
+  Clipboard, X, Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-/* ─── Browser compatibility types ──────────────────────────── */
-interface FullscreenDocument extends Document {
-  webkitFullscreenElement?: Element | null;
-  mozFullScreenElement?: Element | null;
-  webkitExitFullscreen?: () => Promise<void>;
-  mozCancelFullScreen?: () => Promise<void>;
-}
-interface FullscreenElement extends HTMLElement {
-  webkitRequestFullscreen?: () => Promise<void>;
-  mozRequestFullScreen?: () => Promise<void>;
-}
+
 
 /* ─────────────────── Main Component ─────────────────── */
 interface ArticleReaderControlsProps {
@@ -30,17 +18,13 @@ interface ArticleReaderControlsProps {
   userId?: string | null;
 }
 
-export default function ArticleReaderControls({ articleId, userId }: ArticleReaderControlsProps) {
+export default function ArticleReaderControls({ }: ArticleReaderControlsProps) {
   const [mounted, setMounted] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [scrollPos, setScrollPos] = useState<'top' | 'middle' | 'bottom'>('top');
   const [fontSize, setFontSize] = useState(18);
   const [fontFamily, setFontFamily] = useState('kannada-serif');
-  const [columnWidth, setColumnWidth] = useState('medium');
   const [lineHeight, setLineHeight] = useState(1.85);
-  const [textAlign, setTextAlign] = useState<'left' | 'justify'>('left');
   const [showSettings, setShowSettings] = useState(false);
-  const [isFocusMode, setIsFocusMode] = useState(false);
   const [hasTOC, setHasTOC] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -51,12 +35,8 @@ export default function ArticleReaderControls({ articleId, userId }: ArticleRead
       if (savedSize) setFontSize(parseInt(savedSize, 10));
       const savedFont = localStorage.getItem('sathyadhare:font-family');
       if (savedFont) setFontFamily(savedFont);
-      const savedWidth = localStorage.getItem('sathyadhare:column-width');
-      if (savedWidth) setColumnWidth(savedWidth);
       const savedLine = localStorage.getItem('sathyadhare:line-height');
       if (savedLine) setLineHeight(parseFloat(savedLine));
-      const savedAlign = localStorage.getItem('sathyadhare:text-align');
-      if (savedAlign === 'left' || savedAlign === 'justify') setTextAlign(savedAlign);
 
       const headings = document.querySelectorAll('.prose-article h1, .prose-article h2, .prose-article h3');
       setHasTOC(headings.length >= 2);
@@ -78,22 +58,12 @@ export default function ArticleReaderControls({ articleId, userId }: ArticleRead
                      'var(--font-baloo-tamma), sans-serif';
       document.documentElement.style.setProperty('--article-font-family', fontVal);
       
-      localStorage.setItem('sathyadhare:column-width', columnWidth);
-      const widthVal = columnWidth === 'narrow' ? '620px' : columnWidth === 'wide' ? '1100px' : '860px';
-      document.documentElement.style.setProperty('--article-max-width', widthVal);
-      
       localStorage.setItem('sathyadhare:line-height', lineHeight.toString());
       document.documentElement.style.setProperty('--article-line-height', lineHeight.toString());
-
-      localStorage.setItem('sathyadhare:text-align', textAlign);
-      document.documentElement.style.setProperty('--article-text-align', textAlign);
     }
-  }, [fontSize, fontFamily, columnWidth, lineHeight, textAlign, mounted]);
+  }, [fontSize, fontFamily, lineHeight, mounted]);
 
-  useEffect(() => {
-    if (isFocusMode) document.documentElement.classList.add('focus-mode');
-    else document.documentElement.classList.remove('focus-mode');
-  }, [isFocusMode]);
+
 
   useEffect(() => {
     const onScroll = () => {
@@ -109,46 +79,15 @@ export default function ArticleReaderControls({ articleId, userId }: ArticleRead
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => {
-    const onFsChange = () => {
-      const doc = document as FullscreenDocument;
-      const fsEl = document.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement;
-      setIsFullscreen(!!fsEl);
-      if (fsEl) document.documentElement.classList.add('is-fullscreen');
-      else document.documentElement.classList.remove('is-fullscreen');
-    };
-    document.addEventListener('fullscreenchange', onFsChange);
-    document.addEventListener('webkitfullscreenchange', onFsChange);
-    document.addEventListener('mozfullscreenchange', onFsChange);
-    return () => {
-      document.removeEventListener('fullscreenchange', onFsChange);
-      document.removeEventListener('webkitfullscreenchange', onFsChange);
-      document.removeEventListener('mozfullscreenchange', onFsChange);
-    };
-  }, []);
 
-  const toggleFullscreen = useCallback(async () => {
-    const doc = document as FullscreenDocument;
-    const el = document.documentElement as FullscreenElement;
-    if (!isFullscreen) {
-      if (el.requestFullscreen) await el.requestFullscreen();
-      else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
-    } else {
-      if (document.exitFullscreen) await document.exitFullscreen();
-      else if (doc.webkitExitFullscreen) await doc.webkitExitFullscreen();
-    }
-  }, [isFullscreen]);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
   const scrollToBottom = () => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
 
   const resetAll = () => {
     setFontSize(18);
-    setColumnWidth('medium');
     setFontFamily('kannada-serif');
     setLineHeight(1.85);
-    setTextAlign('left');
-    setIsFocusMode(false);
     toast.success('Defaults restored');
   };
 
@@ -175,144 +114,119 @@ export default function ArticleReaderControls({ articleId, userId }: ArticleRead
         .prose-article p { 
           text-align: var(--article-text-align, left) !important;
         }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .overscroll-contain { overscroll-behavior: contain; }
       `}} />
 
       {showSettings && (
-        <div className="fixed inset-0 z-[1100] pointer-events-none">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] animate-fade-in pointer-events-auto" onClick={() => setShowSettings(false)} />
-          <div className="absolute top-14 right-0 bottom-0 w-[min(420px,90vw)] bg-[var(--color-surface)] shadow-2xl pointer-events-auto overflow-y-auto flex flex-col animate-settings-slide border-l border-[var(--color-border)]">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--color-border)] bg-[var(--color-surface)] sticky top-0 z-10">
+        <div className="fixed inset-0 z-[1100]" onWheel={(e) => e.stopPropagation()} onTouchMove={(e) => e.stopPropagation()}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] animate-fade-in pointer-events-auto" onClick={() => setShowSettings(false)} />
+          <div 
+            className="absolute right-0 bottom-0 w-[min(340px,100vw)] bg-[var(--color-surface)] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] pointer-events-auto overflow-hidden flex flex-col animate-settings-slide border-l border-[var(--color-border)] rounded-tl-[2.5rem]"
+            style={{ top: 'max(72px, calc(64px + env(safe-area-inset-top, 0px)))' }}
+          >
+            {/* Minimal Header */}
+            <div className="flex items-center justify-between px-7 pt-7 pb-4">
               <div>
-                <h2 className="text-xl font-black">Reader Settings</h2>
-                <p className="text-[10px] font-bold text-[var(--color-primary)] uppercase tracking-wider mt-0.5">Customize your view</p>
+                <h2 className="text-[17px] font-black text-[var(--color-text)] tracking-tight">Appearance</h2>
+                <div className="w-8 h-1 bg-[var(--color-primary)] rounded-full mt-1.5 opacity-80" />
               </div>
-              <button onClick={() => setShowSettings(false)} className="w-9 h-9 rounded-xl bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:text-rose-500 hover:rotate-90 transition-all"><X size={18} /></button>
+              <button 
+                onClick={() => setShowSettings(false)} 
+                className="w-10 h-10 rounded-2xl bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-text)] transition-all active:scale-90"
+              >
+                <X size={20} strokeWidth={2.5} />
+              </button>
             </div>
             
-            <div className="flex-1 px-6 py-8 space-y-10 overflow-y-auto">
+            <div className="flex-1 px-7 py-6 space-y-9 overflow-y-auto hide-scrollbar overscroll-contain">
               
-              {/* Text Size & Appearance */}
-              <div className="space-y-6">
-                <div>
-                  <span className="section-label">Typography</span>
-                  <div className="grid grid-cols-1 gap-3">
-                    {[
-                      { id: 'kannada-serif', label: 'Classic Serif', sub: 'Traditional look' },
-                      { id: 'kannada-sans', label: 'Modern Sans', sub: 'Clean & minimal' },
-                      { id: 'kannada-tiro', label: 'Literary Serif', sub: 'Book style' },
-                      { id: 'kannada-modern', label: 'Display Sans', sub: 'Friendly curves' }
-                    ].map(f => (
-                      <button 
-                        key={f.id} 
-                        onClick={() => setFontFamily(f.id)}
-                        className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${fontFamily === f.id ? 'bg-[var(--color-primary)]/5 border-[var(--color-primary)]' : 'border-[var(--color-border)] hover:bg-[var(--color-surface-2)]'}`}
-                      >
-                        <div className="text-left">
-                          <p className={`text-sm font-bold ${fontFamily === f.id ? 'text-[var(--color-primary)]' : 'text-[var(--color-text)]'}`}>{f.label}</p>
-                          <p className="text-[10px] text-[var(--color-muted)] font-medium">{f.sub}</p>
-                        </div>
-                        <Type size={18} className={fontFamily === f.id ? 'text-[var(--color-primary)]' : 'text-[var(--color-muted)]'} />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <span className="section-label">Size</span>
-                    <div className="flex items-center justify-between bg-[var(--color-surface-2)] p-2 rounded-2xl border border-[var(--color-border)]">
-                      <button onClick={decFont} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-white hover:text-[var(--color-primary)] transition-all shadow-sm"><Minus size={16}/></button>
-                      <span className="text-base font-black text-[var(--color-text)]">{fontSize}</span>
-                      <button onClick={incFont} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-white hover:text-[var(--color-primary)] transition-all shadow-sm"><Plus size={16}/></button>
-                    </div>
-                  </div>
-                  <div>
-                    <span className="section-label">Spacing</span>
-                    <div className="flex gap-1.5 bg-[var(--color-surface-2)] p-1.5 rounded-2xl border border-[var(--color-border)]">
-                      {[1.4, 1.85, 2.3].map(lh => (
-                        <button 
-                          key={lh} 
-                          onClick={() => setLineHeight(lh)} 
-                          className={`flex-1 h-9 rounded-xl text-[10px] font-black transition-all ${lineHeight === lh ? 'bg-[var(--color-primary)] text-white shadow-md' : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'}`}
-                        >
-                          {lh === 1.4 ? 'COMP' : lh === 1.85 ? 'NORM' : 'WIDE'}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <span className="section-label">Alignment</span>
-                    <div className="flex gap-1.5 bg-[var(--color-surface-2)] p-1.5 rounded-2xl border border-[var(--color-border)]">
-                      {[
-                        { id: 'left', icon: AlignLeft },
-                        { id: 'justify', icon: AlignJustify }
-                      ].map(a => (
-                        <button 
-                          key={a.id} 
-                          onClick={() => setTextAlign(a.id as any)} 
-                          className={`flex-1 h-9 rounded-xl flex items-center justify-center transition-all ${textAlign === a.id ? 'bg-[var(--color-primary)] text-white shadow-md' : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'}`}
-                        >
-                          <a.icon size={18} />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="section-label">Width</span>
-                    <div className="flex gap-1.5 bg-[var(--color-surface-2)] p-1.5 rounded-2xl border border-[var(--color-border)]">
-                      {['narrow', 'medium', 'wide'].map(w => (
-                        <button 
-                          key={w} 
-                          onClick={() => setColumnWidth(w)} 
-                          className={`flex-1 h-9 rounded-xl text-[10px] font-black uppercase transition-all ${columnWidth === w ? 'bg-[var(--color-primary)] text-white shadow-md' : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'}`}
-                        >
-                          {w[0]}
-                        </button>
-                      ))}
-                    </div>
+              {/* 1. Change Font */}
+              <div className="space-y-3">
+                <span className="section-label !mb-0">Selected Font</span>
+                <div className="relative group">
+                  <select 
+                    value={fontFamily} 
+                    onChange={(e) => setFontFamily(e.target.value)}
+                    className="w-full bg-[var(--color-surface-2)] border-2 border-transparent rounded-[1.25rem] px-5 py-4 text-[15px] font-bold text-[var(--color-text)] outline-none focus:bg-[var(--color-surface)] focus:border-[var(--color-primary)] transition-all appearance-none cursor-pointer pr-12 shadow-sm"
+                  >
+                    <option value="kannada-serif">Classic Serif</option>
+                    <option value="kannada-sans">Modern Sans</option>
+                    <option value="kannada-tiro">Literary Serif</option>
+                    <option value="kannada-modern">Display Sans</option>
+                  </select>
+                  <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-muted)] group-hover:text-[var(--color-primary)] transition-colors">
+                    <ChevronDown size={18} strokeWidth={3} />
                   </div>
                 </div>
               </div>
 
-              {/* Mode Tools */}
-              <div>
-                <span className="section-label">Display</span>
-                <div className="grid grid-cols-2 gap-3">
-                  <button onClick={() => setIsFocusMode(!isFocusMode)} className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all ${isFocusMode ? 'bg-indigo-500 text-white border-indigo-500 shadow-lg' : 'border-[var(--color-border)] hover:bg-[var(--color-surface-2)]'}`}>
-                    {isFocusMode ? <EyeOff size={18}/> : <Eye size={18} className="text-indigo-500"/>}
-                    <div className="text-left">
-                      <p className="text-[11px] font-black uppercase">Focus</p>
-                      <p className="text-[8px] opacity-70 font-bold uppercase">{isFocusMode ? 'ON' : 'OFF'}</p>
-                    </div>
+              {/* 2. Font Size */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between section-label !mb-0">
+                  <span>Font Size</span>
+                  <span className="text-[var(--color-primary)] lowercase tracking-normal">{fontSize}px</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button 
+                    onClick={decFont} 
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[var(--color-surface-2)] text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-white transition-all shadow-sm active:scale-90 border border-[var(--color-border)]"
+                  >
+                    <Minus size={20} strokeWidth={2.5} />
                   </button>
-                  <button onClick={toggleFullscreen} className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all ${isFullscreen ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg' : 'border-[var(--color-border)] hover:bg-[var(--color-surface-2)]'}`}>
-                    {isFullscreen ? <Minimize2 size={18}/> : <Maximize size={18} className="text-emerald-500"/>}
-                    <div className="text-left">
-                      <p className="text-[11px] font-black uppercase">Full</p>
-                      <p className="text-[8px] opacity-70 font-bold uppercase">{isFullscreen ? 'ON' : 'OFF'}</p>
-                    </div>
+                  <div className="flex-1 h-3 bg-[var(--color-surface-2)] rounded-full relative overflow-hidden">
+                    <div 
+                      className="absolute inset-y-0 left-0 bg-[var(--color-primary)] transition-all duration-300"
+                      style={{ width: `${((fontSize - 12) / (32 - 12)) * 100}%` }}
+                    />
+                  </div>
+                  <button 
+                    onClick={incFont} 
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[var(--color-surface-2)] text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-white transition-all shadow-sm active:scale-90 border border-[var(--color-border)]"
+                  >
+                    <Plus size={20} strokeWidth={2.5} />
                   </button>
                 </div>
               </div>
 
-              {/* Reset */}
-              <button 
-                onClick={resetAll} 
-                className="w-full h-12 rounded-2xl border-2 border-dashed border-rose-300/40 text-[10px] font-black text-rose-500 uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-rose-50 hover:border-rose-300 transition-all active:scale-95"
-              >
-                <RotateCcw size={14}/>
-                Restore Defaults
-              </button>
+              {/* 3. Spacing */}
+              <div className="space-y-4">
+                <span className="section-label !mb-0">Line Spacing</span>
+                <div className="flex bg-[var(--color-surface-2)] p-1.5 rounded-[1.25rem] border border-[var(--color-border)] shadow-inner">
+                  {[
+                    { val: 1.4, label: 'Tight' },
+                    { val: 1.85, label: 'Normal' },
+                    { val: 2.3, label: 'Large' }
+                  ].map(lh => (
+                    <button 
+                      key={lh.val} 
+                      onClick={() => setLineHeight(lh.val)} 
+                      className={`flex-1 h-11 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all duration-300 ${lineHeight === lh.val ? 'bg-[var(--color-surface)] text-[var(--color-primary)] shadow-sm' : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'}`}
+                    >
+                      {lh.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sub-Actions */}
+              <div className="pt-6">
+                <button 
+                  onClick={resetAll} 
+                  className="w-full h-12 rounded-2xl text-[10px] font-black text-[var(--color-muted)] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:text-rose-500 hover:bg-rose-500/5 transition-all active:scale-[0.98]"
+                >
+                  <RotateCcw size={14} strokeWidth={3} />
+                  Restore Defaults
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {/* Floating Buttons */}
-      <div className="fixed right-6 z-[95] flex flex-col gap-4 pointer-events-none transition-all duration-700" style={{ bottom: isFullscreen ? '40px' : 'calc(90px + env(safe-area-inset-bottom, 0px))' }}>
+      <div className="fixed right-6 z-[95] flex flex-col gap-4 pointer-events-none transition-all duration-700" style={{ bottom: 'calc(90px + env(safe-area-inset-bottom, 0px))' }}>
         <button onClick={() => setShowSettings(!showSettings)} className={`${controlBtnBase} pointer-events-auto ${showSettings ? 'scale-110 border-[var(--color-primary)] ring-8 ring-[var(--color-primary)]/10 text-[var(--color-primary)]' : ''}`}><Settings className={showSettings ? 'rotate-90' : ''}/></button>
         {hasTOC && (
           <button onClick={() => window.dispatchEvent(new CustomEvent('toggle-toc'))} className={`${controlBtnBase} !rounded-full relative group pointer-events-auto`}>
@@ -395,9 +309,16 @@ export function CopyProtected({ children, className = '', html, articleId, userI
     const preventCopy = (e: Event) => { e.preventDefault(); toast.error("Copying is disabled."); };
     el.addEventListener('copy', preventCopy); el.addEventListener('cut', preventCopy); el.addEventListener('contextmenu', e => e.preventDefault());
     const imgs = el.querySelectorAll('img');
-    const hImg = (e: any) => setZoomImg(e.currentTarget.src);
-    imgs.forEach(img => { img.style.cursor = 'zoom-in'; img.addEventListener('click', hImg); });
-    return () => { el.removeEventListener('copy', preventCopy); el.removeEventListener('cut', preventCopy); imgs.forEach(img => img.removeEventListener('click', hImg)); };
+    const hImg = (e: Event) => setZoomImg((e.currentTarget as HTMLImageElement).src);
+    imgs.forEach(img => { 
+      img.style.cursor = 'zoom-in'; 
+      img.addEventListener('click', hImg); 
+    });
+    return () => { 
+      el.removeEventListener('copy', preventCopy); 
+      el.removeEventListener('cut', preventCopy); 
+      imgs.forEach(img => img.removeEventListener('click', hImg)); 
+    };
   }, [html]);
 
   return (
@@ -413,6 +334,7 @@ export function CopyProtected({ children, className = '', html, articleId, userI
       {zoomImg && (
         <div className="fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center p-4 cursor-zoom-out" onClick={() => setZoomImg(null)}>
           <button className="absolute top-6 right-6 text-white"><Minimize2 size={32}/></button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={zoomImg} alt="Zoomed" className="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-scale-in" />
         </div>
       )}

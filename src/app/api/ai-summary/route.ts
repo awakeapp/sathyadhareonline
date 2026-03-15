@@ -6,90 +6,87 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { articleId, content, title } = body;
 
+    // 1. Validate Input
     if (!articleId || !content) {
-      return NextResponse.json({ error: 'Article content is missing' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing article data' }, { status: 400 });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    // 2. Extract and sanitize API Key
+    // We remove ALL whitespace characters (\s) to prevent URL breakage
+    const rawKey = process.env.GEMINI_API_KEY || '';
+    const apiKey = rawKey.replace(/\s/g, ''); 
+    
     if (!apiKey) {
-      console.error('GEMINI_API_KEY is not defined in environment variables');
-      return NextResponse.json({ error: 'AI key not found' }, { status: 500 });
+      return NextResponse.json({ error: 'AI key not configured in Vercel' }, { status: 500 });
     }
 
-    // Clean text: strip HTML, remove extra spaces, trim length
+    // 3. Prepare Content (Simple cleaning)
     const plainText = content
       .replace(/<[^>]*>/g, ' ')
       .replace(/\s+/g, ' ')
       .trim()
-      .slice(0, 15000); // 1.5 Flash can handle much more, but we keep it reasonable
+      .slice(0, 10000);
 
-    // Detect if text is predominantly Kannada
-    const kannadaPattern = /[\u0C80-\u0CFF]/;
-    const isKannada = kannadaPattern.test(plainText.slice(0, 500));
+    const isKannada = /[\u0C80-\u0CFF]/.test(plainText.slice(0, 500));
 
     const prompt = isKannada
-      ? `ಸತ್ಯಧಾರೆ ಡಿಜಿಟಲ್ ಪತ್ರಿಕೆಗೆ ಈ ಲೇಖನಕ್ಕೆ ಸಾರಾಂಶವನ್ನು ತಯಾರಿಸಿ. ಈ ಕೆಳಗಿನ ಲೇಖನವನ್ನು ಓದಿ ಮತ್ತು ಅದರ ಮುಖ್ಯ ತಿರುಳನ್ನು ವಿವರಿಸುವ 2-3 ಆಕರ್ಷಕ ವಾಕ್ಯಗಳ ಕನ್ನಡ ಸಾರಾಂಶವನ್ನು ನೀಡಿ. ಯಾವುದೇ ಹೆಚ್ಚುವರಿ ಮಾತುಗಳಿಲ್ಲದೆ ನೇರವಾಗಿ ಸಾರಾಂಶವನ್ನು ಮಾತ್ರ ಬರೆಯಿರಿ.\n\nಶೀರ್ಷಿಕೆ: ${title}\n\nಲೇಖನ:\n${plainText}\n\nಸಾರಾಂಶ:`
-      : `Write a high-quality, engaging 2-3 sentence summary for the following article. Focus on the core message and key takeaways. Return ONLY the summary text, no preamble.\n\nTitle: ${title}\n\nArticle:\n${plainText}\n\nSummary:`;
+      ? `ಸಾರಾಂಶ: ${title}\n\n${plainText}`
+      : `Summarize: ${title}\n\n${plainText}`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            maxOutputTokens: 300,
-            temperature: 0.2,
-            topP: 0.9,
-          },
-          safetySettings: [
-            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
-          ],
-        }),
-      }
-    );
+    // 4. API Request with explicit Model and Version
+    // gemini-1.5-flash is the most reliable model name
+    const model = 'gemini-1.5-flash';
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 250, temperature: 0.2 },
+      }),
+    });
+
+    // 5. Advanced Error Handling
     if (!response.ok) {
       const errText = await response.text();
-      console.error('Gemini API Error Status:', response.status);
-      console.error('Gemini API Error Details:', errText);
-      return NextResponse.json({ error: `AI Error: ${response.status}` }, { status: 502 });
+      let parsedErr;
+      try { parsedErr = JSON.parse(errText); } catch { parsedErr = { error: { message: errText } }; }
+      
+      const errMsg = parsedErr?.error?.message || 'Unknown API Error';
+      const status = response.status;
+
+      console.error(`AI Summary Failure [${status}]:`, errMsg);
+
+      if (status === 404) {
+        return NextResponse.json({ error: `AI Setup Error: Model not found. Check if API key is active.` }, { status: 404 });
+      }
+      if (status === 403 || status === 401) {
+        return NextResponse.json({ error: `AI Access Refused: Invalid API Key.` }, { status: 403 });
+      }
+      
+      return NextResponse.json({ error: `AI Error (${status}): ${errMsg.slice(0, 100)}` }, { status });
     }
 
+    // 6. Success Response
     const data = await response.json();
-    
-    // Check if we have candidates and text
     const summary = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
 
     if (!summary) {
-      console.error('Gemini Response Empty:', JSON.stringify(data));
-      // Could be blocked by safety despite settings
-      if (data.promptFeedback?.blockReason) {
-         return NextResponse.json({ error: `Blocked: ${data.promptFeedback.blockReason}` }, { status: 403 });
-      }
-      return NextResponse.json({ error: 'AI failed to generate summary' }, { status: 500 });
+      return NextResponse.json({ error: 'AI returned an empty summary' }, { status: 500 });
     }
 
-    // Optionally store the summary in the DB for future loads
-    try {
-      const supabase = await createClient();
-      const { error: dbError } = await supabase
-        .from('articles')
-        .update({ ai_summary: summary })
-        .eq('id', articleId);
-      
-      if (dbError) console.warn('Supabase Update Warning:', dbError.message);
-    } catch (dbErr) {
-      console.warn('DB Storage Trace:', dbErr);
-    }
+    // 7. Async Save to DB (don't block user)
+    const supabase = await createClient();
+    supabase
+      .from('articles')
+      .update({ ai_summary: summary })
+      .eq('id', articleId)
+      .then(() => {});
 
     return NextResponse.json({ summary });
   } catch (error: any) {
     console.error('AI summary route error:', error);
-    return NextResponse.json({ error: error.message || 'Internal error' }, { status: 500 });
+    return NextResponse.json({ error: 'System Error: ' + (error.message || 'unknown') }, { status: 500 });
   }
 }
