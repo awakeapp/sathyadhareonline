@@ -25,7 +25,7 @@ export function ThemeSwitcher() {
   return (
     <button
       onClick={cycleTheme}
-      className="w-9 h-9 rounded-xl flex items-center justify-center bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)]/30 transition-all active:scale-90 shadow-sm"
+      className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-transform active:scale-95"
       aria-label="Cycle theme"
       title={`Current: ${theme}. Click to switch.`}
     >

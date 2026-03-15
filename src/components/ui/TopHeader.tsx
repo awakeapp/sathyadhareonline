@@ -221,7 +221,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
                  import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
                  setIsSearchOpen(p => !p);
                }}
-               className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform shadow-sm ml-1 ${isSearchOpen ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-text)] hover:bg-[var(--color-surface)] bg-[var(--color-surface)] border border-[var(--color-border)]'}`}
+               className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform active:scale-95 ml-1 ${isSearchOpen ? 'bg-[var(--color-surface-2)] text-[var(--color-primary)]' : 'text-[var(--color-text)] hover:bg-[var(--color-surface-2)]'}`}
                title="Search"
             >
                <Search className="w-[15px] h-[15px]" strokeWidth={2.5} />
@@ -243,11 +243,15 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
                     import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
                     setIsMenuOpen(true);
                   }}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-transform ml-1"
+                  className="w-8 h-8 rounded-full flex items-center justify-center transition-transform active:scale-95 ml-1 text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"
                   title="Profile"
                   aria-label="Open profile"
                 >
-                  <UserIcon className="w-[15px] h-[15px]" strokeWidth={2.5} />
+                  {user?.user_metadata?.avatar_url || profile?.avatar_url ? (
+                    <img src={user?.user_metadata?.avatar_url || profile?.avatar_url} alt="Profile" className="w-5 h-5 rounded-full object-cover" />
+                  ) : (
+                    <UserIcon className="w-[15px] h-[15px]" strokeWidth={2.5} />
+                  )}
                 </button>
               </div>
             )}
