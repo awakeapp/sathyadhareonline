@@ -127,82 +127,87 @@ export default function ArticleReaderControls({ }: ArticleReaderControlsProps) {
             style={{ top: 'max(72px, calc(64px + env(safe-area-inset-top, 0px)))' }}
           >
             {/* Minimal Header */}
-            <div className="flex items-center justify-between px-7 pt-7 pb-4">
-              <div>
-                <h2 className="text-[17px] font-black text-[var(--color-text)] tracking-tight">Appearance</h2>
-                <div className="w-8 h-1 bg-[var(--color-primary)] rounded-full mt-1.5 opacity-80" />
+            <div className="flex items-center justify-between px-7 pt-9 pb-4">
+              <div className="space-y-1">
+                <h2 className="text-[20px] font-black text-[var(--color-text)] tracking-tight leading-none">Appearance</h2>
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-1 bg-[var(--color-primary)] rounded-full" />
+                  <span className="text-[9px] font-black uppercase text-[var(--color-primary)] tracking-widest opacity-60">Reader Settings</span>
+                </div>
               </div>
               <button 
                 onClick={() => setShowSettings(false)} 
-                className="w-10 h-10 rounded-2xl bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-text)] transition-all active:scale-90"
+                className="w-11 h-11 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:text-rose-500 hover:bg-rose-500/10 transition-all active:scale-90 border border-[var(--color-border)]/50"
               >
-                <X size={20} strokeWidth={2.5} />
+                <X size={22} strokeWidth={2.5} />
               </button>
             </div>
             
-            <div className="flex-1 px-7 py-6 space-y-9 overflow-y-auto hide-scrollbar overscroll-contain">
+            <div className="flex-1 px-8 py-8 space-y-10 overflow-y-auto hide-scrollbar overscroll-contain">
               
               {/* 1. Change Font */}
-              <div className="space-y-3">
-                <span className="section-label !mb-0">Selected Font</span>
+              <div className="space-y-4">
+                <span className="section-label !mb-0 text-[11px]">Typeface Selection</span>
                 <div className="relative group">
                   <select 
                     value={fontFamily} 
                     onChange={(e) => setFontFamily(e.target.value)}
-                    className="w-full bg-[var(--color-surface-2)] border-2 border-transparent rounded-[1.25rem] px-5 py-4 text-[15px] font-bold text-[var(--color-text)] outline-none focus:bg-[var(--color-surface)] focus:border-[var(--color-primary)] transition-all appearance-none cursor-pointer pr-12 shadow-sm"
+                    className="w-full bg-[var(--color-surface-2)] border-2 border-transparent rounded-2xl px-6 py-4.5 text-[15px] font-bold text-[var(--color-text)] outline-none focus:bg-[var(--color-surface)] focus:border-[var(--color-primary)] transition-all appearance-none cursor-pointer pr-12 shadow-sm"
                   >
                     <option value="kannada-serif">Classic Serif</option>
                     <option value="kannada-sans">Modern Sans</option>
                     <option value="kannada-tiro">Literary Serif</option>
                     <option value="kannada-modern">Display Sans</option>
                   </select>
-                  <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-muted)] group-hover:text-[var(--color-primary)] transition-colors">
-                    <ChevronDown size={18} strokeWidth={3} />
+                  <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-muted)] group-hover:text-[var(--color-primary)] transition-all">
+                    <ChevronDown size={20} strokeWidth={3} />
                   </div>
                 </div>
               </div>
 
-              {/* 2. Font Size */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between section-label !mb-0">
-                  <span>Font Size</span>
-                  <span className="text-[var(--color-primary)] lowercase tracking-normal">{fontSize}px</span>
+              {/* 2. Font Size - Modern Slider Style */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between section-label !mb-0 text-[11px]">
+                  <span>Text size</span>
+                  <div className="px-2 py-0.5 bg-[var(--color-primary)]/10 rounded-md">
+                    <span className="text-[var(--color-primary)] font-black">{fontSize}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4 bg-[var(--color-surface-2)] p-2 rounded-3xl border border-[var(--color-border)]/60 shadow-inner">
                   <button 
                     onClick={decFont} 
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[var(--color-surface-2)] text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-white transition-all shadow-sm active:scale-90 border border-[var(--color-border)]"
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[var(--color-surface)] text-[var(--color-text)] hover:text-white hover:bg-rose-500 transition-all shadow-md active:scale-90 border border-[var(--color-border)]/40"
                   >
-                    <Minus size={20} strokeWidth={2.5} />
+                    <Minus size={22} strokeWidth={3} />
                   </button>
-                  <div className="flex-1 h-3 bg-[var(--color-surface-2)] rounded-full relative overflow-hidden">
+                  <div className="flex-1 h-2 bg-[var(--color-border)]/30 rounded-full relative overflow-hidden mx-1">
                     <div 
-                      className="absolute inset-y-0 left-0 bg-[var(--color-primary)] transition-all duration-300"
+                      className="absolute inset-y-0 left-0 bg-[var(--color-primary)] transition-all duration-300 rounded-full shadow-[0_0_8px_rgba(var(--color-primary-rgb),0.5)]"
                       style={{ width: `${((fontSize - 12) / (32 - 12)) * 100}%` }}
                     />
                   </div>
                   <button 
                     onClick={incFont} 
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[var(--color-surface-2)] text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-white transition-all shadow-sm active:scale-90 border border-[var(--color-border)]"
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[var(--color-surface)] text-[var(--color-text)] hover:text-white hover:bg-emerald-500 transition-all shadow-md active:scale-90 border border-[var(--color-border)]/40"
                   >
-                    <Plus size={20} strokeWidth={2.5} />
+                    <Plus size={22} strokeWidth={3} />
                   </button>
                 </div>
               </div>
 
-              {/* 3. Spacing */}
+              {/* 3. Spacing - Segmented Control */}
               <div className="space-y-4">
-                <span className="section-label !mb-0">Line Spacing</span>
-                <div className="flex bg-[var(--color-surface-2)] p-1.5 rounded-[1.25rem] border border-[var(--color-border)] shadow-inner">
+                <span className="section-label !mb-0 text-[11px]">Readability Spacing</span>
+                <div className="flex bg-[var(--color-surface-2)] p-1.5 rounded-[1.5rem] border border-[var(--color-border)]/60 shadow-inner">
                   {[
-                    { val: 1.4, label: 'Tight' },
-                    { val: 1.85, label: 'Normal' },
-                    { val: 2.3, label: 'Large' }
+                    { val: 1.4, label: 'Dense' },
+                    { val: 1.85, label: 'Standard' },
+                    { val: 2.3, label: 'Airy' }
                   ].map(lh => (
                     <button 
                       key={lh.val} 
                       onClick={() => setLineHeight(lh.val)} 
-                      className={`flex-1 h-11 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all duration-300 ${lineHeight === lh.val ? 'bg-[var(--color-surface)] text-[var(--color-primary)] shadow-sm' : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'}`}
+                      className={`flex-1 h-12 rounded-[1rem] text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${lineHeight === lh.val ? 'bg-[var(--color-surface)] text-[var(--color-primary)] shadow-md border border-[var(--color-border)]/30' : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'}`}
                     >
                       {lh.label}
                     </button>
@@ -211,13 +216,13 @@ export default function ArticleReaderControls({ }: ArticleReaderControlsProps) {
               </div>
 
               {/* Sub-Actions */}
-              <div className="pt-6">
+              <div className="pt-8 border-t border-[var(--color-border)]/40">
                 <button 
                   onClick={resetAll} 
-                  className="w-full h-12 rounded-2xl text-[10px] font-black text-[var(--color-muted)] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:text-rose-500 hover:bg-rose-500/5 transition-all active:scale-[0.98]"
+                  className="w-full h-14 rounded-2xl text-[11px] font-black text-[var(--color-muted)] uppercase tracking-[0.25em] flex items-center justify-center gap-3 hover:text-rose-500 hover:bg-rose-500/5 transition-all active:scale-[0.98] border border-dashed border-[var(--color-border)]/60"
                 >
-                  <RotateCcw size={14} strokeWidth={3} />
-                  Restore Defaults
+                  <RotateCcw size={16} strokeWidth={3} className="opacity-70 group-hover:rotate-180 transition-transform" />
+                  Default Settings
                 </button>
               </div>
             </div>
