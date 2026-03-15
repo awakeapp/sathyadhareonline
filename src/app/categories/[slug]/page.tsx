@@ -51,10 +51,9 @@ export default async function CategoryPage({ params }: Props) {
           <p className="text-sm font-bold tracking-widest uppercase text-[var(--color-muted)]">No articles found</p>
         </Card>
       ) : (
-        <div className="flex flex-col gap-5 mt-2">
+        <div className="flex flex-col gap-4 mt-2">
           {articles.map((article) => (
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            <ArticleCard key={article.id} variant="list" article={article as any} />
+            <ArticleCard key={article.id} variant="list" article={article as unknown as React.ComponentProps<typeof ArticleCard>['article']} />
           ))}
         </div>
       )}

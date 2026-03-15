@@ -233,9 +233,9 @@ export default function SavedClientPage({ articles }: Props) {
             )}
           </div>
         ) : (
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-4">
             {filtered.map(article => (
-              <ArticleCard key={article.id} variant="list" article={article as any} />
+              <ArticleCard key={article.id} variant="list" article={article as unknown as React.ComponentProps<typeof ArticleCard>['article']} />
             ))}
           </div>
         )}

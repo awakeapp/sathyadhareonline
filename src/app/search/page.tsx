@@ -106,7 +106,7 @@ export default async function SearchPage({ searchParams }: Props) {
               </p>
             </Card>
           ) : (
-            <div className="flex flex-col gap-5 mt-4">
+            <div className="flex flex-col gap-4 mt-4">
               {results.map((article) => (
                 <ArticleCard key={article.id} variant="list" article={article} />
               ))}

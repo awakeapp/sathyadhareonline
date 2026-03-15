@@ -84,13 +84,13 @@ export default function HomeLatestArticles({ initialArticles }: HomeLatestArticl
   }, [hasMore, loading, loadMore]);
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       {articles.map((item) => (
         <ArticleCard key={item.id} variant="list" article={item} />
       ))}
 
       {hasMore && (
-        <div ref={observerRef} className="mt-4 flex flex-col gap-5">
+        <div ref={observerRef} className="mt-4 flex flex-col gap-4">
           {loading && (
             <>
               <ArticleCardSkeleton />

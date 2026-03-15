@@ -112,9 +112,9 @@ export default async function AuthorPage({ params }: Props) {
           <p className="text-sm font-bold tracking-widest uppercase text-[var(--color-muted)]">No articles yet</p>
         </Card>
       ) : (
-        <div className="grid gap-5 mt-4">
+        <div className="grid gap-4 mt-4">
           {articles.map((article) => (
-             <ArticleCard key={article.id} variant="list" article={article} />
+             <ArticleCard key={article.id} variant="list" article={article as unknown as React.ComponentProps<typeof ArticleCard>['article']} />
           ))}
         </div>
       )}
