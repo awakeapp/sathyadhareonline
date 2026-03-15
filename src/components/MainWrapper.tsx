@@ -10,6 +10,7 @@ export default function MainWrapper({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const isAuthPage   = AUTH_PATHS.includes(pathname)
   const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/editor')
+  const isArticlePage = pathname.startsWith('/articles/')
 
   return (
     <main
@@ -28,8 +29,8 @@ export default function MainWrapper({ children }: { children: React.ReactNode })
 
       {children}
 
-      {/* Global ScrollToTop for reader pages, hiding on auth and admin routes */}
-      {!isAuthPage && !isAdminRoute && <ScrollToTop />}
+      {/* Global ScrollToTop for reader pages, hiding on auth, admin, and article pages (since articles have their own scrolling tools) */}
+      {!isAuthPage && !isAdminRoute && !isArticlePage && <ScrollToTop />}
     </main>
   )
 }
