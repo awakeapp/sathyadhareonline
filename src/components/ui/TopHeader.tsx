@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useReaderMode } from '@/context/ReaderModeContext';
 import { useTheme } from 'next-themes';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
-import { ArrowLeft, Bell, Eye, Maximize2, User as UserIcon, Plus } from 'lucide-react';
+import { ArrowLeft, Bell, Eye, Maximize2, User as UserIcon } from 'lucide-react';
 import { SA_SECTIONS, ADMIN_SECTIONS, EDITOR_SECTIONS } from '../navigation/nav-items';
 
 
@@ -203,17 +203,6 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
           {/* Right actions */}
           <div className="flex items-center gap-2">
             
-            {/* ── Primary Create Button for Staff ONLY ── */}
-            {isPrivilegedRole && (
-              <Link
-                href="/editor/articles/new"
-                className="flex items-center justify-center w-9 h-9 rounded-xl bg-[var(--color-primary)] text-black shadow-lg shadow-[var(--color-primary)]/20 transition-transform active:scale-[0.85] hover:scale-105"
-                title="Create New Article"
-              >
-                <Plus className="w-5 h-5" strokeWidth={3} />
-              </Link>
-            )}
-
             {/* ── Switch to Reader Mode button (admin route → reader side) ── */}
             {isPrivilegedRole && isAdminRoute && (
               <button
