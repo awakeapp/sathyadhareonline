@@ -8,8 +8,9 @@ import { createClient } from '@/lib/supabase/client';
 import { useReaderMode } from '@/context/ReaderModeContext';
 import { useTheme } from 'next-themes';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
-import { ArrowLeft, Bell, Eye, User as UserIcon } from 'lucide-react';
+import { ArrowLeft, Eye, User as UserIcon } from 'lucide-react';
 import { SA_SECTIONS, ADMIN_SECTIONS, EDITOR_SECTIONS } from '../navigation/nav-items';
+import HomeSearchBar from '@/components/ui/HomeSearchBar';
 
 
 interface TopHeaderProps {
@@ -150,7 +151,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
         className={`fixed top-0 left-0 right-0 z-[100] glass-ribbon overflow-hidden transition-all duration-500`}
         style={{
           // Tighter vertical rhythm to prevent "Forehead" gap
-          height: 'calc(var(--safe-top) + 56px)',
+          height: pathname === '/' ? 'calc(var(--safe-top) + 116px)' : 'calc(var(--safe-top) + 56px)',
         }}
       >
         <div 
@@ -217,17 +218,6 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
             {!isArticlePage && !(isPrivilegedRole && isArticlePage) && (
               <div className="flex items-center gap-1.5 ml-1">
 
-                {/* Notification Bell */}
-                {clientUser && (
-                  <Link
-                    href="/profile/history"
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-transform active:scale-90 shadow-sm relative"
-                    title="Notifications"
-                  >
-                    <Bell className="w-[15px] h-[15px]" strokeWidth={2.5} />
-                    <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 border-2 border-white dark:border-[#181623] rounded-full" />
-                  </Link>
-                )}
 
                 {/* Global Theme Switcher */}
                 <div className="w-8 h-8 flex items-center justify-center">
@@ -250,6 +240,12 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
             )}
         </div>
       </div>
+
+      {pathname === '/' && (
+        <div className="px-4 pb-3">
+           <HomeSearchBar />
+        </div>
+      )}
     </header>
     )}
 

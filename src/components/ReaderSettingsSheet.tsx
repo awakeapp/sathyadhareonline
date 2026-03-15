@@ -2,7 +2,7 @@
 
 import { useReaderSettings } from '@/context/ReaderSettingsContext';
 import { BottomSheet } from './ui/BottomSheet';
-import { Minus, Plus, AlignLeft } from 'lucide-react';
+import { AlignLeft } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 interface ReaderSettingsSheetProps {
@@ -15,21 +15,21 @@ export function ReaderSettingsSheet({ isOpen, onClose }: ReaderSettingsSheetProp
   const { setTheme } = useTheme();
 
   return (
-    <BottomSheet isOpen={isOpen} onClose={onClose} title="Reader Appearance">
-      <div className="space-y-8 pb-8">
+    <BottomSheet isOpen={isOpen} onClose={onClose} title="Appearance Settings">
+      <div className="space-y-7 pb-8">
         
         {/* Font Size */}
         <section>
-          <div className="flex items-center justify-between mb-4">
-            <h4 className="text-xs font-black uppercase tracking-widest text-[var(--color-muted)]">Text Size</h4>
-            <span className="text-sm font-bold">{settings.fontSize}px</span>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-base font-bold text-[var(--color-text)] mb-1">ಅಕ್ಷರದ ಗಾತ್ರ (Text Size)</h4>
+            <span className="text-xs font-bold bg-[var(--color-surface-2)] border border-[var(--color-border)] px-2 py-1 rounded-md text-[var(--color-muted)]">{settings.fontSize}</span>
           </div>
           <div className="flex items-center gap-4 bg-[var(--color-surface-2)] p-2 rounded-2xl border border-[var(--color-border)]">
             <button 
               onClick={() => updateSettings({ fontSize: Math.max(12, settings.fontSize - 1) })}
-              className="w-12 h-12 rounded-xl flex items-center justify-center hover:bg-[var(--color-border)] transition-colors"
+              className="w-12 h-12 rounded-xl flex items-center justify-center hover:bg-[var(--color-border)] transition-colors text-lg font-bold"
             >
-              <Minus size={18} />
+              A-
             </button>
             <div className="flex-1 h-1.5 bg-[var(--color-border)] rounded-full relative overflow-hidden">
               <div 
@@ -39,57 +39,58 @@ export function ReaderSettingsSheet({ isOpen, onClose }: ReaderSettingsSheetProp
             </div>
             <button 
               onClick={() => updateSettings({ fontSize: Math.min(32, settings.fontSize + 1) })}
-              className="w-12 h-12 rounded-xl flex items-center justify-center hover:bg-[var(--color-border)] transition-colors"
+              className="w-12 h-12 rounded-xl flex items-center justify-center hover:bg-[var(--color-border)] transition-colors text-xl font-bold"
             >
-              <Plus size={18} />
+              A+
             </button>
           </div>
         </section>
 
         {/* Font Family */}
         <section>
-          <h4 className="text-xs font-black uppercase tracking-widest text-[var(--color-muted)] mb-4">Typography</h4>
-          <div className="grid grid-cols-2 gap-2">
+          <h4 className="text-base font-bold text-[var(--color-text)] mb-3">ಅಕ್ಷರ ಶೈಲಿ (Font Style)</h4>
+          <div className="grid grid-cols-2 gap-3">
             {[
-              { id: 'serif', label: 'Classic Serif', class: 'font-serif' },
-              { id: 'sans', label: 'Balanced Sans', class: 'font-sans' },
-              { id: 'modern', label: 'Modern Baloo', class: 'font-baloo' },
-              { id: 'tiro', label: 'Tiro Kannada', class: 'font-tiro' },
-            ].map((f) => (
+              { id: 'serif', kn: 'ನೋಟೋ ಸೆರಿಫ್', en: 'Noto Serif' },
+              { id: 'sans', kn: 'ನೋಟೋ ಸ್ಯಾನ್ಸ್', en: 'Noto Sans' },
+              { id: 'modern', kn: 'ಬಾಲೂ ತಮ್ಮ', en: 'Baloo Tamma' },
+              { id: 'tiro', kn: 'ಟಿರೋ ಕನ್ನಡ', en: 'Tiro Kannada' },
+            ].map((f) => {
+              const fontClass = f.id === 'serif' ? 'font-serif' : f.id === 'sans' ? 'font-sans' : f.id === 'modern' ? 'font-baloo' : 'font-tiro';
+              return (
               <button
                 key={f.id}
                 onClick={() => updateSettings({ fontFamily: f.id as 'serif' | 'sans' | 'modern' | 'tiro' })}
-                className={`p-4 rounded-2xl border-2 text-left transition-all ${
+                className={`p-3 rounded-2xl border-2 text-center transition-all ${
                   settings.fontFamily === f.id 
-                    ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5' 
+                    ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5 shadow-sm' 
                     : 'border-[var(--color-border)] bg-[var(--color-surface-2)] hover:border-[var(--color-muted)]'
                 }`}
               >
-                <div className={`text-lg mb-1 ${f.id === 'serif' ? 'font-serif' : f.id === 'sans' ? 'font-sans' : f.id === 'modern' ? 'font-baloo' : 'font-tiro'}`}>Aa</div>
-                <div className="text-[10px] font-bold uppercase tracking-wider opacity-60">{f.label}</div>
+                <div className={`text-[17px] leading-tight mb-1 ${fontClass}`}>{f.kn}</div>
+                <div className="text-[10px] font-bold uppercase tracking-widest opacity-50">{f.en}</div>
               </button>
-            ))}
+            )})}
           </div>
         </section>
 
         {/* Line Height */}
         <section>
-          <div className="flex items-center justify-between mb-4">
-            <h4 className="text-xs font-black uppercase tracking-widest text-[var(--color-muted)]">Line Spacing</h4>
-            <span className="text-sm font-bold">{settings.lineHeight}x</span>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-base font-bold text-[var(--color-text)]">ಸಾಲುಗಳ ಅಂತರ (Spacing)</h4>
           </div>
           <div className="flex gap-2">
             {[1.4, 1.6, 1.85, 2.1].map((lh) => (
               <button
                 key={lh}
                 onClick={() => updateSettings({ lineHeight: lh })}
-                className={`flex-1 h-12 rounded-xl border-2 flex items-center justify-center transition-all ${
+                className={`flex-1 h-12 rounded-xl flex items-center justify-center transition-all ${
                   settings.lineHeight === lh 
-                    ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)]' 
-                    : 'border-[var(--color-border)] bg-[var(--color-surface-2)] text-[var(--color-muted)]'
+                    ? 'bg-[var(--color-primary)] text-white shadow-md' 
+                    : 'bg-[var(--color-surface-2)] text-[var(--color-muted)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/50'
                 }`}
               >
-                <AlignLeft size={16 + (lh - 1.4) * 10} />
+                <AlignLeft size={16 + (lh - 1.4) * 8} />
               </button>
             ))}
           </div>
@@ -97,7 +98,7 @@ export function ReaderSettingsSheet({ isOpen, onClose }: ReaderSettingsSheetProp
 
         {/* Theme Toggles */}
         <section>
-          <h4 className="text-xs font-black uppercase tracking-widest text-[var(--color-muted)] mb-4">Background</h4>
+          <h4 className="text-base font-bold text-[var(--color-text)] mb-3">ಬಣ್ಣ (Theme)</h4>
           <div className="grid grid-cols-3 gap-3">
             {[
               { id: 'light', label: 'Light', bg: 'bg-white', text: 'text-zinc-900', border: 'border-zinc-200' },
@@ -112,14 +113,14 @@ export function ReaderSettingsSheet({ isOpen, onClose }: ReaderSettingsSheetProp
                 }}
                 className={`flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all ${
                   settings.theme === t.id 
-                    ? 'border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/20' 
-                    : 'border-transparent'
+                    ? 'border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/10 bg-[var(--color-surface-2)] shadow-sm' 
+                    : 'border-[var(--color-border)] bg-[var(--color-surface)]'
                 }`}
               >
-                <div className={`w-full aspect-square rounded-xl ${t.bg} ${t.border} border shadow-sm flex items-center justify-center overflow-hidden`}>
-                   <span className={`text-lg font-serif ${t.text}`}>A</span>
+                <div className={`w-full aspect-video rounded-xl ${t.bg} ${t.border} border shadow-inner flex items-center justify-center overflow-hidden`}>
+                   <span className={`text-2xl font-bold font-sans ${t.text}`}>A</span>
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">{t.label}</span>
+                <span className="text-xs font-bold text-[var(--color-text)]">{t.label}</span>
               </button>
             ))}
           </div>

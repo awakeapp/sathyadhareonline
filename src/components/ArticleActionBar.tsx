@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Share2, Link as LinkIcon, Check, Bookmark, Heart, Volume2, Square, X, FileText, AlignLeft, Loader2, ChevronDown, Type } from 'lucide-react';
+import { Share2, Link as LinkIcon, Check, Bookmark, Heart, Volume2, Square, X, FileText, AlignLeft, Loader2, ChevronDown } from 'lucide-react';
 
 /* ─── helpers ─────────────────────────────────────────────── */
 function getArticleUrl(slug: string) {
@@ -310,7 +310,7 @@ export default function ArticleActionBar({
 
         {/* Reader Appearance */}
         <IBtn onClick={() => setIsSettingsOpen(true)} title="Appearance settings">
-          <Type size={16} strokeWidth={2.5} />
+          <span className="font-serif font-bold text-[16px] tracking-tight leading-none mt-0.5">Aa</span>
         </IBtn>
 
         {/* Speaker with circular progress */}
