@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useReaderMode } from '@/context/ReaderModeContext';
 import { useTheme } from 'next-themes';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
-import { ArrowLeft, Eye, User as UserIcon } from 'lucide-react';
+import { ArrowLeft, Eye, User as UserIcon, Search } from 'lucide-react';
 import { SA_SECTIONS, ADMIN_SECTIONS, EDITOR_SECTIONS } from '../navigation/nav-items';
 import HomeSearchBar from '@/components/ui/HomeSearchBar';
 
@@ -41,6 +41,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
   const isOnReaderSide   = !isAdminRoute && !isAuthPage;
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   
   const { theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -151,7 +152,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
         className={`fixed top-0 left-0 right-0 z-[100] glass-ribbon overflow-hidden transition-all duration-500`}
         style={{
           // Tighter vertical rhythm to prevent "Forehead" gap
-          height: pathname === '/' ? 'calc(var(--safe-top) + 116px)' : 'calc(var(--safe-top) + 56px)',
+          height: isSearchOpen ? 'calc(var(--safe-top) + 116px)' : 'calc(var(--safe-top) + 56px)',
         }}
       >
         <div 
@@ -214,6 +215,18 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
               </div>
             )}
 
+            {/* ── Global Search Trigger ── */}
+            <button
+               onClick={() => {
+                 import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
+                 setIsSearchOpen(p => !p);
+               }}
+               className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform shadow-sm ml-1 ${isSearchOpen ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-text)] hover:bg-[var(--color-surface)] bg-[var(--color-surface)] border border-[var(--color-border)]'}`}
+               title="Search"
+            >
+               <Search className="w-[15px] h-[15px]" strokeWidth={2.5} />
+            </button>
+
             {/* ── Global Header Actions (Theme, Profile) — hidden on ALL article pages ── */}
             {!isArticlePage && !(isPrivilegedRole && isArticlePage) && (
               <div className="flex items-center gap-1.5 ml-1">
@@ -241,8 +254,8 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
         </div>
       </div>
 
-      {pathname === '/' && (
-        <div className="px-4 pb-3">
+      {isSearchOpen && (
+        <div className="px-4 pb-3 z-40 relative">
            <HomeSearchBar />
         </div>
       )}

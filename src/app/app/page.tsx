@@ -85,7 +85,7 @@ export default async function AppPage() {
       {latestSequels && latestSequels.length > 0 && (
         <section className="mb-10">
           <SectionHeader title="Latest Sequels" />
-          <HorizontalScroller className="-mx-4 px-4 sm:mx-0 sm:px-0 flex gap-5">
+          <HorizontalScroller className="-mx-4 px-4 sm:mx-0 sm:px-0 flex gap-4">
             {latestSequels.map((seq: any) => (
               <div key={seq.id} style={{ minWidth: '180px', width: '45vw', maxWidth: '220px' }}>
                 <ArticleCard
@@ -102,7 +102,7 @@ export default async function AppPage() {
       {trending.length > 0 && (
         <section className="mb-10">
           <SectionHeader title="Trending Articles" />
-          <HorizontalScroller className="-mx-4 px-4 sm:mx-0 sm:px-0 flex gap-5">
+          <HorizontalScroller className="-mx-4 px-4 sm:mx-0 sm:px-0 flex gap-4">
             {trending.map((item: any) => (
               <div key={item.id} style={{ minWidth: '180px', width: '45vw', maxWidth: '220px' }}>
                 <ArticleCard variant="grid-dark" article={item} />
@@ -116,7 +116,7 @@ export default async function AppPage() {
       {latestArticles && latestArticles.length > 0 && (
         <section className="mb-10">
           <SectionHeader title="Latest Articles" />
-          <HorizontalScroller className="-mx-4 px-4 sm:mx-0 sm:px-0 flex gap-5">
+          <HorizontalScroller className="-mx-4 px-4 sm:mx-0 sm:px-0 flex gap-4">
             {latestArticles.map((item: any) => (
               <div key={item.id} style={{ minWidth: '180px', width: '45vw', maxWidth: '220px' }}>
                 <ArticleCard variant="grid-dark" article={item} />
