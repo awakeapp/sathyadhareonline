@@ -31,11 +31,11 @@ export default function ScrollToTop() {
   return (
     <button
       onClick={scrollToTop}
-      className="fixed right-6 z-50 p-3 rounded-2xl bg-white/95 dark:bg-[#1a222c]/95 border border-[var(--color-border)] shadow-[0_8px_30px_rgba(0,0,0,0.12)] text-[var(--color-text)] hover:bg-[var(--color-surface)] active:scale-90 transition-all backdrop-blur-xl animate-in fade-in zoom-in duration-200"
-      style={{ bottom: 'calc(90px + env(safe-area-inset-bottom, 0px))' }}
+      className="fixed right-4 z-50 p-2.5 rounded-full bg-white/95 dark:bg-[#1a222c]/95 border border-[var(--color-border)] shadow-[0_4px_20px_rgba(0,0,0,0.12)] text-[var(--color-text)] hover:bg-[var(--color-surface)] active:scale-90 transition-all backdrop-blur-xl animate-in fade-in zoom-in duration-200"
+      style={{ bottom: 'calc(70px + env(safe-area-inset-bottom, 0px))' }}
       aria-label="Scroll to top"
     >
-      <ChevronUp className="w-6 h-6" strokeWidth={3} />
+      <ChevronUp className="w-5 h-5" strokeWidth={3} />
     </button>
   );
 }

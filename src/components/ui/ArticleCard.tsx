@@ -227,10 +227,10 @@ export default function ArticleCard({ article, variant = 'list' }: ArticleCardPr
 
   if (variant === 'list') {
     return (
-      <div className="group relative block w-full mb-3">
-        <Card hoverable className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-none overflow-hidden h-full flex flex-col group-hover:bg-[var(--color-surface-2)] transition-colors">
+      <Link href={`/articles/${article.slug}`} className="group relative block w-full mb-3 outline-none transition-transform active:scale-[0.98]">
+        <Card hoverable className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-none overflow-hidden h-full flex flex-col group-hover:bg-[var(--color-surface-2)] transition-colors">
           {/* Image Side */}
-          <Link href={`/articles/${article.slug}`} className="relative block w-full aspect-[16/9] overflow-hidden transition-transform active:scale-[0.98]">
+          <div className="relative block w-full aspect-[16/9] overflow-hidden">
             {article.cover_image ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -251,38 +251,36 @@ export default function ArticleCard({ article, variant = 'list' }: ArticleCardPr
                 </span>
               </div>
             )}
-          </Link>
+          </div>
 
           {/* Content Side */}
           <div className="flex flex-col flex-1 px-4 py-4">
-            <Link href={`/articles/${article.slug}`} className="block">
-              <h3 className="text-[17px] font-black leading-snug text-[var(--color-text)] line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors">
-                {article.title}
-              </h3>
-              {article.excerpt && (
-                <p className="text-[var(--color-muted)] text-sm leading-relaxed line-clamp-2 mt-1.5 font-medium">
-                  {article.excerpt}
-                </p>
-              )}
-              <div className="mt-2.5 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted)] opacity-80">
-                {date && <span>{date}</span>}
-                {date && <span className="opacity-30">•</span>}
-                <span className="flex items-center gap-1">
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  {readTime}
-                </span>
-                <span className="opacity-30">•</span>
-                <span className="flex items-center gap-1 text-rose-500/80">
-                  <Heart size={11} strokeWidth={2.5} className="fill-current" />
-                  {article.like_count ?? (Array.isArray(article.reactions) ? article.reactions[0]?.count : 0) ?? 0}
-                </span>
-              </div>
-            </Link>
+            <h3 className="text-[17px] font-black leading-snug text-[var(--color-text)] line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors">
+              {article.title}
+            </h3>
+            {article.excerpt && (
+              <p className="text-[var(--color-muted)] text-sm leading-relaxed line-clamp-2 mt-1.5 font-medium">
+                {article.excerpt}
+              </p>
+            )}
+            <div className="mt-2.5 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted)] opacity-80">
+              {date && <span>{date}</span>}
+              {date && <span className="opacity-30">•</span>}
+              <span className="flex items-center gap-1">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {readTime}
+              </span>
+              <span className="opacity-30">•</span>
+              <span className="flex items-center gap-1 text-rose-500/80">
+                <Heart size={11} strokeWidth={2.5} className="fill-current" />
+                {article.like_count ?? (Array.isArray(article.reactions) ? article.reactions[0]?.count : 0) ?? 0}
+              </span>
+            </div>
           </div>
         </Card>
-      </div>
+      </Link>
     );
   }
 
