@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useReaderMode } from '@/context/ReaderModeContext';
 import { useTheme } from 'next-themes';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
-import { ArrowLeft, Bell, Eye, Maximize2, User as UserIcon } from 'lucide-react';
+import { ArrowLeft, Bell, Eye, User as UserIcon } from 'lucide-react';
 import { SA_SECTIONS, ADMIN_SECTIONS, EDITOR_SECTIONS } from '../navigation/nav-items';
 
 
@@ -75,37 +75,14 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
   }, []);
 
   // ── Scroll Tracking ──────────────────────────────────────────
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
-
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      // Don't hide header if we're near the top (e.g., top 100px)
-      if (currentScrollY < 100) {
-        setIsVisible(true);
-      } else if (currentScrollY > lastScrollY && isVisible) {
-        // Scrolling down - hide
-        setIsVisible(false);
-      } else if (currentScrollY < lastScrollY && !isVisible) {
-        // Scrolling up - show
-        setIsVisible(true);
-      }
-      
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    
     const handleToggleMenu = () => setIsMenuOpen((prev) => !prev);
     window.addEventListener('toggle-drawer', handleToggleMenu);
     
     return () => {
-      window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('toggle-drawer', handleToggleMenu);
     };
-  }, [lastScrollY, isVisible]);
+  }, []);
 
   // (Theme is now handled by next-themes via ThemeProvider on the root html element)
 
@@ -125,11 +102,6 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
     }
   }, [isMenuOpen]);
 
-  // Handler: trigger fullscreen via custom event
-  function handleToggleFullscreen() {
-    import('@/lib/haptics').then(({ haptics }) => haptics.impact('medium'));
-    window.dispatchEvent(new CustomEvent('toggle-fullscreen'));
-  }
 
   // Handler: enable reader mode and navigate to reader homepage
   function handleSwitchToReader() {
@@ -178,15 +150,15 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
         className={`fixed top-0 left-0 right-0 z-[100] glass-ribbon overflow-hidden transition-all duration-500`}
         style={{
           // Tighter vertical rhythm to prevent "Forehead" gap
-          height: isVisible ? 'calc(var(--safe-top) + 56px)' : 'var(--safe-top)',
+          height: 'calc(var(--safe-top) + 56px)',
         }}
       >
         <div 
           className="flex items-center justify-between h-14 px-4 transition-transform duration-500 cubic-bezier(0.16,1,0.3,1)"
           style={{
             marginTop: 'var(--safe-top)',
-            transform: isVisible ? 'translateY(0)' : 'translateY(-100%)',
-            opacity: isVisible ? 1 : 0
+            transform: 'translateY(0)',
+            opacity: 1
           }}
         >
           {/* Logo */}
@@ -235,13 +207,6 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
             {/* ── Article reading controls in header ── */}
             {isArticlePage && (
               <div className="flex items-center gap-1 mr-1">
-                <button
-                  onClick={handleToggleFullscreen}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-all active:scale-90"
-                  title="Fit to Screen"
-                >
-                  <Maximize2 className="w-4.5 h-4.5" strokeWidth={2.2} />
-                </button>
                 <div className="w-9 h-9 flex items-center justify-center">
                   <ThemeSwitcher />
                 </div>
