@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Share2, Link as LinkIcon, Check, Bookmark, Heart, Volume2, Square, X, FileText, AlignLeft, Loader2, ChevronDown, Settings } from 'lucide-react';
+import { toast } from 'sonner';
+import { createClient } from '@/lib/supabase/client';
 
 /* ─── helpers ─────────────────────────────────────────────── */
 function getArticleUrl(slug: string) {
@@ -264,6 +266,19 @@ export default function ArticleActionBar({
   const [saved, setSaved] = useState(initialSaved ?? false);
   const [liked, setLiked] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isClientAuth, setIsClientAuth] = useState(isAuthenticated);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) setIsClientAuth(true);
+      // We could also re-fetch the user's bookmark status here if we wanted to be perfectly in sync
+    });
+    const { data: authListener } = supabase.auth.onAuthStateChange((_e, session) => {
+      setIsClientAuth(!!session?.user);
+    });
+    return () => authListener.subscription.unsubscribe();
+  }, []);
 
   const copy = async () => {
     const url = getArticleUrl(slug);
@@ -282,7 +297,10 @@ export default function ArticleActionBar({
   };
 
   const toggleSave = async () => {
-    if (!isAuthenticated) return;
+    if (!isClientAuth) {
+      toast.error('Please sign in to save articles.');
+      return;
+    }
     import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
     if (saved) { setSaved(false); onUnsave?.(); }
     else { setSaved(true); onSave?.(); }

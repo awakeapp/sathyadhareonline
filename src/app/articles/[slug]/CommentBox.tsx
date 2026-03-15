@@ -1,14 +1,27 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { Input } from '@/components/ui/Input';
 import { toast } from 'sonner';
 import { Loader2, SendHorizontal } from 'lucide-react';
 import { submitComment } from '@/app/actions/comments';
+import { createClient } from '@/lib/supabase/client';
 
 export function CommentBox({ articleId, isAuthenticated }: { articleId: string, isAuthenticated: boolean }) {
   const [comment, setComment] = useState('');
   const [isPending, startTransition] = useTransition();
+  const [isClientAuth, setIsClientAuth] = useState(isAuthenticated);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) setIsClientAuth(true);
+    });
+    const { data: authListener } = supabase.auth.onAuthStateChange((_e, session) => {
+      setIsClientAuth(!!session?.user);
+    });
+    return () => authListener.subscription.unsubscribe();
+  }, []);
 
   const handleSend = async () => {
     if (!comment.trim()) return;
@@ -25,7 +38,7 @@ export function CommentBox({ articleId, isAuthenticated }: { articleId: string, 
   };
 
   const handleClick = () => {
-    if (!isAuthenticated) {
+    if (!isClientAuth) {
       toast.error('Please log in to leave a comment!');
     }
   };
@@ -36,8 +49,8 @@ export function CommentBox({ articleId, isAuthenticated }: { articleId: string, 
         <Input 
           value={comment}
           onChange={(e) => setComment(e.target.value)}
-          disabled={!isAuthenticated || isPending}
-          placeholder={isAuthenticated ? "Write a comment..." : "Sign in to join the conversation..."} 
+          disabled={!isClientAuth || isPending}
+          placeholder={isClientAuth ? "Write a comment..." : "Sign in to join the conversation..."} 
           className="border-none bg-transparent shadow-none px-4 focus-visible:ring-0 placeholder:text-[var(--color-muted)]/40 font-medium text-[15px] cursor-text h-11" 
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -47,7 +60,7 @@ export function CommentBox({ articleId, isAuthenticated }: { articleId: string, 
           }}
         />
         
-        {isAuthenticated && (
+        {isClientAuth && (
           <button 
             onClick={handleSend}
             disabled={!comment.trim() || isPending}
