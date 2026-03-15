@@ -23,7 +23,7 @@ interface TopHeaderProps {
   } | null;
 }
 
-export default function TopHeader({ user, role }: TopHeaderProps) {
+export default function TopHeader({ user, role, profile }: TopHeaderProps) {
   const pathname = usePathname();
 
   // ── Reader‑mode context ──────────────────────────────────────────────────
@@ -248,6 +248,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
                   aria-label="Open profile"
                 >
                   {user?.user_metadata?.avatar_url || profile?.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={user?.user_metadata?.avatar_url || profile?.avatar_url} alt="Profile" className="w-5 h-5 rounded-full object-cover" />
                   ) : (
                     <UserIcon className="w-[15px] h-[15px]" strokeWidth={2.5} />
