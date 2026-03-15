@@ -302,8 +302,13 @@ export default function ArticleActionBar({
       return;
     }
     import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
-    if (saved) { setSaved(false); onUnsave?.(); }
-    else { setSaved(true); onSave?.(); }
+    if (saved) { 
+      setSaved(false); 
+      if (onUnsave) await onUnsave(); 
+    } else { 
+      setSaved(true); 
+      if (onSave) await onSave(); 
+    }
   };
 
   return (
