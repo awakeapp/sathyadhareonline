@@ -149,7 +149,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
     <>
       {!isAdminRoute && (
       <header
-        className={`fixed top-0 left-0 right-0 z-[100] glass-ribbon overflow-hidden transition-all duration-500`}
+        className={`fixed top-0 left-0 right-0 z-[100] glass-ribbon overflow-visible transition-all duration-500`}
         style={{
           // Tighter vertical rhythm to prevent "Forehead" gap
           height: isSearchOpen ? 'calc(var(--safe-top) + 116px)' : 'calc(var(--safe-top) + 56px)',
@@ -209,7 +209,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
             {/* ── Article reading controls in header ── */}
             {isArticlePage && (
               <div className="flex items-center gap-1 mr-1">
-                <div className="w-9 h-9 flex items-center justify-center">
+                <div className="w-10 h-10 flex items-center justify-center">
                   <ThemeSwitcher />
                 </div>
               </div>
@@ -221,10 +221,10 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                  import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
                  setIsSearchOpen(p => !p);
                }}
-               className={`w-9 h-9 rounded-full flex items-center justify-center transition-transform active:scale-95 ml-1 ${isSearchOpen ? 'bg-[var(--color-surface-2)] text-[var(--color-primary)]' : 'text-[var(--color-text)] hover:bg-[var(--color-surface-2)]'}`}
+               className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform active:scale-95 ml-1 ${isSearchOpen ? 'bg-[var(--color-surface-2)] text-[var(--color-primary)]' : 'text-[var(--color-text)] hover:bg-[var(--color-surface-2)]'}`}
                title="Search"
             >
-               <Search size={20} strokeWidth={2.25} />
+               <Search size={22} strokeWidth={2.25} />
             </button>
 
             {/* ── Global Header Actions (Theme, Profile) — hidden on ALL article pages ── */}
@@ -233,7 +233,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
 
 
                 {/* Global Theme Switcher */}
-                <div className="w-9 h-9 flex items-center justify-center">
+                <div className="w-10 h-10 flex items-center justify-center">
                   <ThemeSwitcher />
                 </div>
 
@@ -243,15 +243,15 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                     import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
                     setIsMenuOpen(true);
                   }}
-                  className="w-9 h-9 rounded-full flex items-center justify-center transition-transform active:scale-95 ml-1 text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"
+                  className="w-10 h-10 rounded-full flex items-center justify-center transition-transform active:scale-95 ml-1 text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"
                   title="Profile"
                   aria-label="Open profile"
                 >
                   {user?.user_metadata?.avatar_url || profile?.avatar_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user?.user_metadata?.avatar_url || profile?.avatar_url} alt="Profile" className="w-[22px] h-[22px] rounded-full object-cover" />
+                    <img src={user?.user_metadata?.avatar_url || profile?.avatar_url} alt="Profile" className="w-6 h-6 rounded-full object-cover" />
                   ) : (
-                    <UserIcon size={20} strokeWidth={2.25} />
+                    <UserIcon size={22} strokeWidth={2.25} />
                   )}
                 </button>
               </div>
