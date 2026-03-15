@@ -226,10 +226,13 @@ export default async function ArticlePage({ params }: Props) {
           <CopyProtected html={renderedHtml} className="prose-article mt-4 mb-12" articleId={article.id} userId={user?.id} />
           
           {/* Article End Divider */}
-          <div className="flex items-center justify-center gap-4 py-8 mb-12 opacity-30">
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent to-[var(--color-text)]" />
-            <div className="w-2 h-2 rounded-full bg-[var(--color-primary)] ring-4 ring-[var(--color-primary)]/20" />
-            <div className="h-px flex-1 bg-gradient-to-l from-transparent to-[var(--color-text)]" />
+          <div className="flex flex-col items-center justify-center py-16 mb-8 opacity-40">
+            <div className="flex items-center gap-4 w-full max-w-[200px] mb-4">
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent to-[var(--color-text)]" />
+              <div className="font-tiro-kannada text-2xl select-none text-[var(--color-primary)]">***</div>
+              <div className="h-px flex-1 bg-gradient-to-l from-transparent to-[var(--color-text)]" />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--color-muted)]">End of Story</span>
           </div>
         </div>
       </div>
