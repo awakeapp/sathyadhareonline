@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { SlidersHorizontal, ChevronDown, ChevronUp, Check } from 'lucide-react';
 import { useState, useEffect, useTransition } from 'react';
 import ArticleCard from '@/components/ui/ArticleCard';
-import HomeSearchBar from '@/components/ui/HomeSearchBar';
 
 interface Category { name: string; slug: string; }
 interface Article {
@@ -60,8 +59,6 @@ export default function ArticlesClientPage({ categories, initialArticles, active
 
   return (
     <div className="min-h-[100svh] pb-0">
-
-      <HomeSearchBar />
 
       {/* ── Sticky header zone: category pills + filter ── */}
       <div className="sticky top-[56px] z-40 bg-[var(--color-background)]/95 backdrop-blur-2xl border-b border-[var(--color-border)]">

@@ -3,7 +3,6 @@ import SectionHeader from '@/components/ui/SectionHeader';
 import BookCard, { BookItem } from '@/components/ui/BookCard';
 import { Card } from '@/components/ui/Card';
 import { Library } from 'lucide-react';
-import HomeSearchBar from '@/components/ui/HomeSearchBar';
 
 export const revalidate = 60;
 
@@ -37,7 +36,6 @@ export default async function LibraryIndexPage() {
 
   return (
     <div className="min-h-[100svh] px-4 py-2 pb-32 max-w-lg mx-auto sm:max-w-2xl lg:max-w-5xl">
-      <HomeSearchBar />
       
       <SectionHeader title="Library" />
 

@@ -198,11 +198,11 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
               <Link
                 id="return-dashboard-btn"
                 href={role === 'super_admin' || role === 'admin' ? '/admin' : '/editor'}
-                className="flex items-center gap-1 px-2.5 h-7 rounded-full font-bold transition-transform active:scale-95 hover:bg-[var(--color-surface-2)] text-[var(--color-text)] border border-[var(--color-border)] mr-1"
+                className="flex items-center gap-1.5 px-3 h-8 rounded-full font-bold transition-transform active:scale-95 hover:bg-[var(--color-surface-2)] text-[var(--color-text)] border border-[var(--color-border)] mr-1"
                 title={`Return to ${dashboardLabel}`}
               >
-                <ArrowLeft className="w-3.5 h-3.5" strokeWidth={2.5} />
-                <span className="text-[9px] uppercase tracking-wider leading-none font-black mt-px">Dash</span>
+                <ArrowLeft size={16} strokeWidth={2.5} />
+                <span className="text-[10px] uppercase tracking-wider leading-none font-black mt-px">Dash</span>
               </Link>
             )}
 
@@ -221,10 +221,10 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                  import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
                  setIsSearchOpen(p => !p);
                }}
-               className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform active:scale-95 ml-1 ${isSearchOpen ? 'bg-[var(--color-surface-2)] text-[var(--color-primary)]' : 'text-[var(--color-text)] hover:bg-[var(--color-surface-2)]'}`}
+               className={`w-9 h-9 rounded-full flex items-center justify-center transition-transform active:scale-95 ml-1 ${isSearchOpen ? 'bg-[var(--color-surface-2)] text-[var(--color-primary)]' : 'text-[var(--color-text)] hover:bg-[var(--color-surface-2)]'}`}
                title="Search"
             >
-               <Search className="w-[15px] h-[15px]" strokeWidth={2.5} />
+               <Search size={20} strokeWidth={2.25} />
             </button>
 
             {/* ── Global Header Actions (Theme, Profile) — hidden on ALL article pages ── */}
@@ -233,7 +233,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
 
 
                 {/* Global Theme Switcher */}
-                <div className="w-8 h-8 flex items-center justify-center">
+                <div className="w-9 h-9 flex items-center justify-center">
                   <ThemeSwitcher />
                 </div>
 
@@ -243,15 +243,15 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                     import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
                     setIsMenuOpen(true);
                   }}
-                  className="w-8 h-8 rounded-full flex items-center justify-center transition-transform active:scale-95 ml-1 text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"
+                  className="w-9 h-9 rounded-full flex items-center justify-center transition-transform active:scale-95 ml-1 text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"
                   title="Profile"
                   aria-label="Open profile"
                 >
                   {user?.user_metadata?.avatar_url || profile?.avatar_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user?.user_metadata?.avatar_url || profile?.avatar_url} alt="Profile" className="w-5 h-5 rounded-full object-cover" />
+                    <img src={user?.user_metadata?.avatar_url || profile?.avatar_url} alt="Profile" className="w-[22px] h-[22px] rounded-full object-cover" />
                   ) : (
-                    <UserIcon className="w-[15px] h-[15px]" strokeWidth={2.5} />
+                    <UserIcon size={20} strokeWidth={2.25} />
                   )}
                 </button>
               </div>

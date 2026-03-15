@@ -4,8 +4,6 @@ import ArticleCard from '@/components/ui/ArticleCard';
 import { Card } from '@/components/ui/Card';
 import { Library } from 'lucide-react';
 
-import HomeSearchBar from '@/components/ui/HomeSearchBar';
-
 export const revalidate = 60;
 
 export default async function SequelsPage() {
@@ -19,7 +17,6 @@ export default async function SequelsPage() {
 
   return (
     <div className="min-h-[100svh] px-4 py-2 pb-32 max-w-lg mx-auto sm:max-w-2xl lg:max-w-5xl">
-      <HomeSearchBar />
       
       <SectionHeader title="Weekly Sequels" />
 
@@ -47,7 +44,7 @@ export default async function SequelsPage() {
                 slug: seq.slug,
                 cover_image: seq.banner_image,
                 published_at: seq.published_at,
-                category: [{ name: `SEQUEL` }] as any
+                category: [{ name: `SEQUEL` }]
               }}
             />
           ))}

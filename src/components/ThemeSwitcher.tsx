@@ -25,16 +25,16 @@ export function ThemeSwitcher() {
   return (
     <button
       onClick={cycleTheme}
-      className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-transform active:scale-95"
+      className="w-9 h-9 rounded-full flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-transform active:scale-95"
       aria-label="Cycle theme"
       title={`Current: ${theme}. Click to switch.`}
     >
       {theme === 'dark' ? (
-        <Moon size={18} strokeWidth={2.5} />
+        <Moon size={20} strokeWidth={2.25} />
       ) : theme === 'sepia' ? (
-        <Coffee size={18} strokeWidth={2.5} className="text-[#926b0a]" />
+        <Coffee size={20} strokeWidth={2.25} className="text-[#926b0a]" />
       ) : (
-        <Sun size={18} strokeWidth={2.5} className="text-amber-500" />
+        <Sun size={20} strokeWidth={2.25} className="text-amber-500" />
       )}
     </button>
   );
