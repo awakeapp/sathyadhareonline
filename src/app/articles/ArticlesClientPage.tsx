@@ -61,10 +61,10 @@ export default function ArticlesClientPage({ categories, initialArticles, active
     <div className="min-h-[100svh] pb-0">
 
       {/* ── Sticky header zone: category pills + filter ── */}
-      <div className="sticky top-[56px] z-40 bg-[var(--color-background)]/95 backdrop-blur-2xl border-b border-[var(--color-border)]">
+      <div className="sticky z-40 bg-[var(--color-surface)]/95 backdrop-blur-xl border-b border-[var(--color-border)] transition-all" style={{ top: 'calc(var(--safe-top) + 56px)' }}>
 
         {/* Category pill row */}
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none px-4 py-3">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none px-4 pt-3 pb-2">
           {/* All button */}
           <button
             onClick={() => navigate(null, sortOrder)}

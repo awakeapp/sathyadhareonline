@@ -78,9 +78,9 @@ export default function SavedClientPage({ articles }: Props) {
   }
 
   return (
-    <div className="min-h-screen pb-0 pt-1">
+    <div className="min-h-screen pb-0">
       {/* Sticky header */}
-      <div className="sticky top-[56px] z-40 bg-[var(--color-background)]/95 backdrop-blur-2xl border-b border-[var(--color-border)]">
+      <div className="sticky z-40 bg-[var(--color-surface)]/95 backdrop-blur-xl border-b border-[var(--color-border)] transition-all" style={{ top: 'calc(var(--safe-top) + 56px)' }}>
         <div className="flex items-center justify-between px-4 py-3 max-w-lg mx-auto">
           <div className="flex items-center gap-2">
             <Bookmark className="w-5 h-5 text-[#685de6]" />
