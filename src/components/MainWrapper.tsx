@@ -15,7 +15,7 @@ export default function MainWrapper({ children }: { children: React.ReactNode })
     <main
       className="overflow-x-hidden animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out select-none"
       style={{
-        paddingTop: isAuthPage || isAdminRoute ? 0 : 'var(--safe-top)',
+        paddingTop: isAuthPage || isAdminRoute ? 0 : 'calc(var(--safe-top) + 76px)',
         paddingBottom: isAuthPage || isAdminRoute ? 0 : '90px',
         WebkitTapHighlightColor: 'transparent',
         backgroundColor: 'var(--color-background)',

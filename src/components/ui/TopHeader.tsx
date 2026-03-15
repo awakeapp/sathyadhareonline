@@ -175,34 +175,36 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
     <>
       {!isAdminRoute && (
       <header
-        className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 cubic-bezier(0.16,1,0.3,1) ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}
+        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 cubic-bezier(0.16,1,0.3,1) ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}
         style={{
           paddingTop: 'var(--safe-top)',
+          pointerEvents: 'none'
         }}
       >
-        {/* ── Main bar ──────────────────────────────────────────────── */}
-        <div className={`flex items-center justify-between px-4 sm:px-5 h-14 glass-premium shadow-lg border-b border-[var(--color-border)]/50`}>
+        {/* ── Main tray with proper glassmorphism ───────────────────── */}
+        <div className="mx-auto w-full max-w-7xl px-3 sm:px-4 pointer-events-auto">
+          <div className="h-16 flex items-center justify-between glass-premium shadow-xl rounded-2xl border border-[var(--color-border)]/40 mt-1 px-4">
 
           {/* Logo */}
-          <Link href={isAdminRoute ? dashboardHref : '/'} className="flex items-center flex-shrink-0 tap-highlight">
+          <Link href={isAdminRoute ? dashboardHref : '/'} className="flex items-center flex-shrink-0 mr-auto transition-transform active:scale-95">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={currentTheme === 'dark' ? '/logo-dark.png' : '/logo-light.png'}
               alt="Sathyadhare Logo"
-              className="h-[26px] min-w-[110px] object-left object-contain transition-opacity duration-300"
+              className="h-[28px] min-w-[110px] object-left object-contain transition-opacity duration-300"
               suppressHydrationWarning
             />
           </Link>
 
           {/* Right actions */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
 
             {/* ── Switch to Reader Mode button (admin route → reader side) ── */}
             {isPrivilegedRole && isAdminRoute && (
               <button
                 id="switch-reader-mode-btn"
                 onClick={handleSwitchToReader}
-                className="tap-highlight flex items-center gap-2 px-3.5 h-9 rounded-xl font-bold transition-all active:scale-95 hover:scale-105"
+                className="flex items-center gap-2 px-3.5 h-9 rounded-xl font-bold transition-all active:scale-90 active:translate-y-0.5 hover:scale-105"
                 style={{ background: 'rgba(255,229,0,0.15)', color: '#ffe500', border: '1px solid rgba(255,229,0,0.35)' }}
                 title="Switch to Reader Mode"
               >
@@ -218,7 +220,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
               <Link
                 id="return-dashboard-btn"
                 href={role === 'super_admin' || role === 'admin' ? '/admin' : '/editor'}
-                className="tap-highlight flex items-center gap-1 px-2.5 h-7 rounded-full font-bold transition-all active:scale-95 hover:bg-[var(--color-surface-2)] text-[var(--color-text)] border border-[var(--color-border)] mr-1"
+                className="flex items-center gap-1 px-2.5 h-7 rounded-full font-bold transition-all active:scale-90 active:translate-y-0.5 hover:bg-[var(--color-surface-2)] text-[var(--color-text)] border border-[var(--color-border)] mr-1"
                 title={`Return to ${dashboardLabel}`}
               >
                 <ArrowLeft className="w-3.5 h-3.5" strokeWidth={2.5} />
@@ -250,7 +252,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
                 {clientUser && (
                   <Link
                     href="/profile/history"
-                    className="tap-highlight w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-all active:scale-95 shadow-sm relative"
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-all active:scale-90 active:translate-y-0.5 shadow-sm relative"
                     title="Notifications"
                   >
                     <Bell className="w-[15px] h-[15px]" strokeWidth={2.5} />
@@ -269,7 +271,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
                     import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
                     setIsMenuOpen(true);
                   }}
-                  className="tap-highlight w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-all active:scale-95 ml-1 shadow-sm"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-all active:scale-90 active:translate-y-0.5 ml-1 shadow-sm"
                   title="Profile"
                   aria-label="Open profile"
                 >
@@ -279,6 +281,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
             )}
           </div>
         </div>
+      </div>
 
 
       </header>
