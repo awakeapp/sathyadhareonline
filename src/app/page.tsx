@@ -124,7 +124,7 @@ export default async function HomePage() {
           <SectionHeader title="Trending Articles" />
           <div className="flex flex-col gap-4 mt-5">
             {trending.map((article) => (
-              <ArticleCard key={article.id} variant="list-horizontal" article={article as unknown as ArticleWithCategory} />
+              <ArticleCard key={article.id} variant="list" article={article as unknown as ArticleWithCategory} />
             ))}
           </div>
         </section>

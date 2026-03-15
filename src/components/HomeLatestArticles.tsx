@@ -87,7 +87,7 @@ export default function HomeLatestArticles({ initialArticles }: HomeLatestArticl
   return (
     <div className="flex flex-col gap-4">
       {articles.map((item) => (
-        <ArticleCard key={item.id} variant="list-horizontal" article={item} />
+        <ArticleCard key={item.id} variant="list" article={item} />
       ))}
 
       {hasMore && (
