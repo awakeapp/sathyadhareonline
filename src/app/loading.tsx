@@ -1,9 +1,12 @@
+import { ArticleCardSkeleton } from "@/components/ui/Skeleton";
+
 export default function Loading() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)]">
-      <div className="flex flex-col items-center gap-4">
-        {/* Native-style tiny spinner */}
-        <div className="w-6 h-6 border-[3px] border-[var(--color-border)] border-t-[var(--color-primary)] rounded-full animate-spin"></div>
+    <div className="min-h-screen px-4 py-8 bg-[var(--color-background)] max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl">
+      <div className="flex flex-col gap-6">
+        <ArticleCardSkeleton />
+        <ArticleCardSkeleton />
+        <ArticleCardSkeleton />
       </div>
     </div>
   );

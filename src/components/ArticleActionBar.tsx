@@ -66,7 +66,7 @@ const IBtn = ({
   <button
     onClick={onClick}
     title={tip}
-    className={`relative w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 transition-all active:scale-90 ${
+    className={`relative w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 transition-transform active:scale-[0.96] ${
       blue
         ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/25 hover:bg-[var(--color-primary)]/90'
         : active
@@ -325,7 +325,7 @@ export default function ArticleActionBar({
             import('@/lib/haptics').then(({ haptics }) => !liked ? haptics.success() : haptics.impact('light'));
             setLiked(l => !l);
           }}
-          className={`flex items-center gap-1.5 h-10 px-4 rounded-2xl font-black text-[10px] uppercase tracking-wider transition-all active:scale-90 border ${
+          className={`flex items-center gap-1.5 h-10 px-4 rounded-2xl font-black text-[10px] uppercase tracking-wider transition-transform active:scale-[0.96] border ${
             liked
               ? 'bg-rose-500 text-white border-rose-500 shadow-lg shadow-rose-500/25'
               : 'bg-[var(--color-surface-2)] text-[var(--color-muted)] border border-[var(--color-border)] hover:border-rose-400 hover:text-rose-500'

@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import ArticleCard from './ui/ArticleCard';
-import { Button } from './ui/Button';
-import { ChevronDown, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ArticleCardSkeleton } from './ui/Skeleton';
+import { useEffect, useRef, useCallback } from 'react';
 
 interface ArticleWithCategory {
   id: string;
@@ -28,7 +28,7 @@ export default function HomeLatestArticles({ initialArticles }: HomeLatestArticl
   const [hasMore, setHasMore] = useState(initialArticles.length === 6);
   const supabase = createClient();
 
-  const loadMore = async () => {
+  const loadMore = useCallback(async () => {
     if (loading || !hasMore) return;
     setLoading(true);
 
@@ -60,7 +60,28 @@ export default function HomeLatestArticles({ initialArticles }: HomeLatestArticl
     } finally {
       setLoading(false);
     }
-  };
+  }, [loading, hasMore, articles, supabase]);
+
+  const observerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!hasMore || loading) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1, rootMargin: '200px' }
+    );
+
+    if (observerRef.current) {
+      observer.observe(observerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasMore, loading, loadMore]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -69,22 +90,13 @@ export default function HomeLatestArticles({ initialArticles }: HomeLatestArticl
       ))}
 
       {hasMore && (
-        <div className="mt-4 flex justify-center">
-          <Button
-            onClick={loadMore}
-            disabled={loading}
-            variant="outline"
-            className="w-full h-14 rounded-2xl border-2 border-[var(--color-border)] text-[var(--color-text)] font-black uppercase tracking-widest hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 active:scale-95 transition-all flex items-center gap-2 group"
-          >
-            {loading ? (
-              <Loader2 className="w-5 h-5 animate-spin text-[var(--color-primary)]" />
-            ) : (
-              <>
-                <ChevronDown className="w-5 h-5 group-hover:translate-y-1 transition-transform" strokeWidth={3} />
-                Load More Articles
-              </>
-            )}
-          </Button>
+        <div ref={observerRef} className="mt-4 flex flex-col gap-5">
+          {loading && (
+            <>
+              <ArticleCardSkeleton />
+              <ArticleCardSkeleton />
+            </>
+          )}
         </div>
       )}
     </div>

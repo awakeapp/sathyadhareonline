@@ -51,14 +51,14 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
         exit={currentVariant.exit}
         transition={{ 
           type: "spring",
-          stiffness: 260,
-          damping: 30,
-          mass: 1
+          stiffness: 300,
+          damping: 35,
+          mass: 0.8
         }}
         className="w-full flex-1 flex flex-col min-w-0"
         style={{
           backgroundColor: 'var(--color-background)',
-          boxShadow: '-10px 0 30px rgba(0,0,0,0.1)',
+          boxShadow: '-2px 0 10px rgba(0,0,0,0.08)',
           zIndex: 10
         }}
       >

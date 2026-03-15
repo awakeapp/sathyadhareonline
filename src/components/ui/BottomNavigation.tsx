@@ -169,7 +169,7 @@ export default function BottomNavigation({ role }: BottomNavigationProps) {
                   sessionStorage.setItem('transition_type', 'slide-up');
                 }
               }}
-              className="relative flex flex-col items-center justify-center flex-1 gap-[3px] transition-all active:scale-90 active:translate-y-[2px]"
+              className="relative flex flex-col items-center justify-center flex-1 gap-[3px] transition-transform active:scale-[0.98]"
             >
               {/* Active indicator — thin top bar (WhatsApp style) */}
               <span

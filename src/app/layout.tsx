@@ -11,7 +11,7 @@ import { ThemeProvider } from '@/providers/ThemeProvider'
 import NavigationWrapper from '@/components/navigation/NavigationWrapper'
 import DashboardReturnFab from '@/components/DashboardReturnFab'
 import { Toaster } from 'sonner'
-import { RippleEffect } from '@/components/RippleEffect'
+// import { RippleEffect } from '@/components/RippleEffect'
 import { PageTransition } from '@/components/PageTransition'
 import NavigationProgressBar from '@/components/NavigationProgressBar'
 import OneSignalInitializer from '@/components/OneSignalInitializer'
@@ -143,7 +143,7 @@ export default async function RootLayout({
                   </div>
                 </div>
                 
-                <RippleEffect />
+                {/* <RippleEffect /> */}
                 <InstallPrompt />
                 <OneSignalInitializer />
                 <Toaster position="bottom-center" theme="system" richColors closeButton toastOptions={{

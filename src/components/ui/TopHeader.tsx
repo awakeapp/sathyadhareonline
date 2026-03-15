@@ -200,7 +200,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
             {isPrivilegedRole && (
               <Link
                 href="/editor/articles/new"
-                className="flex items-center justify-center w-9 h-9 rounded-xl bg-[var(--color-primary)] text-black shadow-lg shadow-[var(--color-primary)]/20 transition-all active:scale-75 active:translate-y-1 hover:scale-105"
+                className="flex items-center justify-center w-9 h-9 rounded-xl bg-[var(--color-primary)] text-black shadow-lg shadow-[var(--color-primary)]/20 transition-transform active:scale-[0.85] hover:scale-105"
                 title="Create New Article"
               >
                 <Plus className="w-5 h-5" strokeWidth={3} />
@@ -212,7 +212,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
               <button
                 id="switch-reader-mode-btn"
                 onClick={handleSwitchToReader}
-                className="flex items-center gap-2 px-3.5 h-9 rounded-xl font-bold transition-all active:scale-90 active:translate-y-0.5 hover:scale-105"
+                className="flex items-center gap-2 px-3.5 h-9 rounded-xl font-bold transition-transform active:scale-95 hover:scale-105"
                 style={{ background: 'rgba(255,229,0,0.15)', color: '#ffe500', border: '1px solid rgba(255,229,0,0.35)' }}
                 title="Switch to Reader Mode"
               >
@@ -228,7 +228,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
               <Link
                 id="return-dashboard-btn"
                 href={role === 'super_admin' || role === 'admin' ? '/admin' : '/editor'}
-                className="flex items-center gap-1 px-2.5 h-7 rounded-full font-bold transition-all active:scale-90 active:translate-y-0.5 hover:bg-[var(--color-surface-2)] text-[var(--color-text)] border border-[var(--color-border)] mr-1"
+                className="flex items-center gap-1 px-2.5 h-7 rounded-full font-bold transition-transform active:scale-95 hover:bg-[var(--color-surface-2)] text-[var(--color-text)] border border-[var(--color-border)] mr-1"
                 title={`Return to ${dashboardLabel}`}
               >
                 <ArrowLeft className="w-3.5 h-3.5" strokeWidth={2.5} />
@@ -260,7 +260,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
                 {clientUser && (
                   <Link
                     href="/profile/history"
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-all active:scale-90 active:translate-y-0.5 shadow-sm relative"
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-transform active:scale-90 shadow-sm relative"
                     title="Notifications"
                   >
                     <Bell className="w-[15px] h-[15px]" strokeWidth={2.5} />
@@ -279,7 +279,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
                     import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
                     setIsMenuOpen(true);
                   }}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-all active:scale-90 active:translate-y-0.5 ml-1 shadow-sm"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-transform active:scale-90 ml-1 shadow-sm"
                   title="Profile"
                   aria-label="Open profile"
                 >

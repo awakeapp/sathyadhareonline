@@ -132,7 +132,7 @@ function HorizontalCard({ article, readTime, date, categoryName }: { article: Ar
         
         <div className="flex flex-row gap-4">
           {/* Left: Image Side */}
-          <Link href={`/articles/${article.slug}`} className="relative shrink-0 block w-[110px] h-[110px] sm:w-[130px] sm:h-[130px] transition-all active:scale-95 active:rotate-1">
+          <Link href={`/articles/${article.slug}`} className="relative shrink-0 block w-[110px] h-[110px] sm:w-[130px] sm:h-[130px] transition-transform active:scale-[0.98]">
             <div className="w-full h-full rounded-[1.5rem] overflow-hidden bg-[var(--color-surface-2)] relative shadow-sm">
               {article.cover_image ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -230,7 +230,7 @@ export default function ArticleCard({ article, variant = 'list' }: ArticleCardPr
       <div className="group relative block w-full mb-3">
         <Card hoverable className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-none overflow-hidden h-full flex flex-col group-hover:bg-[var(--color-surface-2)] transition-colors">
           {/* Image Side */}
-          <Link href={`/articles/${article.slug}`} className="relative block w-full aspect-[16/9] overflow-hidden transition-all active:scale-[0.98] active:translate-y-0.5">
+          <Link href={`/articles/${article.slug}`} className="relative block w-full aspect-[16/9] overflow-hidden transition-transform active:scale-[0.98]">
             {article.cover_image ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -288,7 +288,7 @@ export default function ArticleCard({ article, variant = 'list' }: ArticleCardPr
 
   // Grid Style
   return (
-    <Link href={`/articles/${article.slug}`} className="group flex flex-col h-full outline-none transition-all active:scale-95 active:translate-y-1">
+    <Link href={`/articles/${article.slug}`} className="group flex flex-col h-full outline-none transition-transform active:scale-[0.98]">
       <Card hoverable className="rounded-[1.75rem] border-transparent bg-transparent shadow-none h-full flex flex-col">
         {/* Image Container */}
         <div className="relative w-full aspect-[4/5] rounded-[1.75rem] overflow-hidden mb-3 bg-[var(--color-surface-2)]">

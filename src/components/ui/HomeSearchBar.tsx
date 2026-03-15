@@ -76,11 +76,14 @@ export default function HomeSearchBar() {
           }}
           onFocus={() => { if (options.length > 0) setShowOptions(true); }}
           placeholder="Search"
-          className="w-full h-12 pl-12 pr-6 rounded-full bg-[var(--color-surface-2)]/50 border border-[var(--color-border)] text-[var(--color-text)] placeholder:text-[var(--color-muted)] shadow-sm outline-none focus:bg-[var(--color-surface)] focus:border-[#685de6]/30 focus:ring-4 focus:ring-[#685de6]/5 transition-all font-medium text-sm"
+          className="w-full h-12 pl-12 pr-6 rounded-full bg-[var(--color-surface-2)]/50 border border-[var(--color-border)] text-[var(--color-text)] placeholder:text-[var(--color-muted)] shadow-sm outline-none focus:bg-[var(--color-surface)] focus:border-[#685de6]/60 transition-all font-medium text-sm"
         />
         <button
-          onClick={() => submitSearch(query)}
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[#685de6] transition-colors"
+          onClick={() => {
+            import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
+            submitSearch(query);
+          }}
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[#685de6] active:scale-90 transition-transform"
         >
           {isLoading ? (
             <Loader2 size={18} strokeWidth={2} className="animate-spin text-[#685de6]" />
@@ -97,10 +100,11 @@ export default function HomeSearchBar() {
             <button
               key={i}
               onClick={() => {
+                import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
                 setShowOptions(false);
                 router.push(opt.href);
               }}
-              className="w-full px-5 py-3 text-left hover:bg-[var(--color-surface-2)] active:bg-[var(--color-surface-2)] flex items-center gap-3 transition-colors border-b last:border-0 border-[var(--color-border)]/50"
+              className="w-full px-5 py-3 text-left bg-[var(--color-surface)] active:bg-[var(--color-surface-2)] active:scale-[0.99] flex items-center gap-3 transition-transform border-b last:border-0 border-[var(--color-border)]/50"
             >
               <div className="shrink-0 w-8 h-8 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)]">
                 {opt.type === 'book' && <Book size={14} strokeWidth={2} />}
