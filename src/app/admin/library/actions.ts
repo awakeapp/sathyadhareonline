@@ -12,7 +12,8 @@ export async function createBook(data: { title: string; author_name: string; cov
     drive_link: data.drive_link,
     is_active: data.is_active,
   });
-  revalidatePath('/admin/books');
+  revalidatePath('/admin/library');
+  revalidatePath('/library');
   revalidatePath('/');
   return { error: error?.message };
 }
@@ -26,7 +27,8 @@ export async function updateBook(id: string, data: { title: string; author_name:
     drive_link: data.drive_link,
     is_active: data.is_active,
   }).eq('id', id);
-  revalidatePath('/admin/books');
+  revalidatePath('/admin/library');
+  revalidatePath('/library');
   revalidatePath('/');
   return { error: error?.message };
 }
@@ -34,7 +36,8 @@ export async function updateBook(id: string, data: { title: string; author_name:
 export async function deleteBook(id: string) {
   const supabase = await createClient();
   const { error } = await supabase.from('books').delete().eq('id', id);
-  revalidatePath('/admin/books');
+  revalidatePath('/admin/library');
+  revalidatePath('/library');
   revalidatePath('/');
   return { error: error?.message };
 }
@@ -42,7 +45,8 @@ export async function deleteBook(id: string) {
 export async function toggleBook(id: string, is_active: boolean) {
   const supabase = await createClient();
   const { error } = await supabase.from('books').update({ is_active }).eq('id', id);
-  revalidatePath('/admin/books');
+  revalidatePath('/admin/library');
+  revalidatePath('/library');
   revalidatePath('/');
   return { error: error?.message };
 }

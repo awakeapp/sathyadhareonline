@@ -49,7 +49,7 @@ export async function fetchHomeSuggestions(queries: string[]): Promise<HomeSearc
 
   articles?.forEach(a => results.push({ id: a.id, title: a.title, type: 'article', href: `/articles/${a.slug}` }));
   sequels?.forEach(s => results.push({ id: s.id, title: s.title, type: 'sequel', href: `/sequels/${s.slug}` }));
-  books?.forEach(b => results.push({ id: b.id, title: b.title, type: 'book', href: b.drive_link }));
+  books?.forEach(b => results.push({ id: b.id, title: b.title, type: 'book', href: `/library/${b.id}` }));
 
   return results;
 }

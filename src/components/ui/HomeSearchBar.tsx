@@ -110,7 +110,7 @@ export default function HomeSearchBar() {
               <div className="flex-1 min-w-0">
                 <p className="text-[var(--color-text)] font-semibold text-sm truncate">{opt.title}</p>
                 <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--color-muted)] mt-0.5">
-                  {opt.type}
+                  {opt.type === 'book' ? 'Library' : opt.type}
                 </p>
               </div>
             </button>

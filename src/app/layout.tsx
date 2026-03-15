@@ -94,8 +94,6 @@ export default async function RootLayout({
       if (!error && p) {
         profile = { ...p, avatar_url: null } as { role: string | null; full_name: string | null; avatar_url: string | null; }
       } else if (user) {
-        // SELF-HEALING: User exists but no profile row found? Create one immediately.
-        // This prevents the middleware from entering an infinite redirect loop.
         const { data: newProfile } = await supabase
           .from('profiles')
           .insert({
@@ -126,17 +124,15 @@ export default async function RootLayout({
           padding: 0,
         }}
       >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem themes={['light', 'dark', 'sepia']}>
           <ReaderModeProvider>
             <NavigationProgressBar />
             <div className="flex min-h-screen">
               <NavigationWrapper role={profile?.role || null} />
               
               <div className="flex-1 flex flex-col min-w-0">
-                {/* ─────────── FIXED TOP HEADER ─────────── */}
                 <TopHeader user={user} role={profile?.role || null} profile={profile} />
 
-                {/* ─────────── PAGE CONTENT ─────────── */}
                 <PageTransition>
                   <MainWrapper>{children}</MainWrapper>
                 </PageTransition>
@@ -163,7 +159,6 @@ export default async function RootLayout({
               }}
             />
 
-            {/* ── Floating Return-to-Dashboard button (reader mode active) ── */}
             <DashboardReturnFab
               role={profile?.role || null}
               dashboardHref={

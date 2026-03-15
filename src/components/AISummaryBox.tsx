@@ -1,156 +1,108 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, ChevronDown, ChevronUp, Loader2, Wand2, Info } from 'lucide-react';
+import { Sparkles, Loader2, Wand2, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
+import { Pause, Play, Square, Sliders } from 'lucide-react';
 
+/* ─── AI Summary ──────────────────────────────────────────── */
 interface AISummaryBoxProps {
   articleId: string;
   content: string;
   title: string;
   existingSummary?: string | null;
-  compact?: boolean;
 }
 
-export default function AISummaryBox({ articleId, content, title, existingSummary, compact = false }: AISummaryBoxProps) {
+function AISummaryPill({ articleId, content, title, existingSummary }: AISummaryBoxProps) {
   const [summary, setSummary] = useState<string | null>(existingSummary || null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [collapsed, setCollapsed] = useState(compact && !!existingSummary);
-  const [generated, setGenerated] = useState(!!existingSummary);
+  const [expanded, setExpanded] = useState(false);
 
-  const generateSummary = async () => {
+  const generate = async () => {
     if (loading) return;
-    setLoading(true);
-    setError(null);
-
+    setLoading(true); setError(null);
     try {
       const res = await fetch('/api/ai-summary', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ articleId, content, title }),
       });
-
       const data = await res.json();
-      if (!res.ok || !data.summary) throw new Error(data.error || 'Failed to generate');
+      if (!res.ok || !data.summary) throw new Error(data.error || 'Failed');
       setSummary(data.summary);
-      setGenerated(true);
-      setCollapsed(false);
-    } catch {
-      setError('Could not generate summary. Check your connection or try again.');
-    } finally {
-      setLoading(false);
-    }
+      setExpanded(true);
+    } catch { setError('Could not generate. Try again.'); }
+    finally { setLoading(false); }
   };
 
   if (!content || content.length < 300) return null;
 
   return (
-    <div className={`relative transition-all duration-700 ${
-      generated 
-        ? 'bg-gradient-to-br from-[#685de6]/5 via-white to-[#685de6]/5 dark:from-[#685de6]/10 dark:via-zinc-900 dark:to-[#685de6]/10 border-[#685de6]/30' 
-        : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800'
-    } border rounded-[2rem] overflow-hidden group shadow-sm`}>
-      
-      {/* Decorative Aura */}
-      {generated && (
-        <div className="absolute top-0 right-0 w-32 h-32 bg-[#685de6]/10 blur-[60px] pointer-events-none" />
-      )}
+    <div className="flex-1 min-w-0">
+      {/* Single pill row — strictly no overflow */}
+      <div className={`flex items-center h-12 px-4 gap-3 rounded-2xl border transition-all overflow-hidden ${
+        summary ? 'bg-[#685de6]/6 border-[#685de6]/20' : 'bg-[var(--color-surface)] border-[var(--color-border)]'
+      }`}>
 
-      {/* Header */}
-      <div 
-        className={`flex items-center gap-4 px-6 py-4 cursor-pointer select-none ${generated ? '' : 'pointer-events-none'}`}
-        onClick={() => generated && setCollapsed(!collapsed)}
-      >
-        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${
-          generated ? 'bg-[#685de6] text-white shadow-xl rotate-0' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400'
+        {/* Icon */}
+        <div className={`w-7 h-7 rounded-lg shrink-0 flex items-center justify-center ${
+          summary ? 'bg-[#685de6] text-white' : 'bg-[var(--color-surface-2)] text-[#685de6]'
         }`}>
-          {loading ? (
-            <Loader2 size={20} className="animate-spin" />
-          ) : (
-            <Sparkles size={20} className={generated ? 'animate-pulse' : ''} />
+          {loading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
+        </div>
+
+        {/* Text */}
+        <div className="flex-1 min-w-0 overflow-hidden">
+          <p className="text-[8px] font-black uppercase tracking-[0.17em] text-[#685de6] leading-none mb-0.5">AI Summary</p>
+          <p className="text-[11px] font-semibold text-[var(--color-text)] truncate leading-none">
+            {loading
+              ? 'Generating…'
+              : error
+              ? 'Failed — tap retry'
+              : summary
+              ? summary.slice(0, 55) + (summary.length > 55 ? '…' : '')
+              : 'Get an instant AI summary'}
+          </p>
+        </div>
+
+        {/* Action — shrink-0 so it never compresses */}
+        <div className="shrink-0 flex items-center gap-1.5">
+          {!summary && !loading && (
+            <button
+              onClick={generate}
+              className="flex items-center gap-1.5 px-3 h-8 rounded-xl bg-[#685de6] text-white text-[9px] font-black uppercase tracking-wider hover:bg-[#5548d4] active:scale-95 transition-all shadow-md shadow-[#685de6]/25"
+            >
+              <Wand2 size={11} />
+              Generate
+            </button>
+          )}
+          {error && !loading && (
+            <button onClick={generate} className="p-1.5 rounded-lg text-[#685de6] hover:bg-[#685de6]/10 transition-colors">
+              <RotateCcw size={13} />
+            </button>
+          )}
+          {summary && (
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-surface-2)] transition-colors"
+            >
+              {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            </button>
           )}
         </div>
-
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${generated ? 'text-[#685de6]' : 'text-zinc-500'}`}>
-              {loading ? 'Synthesizing...' : 'AI Insights'}
-            </span>
-            {generated && !loading && (
-              <span className="px-1.5 py-0.5 rounded-md bg-[#685de6]/10 text-[#685de6] text-[8px] font-black uppercase tracking-widest">
-                Flash 1.5
-              </span>
-            )}
-          </div>
-          <h4 className="text-sm font-black text-zinc-900 dark:text-zinc-100">
-            {generated ? 'Article Summary' : 'AI-Powered Quick Summary'}
-          </h4>
-        </div>
-
-        {generated ? (
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors">
-            {collapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
-          </div>
-        ) : !loading && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              generateSummary();
-            }}
-            className="flex items-center gap-2 px-6 h-12 rounded-2xl bg-[#685de6] text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#685de6]/30 hover:scale-105 active:scale-95 transition-all"
-          >
-            <Wand2 size={14} />
-            Generate
-          </button>
-        )}
       </div>
 
-      {/* Progress bar during loading */}
-      {loading && (
-        <div className="absolute bottom-0 left-0 h-1 bg-[#685de6] animate-[shimmer_2s_infinite] w-full origin-left" />
-      )}
-
-      {/* Body Content */}
-      {(!collapsed || loading) && (
-        <div className="px-6 pb-6 pt-2 animate-fade-in">
-          {loading ? (
-            <div className="space-y-3">
-              <div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded-full w-[90%] animate-pulse" />
-              <div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded-full w-full animate-pulse" />
-              <div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded-full w-[70%] animate-pulse" />
-            </div>
-          ) : error ? (
-            <div className="flex items-center gap-3 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30">
-              <Info size={16} className="text-rose-500" />
-              <p className="text-xs font-semibold text-rose-600 flex-1">{error}</p>
-              <button onClick={generateSummary} className="text-[10px] font-black uppercase text-[#685de6] hover:underline">Retry</button>
-            </div>
-          ) : summary ? (
-            <div className="relative">
-              <div className="absolute -left-2 top-0 bottom-0 w-1 bg-[#685de6]/20 rounded-full" />
-              <p className="text-[15px] leading-relaxed font-semibold text-zinc-700 dark:text-zinc-300 pl-4 italic">
-                &ldquo;{summary}&rdquo;
-              </p>
-              <div className="mt-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#685de6]" />
-                  <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">
-                    AI Analysis Complete
-                  </span>
-                </div>
-              </div>
-            </div>
-          ) : null}
+      {/* Expandable summary */}
+      {expanded && summary && (
+        <div className="mt-2 px-4 py-3.5 bg-[#685de6]/5 border border-[#685de6]/20 rounded-2xl">
+          <p className="text-[13px] leading-relaxed text-[var(--color-text)] font-medium">
+            &ldquo;{summary}&rdquo;
+          </p>
+          <p className="mt-2.5 text-[8px] font-black uppercase tracking-widest text-[#685de6]/50">Gemini 1.5 Flash</p>
         </div>
       )}
-
-      <style jsx>{`
-        @keyframes shimmer {
-          0% { transform: scaleX(0); opacity: 0; }
-          50% { transform: scaleX(0.5); opacity: 1; }
-          100% { transform: scaleX(1); opacity: 0; }
-        }
-      `}</style>
     </div>
   );
 }
+
+export default AISummaryPill;

@@ -6,7 +6,7 @@ import { Share2, Bookmark, BookOpen, ChevronLeft, ArrowRight, Play } from 'lucid
 
 export const revalidate = 60;
 
-export default async function BookIndexPage({ params }: { params: { slug: string } }) {
+export default async function LibraryItemPage({ params }: { params: { slug: string } }) {
   const supabase = await createClient();
   
   // Handle case where id is sent as slug
@@ -55,7 +55,7 @@ export default async function BookIndexPage({ params }: { params: { slug: string
       {/* Top Navigation */}
       <nav className="flex items-center justify-between mb-8 z-20 relative">
         <Link 
-          href="/books" 
+          href="/library" 
           className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[var(--color-surface-2)] text-[var(--color-text)] hover:text-[#685de6] active:scale-90 transition-all shadow-sm"
         >
           <ChevronLeft size={20} strokeWidth={2.5} />
@@ -101,7 +101,7 @@ export default async function BookIndexPage({ params }: { params: { slug: string
         {/* Info side */}
         <div className="flex flex-col justify-center flex-1 text-center sm:text-left mt-2 sm:mt-0 z-10">
           <div className="inline-block px-3 py-1 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-[10px] font-black uppercase tracking-widest self-center sm:self-start mb-4 shadow-sm backdrop-blur-sm border border-[var(--color-primary)]/20">
-            {isLegacyLink ? 'PDF Book' : 'Article Book'}
+            {isLegacyLink ? 'Project PDF' : 'Collection'}
           </div>
           
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--color-text)] leading-tight tracking-tight mb-3">

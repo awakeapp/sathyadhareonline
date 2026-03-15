@@ -29,7 +29,7 @@ interface Props {
 
 const emptyForm = { title: '', author_name: '', cover_image: '', drive_link: '', is_active: true };
 
-export default function BooksClient({ initialBooks, availableArticles }: Props) {
+export default function LibraryClient({ initialBooks, availableArticles }: Props) {
   const [books, setBooks] = useState<Book[]>(initialBooks);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -162,7 +162,7 @@ export default function BooksClient({ initialBooks, availableArticles }: Props) 
             <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)] sticky top-0 z-10">
               <h3 className="text-[17px] font-black text-[var(--color-text)] tracking-tight flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-[#685de6]" />
-                {editId ? 'Edit Book' : 'New Book'}
+                {editId ? 'Edit Item' : 'New Library Item'}
               </h3>
               <button
                 type="button"
@@ -178,7 +178,7 @@ export default function BooksClient({ initialBooks, availableArticles }: Props) 
               {/* Cover Image Picker (2:3 aspect ratio) */}
               <div>
                 <label className="text-[10px] font-black uppercase tracking-[0.18em] text-[var(--color-muted)] block mb-2">
-                  Book Cover Image *
+                  Library Cover Image *
                 </label>
                 <button
                   type="button"
@@ -222,7 +222,7 @@ export default function BooksClient({ initialBooks, availableArticles }: Props) 
               {/* Title Input */}
               <div>
                 <label className="text-[10px] font-black uppercase tracking-[0.18em] text-[var(--color-muted)] block mb-2">
-                  Book Title *
+                  Title *
                 </label>
                 <input
                   required
@@ -249,7 +249,7 @@ export default function BooksClient({ initialBooks, availableArticles }: Props) 
               {/* Chapters Input */}
               <div>
                 <label className="text-[10px] font-black uppercase tracking-[0.18em] text-[var(--color-muted)] block mb-2 flex items-center justify-between">
-                  <span>Book Chapters</span>
+                  <span>Chapters</span>
                   <span className="bg-[#685de6]/10 text-[#685de6] px-2 py-0.5 rounded-full">{chapters.length} Total</span>
                 </label>
                 
@@ -321,7 +321,7 @@ export default function BooksClient({ initialBooks, availableArticles }: Props) 
                 className="flex items-center justify-between p-4 rounded-2xl bg-[var(--color-surface-2)] border border-[var(--color-border)] cursor-pointer active:scale-[0.98] transition-all select-none"
               >
                 <div>
-                  <p className="text-sm font-bold text-[var(--color-text)] leading-none mb-0.5">Publish Book</p>
+                  <p className="text-sm font-bold text-[var(--color-text)] leading-none mb-0.5">Publish Item</p>
                   <p className="text-[11px] text-[var(--color-muted)]">
                     {form.is_active ? 'Visible in Library' : 'Hidden from readers'}
                   </p>
@@ -358,7 +358,7 @@ export default function BooksClient({ initialBooks, availableArticles }: Props) 
             <div className="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 mx-auto mb-5">
               <Trash2 size={24} />
             </div>
-            <h4 className="text-lg font-black text-[var(--color-text)] mb-2 text-center">Remove Book?</h4>
+            <h4 className="text-lg font-black text-[var(--color-text)] mb-2 text-center">Remove from Library?</h4>
             <p className="text-sm text-[var(--color-muted)] mb-8 text-center px-4 leading-relaxed">This will permanently remove it from your reader&apos;s library.</p>
             <div className="flex gap-3">
               <button
@@ -382,7 +382,7 @@ export default function BooksClient({ initialBooks, availableArticles }: Props) 
       {/* ── Page header ── */}
       <div className="flex items-center justify-between px-4 pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] pb-4 border-b border-[var(--color-border)] mb-4">
         <div>
-          <h1 className="text-xl font-black text-[var(--color-text)] tracking-tight">Library Books</h1>
+          <h1 className="text-xl font-black text-[var(--color-text)] tracking-tight">Library Management</h1>
           <p className="text-[11px] text-[var(--color-muted)] font-semibold uppercase tracking-widest mt-0.5">
             {books.length} book{books.length !== 1 ? 's' : ''}
           </p>
@@ -392,7 +392,7 @@ export default function BooksClient({ initialBooks, availableArticles }: Props) 
           className="flex items-center gap-2 h-10 px-4 rounded-2xl bg-[#685de6] text-white text-sm font-black shadow-md shadow-[#685de6]/25 active:scale-95 transition-all"
         >
           <Plus size={16} strokeWidth={2.5} />
-          Create Book
+          Add to Library
         </button>
       </div>
 

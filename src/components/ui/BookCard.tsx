@@ -70,7 +70,7 @@ export default function BookCard({ book }: BookCardProps) {
     }
   }
 
-  const getUrl = () => `${typeof window !== 'undefined' ? window.location.origin : 'https://sathyadhare.com'}/books/${slug}`;
+  const getUrl = () => `${typeof window !== 'undefined' ? window.location.origin : 'https://sathyadhare.com'}/library/${slug}`;
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -96,7 +96,7 @@ export default function BookCard({ book }: BookCardProps) {
   return (
     <div className="group relative flex flex-col w-full h-full">
       {/* 1. Cover Image (Clickable) */}
-      <Link href={`/books/${slug}`} className="block relative w-full aspect-[3/4] rounded-2xl sm:rounded-[2rem] overflow-hidden bg-[var(--color-surface-2)] shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 z-10 tap-highlight outline-none">
+      <Link href={`/library/${slug}`} className="block relative w-full aspect-[3/4] rounded-2xl sm:rounded-[2rem] overflow-hidden bg-[var(--color-surface-2)] shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 z-10 tap-highlight outline-none">
         {book.cover_image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -107,7 +107,7 @@ export default function BookCard({ book }: BookCardProps) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-[var(--color-surface-2)] text-[var(--color-muted)] font-black text-xs uppercase tracking-widest">
-            Book Cover
+            No Cover
           </div>
         )}
         
@@ -121,7 +121,7 @@ export default function BookCard({ book }: BookCardProps) {
       {/* 2 & 3. Metadata Section + Actions */}
       <div className="flex flex-col flex-1 mt-4 px-1 sm:px-2">
         {/* Title & Stats */}
-        <Link href={`/books/${slug}`} className="block group-hover:text-[#685de6] transition-colors outline-none tap-highlight flex-1">
+        <Link href={`/library/${slug}`} className="block group-hover:text-[#685de6] transition-colors outline-none tap-highlight flex-1">
           <h3 className="text-[16px] sm:text-lg font-black leading-tight text-[var(--color-text)] line-clamp-2 mb-1.5 break-words">
             {book.title}
           </h3>

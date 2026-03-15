@@ -7,7 +7,7 @@ import HomeSearchBar from '@/components/ui/HomeSearchBar';
 
 export const revalidate = 60;
 
-export default async function BooksLibraryPage() {
+export default async function LibraryIndexPage() {
   const supabase = await createClient();
   const { data: books } = await supabase
     .from('books')

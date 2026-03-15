@@ -141,7 +141,7 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
                   <div className="w-12 h-12 rounded-xl bg-[var(--color-surface)] shadow-sm flex items-center justify-center text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors">
                     <BookOpen size={22} strokeWidth={1.5} />
                   </div>
-                  <span className="text-[12px] font-bold text-[var(--color-text)] group-hover:text-white leading-tight">Book</span>
+                  <span className="text-[12px] font-bold text-[var(--color-text)] group-hover:text-white leading-tight">Library</span>
                 </Link>
               </div>
 
@@ -290,7 +290,7 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
           { label: 'Home',     href: '/',         icon: Home,    exact: true  },
           { label: 'Articles', href: '/articles',  icon: FileText,exact: false },
           { label: 'Sequels',  href: '/sequels',   icon: Layers,  exact: false },
-          { label: 'Books',    href: '/books',     icon: BookOpen,exact: false },
+          { label: 'Library',  href: '/library',   icon: Library, exact: false },
         ].map(tab => (
           <NavTabLink key={tab.href} href={tab.href} icon={tab.icon} label={tab.label}
             active={tab.exact ? pathname === tab.href : pathname.startsWith(tab.href)}

@@ -1,9 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
-import Link from 'next/link';
 import HeroBanner from '@/components/ui/HeroBanner';
 import BannerCarousel from '@/components/ui/BannerCarousel';
 import HomeSearchBar from '@/components/ui/HomeSearchBar';
-import HomeBooksWidget from '@/components/ui/HomeBooksWidget';
 import ArticleCard from '@/components/ui/ArticleCard';
 import SectionHeader from '@/components/ui/SectionHeader';
 import HomeLatestArticles from '@/components/HomeLatestArticles';
@@ -98,22 +96,10 @@ export default async function HomePage() {
 
   const activeBanners = bannersData || [];
 
-  // 5) Active books for PDF library
-  const { data: booksData } = await supabase
-    .from('books')
-    .select('id, title, author_name, cover_image, drive_link, is_active')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false });
 
-  const activeBooks = booksData || [];
 
-  // 6) Categories for chips
-  const { data: categoriesData } = await supabase
-    .from('categories')
-    .select('id, name, slug')
-    .order('name');
-  
-  const categories = categoriesData || [];
+  // 6) Categories for SectionHeaders (Optional check)
+  // const categories = categoriesData || [];
 
   return (
     <div className="font-sans antialiased min-h-[100svh] px-4 pt-2 pb-0 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl scroll-smooth">
@@ -121,25 +107,7 @@ export default async function HomePage() {
       {/* ── 0. Inline search bar (Translates Eng -> Kannada) ── */}
       <HomeSearchBar />
 
-      {/* ── 0.1. Category Chips Row ── */}
-      {categories.length > 0 && (
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 hide-scrollbar -mx-4 px-4 mb-2">
-          {categories.map((cat) => (
-            <Link
-              key={cat.id}
-              href={`/categories/${cat.slug}`}
-              className="whitespace-nowrap px-4 py-2 rounded-full bg-[var(--color-surface-2)] text-[var(--color-text)] text-[10px] font-black uppercase tracking-widest border border-transparent hover:border-[var(--color-primary)]/20 active:scale-95 transition-all"
-            >
-              {cat.name}
-            </Link>
-          ))}
-        </div>
-      )}
 
-      {/* ── 0.5. PDF Library (horizontally scrollable books) ── */}
-      {activeBooks.length > 0 && (
-        <HomeBooksWidget books={activeBooks} />
-      )}
 
       {/* ── 1. Banner Carousel (landscape 16:9) — or fallback hero ── */}
       <div className="mb-8">

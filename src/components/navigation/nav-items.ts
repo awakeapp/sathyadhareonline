@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, Library, Users, Menu, SquarePen, Eye, Home, Search, Layers, Mic, ScrollText, Settings, Shield, IndianRupee, BarChart2, MessageSquare, Image as ImageIcon, Mail, LucideIcon, Send, Trash2, Calendar } from 'lucide-react';
+import { LayoutDashboard, FileText, Library, Users, Menu, SquarePen, Eye, Home, Search, Layers, Mic, ScrollText, Settings, Shield, IndianRupee, BarChart2, MessageSquare, Image as ImageIcon, Mail, LucideIcon, Send, Trash2, Calendar, BookOpen, Tags } from 'lucide-react';
 
 export interface NavItem {
   name: string;
@@ -15,7 +15,8 @@ export interface NavItem {
 export const SUPER_ADMIN_NAV: NavItem[] = [
   { name: 'Dashboard', href: '/admin', exact: true, icon: LayoutDashboard },
   { name: 'Articles', href: '/admin/articles', exact: false, icon: FileText },
-  { name: 'Categories', href: '/admin/categories', exact: false, icon: Library },
+  { name: 'Library', href: '/admin/library', exact: false, icon: Library },
+  { name: 'Categories', href: '/admin/categories', exact: false, icon: Tags },
   { name: 'Sequels', href: '/admin/sequels', exact: false, icon: Layers },
   { name: 'Users', href: '/admin/users', exact: false, icon: Users },
   { name: 'Financials', href: '/admin/financial', exact: false, icon: IndianRupee },
@@ -53,7 +54,8 @@ export const SA_SECTIONS: NavSection[] = [
     items: [
       { label: 'Articles', href: '/admin/articles', icon: FileText },
       { label: 'Authors', href: '/admin/users?role=author', icon: Users },
-      { label: 'Categories', href: '/admin/categories', icon: Library },
+      { label: 'Library', href: '/admin/library', icon: BookOpen },
+      { label: 'Categories', href: '/admin/categories', icon: Tags },
       { label: 'Media Library', href: '/admin/media', icon: ImageIcon },
       { label: 'Submissions', href: '/admin/submissions', icon: Send },
     ],
@@ -92,7 +94,8 @@ export const ADMIN_SECTIONS: NavSection[] = [
   {
     title: 'Content & Users',
     items: [
-      { label: 'Categories', href: '/admin/categories', icon: Library },
+      { label: 'Library',    href: '/admin/library',     icon: BookOpen    },
+      { label: 'Categories', href: '/admin/categories', icon: Tags       },
       { label: 'Users',     href: '/admin/users',      icon: Users        },
       { label: 'Submissions', href: '/admin/submissions', icon: Send },
       { label: 'Comments',  href: '/admin/comments',   icon: MessageSquare },
@@ -133,7 +136,8 @@ export const EDITOR_SECTIONS: NavSection[] = [
 export const ADMIN_NAV: NavItem[] = [
   { name: 'Dashboard', href: '/admin', exact: true, icon: LayoutDashboard },
   { name: 'Articles', href: '/admin/articles', exact: false, icon: FileText },
-  { name: 'Categories', href: '/admin/categories', exact: false, icon: Library },
+  { name: 'Library', href: '/admin/library', exact: false, icon: Library },
+  { name: 'Categories', href: '/admin/categories', exact: false, icon: Tags },
   { name: 'Sequels', href: '/admin/sequels', exact: false, icon: Layers },
   { name: 'Users', href: '/admin/users', exact: false, icon: Users },
   { name: 'Reader Mode', href: '/', exact: false, icon: Eye, readerModeToggle: true },
@@ -148,6 +152,8 @@ export const EDITOR_NAV: NavItem[] = [
 
 export const READER_NAV: NavItem[] = [
   { name: 'Home', href: '/', exact: true, icon: Home },
+  { name: 'Articles', href: '/articles', exact: false, icon: FileText },
+  { name: 'Library', href: '/library', exact: false, icon: Library },
   { name: 'Sequels', href: '/sequels', exact: false, icon: Layers },
   { name: 'Search', href: '/search', exact: false, icon: Search },
   { name: 'Podcast', href: '/podcast', exact: false, icon: Mic },

@@ -1,11 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
-import BooksClient from './BooksClient';
+import LibraryClient from './LibraryClient';
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = { title: 'Books | Admin' };
+export const metadata: Metadata = { title: 'Library | Admin' };
 export const dynamic = 'force-dynamic';
 
-export default async function BooksPage() {
+export default async function LibraryAdminPage() {
   const supabase = await createClient();
 
   const { data: books } = await supabase
@@ -27,5 +27,5 @@ export default async function BooksPage() {
     category: a.category as { name: string } | { name: string }[] | null,
   }));
 
-  return <BooksClient initialBooks={books || []} availableArticles={mappedArticles} />;
+  return <LibraryClient initialBooks={books || []} availableArticles={mappedArticles} />;
 }
