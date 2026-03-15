@@ -409,11 +409,10 @@ body.lock-scroll {
 }
 
 .glass-ribbon {
-  background: rgba(var(--color-surface-rgb), 0.9) !important;
-  backdrop-filter: blur(40px) saturate(200%) !important;
-  -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+  background: rgba(var(--color-surface-rgb), 0.85) !important;
+  backdrop-filter: blur(30px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
   border-bottom: 0.5px solid var(--color-border) !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.03) !important;
 }
 
 .rugged-shadow {

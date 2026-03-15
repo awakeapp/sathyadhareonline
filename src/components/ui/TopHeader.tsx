@@ -177,12 +177,12 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
       <header
         className={`fixed top-0 left-0 right-0 z-[100] glass-ribbon overflow-hidden transition-all duration-500`}
         style={{
-          // The header container stays fixed to protect the status bar
-          height: isVisible ? 'calc(var(--safe-top) + 64px)' : 'var(--safe-top)',
+          // Tighter vertical rhythm to prevent "Forehead" gap
+          height: isVisible ? 'calc(var(--safe-top) + 56px)' : 'var(--safe-top)',
         }}
       >
         <div 
-          className="flex items-center justify-between h-16 px-4 transition-transform duration-500 cubic-bezier(0.16,1,0.3,1)"
+          className="flex items-center justify-between h-14 px-4 transition-transform duration-500 cubic-bezier(0.16,1,0.3,1)"
           style={{
             marginTop: 'var(--safe-top)',
             transform: isVisible ? 'translateY(0)' : 'translateY(-100%)',
@@ -195,7 +195,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
             <img
               src={currentTheme === 'dark' ? '/logo-dark.png' : '/logo-light.png'}
               alt="Sathyadhare Logo"
-              className="h-[28px] min-w-[110px] object-left object-contain"
+              className="h-[32px] min-w-[120px] object-left object-contain"
               suppressHydrationWarning
             />
           </Link>
