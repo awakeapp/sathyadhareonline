@@ -14,8 +14,8 @@ export function GestureProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const handleTouchStart = (e: TouchEvent) => {
       const touch = e.touches[0];
-      // Only start swipe if near the left edge (first 30px)
-      if (touch.clientX < 30) {
+      // Slightly larger start zone for better accessibility on rugged devices
+      if (touch.clientX < 45) {
         setStartX(touch.clientX);
         setIsSwiping(true);
       }

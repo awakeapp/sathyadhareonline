@@ -20,6 +20,23 @@
   --article-line-height: 1.85;
   --article-max-width: 768px;
   --article-font-family: var(--font-noto-serif-kannada), serif;
+  
+  /* System Buffers */
+  --safe-top: max(20px, env(safe-area-inset-top));
+}
+
+* {
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
+  touch-action: manipulation;
+}
+
+body.lock-scroll {
+  overflow: hidden !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  position: fixed;
+  width: 100%;
 }
 
 .font-kannada-serif { font-family: var(--font-noto-serif-kannada), serif; }

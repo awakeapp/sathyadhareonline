@@ -139,8 +139,9 @@ export default function ArticleReaderControls({ }: ArticleReaderControlsProps) {
   };
 
   useEffect(() => {
-    if (showSettings && window.innerWidth < 1024) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = '';
+    if (typeof window !== 'undefined') {
+      document.body.classList.toggle('lock-scroll', showSettings);
+    }
   }, [showSettings]);
 
   if (!mounted) return null;

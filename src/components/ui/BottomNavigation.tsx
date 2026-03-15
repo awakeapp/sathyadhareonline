@@ -148,12 +148,9 @@ export default function BottomNavigation({ role }: BottomNavigationProps) {
   return (
     <nav
       aria-label="Bottom navigation"
-      className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl"
+      className="fixed bottom-0 left-0 right-0 z-50 glass-premium shadow-[0_-10px_40px_rgba(0,0,0,0.12)]"
       style={{
-        background:    isAdminView ? 'rgba(var(--color-surface-rgb), 0.85)' : 'rgba(var(--color-background-rgb), 0.85)',
-        borderTop:     `1px solid var(--color-border)`,
         paddingBottom: 'env(safe-area-inset-bottom)',
-        boxShadow:     '0 -8px 30px rgba(0,0,0,0.12)',
       }}
     >
       <div className="flex items-stretch justify-around h-[56px]">
@@ -172,7 +169,7 @@ export default function BottomNavigation({ role }: BottomNavigationProps) {
                   sessionStorage.setItem('transition_type', 'slide-up');
                 }
               }}
-              className="relative flex flex-col items-center justify-center flex-1 gap-[3px] tap-highlight transition-all active:scale-90"
+              className="relative flex flex-col items-center justify-center flex-1 gap-[3px] transition-all active:scale-90 active:translate-y-[2px]"
             >
               {/* Active indicator — thin top bar (WhatsApp style) */}
               <span

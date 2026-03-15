@@ -13,13 +13,14 @@ export default function MainWrapper({ children }: { children: React.ReactNode })
 
   return (
     <main
-      className="overflow-x-hidden animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out"
+      className="overflow-x-hidden animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out select-none"
       style={{
-        paddingTop: isAuthPage || isAdminRoute ? 0 : 'calc(80px + env(safe-area-inset-top, 0px))',
+        paddingTop: isAuthPage || isAdminRoute ? 0 : 'var(--safe-top)',
         paddingBottom: isAuthPage || isAdminRoute ? 0 : '90px',
         WebkitTapHighlightColor: 'transparent',
         backgroundColor: 'var(--color-background)',
         minHeight: '100dvh',
+        touchAction: 'manipulation'
       }}
     >
       {/* ReaderModeBar reads localStorage directly — no SSR/context/hydration issues */}

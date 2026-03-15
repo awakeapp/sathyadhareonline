@@ -119,6 +119,12 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
     role === 'super_admin' || role === 'admin' ? '/admin' :
     role === 'editor' ? '/editor' : '/';
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      document.body.classList.toggle('lock-scroll', isMenuOpen);
+    }
+  }, [isMenuOpen]);
+
   // Handler: trigger fullscreen via custom event
   function handleToggleFullscreen() {
     import('@/lib/haptics').then(({ haptics }) => haptics.impact('medium'));
@@ -169,14 +175,13 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
     <>
       {!isAdminRoute && (
       <header
-        className={`fixed top-0 left-0 right-0 z-50 w-full backdrop-blur-3xl bg-white/75 dark:bg-[#181623]/75 border-b border-[var(--color-border)]/50 transition-all duration-500 cubic-bezier(0.16,1,0.3,1) ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}
+        className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 cubic-bezier(0.16,1,0.3,1) ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}
         style={{
-          paddingTop: 'env(safe-area-inset-top, 0px)',
-          boxShadow: isVisible ? '0 4px 15px -3px rgba(0,0,0,0.05)' : 'none',
+          paddingTop: 'var(--safe-top)',
         }}
       >
         {/* ── Main bar ──────────────────────────────────────────────── */}
-        <div className={`flex items-center justify-between px-4 sm:px-5 h-14`}>
+        <div className={`flex items-center justify-between px-4 sm:px-5 h-14 glass-premium shadow-lg border-b border-[var(--color-border)]/50`}>
 
           {/* Logo */}
           <Link href={isAdminRoute ? dashboardHref : '/'} className="flex items-center flex-shrink-0 tap-highlight">

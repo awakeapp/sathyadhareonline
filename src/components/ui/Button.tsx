@@ -22,11 +22,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     
     // Variants
     const variants = {
-      primary: "bg-[var(--color-primary)] text-black hover:bg-[#ffed4a] shadow-[0_4px_0_0_rgba(104,93,230,0.3)] hover:shadow-[0_2px_0_0_rgba(104,93,230,0.3)] hover:-translate-y-[1px] active:translate-y-[2px] active:shadow-none",
+      primary: "bg-[var(--color-primary)] text-black hover:bg-[#ffed4a] shadow-[0_4px_0_0_rgba(255,237,74,0.3)] hover:shadow-[0_2px_0_0_rgba(255,237,74,0.3)] hover:-translate-y-[1px] active:translate-y-[2px] active:shadow-none",
       secondary: "bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-surface-2)] shadow-[0_4px_0_0_rgba(0,0,0,0.1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,0.1)] hover:-translate-y-[1px] active:translate-y-[2px] active:shadow-none",
-      ghost: "text-[var(--color-text)] hover:bg-[var(--color-surface-2)] active:scale-95",
-      destructive: "bg-red-500/10 text-red-500 hover:bg-red-500/20 active:scale-95",
-      outline: "border-2 border-[var(--color-border)] bg-transparent text-[var(--color-text)] hover:bg-[var(--color-surface)] active:scale-95",
+      ghost: "text-[var(--color-text)] hover:bg-[var(--color-surface-2)] active:scale-95 active:bg-[var(--color-surface-2)]",
+      destructive: "bg-red-500/10 text-red-500 hover:bg-red-500/20 active:scale-95 active:bg-red-500/30",
+      outline: "border-2 border-[var(--color-border)] bg-transparent text-[var(--color-text)] hover:bg-[var(--color-surface)] active:scale-95 active:bg-[var(--color-surface-2)]",
     }
     
     // Sizes
