@@ -18,6 +18,7 @@ interface ArticleWithCategory {
   published_at?: string | null;
   category: { name: string } | { name: string }[] | null;
   reactions?: { count: number }[];
+  author?: { full_name: string } | null;
 }
 
 export default async function HomePage() {
@@ -26,7 +27,7 @@ export default async function HomePage() {
   // 1) Hero
   const { data: featuredData } = await supabase
     .from('articles')
-    .select('id, title, slug, excerpt, cover_image, category:categories(name), reactions:article_reactions(count)')
+    .select('id, title, slug, excerpt, cover_image, category:categories(name), reactions:article_reactions(count), author:profiles(full_name)')
     .eq('article_reactions.type', 'like')
     .eq('is_featured', true).eq('status', 'published').eq('is_deleted', false)
     .single();
@@ -35,7 +36,7 @@ export default async function HomePage() {
   if (!featured) {
     const { data: fb } = await supabase
       .from('articles')
-      .select('id, title, slug, excerpt, cover_image, category:categories(name), reactions:article_reactions(count)')
+      .select('id, title, slug, excerpt, cover_image, category:categories(name), reactions:article_reactions(count), author:profiles(full_name)')
       .eq('article_reactions.type', 'like')
       .eq('status', 'published').eq('is_deleted', false)
       .order('published_at', { ascending: false }).limit(1).single();
@@ -45,7 +46,7 @@ export default async function HomePage() {
   // 2) Latest Articles
   let { data: latestArticles } = await supabase
     .from('articles')
-    .select('id, title, slug, excerpt, cover_image, published_at, category:categories(name), reactions:article_reactions(count)')
+    .select('id, title, slug, excerpt, cover_image, published_at, category:categories(name), reactions:article_reactions(count), author:profiles(full_name)')
     .eq('article_reactions.type', 'like')
     .eq('status', 'published').eq('is_deleted', false)
     .order('published_at', { ascending: false }).limit(6);
@@ -76,7 +77,7 @@ export default async function HomePage() {
   if (topIds.length > 0) {
     const { data: td } = await supabase
       .from('articles')
-      .select('id, title, slug, cover_image, category:categories(name), published_at, reactions:article_reactions(count)')
+      .select('id, title, slug, cover_image, category:categories(name), published_at, reactions:article_reactions(count), author:profiles(full_name)')
       .eq('article_reactions.type', 'like')
       .in('id', topIds)
       .eq('status', 'published')
@@ -123,7 +124,7 @@ export default async function HomePage() {
           <SectionHeader title="Trending Articles" />
           <div className="flex flex-col gap-4 mt-5">
             {trending.map((article) => (
-              <ArticleCard key={article.id} variant="list" article={article as unknown as ArticleWithCategory} />
+              <ArticleCard key={article.id} variant="list-horizontal" article={article as unknown as ArticleWithCategory} />
             ))}
           </div>
         </section>

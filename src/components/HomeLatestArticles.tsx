@@ -16,6 +16,7 @@ interface ArticleWithCategory {
   published_at?: string | null;
   category: { name: string } | { name: string }[] | null;
   reactions?: { count: number }[];
+  author?: { full_name: string } | null;
 }
 
 interface HomeLatestArticlesProps {
@@ -36,7 +37,7 @@ export default function HomeLatestArticles({ initialArticles }: HomeLatestArticl
       const lastArticle = articles[articles.length - 1];
       const { data, error } = await supabase
         .from('articles')
-        .select('id, title, slug, excerpt, cover_image, published_at, category:categories(name), reactions:article_reactions(count)')
+        .select('id, title, slug, excerpt, cover_image, published_at, category:categories(name), reactions:article_reactions(count), author:profiles(full_name)')
         .eq('article_reactions.type', 'like')
         .eq('status', 'published')
         .eq('is_deleted', false)
@@ -86,7 +87,7 @@ export default function HomeLatestArticles({ initialArticles }: HomeLatestArticl
   return (
     <div className="flex flex-col gap-4">
       {articles.map((item) => (
-        <ArticleCard key={item.id} variant="list" article={item} />
+        <ArticleCard key={item.id} variant="list-horizontal" article={item} />
       ))}
 
       {hasMore && (

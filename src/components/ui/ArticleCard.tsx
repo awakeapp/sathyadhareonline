@@ -20,6 +20,7 @@ interface Article {
   content?: string | null;   // if passed, used for more accurate read time
   reactions?: { count: number }[] | null;
   like_count?: number;
+  author?: { full_name: string } | null;
 }
 
 interface ArticleCardProps {
@@ -160,57 +161,56 @@ function HorizontalCard({ article, readTime, date, categoryName }: { article: Ar
               <h3 className="text-[15px] sm:text-[17px] font-black leading-[1.3] text-[var(--color-text)] line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors mb-1.5 break-words">
                 {article.title}
               </h3>
-              {article.excerpt && (
-                <p className="text-[var(--color-muted)] text-[11px] sm:text-xs leading-relaxed line-clamp-2 font-semibold break-words">
-                  {article.excerpt}
+              {article.author?.full_name ? (
+                <p className="text-[var(--color-muted)] text-[11px] sm:text-xs font-bold flex items-center gap-1.5 mt-1">
+                  <span className="opacity-60 font-medium">By</span>
+                  <span className="text-[var(--color-primary)]">{article.author.full_name}</span>
+                </p>
+              ) : (
+                <p className="text-[var(--color-muted)] text-[11px] sm:text-xs font-bold flex items-center gap-1.5 mt-1">
+                  <span className="opacity-60 font-medium">By</span>
+                  <span className="text-[var(--color-primary)]">Sathyadhare</span>
                 </p>
               )}
             </Link>
             
-            <div className="mt-3 flex flex-wrap items-center justify-between text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[var(--color-muted)] pt-3 border-t border-[var(--color-border)] opacity-80 pl-1 mr-2">
-              <div className="flex items-center flex-wrap gap-1.5 shrink-0">
+            <div className="mt-3 flex flex-col gap-2 pt-2 border-t border-[var(--color-border)] pl-1 pr-1">
+              <div className="flex items-center text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[var(--color-muted)] opacity-80 gap-1.5 shrink-0">
                 {article.title.toUpperCase().includes('SEQUEL') ? (
                   <><span className="text-[#685de6]">SEQUEL</span><span className="opacity-40">|</span></>
                 ) : null}
                 {date && <span>{date}</span>}
                 {date && <span className="opacity-40">|</span>}
-                <span className="flex items-center gap-1 shrink-0">
+                <span className="flex items-center gap-1">
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   {readTime}
                 </span>
-                <span className="opacity-40">|</span>
-                <span className="flex items-center gap-1 shrink-0 text-rose-500/80">
-                  <Heart size={10} strokeWidth={3} className="fill-current" />
-                  {article.like_count ?? (Array.isArray(article.reactions) ? article.reactions[0]?.count : 0) ?? 0}
-                </span>
               </div>
 
-              {/* Share & Copy logic inline */}
-              <div className="flex items-center gap-2 pl-2">
-                <button onClick={handleShare} className="w-6 h-6 flex items-center justify-center rounded-lg bg-[var(--color-surface-2)] text-[var(--color-muted)] hover:text-[#685de6] transition-all shrink-0">
-                  <Share2 size={11} strokeWidth={2.5} />
-                </button>
-                <button onClick={handleCopy} className={`w-6 h-6 flex items-center justify-center rounded-lg bg-[var(--color-surface-2)] transition-all shrink-0 ${copied ? 'text-green-500' : 'text-[var(--color-muted)] hover:text-[#685de6]'}`}>
-                  {copied ? <Check size={11} strokeWidth={3} /> : <LinkIcon size={11} strokeWidth={2.5} />}
-                </button>
+              {/* Action Icons Row */}
+              <div className="flex items-center justify-between opacity-90 mt-1">
+                <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-black uppercase text-rose-500">
+                  <Heart size={12} strokeWidth={3} className="fill-current" />
+                  {article.like_count ?? (Array.isArray(article.reactions) ? article.reactions[0]?.count : 0) ?? 0}
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <button onClick={handleShare} className="w-7 h-7 flex items-center justify-center rounded-lg bg-[var(--color-surface-2)] text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-all shrink-0" title="Share">
+                    <Share2 size={12} strokeWidth={2.5} />
+                  </button>
+                  <button onClick={handleCopy} className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all shrink-0 ${copied ? 'bg-green-500/10 text-green-500' : 'bg-[var(--color-surface-2)] text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10'}`} title="Copy Link">
+                    {copied ? <Check size={12} strokeWidth={3} /> : <LinkIcon size={12} strokeWidth={2.5} />}
+                  </button>
+                  <button onClick={handleToggleSave} className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all shrink-0 border ${isSaved ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] border-[var(--color-primary)]/30' : 'bg-transparent text-[var(--color-muted)] hover:text-[var(--color-primary)] border-[var(--color-border)]'}`} title={isSaved ? "Saved" : "Save article"}>
+                    <Bookmark size={12} strokeWidth={2.5} className={isSaved ? 'fill-current' : ''} />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Bookmark floating button bottom-right matching the image */}
-        <div className="absolute -bottom-3 right-5 z-20">
-          <button
-            onClick={handleToggleSave}
-            className={`w-8 h-8 rounded-[0.85rem] flex items-center justify-center hover:scale-105 transition-all ${isSaved ? 'bg-[#ffeb3b] text-[#111]' : 'bg-white dark:bg-[#222a36] text-[var(--color-muted)] border border-[var(--color-border)]'}`}
-            title={isSaved ? "Saved" : "Save article"}
-          >
-            <Bookmark size={14} strokeWidth={2.5} className={isSaved ? 'fill-[#111]' : ''} />
-          </button>
-        </div>
-
       </Card>
     </div>
   );
