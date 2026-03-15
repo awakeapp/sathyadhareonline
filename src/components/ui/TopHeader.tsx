@@ -175,9 +175,10 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
     <>
       {!isAdminRoute && (
       <header
-        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 cubic-bezier(0.16,1,0.3,1) ${isVisible ? 'translate-y-0' : '-translate-y-full'} glass-ribbon`}
+        className={`fixed top-0 left-0 right-0 z-[100] transition-transform duration-500 cubic-bezier(0.16,1,0.3,1) glass-ribbon`}
         style={{
           paddingTop: 'var(--safe-top)',
+          transform: isVisible ? 'translateY(0)' : 'translateY(-64px)'
         }}
       >
         <div className="flex items-center justify-between h-16 px-4">
