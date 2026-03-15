@@ -96,7 +96,7 @@ export default function BookCard({ book }: BookCardProps) {
   return (
     <div className="group relative flex flex-col w-full h-full">
       {/* 1. Cover Image (Clickable) */}
-      <Link href={`/library/${slug}`} className="block relative w-full aspect-[3/4] rounded-2xl sm:rounded-[2rem] overflow-hidden bg-[var(--color-surface-2)] shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 z-10 tap-highlight outline-none">
+      <Link href={`/library/${slug}`} className="block relative w-full aspect-[3/4] rounded-2xl sm:rounded-[2rem] overflow-hidden bg-[var(--color-surface-2)] transition-all duration-500 hover:-translate-y-1 z-10 tap-highlight outline-none">
         {book.cover_image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -138,7 +138,7 @@ export default function BookCard({ book }: BookCardProps) {
           {/* Share Button */}
           <button 
             onClick={handleShare}
-            className="flex-1 max-w-[120px] h-9 sm:h-10 rounded-xl bg-[var(--color-surface-2)] text-[var(--color-text)] font-black text-[10px] sm:text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#685de6] hover:text-white hover:shadow-md hover:shadow-[#685de6]/20 active:scale-95 transition-all outline-none group/btn"
+            className="flex-1 max-w-[120px] h-9 sm:h-10 rounded-xl bg-[var(--color-surface-2)] text-[var(--color-text)] font-black text-[10px] sm:text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#685de6] hover:text-white transition-all outline-none group/btn"
           >
             {copied ? <Check size={14} strokeWidth={2.5} className="group-hover/btn:text-white" /> : <Share2 size={14} strokeWidth={2.5} className="text-[var(--color-muted)] group-hover/btn:text-white transition-colors" />}
             <span>Share</span>
@@ -147,7 +147,7 @@ export default function BookCard({ book }: BookCardProps) {
           {/* Save Button */}
           <button 
             onClick={handleToggleSave}
-            className={`flex-1 max-w-[120px] h-9 sm:h-10 rounded-xl font-black text-[10px] sm:text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all outline-none shadow-sm hover:shadow-md ${isSaved ? 'bg-[#ffeb3b] text-[#111] shadow-[#ffeb3b]/20 hover:scale-[1.02]' : 'bg-white dark:bg-[#222a36] text-[var(--color-text)] border border-[var(--color-border)] hover:border-[var(--color-text)]'}`}
+            className={`flex-1 max-w-[120px] h-9 sm:h-10 rounded-xl font-black text-[10px] sm:text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all outline-none ${isSaved ? 'bg-[#ffeb3b] text-[#111] hover:scale-[1.02]' : 'bg-white dark:bg-[#222a36] text-[var(--color-text)] border border-[var(--color-border)] hover:border-[var(--color-text)]'}`}
           >
             <Bookmark size={14} strokeWidth={2.5} className={isSaved ? 'fill-[#111]' : 'text-[var(--color-muted)]'} />
             <span>{isSaved ? 'Saved' : 'Save'}</span>

@@ -65,7 +65,7 @@ export default function HomeSearchBar() {
   };
 
   return (
-    <div className="relative mb-6 z-30 px-2 lg:px-0 mt-4 max-w-lg mx-auto w-full">
+    <div className="relative w-full max-w-lg mx-auto z-30">
       <div className="relative">
         <input
           type="text"

@@ -230,7 +230,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
                     import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
                     setIsMenuOpen(true);
                   }}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-transform active:scale-90 ml-1 shadow-sm"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-transform ml-1"
                   title="Profile"
                   aria-label="Open profile"
                 >

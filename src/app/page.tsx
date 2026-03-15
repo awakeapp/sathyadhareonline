@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import HeroBanner from '@/components/ui/HeroBanner';
 import BannerCarousel from '@/components/ui/BannerCarousel';
-import HomeSearchBar from '@/components/ui/HomeSearchBar';
+
 import ArticleCard from '@/components/ui/ArticleCard';
 import SectionHeader from '@/components/ui/SectionHeader';
 import HomeLatestArticles from '@/components/HomeLatestArticles';
@@ -104,8 +104,7 @@ export default async function HomePage() {
   return (
     <div className="font-sans antialiased min-h-[100svh] px-4 pt-2 pb-0 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl scroll-smooth">
 
-      {/* ── 0. Inline search bar (Translates Eng -> Kannada) ── */}
-      <HomeSearchBar />
+      {/* ── 0. Search bar moved to TopHeader ── */}
 
 
 
@@ -122,7 +121,7 @@ export default async function HomePage() {
       {trending.length > 0 && (
         <section className="mb-12">
           <SectionHeader title="Trending Articles" />
-          <div className="flex flex-col gap-5 mt-5">
+          <div className="flex flex-col gap-4 mt-5">
             {trending.map((article) => (
               <ArticleCard key={article.id} variant="list" article={article as unknown as ArticleWithCategory} />
             ))}

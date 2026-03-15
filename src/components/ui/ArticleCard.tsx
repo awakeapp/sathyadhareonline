@@ -127,13 +127,13 @@ function HorizontalCard({ article, readTime, date, categoryName }: { article: Ar
   };
 
   return (
-    <div className="group relative block w-full mb-3">
-      <Card hoverable className="relative rounded-[2rem] border-transparent bg-white dark:bg-[#1a222c] shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] overflow-visible flex flex-col p-3 gap-4 group-hover:bg-gray-50/80 dark:group-hover:bg-[#222a36] transition-colors">
+    <div className="group relative block w-full">
+      <Card hoverable className="relative rounded-[2rem] border-transparent bg-white dark:bg-[#1a222c] overflow-visible flex flex-col p-3 gap-4 group-hover:bg-gray-50/80 dark:group-hover:bg-[#222a36] transition-colors">
         
         <div className="flex flex-row gap-4">
           {/* Left: Image Side */}
-          <Link href={`/articles/${article.slug}`} className="relative shrink-0 block w-[110px] h-[110px] sm:w-[130px] sm:h-[130px] transition-transform active:scale-[0.98]">
-            <div className="w-full h-full rounded-[1.5rem] overflow-hidden bg-[var(--color-surface-2)] relative shadow-sm">
+          <Link href={`/articles/${article.slug}`} className="relative shrink-0 block w-[110px] h-[110px] sm:w-[130px] sm:h-[130px] transition-transform">
+            <div className="w-full h-full rounded-[1.5rem] overflow-hidden bg-[var(--color-surface-2)] relative">
               {article.cover_image ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -148,7 +148,7 @@ function HorizontalCard({ article, readTime, date, categoryName }: { article: Ar
             {/* Category badge overlaid on center bottom of image */}
             {categoryName && (
               <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 z-10 w-max max-w-[95%]">
-                <span className="block px-3 py-1 rounded-[10px] text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-white bg-black/70 backdrop-blur-md border border-white/20 shadow-lg truncate text-center">
+                <span className="block px-3 py-1 rounded-[10px] text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-white bg-black/70 backdrop-blur-md border border-white/20 truncate text-center">
                   {categoryName}
                 </span>
               </div>
@@ -189,10 +189,10 @@ function HorizontalCard({ article, readTime, date, categoryName }: { article: Ar
 
               {/* Share & Copy logic inline */}
               <div className="flex items-center gap-2 pl-2">
-                <button onClick={handleShare} className="w-6 h-6 flex items-center justify-center rounded-lg bg-[var(--color-surface-2)] text-[var(--color-muted)] hover:text-[#685de6] active:scale-90 transition-all shrink-0">
+                <button onClick={handleShare} className="w-6 h-6 flex items-center justify-center rounded-lg bg-[var(--color-surface-2)] text-[var(--color-muted)] hover:text-[#685de6] transition-all shrink-0">
                   <Share2 size={11} strokeWidth={2.5} />
                 </button>
-                <button onClick={handleCopy} className={`w-6 h-6 flex items-center justify-center rounded-lg bg-[var(--color-surface-2)] transition-all active:scale-90 shrink-0 ${copied ? 'text-green-500' : 'text-[var(--color-muted)] hover:text-[#685de6]'}`}>
+                <button onClick={handleCopy} className={`w-6 h-6 flex items-center justify-center rounded-lg bg-[var(--color-surface-2)] transition-all shrink-0 ${copied ? 'text-green-500' : 'text-[var(--color-muted)] hover:text-[#685de6]'}`}>
                   {copied ? <Check size={11} strokeWidth={3} /> : <LinkIcon size={11} strokeWidth={2.5} />}
                 </button>
               </div>
@@ -204,7 +204,7 @@ function HorizontalCard({ article, readTime, date, categoryName }: { article: Ar
         <div className="absolute -bottom-3 right-5 z-20">
           <button
             onClick={handleToggleSave}
-            className={`w-8 h-8 rounded-[0.85rem] shadow-[0_4px_12px_rgba(100,100,100,0.1)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all ${isSaved ? 'bg-[#ffeb3b] text-[#111] shadow-[0_4px_12px_rgba(255,235,59,0.3)]' : 'bg-white dark:bg-[#222a36] text-[var(--color-muted)] border border-[var(--color-border)]'}`}
+            className={`w-8 h-8 rounded-[0.85rem] flex items-center justify-center hover:scale-105 transition-all ${isSaved ? 'bg-[#ffeb3b] text-[#111]' : 'bg-white dark:bg-[#222a36] text-[var(--color-muted)] border border-[var(--color-border)]'}`}
             title={isSaved ? "Saved" : "Save article"}
           >
             <Bookmark size={14} strokeWidth={2.5} className={isSaved ? 'fill-[#111]' : ''} />
@@ -227,7 +227,7 @@ export default function ArticleCard({ article, variant = 'list' }: ArticleCardPr
 
   if (variant === 'list') {
     return (
-      <Link href={`/articles/${article.slug}`} className="group relative block w-full mb-3 outline-none transition-transform active:scale-[0.98]">
+      <Link href={`/articles/${article.slug}`} className="group relative block w-full outline-none transition-transform">
         <Card hoverable className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-none overflow-hidden h-full flex flex-col group-hover:bg-[var(--color-surface-2)] transition-colors">
           {/* Image Side */}
           <div className="relative block w-full aspect-[16/9] overflow-hidden">
@@ -246,7 +246,7 @@ export default function ArticleCard({ article, variant = 'list' }: ArticleCardPr
             {/* Category badge overlaid on image */}
             {categoryName && (
               <div className="absolute bottom-3 left-3 z-10">
-                <span className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest text-white bg-[var(--color-primary)]/80 backdrop-blur-md border border-white/10 shadow-lg">
+                <span className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest text-white bg-[var(--color-primary)]/80 backdrop-blur-md border border-white/10">
                   {categoryName}
                 </span>
               </div>
@@ -286,7 +286,7 @@ export default function ArticleCard({ article, variant = 'list' }: ArticleCardPr
 
   // Grid Style
   return (
-    <Link href={`/articles/${article.slug}`} className="group flex flex-col h-full outline-none transition-transform active:scale-[0.98]">
+    <Link href={`/articles/${article.slug}`} className="group flex flex-col h-full outline-none transition-transform">
       <Card hoverable className="rounded-[1.75rem] border-transparent bg-transparent shadow-none h-full flex flex-col">
         {/* Image Container */}
         <div className="relative w-full aspect-[4/5] rounded-[1.75rem] overflow-hidden mb-3 bg-[var(--color-surface-2)]">

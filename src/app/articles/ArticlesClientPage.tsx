@@ -156,7 +156,7 @@ export default function ArticlesClientPage({ categories, initialArticles, active
             <p className="text-sm text-[var(--color-muted)]">Try a different category or remove the filter.</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-4">
             {initialArticles.map(article => (
               <ArticleCard key={article.id} variant="list-horizontal" article={article as unknown as React.ComponentProps<typeof ArticleCard>['article']} />
             ))}
