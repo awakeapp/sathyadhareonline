@@ -1,23 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
-import { User, Mail, Lock, ShieldCheck, ArrowLeft } from 'lucide-react'
+import { User, Mail, Lock, ShieldCheck, ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-
-/* ── Eye icons ── */
-const EyeOpen = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-    <circle cx="12" cy="12" r="3" />
-  </svg>
-)
-const EyeClosed = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-    <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" />
-    <line x1="1" y1="1" x2="23" y2="23" />
-  </svg>
-)
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" className="w-5 h-5 flex-shrink-0" aria-hidden>
@@ -26,6 +12,18 @@ const GoogleIcon = () => (
     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
   </svg>
+)
+
+const FacebookIcon = () => (
+    <svg viewBox="0 0 24 24" className="w-5 h-5 flex-shrink-0" fill="#1877F2">
+        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+    </svg>
+)
+
+const TwitterIcon = () => (
+    <svg viewBox="0 0 24 24" className="w-5 h-5 flex-shrink-0" fill="currentColor">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>
 )
 
 export default function SignupPage() {
@@ -40,14 +38,13 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
 
-  /* ── Signup ── */
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
     setMessage(null)
 
     if (!agreedToTerms) {
-      setError('You must agree to the Terms & Agreement')
+      setError('You must agree to the User Agreement & Privacy Policy')
       return
     }
 
@@ -85,7 +82,6 @@ export default function SignupPage() {
     }, 1800)
   }
 
-  /* ── Google OAuth ── */
   async function handleGoogleSignup() {
     setGoogleLoading(true)
     setError(null)
@@ -103,34 +99,30 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="min-h-dvh flex flex-col items-center justify-center p-4 bg-[var(--color-background)]">
+    <main className="min-h-screen flex flex-col items-center bg-[var(--color-background)] px-6 pt-12">
       
-      <div className="w-full max-w-[480px] bg-[var(--color-background)] rounded-[2.5rem] relative z-10 animate-fade-up">
-
-        {/* Top App Bar */}
-        <div className="flex items-center justify-between py-6">
-          <Link href="/" className="p-2 -ml-2 rounded-full hover:bg-[var(--color-surface)] transition-colors">
-            <ArrowLeft className="w-6 h-6 text-[var(--color-text)]" />
-          </Link>
-          <Link href="/login" className="text-sm font-bold text-[#f04a4c] hover:underline underline-offset-4">
-            Sign In
+      <div className="w-full max-w-[420px] flex flex-col">
+        {/* Header Navigation */}
+        <div className="flex items-center mb-12">
+          <Link href="/" className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[var(--color-surface-2)] transition-colors">
+            <ArrowLeft className="w-5 h-5 text-[var(--color-text)]" />
           </Link>
         </div>
 
-        {/* Main Header */}
-        <div className="mb-8 mt-4">
-          <h1 className="text-4xl font-extrabold text-[var(--color-text)] tracking-tight mb-2">Create<br />an account</h1>
+        {/* Title */}
+        <div className="text-center mb-10">
+          <h1 className="text-[28px] font-black text-[var(--color-text)] tracking-tight">Sign Up</h1>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-3 font-semibold">
+          <div className="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[13px] flex items-center gap-3 font-bold animate-in fade-in zoom-in-95">
             <ShieldCheck className="w-5 h-5 shrink-0" />
             {error}
           </div>
         )}
 
         {message && (
-          <div className="mb-6 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-3 font-semibold">
+          <div className="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[13px] flex items-center gap-3 font-bold animate-in fade-in zoom-in-95">
             <ShieldCheck className="w-5 h-5 shrink-0" />
             {message}
           </div>
@@ -139,22 +131,8 @@ export default function SignupPage() {
         {/* Form */}
         <form onSubmit={handleSignup} className="space-y-4">
           
-          <div className="relative group">
-            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--color-muted)] transition-colors group-focus-within:text-[#f04a4c]">
-              <User className="w-5 h-5" />
-            </div>
-            <input
-              required
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Full Name"
-              className="w-full h-16 pl-14 pr-5 rounded-2xl bg-[var(--color-surface)] border-none text-[var(--color-text)] placeholder:text-[var(--color-muted)]/60 focus:ring-2 focus:ring-[#f04a4c] outline-none transition-all font-semibold text-[15px]"
-            />
-          </div>
-
-          <div className="relative group">
-            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--color-muted)] transition-colors group-focus-within:text-[#f04a4c]">
+          <div className="relative">
+            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--color-muted)]">
               <Mail className="w-5 h-5" />
             </div>
             <input
@@ -163,12 +141,26 @@ export default function SignupPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email address"
-              className="w-full h-16 pl-14 pr-5 rounded-2xl bg-[var(--color-surface)] border-none text-[var(--color-text)] placeholder:text-[var(--color-muted)]/60 focus:ring-2 focus:ring-[#f04a4c] outline-none transition-all font-semibold text-[15px]"
+              className="w-full h-14 pl-14 pr-5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] placeholder:text-[var(--color-muted)]/50 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all font-semibold text-[15px] shadow-sm"
             />
           </div>
 
-          <div className="relative group">
-            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--color-muted)] transition-colors group-focus-within:text-[#f04a4c]">
+          <div className="relative">
+            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--color-muted)]">
+              <User className="w-5 h-5" />
+            </div>
+            <input
+              required
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Full Name"
+              className="w-full h-14 pl-14 pr-5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] placeholder:text-[var(--color-muted)]/50 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all font-semibold text-[15px] shadow-sm"
+            />
+          </div>
+
+          <div className="relative">
+            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--color-muted)]">
               <Lock className="w-5 h-5" />
             </div>
             <input
@@ -177,27 +169,27 @@ export default function SignupPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
-              className="w-full h-16 pl-14 pr-14 rounded-2xl bg-[var(--color-surface)] border-none text-[var(--color-text)] placeholder:text-[var(--color-muted)]/60 focus:ring-2 focus:ring-[#f04a4c] outline-none transition-all font-semibold text-[15px]"
+              className="w-full h-14 pl-14 pr-14 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] placeholder:text-[var(--color-muted)]/50 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all font-semibold text-[15px] shadow-sm"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-5 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors"
+              className="absolute right-5 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-text)]"
             >
-              {showPassword ? <EyeClosed /> : <EyeOpen />}
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
 
-          <div className="flex items-center gap-3 px-1 mt-6">
+          <div className="flex items-start gap-3 px-3 mt-6">
             <input
               type="checkbox"
               id="terms"
               checked={agreedToTerms}
               onChange={(e) => setAgreedToTerms(e.target.checked)}
-              className="w-5 h-5 rounded border-2 border-[var(--color-muted)]/40 text-[#f04a4c] focus:ring-[#f04a4c] cursor-pointer"
+              className="mt-1 w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-primary)] focus:ring-[var(--color-primary)] cursor-pointer"
             />
-            <label htmlFor="terms" className="text-sm font-semibold text-[var(--color-muted)] cursor-pointer">
-              I have read <Link href="/terms" className="text-[#f04a4c] hover:underline">Terms & Agreement</Link>
+            <label htmlFor="terms" className="text-[12px] font-bold text-[var(--color-muted)] leading-tight cursor-pointer">
+              I Have Read And Agree To <Link href="/terms" className="text-[var(--color-primary)] hover:underline">User Agreement Privacy Policy</Link>
             </label>
           </div>
 
@@ -205,29 +197,50 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading || googleLoading}
-              className="w-full h-16 rounded-full bg-[#f04a4c] text-white font-bold text-[15px] shadow-lg shadow-[#f04a4c]/30 hover:shadow-xl hover:shadow-[#f04a4c]/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center"
+              className="w-full h-14 rounded-full bg-[var(--color-primary)] text-white font-black text-[15px] shadow-lg shadow-[var(--color-primary)]/20 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center uppercase tracking-widest"
             >
               {loading
-                ? <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
-                : "Sign Up"}
+                ? <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                : "Continue"}
             </button>
           </div>
         </form>
 
-        <div className="mt-12 text-center pb-8">
-          <p className="text-sm font-semibold text-[var(--color-muted)] mb-6">Or sign up with</p>
-          
-          <div className="flex justify-center gap-4">
-            <button
-              onClick={handleGoogleSignup}
-              disabled={googleLoading || loading}
-              className="flex items-center justify-center gap-3 w-36 h-14 rounded-full bg-[var(--color-surface)] hover:bg-[var(--color-surface-2)] active:scale-[0.98] transition-all disabled:opacity-50"
-            >
-              {googleLoading
-                ? <div className="w-5 h-5 border-2 border-[var(--color-muted)] border-t-transparent rounded-full animate-spin" />
-                : <><GoogleIcon /><span className="text-sm font-bold">Google</span></>}
-            </button>
+        {/* Divider */}
+        <div className="relative my-10">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-[var(--color-border)]"></div>
           </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-[var(--color-background)] px-4 text-[var(--color-muted)] font-bold tracking-widest">OR</span>
+          </div>
+        </div>
+
+        {/* Social Login */}
+        <div className="flex justify-center gap-6 mb-12">
+            <button className="w-12 h-12 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center hover:bg-[var(--color-surface-2)] transition-colors shadow-sm">
+                <TwitterIcon />
+            </button>
+            <button className="w-12 h-12 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center hover:bg-[var(--color-surface-2)] transition-colors shadow-sm">
+                <FacebookIcon />
+            </button>
+            <button 
+                onClick={handleGoogleSignup} 
+                disabled={googleLoading || loading}
+                className="w-12 h-12 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center hover:bg-[var(--color-surface-2)] transition-colors shadow-sm"
+            >
+                {googleLoading ? <div className="w-5 h-5 border-2 border-[var(--color-muted)] border-t-transparent rounded-full animate-spin" /> : <GoogleIcon />}
+            </button>
+        </div>
+
+        {/* Footer Link */}
+        <div className="text-center pb-12">
+            <p className="text-[14px] font-bold text-[var(--color-muted)]">
+                Joined us before?{' '}
+                <Link href="/login" className="text-[var(--color-primary)] hover:underline underline-offset-4">
+                    Sign In
+                </Link>
+            </p>
         </div>
 
       </div>

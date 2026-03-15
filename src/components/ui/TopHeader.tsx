@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useReaderMode } from '@/context/ReaderModeContext';
 import { useTheme } from 'next-themes';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
-import { ArrowLeft, Bell, Eye, Maximize2, User as UserIcon } from 'lucide-react';
+import { ArrowLeft, Bell, Eye, Maximize2, User as UserIcon, Plus } from 'lucide-react';
 import { SA_SECTIONS, ADMIN_SECTIONS, EDITOR_SECTIONS } from '../navigation/nav-items';
 
 
@@ -175,29 +175,36 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
     <>
       {!isAdminRoute && (
       <header
-        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 cubic-bezier(0.16,1,0.3,1) ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}
+        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 cubic-bezier(0.16,1,0.3,1) ${isVisible ? 'translate-y-0' : '-translate-y-full'} glass-ribbon`}
         style={{
           paddingTop: 'var(--safe-top)',
-          pointerEvents: 'none'
         }}
       >
-        {/* ── Main tray with proper glassmorphism ───────────────────── */}
-        <div className="mx-auto w-full max-w-7xl px-3 sm:px-4 pointer-events-auto">
-          <div className="h-16 flex items-center justify-between glass-premium shadow-xl rounded-2xl border border-[var(--color-border)]/40 mt-1 px-4">
-
+        <div className="flex items-center justify-between h-16 px-4">
           {/* Logo */}
-          <Link href={isAdminRoute ? dashboardHref : '/'} className="flex items-center flex-shrink-0 mr-auto transition-transform active:scale-95">
+          <Link href={isAdminRoute ? dashboardHref : '/'} className="flex items-center flex-shrink-0 transition-transform active:scale-95">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={currentTheme === 'dark' ? '/logo-dark.png' : '/logo-light.png'}
               alt="Sathyadhare Logo"
-              className="h-[28px] min-w-[110px] object-left object-contain transition-opacity duration-300"
+              className="h-[28px] min-w-[110px] object-left object-contain"
               suppressHydrationWarning
             />
           </Link>
 
           {/* Right actions */}
           <div className="flex items-center gap-2">
+            
+            {/* ── Primary Create Button for Staff ONLY ── */}
+            {isPrivilegedRole && (
+              <Link
+                href="/editor/articles/new"
+                className="flex items-center justify-center w-9 h-9 rounded-xl bg-[var(--color-primary)] text-black shadow-lg shadow-[var(--color-primary)]/20 transition-all active:scale-75 active:translate-y-1 hover:scale-105"
+                title="Create New Article"
+              >
+                <Plus className="w-5 h-5" strokeWidth={3} />
+              </Link>
+            )}
 
             {/* ── Switch to Reader Mode button (admin route → reader side) ── */}
             {isPrivilegedRole && isAdminRoute && (
@@ -279,13 +286,10 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
                 </button>
               </div>
             )}
-          </div>
         </div>
       </div>
-
-
-      </header>
-      )}
+    </header>
+    )}
 
       {/* ── Drawer overlay (moved out of header to escape backdrop stacking context) ────────────────────────────────────────── */}
       {isMenuOpen && (
