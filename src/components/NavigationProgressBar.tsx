@@ -11,10 +11,13 @@ export default function NavigationProgressBar() {
 
   useEffect(() => {
     // When path or params change, we consider the transition successful/started
-    setLoading(true);
+    const frame = requestAnimationFrame(() => setLoading(true));
     const timeout = setTimeout(() => setLoading(false), 500); 
     
-    return () => clearTimeout(timeout);
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(timeout);
+    };
   }, [pathname, searchParams]);
 
   return (
@@ -22,10 +25,10 @@ export default function NavigationProgressBar() {
       {loading && (
         <motion.div
           initial={{ width: '0%', opacity: 1 }}
-          animate={{ width: '100%', opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="fixed top-0 left-0 h-[3px] bg-gradient-to-r from-blue-500 to-indigo-600 z-[9999] shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+          animate={{ width: '90%', opacity: 1 }}
+          exit={{ width: '100%', opacity: 0 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} // smooth ease out
+          className="fixed top-0 left-0 h-[2px] bg-[var(--color-primary)] z-[9999] shadow-[0_0_8px_var(--color-primary)]"
         />
       )}
     </AnimatePresence>

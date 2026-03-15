@@ -11,9 +11,12 @@ interface SectionHeaderProps {
 export default function SectionHeader({ title, href }: SectionHeaderProps) {
   return (
     <div className="flex items-center justify-between mb-4 mt-8 px-1">
-      <h2 className="text-sm font-black text-[var(--color-text)] uppercase tracking-widest">
-        {title}
-      </h2>
+      <div className="flex items-center gap-3">
+        <div className="w-1 h-6 bg-[var(--color-primary)] rounded-full" />
+        <h2 className="text-sm font-black text-[var(--color-text)] uppercase tracking-widest">
+          {title}
+        </h2>
+      </div>
       {href && (
         <Link 
           href={href}

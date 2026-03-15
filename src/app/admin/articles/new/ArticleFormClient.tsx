@@ -66,12 +66,12 @@ export default function ArticleFormClient({ categories, users, role, onSubmit, c
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-[13px] font-semibold text-[var(--color-text)]">Author Name *</label>
+                <label className="text-[13px] font-semibold text-[var(--color-text)]">Writer Name *</label>
                 <input 
                   required
                   name="author_name" 
                   type="text"
-                  placeholder="Enter Author Name"
+                  placeholder="Enter Writer Name"
                   defaultValue={users.find(u => u.id === currentUserId)?.name || ''}
                   className="w-full h-12 px-4 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[14px] font-medium focus:ring-2 focus:ring-[var(--color-primary)] outline-none transition-all"
                 />

@@ -167,7 +167,14 @@ export default async function ArticlePage({ params }: Props) {
 
   return (
     <div className="font-sans antialiased min-h-[100svh] px-4 pb-0 max-w-lg mx-auto sm:max-w-2xl lg:max-w-3xl article-page-container">
-      <style dangerouslySetInnerHTML={{ __html: `html.is-fullscreen main { padding-top: 0 !important; }` }} />
+      <style dangerouslySetInnerHTML={{ __html: `
+        html.is-fullscreen main { padding-top: 0 !important; }
+        html.is-fullscreen header, 
+        html.is-fullscreen nav, 
+        html.is-fullscreen .hide-in-fullscreen { 
+          display: none !important; 
+        }
+      ` }} />
       <style dangerouslySetInnerHTML={{ __html: `::-webkit-scrollbar { display: block !important; width: 6px !important; height: 6px !important; } * { scrollbar-width: thin !important; -ms-overflow-style: auto !important; } ::-webkit-scrollbar-track { background: transparent !important; } ::-webkit-scrollbar-thumb { background: var(--color-border) !important; border-radius: 10px !important; } ::-webkit-scrollbar-thumb:hover { background: var(--color-muted) !important; }` }} />
 
       <ArticleViewTracker articleId={article.id} trackView={trackView} />
@@ -179,18 +186,18 @@ export default async function ArticlePage({ params }: Props) {
 
       <header className="hide-in-fullscreen pt-3 pb-5 border-b border-[var(--color-border)] mb-6">
         <h1 className="text-[1.75rem] sm:text-4xl font-black text-[var(--color-text)] leading-[1.1] tracking-tighter mb-4">{article.title}</h1>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-full bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center shrink-0">
-            <svg className="w-4.5 h-4.5 text-[var(--color-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-          </div>
-          <div>
-            <p className="text-[13px] font-black text-[var(--color-text)] leading-none mb-1">{author?.id ? <Link href={`/authors/${author.id}`} className="hover:text-[var(--color-primary)] transition-colors">{article.author_name || author?.full_name || 'Sathyadhare Editorial'}</Link> : article.author_name || author?.full_name || 'Sathyadhare Editorial'}</p>
-            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-[var(--color-muted)] uppercase tracking-wider flex-wrap">
-              {categoryName && <span className="px-2 py-0.5 rounded-md bg-[var(--color-primary)] text-white font-black text-[9px] tracking-widest">{categoryName}</span>}
-              {date && <><span className="opacity-40">·</span><span>{date}</span></>}
-              <span className="opacity-40">·</span>
-              <span className="flex items-center gap-1"><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>{readTimeLabel}</span>
+        <div className="flex flex-col gap-2.5 mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center shrink-0">
+              <svg className="w-3.5 h-3.5 text-[var(--color-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
             </div>
+            <p className="text-[13px] font-black text-[var(--color-text)] leading-none">{author?.id ? <Link href={`/authors/${author.id}`} className="hover:text-[var(--color-primary)] transition-colors">{article.author_name || author?.full_name || 'Sathyadhare Editorial'}</Link> : article.author_name || author?.full_name || 'Sathyadhare Editorial'}</p>
+          </div>
+          <div className="flex items-center gap-2 text-[10px] font-semibold text-[var(--color-muted)] uppercase tracking-wider flex-wrap">
+            {categoryName && <span className="px-2 py-0.5 rounded-md bg-[var(--color-primary)] text-white font-black text-[9px] tracking-widest">{categoryName}</span>}
+            {date && <><span className="opacity-40">·</span><span>{date}</span></>}
+            <span className="opacity-40">·</span>
+            <span className="flex items-center gap-1"><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>{readTimeLabel}</span>
           </div>
         </div>
       </header>
@@ -217,12 +224,19 @@ export default async function ArticlePage({ params }: Props) {
         <TableOfContents contentHtml={renderedHtml} />
         <div className="w-full">
           <CopyProtected html={renderedHtml} className="prose-article mt-4 mb-12" articleId={article.id} userId={user?.id} />
+          
+          {/* Article End Divider */}
+          <div className="flex items-center justify-center gap-4 py-8 mb-12 opacity-30">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent to-[var(--color-text)]" />
+            <div className="w-2 h-2 rounded-full bg-[var(--color-primary)] ring-4 ring-[var(--color-primary)]/20" />
+            <div className="h-px flex-1 bg-gradient-to-l from-transparent to-[var(--color-text)]" />
+          </div>
         </div>
       </div>
 
       <div className="hide-in-fullscreen">
-        {related && related[0] && !nextChapter && <ContinueReading article={related[0] as any} />}
-        {nextChapter && <ContinueReading article={nextChapter as any} label="Next Chapter" />}
+        {related && related[0] && !nextChapter && <ContinueReading article={related[0] as unknown as { title: string; slug: string; cover_image: string | null }} />}
+        {nextChapter && <ContinueReading article={nextChapter as unknown as { title: string; slug: string; cover_image: string | null }} label="Next Chapter" />}
         <CommentBox articleId={article.id} isAuthenticated={!!user} />
         {sequelInfo && <ChapterNav prev={prevChapter} next={nextChapter} currentIndex={currentChapterIndex} totalChapters={totalChapters} sequelTitle={sequelInfo.title} sequelSlug={sequelInfo.slug} />}
         {related && related.length > 0 && (
@@ -231,7 +245,7 @@ export default async function ArticlePage({ params }: Props) {
             <HorizontalScroller className="-mx-4 px-4 sm:mx-0 sm:px-0 flex gap-4 mt-6">
               {related.map((item) => (
                 <div key={item.id} style={{ minWidth: '160px', width: '45vw', maxWidth: '200px' }}>
-                  <ArticleCard article={item as any} />
+                  <ArticleCard article={item as unknown as { id: string; title: string; slug: string; excerpt: string | null; cover_image: string | null; published_at: string | null; category: { name: string } | null }} />
                 </div>
               ))}
             </HorizontalScroller>

@@ -144,18 +144,16 @@ export default function BottomNavigation({ role }: BottomNavigationProps) {
   // Brand colors
   const ACTIVE_COLOR   = isAdminView ? '#4f8ef7' : '#685de6';
   const INACTIVE_COLOR = 'var(--color-muted)';
-  const BG_COLOR       = isAdminView ? 'var(--color-surface)' : 'var(--color-background)';
-  const BORDER_COLOR   = isAdminView ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.05)';
 
   return (
     <nav
       aria-label="Bottom navigation"
-      className="fixed bottom-0 left-0 right-0 z-50"
+      className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl"
       style={{
-        background:    BG_COLOR,
-        borderTop:     `1px solid ${BORDER_COLOR}`,
+        background:    isAdminView ? 'rgba(var(--color-surface-rgb), 0.85)' : 'rgba(var(--color-background-rgb), 0.85)',
+        borderTop:     `1px solid var(--color-border)`,
         paddingBottom: 'env(safe-area-inset-bottom)',
-        boxShadow:     '0 -2px 20px rgba(0,0,0,0.18)',
+        boxShadow:     '0 -8px 30px rgba(0,0,0,0.12)',
       }}
     >
       <div className="flex items-stretch justify-around h-[56px]">
@@ -169,14 +167,12 @@ export default function BottomNavigation({ role }: BottomNavigationProps) {
               key={item.label}
               href={item.href}
               onClick={() => {
+                import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
                 if (typeof window !== 'undefined') {
                   sessionStorage.setItem('transition_type', 'slide-up');
-                  if (window.navigator && window.navigator.vibrate) {
-                    window.navigator.vibrate(50);
-                  }
                 }
               }}
-              className="relative flex flex-col items-center justify-center flex-1 gap-[3px] tap-highlight transition-all active:scale-95"
+              className="relative flex flex-col items-center justify-center flex-1 gap-[3px] tap-highlight transition-all active:scale-90"
             >
               {/* Active indicator — thin top bar (WhatsApp style) */}
               <span

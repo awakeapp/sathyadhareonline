@@ -49,6 +49,9 @@ export function RippleEffect() {
 
       target.appendChild(circle);
       
+      // Trigger haptic feedback
+      import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
+
       // Cleanup after animation finishes
       setTimeout(() => {
         circle.remove();

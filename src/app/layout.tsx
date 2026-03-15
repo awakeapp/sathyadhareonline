@@ -6,6 +6,7 @@ import InstallPrompt from '@/components/InstallPrompt'
 import TopHeader from '@/components/ui/TopHeader'
 import MainWrapper from '@/components/MainWrapper'
 import { ReaderModeProvider } from '@/context/ReaderModeContext'
+import { ReaderSettingsProvider } from '@/context/ReaderSettingsContext'
 import { ThemeProvider } from '@/providers/ThemeProvider'
 import NavigationWrapper from '@/components/navigation/NavigationWrapper'
 import DashboardReturnFab from '@/components/DashboardReturnFab'
@@ -14,6 +15,7 @@ import { RippleEffect } from '@/components/RippleEffect'
 import { PageTransition } from '@/components/PageTransition'
 import NavigationProgressBar from '@/components/NavigationProgressBar'
 import OneSignalInitializer from '@/components/OneSignalInitializer'
+import { GestureProvider } from '@/components/GestureProvider'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -126,23 +128,44 @@ export default async function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem themes={['light', 'dark', 'sepia']}>
           <ReaderModeProvider>
-            <NavigationProgressBar />
-            <div className="flex min-h-screen">
-              <NavigationWrapper role={profile?.role || null} />
-              
-              <div className="flex-1 flex flex-col min-w-0">
-                <TopHeader user={user} role={profile?.role || null} profile={profile} />
+            <ReaderSettingsProvider>
+              <GestureProvider>
+                <NavigationProgressBar />
+                <div className="flex min-h-screen">
+                  <NavigationWrapper role={profile?.role || null} />
+                  
+                  <div className="flex-1 flex flex-col min-w-0">
+                    <TopHeader user={user} role={profile?.role || null} profile={profile} />
 
-                <PageTransition>
-                  <MainWrapper>{children}</MainWrapper>
-                </PageTransition>
-              </div>
-            </div>
-            
-            <RippleEffect />
-            <InstallPrompt />
-            <OneSignalInitializer />
-            <Toaster position="top-center" theme="system" richColors />
+                    <PageTransition>
+                      <MainWrapper>{children}</MainWrapper>
+                    </PageTransition>
+                  </div>
+                </div>
+                
+                <RippleEffect />
+                <InstallPrompt />
+                <OneSignalInitializer />
+                <Toaster position="bottom-center" theme="system" richColors closeButton toastOptions={{
+                  style: {
+                    marginBottom: 'env(safe-area-inset-bottom, 20px)',
+                  }
+                }} />
+
+                <DashboardReturnFab
+                  role={profile?.role || null}
+                  dashboardHref={
+                    profile?.role === 'super_admin' || profile?.role === 'admin' ? '/admin' :
+                    profile?.role === 'editor' ? '/editor' : '/'
+                  }
+                  dashboardLabel={
+                    profile?.role === 'super_admin' ? 'Super Admin Dashboard' :
+                    profile?.role === 'admin'       ? 'Admin Dashboard' :
+                    profile?.role === 'editor'      ? 'Editor Dashboard' : 'Dashboard'
+                  }
+                />
+              </GestureProvider>
+            </ReaderSettingsProvider>
             <script
               dangerouslySetInnerHTML={{
                 __html: `
@@ -157,19 +180,6 @@ export default async function RootLayout({
                   }
                 `
               }}
-            />
-
-            <DashboardReturnFab
-              role={profile?.role || null}
-              dashboardHref={
-                profile?.role === 'super_admin' || profile?.role === 'admin' ? '/admin' :
-                profile?.role === 'editor' ? '/editor' : '/'
-              }
-              dashboardLabel={
-                profile?.role === 'super_admin' ? 'Super Admin Dashboard' :
-                profile?.role === 'admin'       ? 'Admin Dashboard' :
-                profile?.role === 'editor'      ? 'Editor Dashboard' : 'Dashboard'
-              }
             />
           </ReaderModeProvider>
         </ThemeProvider>

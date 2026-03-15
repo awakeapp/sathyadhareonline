@@ -4,7 +4,7 @@ import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import RichTextEditor from '@/components/RichTextEditorClient';
 import { CoverImageUpload } from './CoverImageUpload';
-import { Star, ChevronLeft, Bell, PenTool, Sparkles, Send } from 'lucide-react';
+import { Star, ChevronLeft, Bell, PenTool, Sparkles } from 'lucide-react';
 import { logAuditEvent } from '@/lib/audit';
 import { 
   PresenceWrapper, 
@@ -237,8 +237,8 @@ export default async function EditArticlePage({
                       <input name="title" required defaultValue={article.title} placeholder="Enter article title..." className="w-full h-16 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-md font-bold shadow-inner" />
                      </div>
                      <div className="space-y-3">
-                      <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Author Name</label>
-                      <input name="author_name" required defaultValue={article.author_name || ''} placeholder="Author Name" className="w-full h-16 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-md font-bold shadow-inner" />
+                      <label className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Writer Name</label>
+                      <input name="author_name" required defaultValue={article.author_name || ''} placeholder="Writer Name" className="w-full h-16 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-md font-bold shadow-inner" />
                      </div>
                    </div>
 

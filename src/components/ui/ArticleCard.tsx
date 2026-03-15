@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { Share2, Link as LinkIcon, Bookmark, Check, Heart } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { haptics } from '@/lib/haptics';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
@@ -76,6 +77,7 @@ function HorizontalCard({ article, readTime, date, categoryName }: { article: Ar
 
   async function handleToggleSave(e: React.MouseEvent) {
     e.preventDefault();
+    haptics.impact('light');
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -87,13 +89,16 @@ function HorizontalCard({ article, readTime, date, categoryName }: { article: Ar
     try {
       if (nextSaved) {
         await supabase.from('bookmarks').insert({ user_id: user.id, article_id: article.id });
+        haptics.success();
         toast.success('Saved to your collection.');
       } else {
         await supabase.from('bookmarks').delete().match({ user_id: user.id, article_id: article.id });
+        haptics.impact('medium');
         toast.success('Removed from collection.');
       }
     } catch {
       setIsSaved(!nextSaved); // rollback
+      haptics.error();
       toast.error('Failed to update bookmark.');
     }
   }
@@ -102,8 +107,9 @@ function HorizontalCard({ article, readTime, date, categoryName }: { article: Ar
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.preventDefault();
+    haptics.impact('light');
     const url = getUrl();
-    try { await navigator.clipboard.writeText(url); } catch { /* ignore */ }
+    try { await navigator.clipboard.writeText(url); haptics.success(); } catch { /* ignore */ }
     setCopied(true);
     toast.success('Link copied!');
     setTimeout(() => setCopied(false), 2000);
@@ -111,9 +117,10 @@ function HorizontalCard({ article, readTime, date, categoryName }: { article: Ar
 
   const handleShare = async (e: React.MouseEvent) => {
     e.preventDefault();
+    haptics.impact('medium');
     const url = getUrl();
     if (navigator.share) {
-      try { await navigator.share({ title: article.title, url }); } catch {}
+      try { await navigator.share({ title: article.title, url }); haptics.success(); } catch {}
     } else {
       handleCopy(e);
     }
@@ -141,7 +148,7 @@ function HorizontalCard({ article, readTime, date, categoryName }: { article: Ar
             {/* Category badge overlaid on center bottom of image */}
             {categoryName && (
               <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 z-10 w-max max-w-[95%]">
-                <span className="block px-3 py-1 rounded-[10px] text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#111] bg-[#ffeb3b] shadow-md truncate text-center">
+                <span className="block px-3 py-1 rounded-[10px] text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-white bg-black/70 backdrop-blur-md border border-white/20 shadow-lg truncate text-center">
                   {categoryName}
                 </span>
               </div>
@@ -240,7 +247,7 @@ export default function ArticleCard({ article, variant = 'list' }: ArticleCardPr
             {/* Category badge overlaid on image */}
             {categoryName && (
               <div className="absolute bottom-3 left-3 z-10">
-                <span className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest text-white bg-[#685de6] shadow-sm">
+                <span className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest text-white bg-[var(--color-primary)]/80 backdrop-blur-md border border-white/10 shadow-lg">
                   {categoryName}
                 </span>
               </div>

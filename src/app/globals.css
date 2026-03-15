@@ -5,7 +5,9 @@
 :root {
   /* WhatsApp/Meta Light Theme */
   --color-background: #f0f2f5;
+  --color-background-rgb: 240, 242, 245;
   --color-surface: #ffffff;
+  --color-surface-rgb: 255, 255, 255;
   --color-surface-2: #f9fafa;
   --color-primary: #685de6;
   --color-accent: #685de6;
@@ -28,7 +30,9 @@
 .dark {
   /* WhatsApp/Meta Dark Theme */
   --color-background: #0b141a;
+  --color-background-rgb: 11, 20, 26;
   --color-surface: #111b21;
+  --color-surface-rgb: 17, 27, 33;
   --color-surface-2: #202c33;
   --color-primary: #685de6;
   --color-accent: #685de6;
@@ -354,6 +358,12 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
     }
   }
 }

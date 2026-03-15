@@ -22,11 +22,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     
     // Variants
     const variants = {
-      primary: "bg-[var(--color-primary)] text-black hover:bg-[#ffed4a] shadow-sm shadow-[var(--color-primary)]/20",
-      secondary: "bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-surface-2)]",
-      ghost: "text-[var(--color-text)] hover:bg-[var(--color-surface-2)]",
-      destructive: "bg-red-500/10 text-red-500 hover:bg-red-500/20",
-      outline: "border border-[var(--color-border)] bg-transparent text-[var(--color-text)] hover:bg-[var(--color-surface)]",
+      primary: "bg-[var(--color-primary)] text-black hover:bg-[#ffed4a] shadow-[0_4px_0_0_rgba(104,93,230,0.3)] hover:shadow-[0_2px_0_0_rgba(104,93,230,0.3)] hover:-translate-y-[1px] active:translate-y-[2px] active:shadow-none",
+      secondary: "bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-surface-2)] shadow-[0_4px_0_0_rgba(0,0,0,0.1)] hover:shadow-[0_2px_0_0_rgba(0,0,0,0.1)] hover:-translate-y-[1px] active:translate-y-[2px] active:shadow-none",
+      ghost: "text-[var(--color-text)] hover:bg-[var(--color-surface-2)] active:scale-95",
+      destructive: "bg-red-500/10 text-red-500 hover:bg-red-500/20 active:scale-95",
+      outline: "border-2 border-[var(--color-border)] bg-transparent text-[var(--color-text)] hover:bg-[var(--color-surface)] active:scale-95",
     }
     
     // Sizes
@@ -53,12 +53,18 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       )
     }
 
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+      import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
+      if (props.onClick) props.onClick(e);
+    };
+
     return (
       <button
         className={classes}
         ref={ref}
         disabled={disabled || loading}
         {...props}
+        onClick={handleClick}
       >
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         {children}

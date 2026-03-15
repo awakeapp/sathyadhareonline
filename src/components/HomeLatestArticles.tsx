@@ -49,12 +49,14 @@ export default function HomeLatestArticles({ initialArticles }: HomeLatestArticl
       if (data && data.length > 0) {
         setArticles(prev => [...prev, ...data as unknown as ArticleWithCategory[]]);
         if (data.length < 6) setHasMore(false);
+        import('@/lib/haptics').then(({ haptics }) => haptics.success());
       } else {
         setHasMore(false);
       }
     } catch (e) {
       console.error(e);
       toast.error("Failed to load more articles");
+      import('@/lib/haptics').then(({ haptics }) => haptics.error());
     } finally {
       setLoading(false);
     }

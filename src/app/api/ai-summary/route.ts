@@ -1,26 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+interface GeminiResponse {
+  candidates?: Array<{
+    content?: {
+      parts?: Array<{ text?: string }>;
+    };
+  }>;
+  promptFeedback?: {
+    blockReason?: string;
+  };
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { articleId, content, title } = body;
 
-    // 1. Validate Input
     if (!articleId || !content) {
       return NextResponse.json({ error: 'Missing article data' }, { status: 400 });
     }
 
-    // 2. Extract and sanitize API Key
-    // We remove ALL whitespace characters (\s) to prevent URL breakage
+    // 1. Hyper-Sanitize API Key (Google Free Tier Key)
     const rawKey = process.env.GEMINI_API_KEY || '';
-    const apiKey = rawKey.replace(/\s/g, ''); 
+    const apiKey = rawKey.replace(/["']/g, '').replace(/\s/g, '').trim();
     
     if (!apiKey) {
-      return NextResponse.json({ error: 'AI key not configured in Vercel' }, { status: 500 });
+      return NextResponse.json({ error: 'AI key not found' }, { status: 500 });
     }
 
-    // 3. Prepare Content (Simple cleaning)
+    // 2. Prepare text
     const plainText = content
       .replace(/<[^>]*>/g, ' ')
       .replace(/\s+/g, ' ')
@@ -28,65 +37,80 @@ export async function POST(request: NextRequest) {
       .slice(0, 10000);
 
     const isKannada = /[\u0C80-\u0CFF]/.test(plainText.slice(0, 500));
-
     const prompt = isKannada
-      ? `ಸಾರಾಂಶ: ${title}\n\n${plainText}`
-      : `Summarize: ${title}\n\n${plainText}`;
+      ? `ಸಾರಾಂಶ ತಯಾರಿಸಿ: ${title}\n\n${plainText}`
+      : `Summarize this: ${title}\n\n${plainText}`;
 
-    // 4. API Request with explicit Model and Version
-    // gemini-1.5-flash is the most reliable model name
-    const model = 'gemini-1.5-flash';
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    // 3. FREE TIER MODELS ONLY (Gemini 1.5 & 2.0 Flash)
+    // We try multiple models and versions to ensure reliability.
+    const configs = [
+      { ver: 'v1beta', model: 'gemini-2.0-flash-exp' }, // Newest & fastest
+      { ver: 'v1beta', model: 'gemini-1.5-flash' },     // Standard
+      { ver: 'v1',     model: 'gemini-1.5-flash' },     // Stable endpoint
+      { ver: 'v1beta', model: 'gemini-1.5-flash-8b' },  // Efficient fallback
+      { ver: 'v1beta', model: 'gemini-1.5-flash-latest' }
+    ];
 
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 250, temperature: 0.2 },
-      }),
-    });
+    let lastError = '';
+    let successData: GeminiResponse | null = null;
 
-    // 5. Advanced Error Handling
-    if (!response.ok) {
-      const errText = await response.text();
-      let parsedErr;
-      try { parsedErr = JSON.parse(errText); } catch { parsedErr = { error: { message: errText } }; }
-      
-      const errMsg = parsedErr?.error?.message || 'Unknown API Error';
-      const status = response.status;
+    for (const config of configs) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/${config.ver}/models/${config.model}:generateContent?key=${apiKey}`;
+        
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { 
+              maxOutputTokens: 300, 
+              temperature: 0.2,
+              topP: 0.95
+            },
+          }),
+        });
 
-      console.error(`AI Summary Failure [${status}]:`, errMsg);
-
-      if (status === 404) {
-        return NextResponse.json({ error: `AI Setup Error: Model not found. Check if API key is active.` }, { status: 404 });
+        if (res.ok) {
+          successData = await res.json() as GeminiResponse;
+          break;
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          const errMsg = errData.error?.message || 'Not Found';
+          lastError = `${config.model} (${res.status}: ${errMsg})`;
+        }
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : 'unknown';
+        lastError = `Network: ${message}`;
       }
-      if (status === 403 || status === 401) {
-        return NextResponse.json({ error: `AI Access Refused: Invalid API Key.` }, { status: 403 });
-      }
-      
-      return NextResponse.json({ error: `AI Error (${status}): ${errMsg.slice(0, 100)}` }, { status });
     }
 
-    // 6. Success Response
-    const data = await response.json();
-    const summary = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    if (!successData) {
+      // Clean up technical model names for the user
+      const userFriendlyError = lastError
+        .replace('gemini-1.5-flash-8b', 'Flash-8B')
+        .replace('gemini-1.5-flash', 'Flash')
+        .replace('gemini-2.0-flash-exp', 'Flash-2.0');
 
+      return NextResponse.json({ 
+        error: `AI Error: ${userFriendlyError}. Check API key in Google AI Studio.` 
+      }, { status: 500 });
+    }
+
+    const summary = successData.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
     if (!summary) {
-      return NextResponse.json({ error: 'AI returned an empty summary' }, { status: 500 });
+      return NextResponse.json({ error: 'Empty summary returned' }, { status: 500 });
     }
 
-    // 7. Async Save to DB (don't block user)
-    const supabase = await createClient();
-    supabase
-      .from('articles')
-      .update({ ai_summary: summary })
-      .eq('id', articleId)
-      .then(() => {});
+    // 4. Save to DB
+    try {
+      const supabase = await createClient();
+      await supabase.from('articles').update({ ai_summary: summary }).eq('id', articleId);
+    } catch {}
 
     return NextResponse.json({ summary });
-  } catch (error: any) {
-    console.error('AI summary route error:', error);
-    return NextResponse.json({ error: 'System Error: ' + (error.message || 'unknown') }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'unknown';
+    return NextResponse.json({ error: 'System Error: ' + message }, { status: 500 });
   }
 }

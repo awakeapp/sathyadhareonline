@@ -65,7 +65,10 @@ export default function ArticleLikeButton({ articleId, initialLikeCount = 0 }: A
 
     if (next) {
       setBurst(true);
+      import('@/lib/haptics').then(({ haptics }) => haptics.impact('medium'));
       setTimeout(() => setBurst(false), 600);
+    } else {
+      import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
     }
 
     try {

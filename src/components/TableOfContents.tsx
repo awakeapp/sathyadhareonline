@@ -22,7 +22,7 @@ function extractHeadings(html: string): TocItem[] {
 
   const generateId = (text: string) => text.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '').slice(0, 50);
 
-  headings.forEach((el, index) => {
+  headings.forEach((el) => {
     const level = parseInt(el.tagName[1]);
     const text = el.textContent?.trim() || '';
     if (!text) return;
@@ -42,7 +42,9 @@ export default function TableOfContents({ contentHtml }: TableOfContentsProps) {
 
   useEffect(() => {
     const extracted = extractHeadings(contentHtml);
-    setItems(extracted);
+    requestAnimationFrame(() => {
+      setItems(extracted);
+    });
 
     observerRef.current?.disconnect();
     if (extracted.length === 0) return;
@@ -117,33 +119,36 @@ export default function TableOfContents({ contentHtml }: TableOfContentsProps) {
       {/* Modern Drawer (Mobile / Triggered) */}
       {isOpen && (
         <div className="fixed inset-0 z-[1200] flex flex-col justify-end" onClick={() => setIsOpen(false)}>
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-md animate-fade-in" />
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-xl animate-fade-in" />
           <div 
-            className="relative w-full max-w-2xl mx-auto bg-[var(--color-surface)] rounded-t-[3rem] p-8 pb-12 shadow-[0_-20px_80px_rgba(0,0,0,0.4)] max-h-[85vh] flex flex-col animate-toc-up"
+            className="relative w-full max-w-2xl mx-auto bg-[var(--color-surface)] rounded-t-[3.5rem] p-9 pb-12 shadow-[0_-20px_100px_rgba(0,0,0,0.5)] max-h-[85vh] flex flex-col animate-toc-up border-x border-t border-[var(--color-border)]/50"
             onClick={e => e.stopPropagation()}
           >
             {/* Handle */}
-            <div className="w-12 h-1.5 bg-[var(--color-border)] rounded-full mx-auto mb-8 opacity-40 shrink-0" />
+            <div className="w-16 h-1.5 bg-[var(--color-border)] rounded-full mx-auto mb-10 opacity-30 shrink-0" />
             
-            <div className="flex items-center justify-between mb-8 shrink-0">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-2xl bg-[var(--color-primary)]/10 flex items-center justify-center">
-                  <List size={20} className="text-[var(--color-primary)]" />
+            <div className="flex items-center justify-between mb-10 shrink-0">
+              <div className="flex items-center gap-5">
+                <div className="w-14 h-14 rounded-3xl bg-[var(--color-primary)]/10 flex items-center justify-center shadow-inner">
+                  <List size={28} className="text-[var(--color-primary)]" strokeWidth={2.5} />
                 </div>
-                <div>
-                  <h3 className="text-xl font-black tracking-tight">Table of Contents</h3>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted)] mt-0.5">Quick Navigation</p>
+                <div className="space-y-1">
+                  <h3 className="text-2xl font-black tracking-tight text-[var(--color-text)]">Table of Contents</h3>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-0.5 bg-[var(--color-primary)] rounded-full" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-primary)] opacity-70">Navigation summary</p>
+                  </div>
                 </div>
               </div>
               <button 
                 onClick={() => setIsOpen(false)} 
-                className="w-12 h-12 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:text-rose-500 transition-colors"
+                className="w-12 h-12 rounded-2xl bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:text-rose-500 hover:bg-rose-500/5 transition-all active:scale-90 border border-[var(--color-border)]/50 shadow-sm"
               >
-                <X size={22} strokeWidth={2.5} />
+                <X size={24} strokeWidth={2.5} />
               </button>
             </div>
 
-            <div className="overflow-y-auto pr-2 scrollbar-none">
+            <div className="overflow-y-auto pr-2 scrollbar-none custom-scrollbar pb-6">
               <TocList items={items} activeId={activeId} scrollTo={scrollTo} isDrawer />
             </div>
           </div>
@@ -160,23 +165,26 @@ function TocList({ items, activeId, scrollTo, isDrawer = false }: {
   isDrawer?: boolean;
 }) {
   return (
-    <nav className="flex flex-col gap-1.5">
+    <nav className="flex flex-col gap-2">
       {items.map((item) => (
         <button
           key={item.id}
           onClick={() => scrollTo(item.id)}
-          className={`group flex items-center justify-between text-left transition-all duration-300 rounded-2xl
-            ${isDrawer ? 'px-5 py-4' : 'px-3 py-2.5'}
-            ${item.level === 1 ? '' : item.level === 2 ? 'ml-4' : 'ml-8'}
+          className={`group flex items-center justify-between text-left transition-all duration-500 rounded-2xl border
+            ${isDrawer ? 'px-6 py-4.5' : 'px-4 py-3'}
+            ${item.level === 1 ? 'border-transparent' : item.level === 2 ? 'ml-6' : 'ml-10'}
             ${activeId === item.id
-              ? 'text-[var(--color-primary)] bg-[var(--color-primary)]/10 font-black ring-1 ring-[var(--color-primary)]/20'
-              : 'text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] font-bold'
+              ? 'text-[var(--color-primary)] bg-[var(--color-primary)]/5 font-black border-[var(--color-primary)]/20 shadow-sm scale-[1.02]'
+              : 'text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] font-bold border-transparent opacity-70 hover:opacity-100 hover:ml-1'
             }`}
         >
-          <span className={`${isDrawer ? 'text-sm' : 'text-[11px]'} leading-tight`}>{item.text}</span>
-          {activeId === item.id && (
-            <ChevronRight size={14} className="shrink-0 animate-pulse" />
-          )}
+          <span className={`${isDrawer ? 'text-[15px]' : 'text-[12px]'} leading-snug tracking-tight`}>{item.text}</span>
+          <div className="flex items-center gap-3">
+             {activeId === item.id && (
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] animate-pulse" />
+            )}
+            <ChevronRight size={16} className={`shrink-0 transition-transform duration-500 ${activeId === item.id ? 'translate-x-0 opacity-100' : '-translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-40'}`} />
+          </div>
         </button>
       ))}
     </nav>

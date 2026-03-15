@@ -74,13 +74,38 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
     return () => cancelAnimationFrame(id);
   }, []);
 
-  /* ── Scroll Tracking ────────────────────────────────────────── */
+  // ── Scroll Tracking ──────────────────────────────────────────
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Don't hide header if we're near the top (e.g., top 100px)
+      if (currentScrollY < 100) {
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY && isVisible) {
+        // Scrolling down - hide
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY && !isVisible) {
+        // Scrolling up - show
+        setIsVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
     const handleToggleMenu = () => setIsMenuOpen((prev) => !prev);
     window.addEventListener('toggle-drawer', handleToggleMenu);
-    return () => window.removeEventListener('toggle-drawer', handleToggleMenu);
-  }, []);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('toggle-drawer', handleToggleMenu);
+    };
+  }, [lastScrollY, isVisible]);
 
   // (Theme is now handled by next-themes via ThemeProvider on the root html element)
 
@@ -96,11 +121,13 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
 
   // Handler: trigger fullscreen via custom event
   function handleToggleFullscreen() {
+    import('@/lib/haptics').then(({ haptics }) => haptics.impact('medium'));
     window.dispatchEvent(new CustomEvent('toggle-fullscreen'));
   }
 
   // Handler: enable reader mode and navigate to reader homepage
   function handleSwitchToReader() {
+    import('@/lib/haptics').then(({ haptics }) => haptics.success());
     // Store dashboard metadata so ReaderModeBar can display the return button
     // without any server props (pure localStorage read on the reader page)
     try {
@@ -122,6 +149,7 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
 
   // Handler: disable reader mode and navigate to their dashboard
   function handleReturnToDashboard() {
+    import('@/lib/haptics').then(({ haptics }) => haptics.impact('medium'));
     disableReaderMode()
     try {
       document.cookie = 'sathyadhare:readerMode=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
@@ -141,9 +169,10 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
     <>
       {!isAdminRoute && (
       <header
-        className="fixed top-0 left-0 right-0 z-50 w-full backdrop-blur-2xl bg-white/80 dark:bg-[#181623]/80 border-b border-[var(--color-border)] transition-colors duration-300"
+        className={`fixed top-0 left-0 right-0 z-50 w-full backdrop-blur-3xl bg-white/75 dark:bg-[#181623]/75 border-b border-[var(--color-border)]/50 transition-all duration-500 cubic-bezier(0.16,1,0.3,1) ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}
         style={{
           paddingTop: 'env(safe-area-inset-top, 0px)',
+          boxShadow: isVisible ? '0 4px 15px -3px rgba(0,0,0,0.05)' : 'none',
         }}
       >
         {/* ── Main bar ──────────────────────────────────────────────── */}
@@ -231,7 +260,10 @@ export default function TopHeader({ user, role }: TopHeaderProps) {
 
                 {/* Profile Drawer Trigger */}
                 <button
-                  onClick={() => setIsMenuOpen(true)}
+                  onClick={() => {
+                    import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
+                    setIsMenuOpen(true);
+                  }}
                   className="tap-highlight w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-text)] hover:bg-[var(--color-surface)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-all active:scale-95 ml-1 shadow-sm"
                   title="Profile"
                   aria-label="Open profile"

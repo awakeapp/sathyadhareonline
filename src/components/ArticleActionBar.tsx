@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Share2, Link as LinkIcon, Check, Bookmark, Heart, Volume2, Square, X, FileText, AlignLeft, Loader2, ChevronDown } from 'lucide-react';
+import { Share2, Link as LinkIcon, Check, Bookmark, Heart, Volume2, Square, X, FileText, AlignLeft, Loader2, ChevronDown, Type } from 'lucide-react';
 
 /* ─── helpers ─────────────────────────────────────────────── */
 function getArticleUrl(slug: string) {
@@ -147,12 +147,12 @@ function SpeakerButton({ content, title }: { content: string; title?: string }) 
       )}
 
       {/* The icon circle */}
-      <div className={`relative z-10 w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
+      <div className={`relative z-10 w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${
         playing || paused
           ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/30'
           : 'bg-[var(--color-surface-2)] text-[var(--color-muted)] border border-[var(--color-border)]'
       }`}>
-        {playing ? <Square size={13} fill="currentColor" /> : <Volume2 size={15} />}
+        {playing ? <Square size={16} fill="currentColor" strokeWidth={2.5} /> : <Volume2 size={16} strokeWidth={2.5} />}
       </div>
     </button>
   );
@@ -253,6 +253,8 @@ function AISummaryStrip({
   );
 }
 
+import { ReaderSettingsSheet } from './ReaderSettingsSheet';
+
 /* ─── MAIN EXPORT: full action bar ───────────────────────── */
 export default function ArticleActionBar({
   articleId, slug, title, content, existingSummary,
@@ -261,12 +263,14 @@ export default function ArticleActionBar({
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(initialSaved ?? false);
   const [liked, setLiked] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const copy = async () => {
     const url = getArticleUrl(slug);
     try { await navigator.clipboard.writeText(url); }
     catch { const t = document.createElement('textarea'); t.value = url; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); }
     setCopied(true);
+    import('@/lib/haptics').then(({ haptics }) => haptics.success());
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -279,6 +283,7 @@ export default function ArticleActionBar({
 
   const toggleSave = async () => {
     if (!isAuthenticated) return;
+    import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
     if (saved) { setSaved(false); onUnsave?.(); }
     else { setSaved(true); onSave?.(); }
   };
@@ -303,6 +308,11 @@ export default function ArticleActionBar({
           <Bookmark size={16} strokeWidth={2.5} className={saved ? 'fill-[var(--color-primary)]' : ''} />
         </IBtn>
 
+        {/* Reader Appearance */}
+        <IBtn onClick={() => setIsSettingsOpen(true)} title="Appearance settings">
+          <Type size={16} strokeWidth={2.5} />
+        </IBtn>
+
         {/* Speaker with circular progress */}
         <SpeakerButton content={content} title={title} />
 
@@ -311,7 +321,10 @@ export default function ArticleActionBar({
 
         {/* Like */}
         <button
-          onClick={() => setLiked(l => !l)}
+          onClick={() => {
+            import('@/lib/haptics').then(({ haptics }) => !liked ? haptics.success() : haptics.impact('light'));
+            setLiked(l => !l);
+          }}
           className={`flex items-center gap-1.5 h-10 px-4 rounded-2xl font-black text-[10px] uppercase tracking-wider transition-all active:scale-90 border ${
             liked
               ? 'bg-rose-500 text-white border-rose-500 shadow-lg shadow-rose-500/25'
@@ -322,6 +335,8 @@ export default function ArticleActionBar({
           {liked ? 'Liked' : 'Like'}
         </button>
       </div>
+
+      <ReaderSettingsSheet isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
 
       {/* ── AI Summary strip (below action row, before content) ── */}
       <div className="mt-4">

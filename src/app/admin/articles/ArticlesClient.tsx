@@ -234,7 +234,7 @@ export default function ArticlesClient({
                 onChange={(e) => setAuthorFilter(e.target.value)}
                 className="h-10 pl-8 pr-8 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-[13px] font-medium text-[var(--color-text)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none appearance-none"
               >
-                <option value="all">All Authors</option>
+                <option value="all">All Writers</option>
                 {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
               </select>
             </div>
@@ -276,7 +276,7 @@ export default function ArticlesClient({
                   </th>
                   <th className="py-3 px-4 text-[12px] font-semibold text-[var(--color-muted)] uppercase tracking-wider">Title</th>
                   <th className="py-3 px-4 text-[12px] font-semibold text-[var(--color-muted)] uppercase tracking-wider">Status</th>
-                  <th className="py-3 px-4 text-[12px] font-semibold text-[var(--color-muted)] uppercase tracking-wider">Author</th>
+                  <th className="py-3 px-4 text-[12px] font-semibold text-[var(--color-muted)] uppercase tracking-wider">Writer</th>
                   <th className="py-3 px-4 text-[12px] font-semibold text-[var(--color-muted)] uppercase tracking-wider">Date</th>
                   <th className="py-3 px-4 text-[12px] font-semibold text-[var(--color-muted)] uppercase tracking-wider text-right">Actions</th>
                 </tr>

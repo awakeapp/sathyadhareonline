@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { 
   ChevronUp, ChevronDown, Minimize2,
@@ -9,8 +9,20 @@ import {
   Clipboard, X, Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useReaderSettings } from '@/context/ReaderSettingsContext';
+import { haptics } from '@/lib/haptics';
 
-
+/* ─── Browser compatibility types ──────────────────────────── */
+interface FullscreenDocument extends Document {
+  webkitFullscreenElement?: Element | null;
+  mozFullScreenElement?: Element | null;
+  webkitExitFullscreen?: () => Promise<void>;
+  mozCancelFullScreen?: () => Promise<void>;
+}
+interface FullscreenElement extends HTMLElement {
+  webkitRequestFullscreen?: () => Promise<void>;
+  mozRequestFullScreen?: () => Promise<void>;
+}
 
 /* ─────────────────── Main Component ─────────────────── */
 interface ArticleReaderControlsProps {
@@ -20,10 +32,9 @@ interface ArticleReaderControlsProps {
 
 export default function ArticleReaderControls({ }: ArticleReaderControlsProps) {
   const [mounted, setMounted] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [scrollPos, setScrollPos] = useState<'top' | 'middle' | 'bottom'>('top');
-  const [fontSize, setFontSize] = useState(18);
-  const [fontFamily, setFontFamily] = useState('kannada-serif');
-  const [lineHeight, setLineHeight] = useState(1.85);
+  const { settings, updateSettings, resetSettings } = useReaderSettings();
   const [showSettings, setShowSettings] = useState(false);
   const [hasTOC, setHasTOC] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -31,63 +42,99 @@ export default function ArticleReaderControls({ }: ArticleReaderControlsProps) {
   useEffect(() => {
     requestAnimationFrame(() => {
       setMounted(true);
-      const savedSize = localStorage.getItem('sathyadhare:font-size');
-      if (savedSize) setFontSize(parseInt(savedSize, 10));
-      const savedFont = localStorage.getItem('sathyadhare:font-family');
-      if (savedFont) setFontFamily(savedFont);
-      const savedLine = localStorage.getItem('sathyadhare:line-height');
-      if (savedLine) setLineHeight(parseFloat(savedLine));
-
       const headings = document.querySelectorAll('.prose-article h1, .prose-article h2, .prose-article h3');
       setHasTOC(headings.length >= 2);
     });
   }, []);
 
-  const incFont = () => setFontSize(s => Math.min(s + 2, 32));
-  const decFont = () => setFontSize(s => Math.max(s - 2, 12));
-
-  useEffect(() => {
-    if (mounted) {
-      localStorage.setItem('sathyadhare:font-size', fontSize.toString());
-      document.documentElement.style.setProperty('--article-font-size', `${fontSize}px`);
-      
-      localStorage.setItem('sathyadhare:font-family', fontFamily);
-      const fontVal = fontFamily === 'kannada-serif' ? 'var(--font-noto-serif-kannada), serif' :
-                     fontFamily === 'kannada-sans' ? 'var(--font-noto-sans-kannada), sans-serif' :
-                     fontFamily === 'kannada-tiro' ? 'var(--font-tiro-kannada), serif' :
-                     'var(--font-baloo-tamma), sans-serif';
-      document.documentElement.style.setProperty('--article-font-family', fontVal);
-      
-      localStorage.setItem('sathyadhare:line-height', lineHeight.toString());
-      document.documentElement.style.setProperty('--article-line-height', lineHeight.toString());
-    }
-  }, [fontSize, fontFamily, lineHeight, mounted]);
+  const incFont = () => {
+    haptics.impact('light');
+    updateSettings({ fontSize: Math.min(settings.fontSize + 1, 32) });
+  };
+  const decFont = () => {
+    haptics.impact('light');
+    updateSettings({ fontSize: Math.max(settings.fontSize - 1, 12) });
+  };
 
 
 
   useEffect(() => {
     const onScroll = () => {
       const scrollY = window.scrollY;
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
+      const winHeight = window.innerHeight;
+      const maxScroll = docHeight - winHeight;
+      
       if (scrollY < 80) setScrollPos('top');
       else if (scrollY >= maxScroll - 80) setScrollPos('bottom');
       else setScrollPos('middle');
-      if (maxScroll > 0) setProgress((scrollY / maxScroll) * 100);
+
+      // Progress logic: target .prose-article end
+      const articleEl = document.querySelector('.prose-article');
+      if (articleEl) {
+        const rect = articleEl.getBoundingClientRect();
+        const articleTop = rect.top + scrollY;
+        const articleHeight = rect.height;
+        
+        // Start from top of article, end at bottom
+        let p = ((scrollY + winHeight - articleTop) / articleHeight) * 100;
+        p = Math.max(0, Math.min(100, p));
+        setProgress(p);
+      } else {
+        if (maxScroll > 0) setProgress((scrollY / maxScroll) * 100);
+      }
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  useEffect(() => {
+    const onFsChange = () => {
+      const doc = document as FullscreenDocument;
+      const fsEl = document.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement;
+      setIsFullscreen(!!fsEl);
+      if (fsEl) document.documentElement.classList.add('is-fullscreen');
+      else document.documentElement.classList.remove('is-fullscreen');
+    };
+    document.addEventListener('fullscreenchange', onFsChange);
+    document.addEventListener('webkitfullscreenchange', onFsChange);
+    document.addEventListener('mozfullscreenchange', onFsChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', onFsChange);
+      document.removeEventListener('webkitfullscreenchange', onFsChange);
+      document.removeEventListener('mozfullscreenchange', onFsChange);
+    };
+  }, []);
 
+  const toggleFullscreen = useCallback(async () => {
+    haptics.impact('medium');
+    const doc = document as FullscreenDocument;
+    const el = document.documentElement as FullscreenElement;
+    if (!isFullscreen) {
+      if (el.requestFullscreen) await el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
+      haptics.success();
+    } else {
+      if (document.exitFullscreen) await document.exitFullscreen();
+      else if (doc.webkitExitFullscreen) await doc.webkitExitFullscreen();
+    }
+  }, [isFullscreen]);
+
+
+
+  useEffect(() => {
+    const handleToggleFs = () => toggleFullscreen();
+    window.addEventListener('toggle-fullscreen', handleToggleFs);
+    return () => window.removeEventListener('toggle-fullscreen', handleToggleFs);
+  }, [isFullscreen, toggleFullscreen]);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
   const scrollToBottom = () => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
 
   const resetAll = () => {
-    setFontSize(18);
-    setFontFamily('kannada-serif');
-    setLineHeight(1.85);
+    haptics.impact('medium');
+    resetSettings();
     toast.success('Defaults restored');
   };
 
@@ -150,8 +197,13 @@ export default function ArticleReaderControls({ }: ArticleReaderControlsProps) {
                 <span className="section-label !mb-0 text-[11px]">Typeface Selection</span>
                 <div className="relative group">
                   <select 
-                    value={fontFamily} 
-                    onChange={(e) => setFontFamily(e.target.value)}
+                    value={settings.fontFamily === 'serif' ? 'kannada-serif' : settings.fontFamily === 'sans' ? 'kannada-sans' : settings.fontFamily === 'tiro' ? 'kannada-tiro' : 'kannada-modern'} 
+                    onChange={(e) => {
+                      haptics.impact('light');
+                      const targetVal = e.target.value;
+                      const mapped = targetVal === 'kannada-serif' ? 'serif' : targetVal === 'kannada-sans' ? 'sans' : targetVal === 'kannada-tiro' ? 'tiro' : 'modern';
+                      updateSettings({ fontFamily: mapped as 'serif' | 'sans' | 'modern' | 'tiro' });
+                    }}
                     className="w-full bg-[var(--color-surface-2)] border-2 border-transparent rounded-2xl px-6 py-4.5 text-[15px] font-bold text-[var(--color-text)] outline-none focus:bg-[var(--color-surface)] focus:border-[var(--color-primary)] transition-all appearance-none cursor-pointer pr-12 shadow-sm"
                   >
                     <option value="kannada-serif">Classic Serif</option>
@@ -170,7 +222,7 @@ export default function ArticleReaderControls({ }: ArticleReaderControlsProps) {
                 <div className="flex items-center justify-between section-label !mb-0 text-[11px]">
                   <span>Text size</span>
                   <div className="px-2 py-0.5 bg-[var(--color-primary)]/10 rounded-md">
-                    <span className="text-[var(--color-primary)] font-black">{fontSize}</span>
+                    <span className="text-[var(--color-primary)] font-black">{settings.fontSize}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 bg-[var(--color-surface-2)] p-2 rounded-3xl border border-[var(--color-border)]/60 shadow-inner">
@@ -183,7 +235,7 @@ export default function ArticleReaderControls({ }: ArticleReaderControlsProps) {
                   <div className="flex-1 h-2 bg-[var(--color-border)]/30 rounded-full relative overflow-hidden mx-1">
                     <div 
                       className="absolute inset-y-0 left-0 bg-[var(--color-primary)] transition-all duration-300 rounded-full shadow-[0_0_8px_rgba(var(--color-primary-rgb),0.5)]"
-                      style={{ width: `${((fontSize - 12) / (32 - 12)) * 100}%` }}
+                      style={{ width: `${((settings.fontSize - 12) / (32 - 12)) * 100}%` }}
                     />
                   </div>
                   <button 
@@ -206,14 +258,19 @@ export default function ArticleReaderControls({ }: ArticleReaderControlsProps) {
                   ].map(lh => (
                     <button 
                       key={lh.val} 
-                      onClick={() => setLineHeight(lh.val)} 
-                      className={`flex-1 h-12 rounded-[1rem] text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${lineHeight === lh.val ? 'bg-[var(--color-surface)] text-[var(--color-primary)] shadow-md border border-[var(--color-border)]/30' : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'}`}
+                      onClick={() => {
+                        haptics.impact('light');
+                        updateSettings({ lineHeight: lh.val });
+                      }} 
+                      className={`flex-1 h-12 rounded-[1rem] text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${settings.lineHeight === lh.val ? 'bg-[var(--color-surface)] text-[var(--color-primary)] shadow-md border border-[var(--color-border)]/30' : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'}`}
                     >
                       {lh.label}
                     </button>
                   ))}
                 </div>
               </div>
+
+
 
               {/* Sub-Actions */}
               <div className="pt-8 border-t border-[var(--color-border)]/40">
@@ -232,6 +289,19 @@ export default function ArticleReaderControls({ }: ArticleReaderControlsProps) {
 
       {/* Floating Buttons */}
       <div className="fixed right-6 z-[95] flex flex-col gap-4 pointer-events-none transition-all duration-700" style={{ bottom: 'calc(90px + env(safe-area-inset-bottom, 0px))' }}>
+        {isFullscreen && (
+          <button 
+            onClick={toggleFullscreen} 
+            className="flex flex-col items-center gap-1.5 pointer-events-auto group mb-2 animate-in slide-in-from-right-4"
+          >
+            <div className="px-3 py-1 bg-rose-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg shadow-rose-500/30 group-hover:bg-rose-600 transition-colors">
+              Exit
+            </div>
+            <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-rose-500 text-white shadow-xl hover:scale-110 active:scale-95 transition-all">
+              <Minimize2 size={20} strokeWidth={2.5} />
+            </div>
+          </button>
+        )}
         <button onClick={() => setShowSettings(!showSettings)} className={`${controlBtnBase} pointer-events-auto ${showSettings ? 'scale-110 border-[var(--color-primary)] ring-8 ring-[var(--color-primary)]/10 text-[var(--color-primary)]' : ''}`}><Settings className={showSettings ? 'rotate-90' : ''}/></button>
         {hasTOC && (
           <button onClick={() => window.dispatchEvent(new CustomEvent('toggle-toc'))} className={`${controlBtnBase} !rounded-full relative group pointer-events-auto`}>

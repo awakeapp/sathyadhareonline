@@ -49,7 +49,12 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
         initial={currentVariant.initial}
         animate={currentVariant.animate}
         exit={currentVariant.exit}
-        transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ 
+          type: "spring",
+          stiffness: 260,
+          damping: 30,
+          mass: 1
+        }}
         className="w-full flex-1 flex flex-col min-w-0"
         style={{
           backgroundColor: 'var(--color-background)',
