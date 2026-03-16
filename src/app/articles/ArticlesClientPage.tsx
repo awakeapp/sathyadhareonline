@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { SlidersHorizontal, ChevronDown, ChevronUp, Check } from 'lucide-react';
+import { SlidersHorizontal, ChevronDown, ChevronUp, Check, X } from 'lucide-react';
 import { useState, useEffect, useTransition } from 'react';
 import ArticleCard from '@/components/ui/ArticleCard';
 
