@@ -125,13 +125,13 @@ export default function TableOfContents({ contentHtml }: TableOfContentsProps) {
         <div className="fixed inset-0 z-[1200] flex flex-col justify-end" onClick={() => setIsOpen(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] animate-fade-in" />
           <div 
-            className="relative w-full max-w-2xl mx-auto bg-[var(--color-surface)] rounded-t-[3.5rem] p-9 pb-[calc(env(safe-area-inset-bottom)+2rem)] shadow-[0_-20px_100px_rgba(0,0,0,0.5)] max-h-[85vh] flex flex-col animate-toc-up border-x border-t border-[var(--color-border)]/50"
+            className="relative w-full max-w-2xl mx-auto bg-[var(--color-surface)] rounded-t-[3.5rem] p-6 pb-[calc(env(safe-area-inset-bottom)+2rem)] shadow-[0_-20px_100px_rgba(0,0,0,0.5)] max-h-[85vh] flex flex-col animate-toc-up border-x border-t border-[var(--color-border)]/50"
             onClick={e => e.stopPropagation()}
           >
             {/* Handle */}
-            <div className="w-16 h-1.5 bg-[var(--color-border)] rounded-full mx-auto mb-10 opacity-30 shrink-0" />
+            <div className="w-16 h-1.5 bg-[var(--color-border)] rounded-full mx-auto mb-6 opacity-30 shrink-0" />
             
-            <div className="flex items-center justify-between mb-10 shrink-0">
+            <div className="flex items-center justify-between mb-6 shrink-0">
               <div className="flex items-center gap-5">
                 <div className="w-14 h-14 rounded-3xl bg-[var(--color-primary)]/10 flex items-center justify-center shadow-inner">
                   <List size={28} className="text-[var(--color-primary)]" strokeWidth={2.5} />
