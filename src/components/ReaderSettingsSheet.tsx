@@ -2,7 +2,7 @@
 
 import { useReaderSettings } from '@/context/ReaderSettingsContext';
 import { BottomSheet } from './ui/BottomSheet';
-import { AlignLeft } from 'lucide-react';
+import { Minus, Plus } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 interface ReaderSettingsSheetProps {
@@ -57,14 +57,13 @@ export function ReaderSettingsSheet({ isOpen, onClose }: ReaderSettingsSheetProp
         <section>
           <div className="flex items-center gap-2 mb-2 ml-2">
              <h4 className="text-[10px] font-black tracking-[0.15em] text-[var(--color-muted)] uppercase">Text Size</h4>
-             <span className="text-[10px] font-black bg-[#685de6]/10 text-[#685de6] px-1.5 py-[1px] rounded inline-flex">{settings.fontSize}pt</span>
           </div>
           <div className="flex items-center gap-4 bg-[var(--color-surface-2)] p-2 rounded-[2rem] border border-[var(--color-border)] shadow-inner">
             <button 
               onClick={() => updateSettings({ fontSize: Math.max(12, settings.fontSize - 1) })}
               className="w-14 h-14 bg-[var(--color-surface)] shadow-md rounded-full flex items-center justify-center text-[var(--color-text)] hover:scale-105 active:scale-95 transition-transform"
             >
-              <div className="w-4 h-0.5 bg-current rounded-full" />
+              <Minus className="w-5 h-5" strokeWidth={2.5} />
             </button>
             <div className="flex-1 px-2">
                <div className="h-2.5 bg-[var(--color-border)] rounded-full relative overflow-hidden">
@@ -78,8 +77,7 @@ export function ReaderSettingsSheet({ isOpen, onClose }: ReaderSettingsSheetProp
               onClick={() => updateSettings({ fontSize: Math.min(32, settings.fontSize + 1) })}
               className="w-14 h-14 bg-[var(--color-surface)] shadow-md rounded-full flex items-center justify-center text-[var(--color-text)] hover:scale-105 active:scale-95 transition-transform relative"
             >
-              <div className="w-4 h-0.5 bg-current rounded-full absolute" />
-              <div className="w-0.5 h-4 bg-current rounded-full absolute" />
+              <Plus className="w-5 h-5" strokeWidth={2.5} />
             </button>
           </div>
         </section>
@@ -89,10 +87,9 @@ export function ReaderSettingsSheet({ isOpen, onClose }: ReaderSettingsSheetProp
           <h4 className="text-[10px] font-black tracking-[0.15em] text-[var(--color-muted)] uppercase mb-3 ml-2">Readability Spacing</h4>
           <div className="flex p-1.5 bg-[var(--color-surface-2)] rounded-[1.5rem] border border-[var(--color-border)] shadow-inner">
             {[
-              { label: 'Dense', value: 1.4 },
-              { label: 'Standard', value: 1.6 },
-              { label: 'Airy', value: 1.85 },
-              { label: 'Loose', value: 2.1 }
+              { label: 'Compact', value: 1.4 },
+              { label: 'Normal', value: 1.6 },
+              { label: 'Relaxed', value: 1.85 }
             ].map((sp) => {
               const isActive = settings.lineHeight === sp.value;
               return (
