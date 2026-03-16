@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { List, X, ChevronRight } from 'lucide-react';
+import { List, X } from 'lucide-react';
 
 interface TocItem {
   id: string;
@@ -103,6 +103,9 @@ export default function TableOfContents({ contentHtml }: TableOfContentsProps) {
           to { transform: translateY(0); }
         }
         .animate-toc-up { animation: toc-slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .prose-article h1, .prose-article h2, .prose-article h3, .prose-article h4, .prose-article h5, .prose-article h6 {
+          scroll-margin-top: calc(var(--safe-top, 0px) + 90px);
+        }
       `}} />
 
       {/* Sidebar (Desktop) */}
@@ -121,7 +124,7 @@ export default function TableOfContents({ contentHtml }: TableOfContentsProps) {
         <div className="fixed inset-0 z-[1200] flex flex-col justify-end" onClick={() => setIsOpen(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-xl animate-fade-in" />
           <div 
-            className="relative w-full max-w-2xl mx-auto bg-[var(--color-surface)] rounded-t-[3.5rem] p-9 pb-12 shadow-[0_-20px_100px_rgba(0,0,0,0.5)] max-h-[85vh] flex flex-col animate-toc-up border-x border-t border-[var(--color-border)]/50"
+            className="relative w-full max-w-2xl mx-auto bg-[var(--color-surface)] rounded-t-[3.5rem] p-9 pb-[calc(env(safe-area-inset-bottom)+2rem)] shadow-[0_-20px_100px_rgba(0,0,0,0.5)] max-h-[85vh] flex flex-col animate-toc-up border-x border-t border-[var(--color-border)]/50"
             onClick={e => e.stopPropagation()}
           >
             {/* Handle */}
@@ -165,28 +168,37 @@ function TocList({ items, activeId, scrollTo, isDrawer = false }: {
   isDrawer?: boolean;
 }) {
   return (
-    <nav className="flex flex-col gap-2">
-      {items.map((item) => (
-        <button
-          key={item.id}
-          onClick={() => scrollTo(item.id)}
-          className={`group flex items-center justify-between text-left transition-all duration-500 rounded-2xl border
-            ${isDrawer ? 'px-6 py-4.5' : 'px-4 py-3'}
-            ${item.level === 1 ? 'border-transparent' : item.level === 2 ? 'ml-6' : 'ml-10'}
-            ${activeId === item.id
-              ? 'text-[var(--color-primary)] bg-[var(--color-primary)]/5 font-black border-[var(--color-primary)]/20 shadow-sm scale-[1.02]'
-              : 'text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] font-bold border-transparent opacity-70 hover:opacity-100 hover:ml-1'
-            }`}
-        >
-          <span className={`${isDrawer ? 'text-[15px]' : 'text-[12px]'} leading-snug tracking-tight`}>{item.text}</span>
-          <div className="flex items-center gap-3">
-             {activeId === item.id && (
-              <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] animate-pulse" />
+    <nav className="relative flex flex-col items-stretch">
+      {/* Background vertical continuous track */}
+      <div className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-[var(--color-border)] rounded-full" />
+      
+      {items.map((item) => {
+        const isActive = activeId === item.id;
+        // Indentation logic
+        const pl = item.level <= 1 ? 'pl-6' : item.level === 2 ? 'pl-10' : 'pl-14';
+
+        return (
+          <button
+            key={item.id}
+            onClick={() => scrollTo(item.id)}
+            className={`group relative flex items-center justify-between text-left transition-all duration-300 w-full rounded-r-2xl
+              ${isDrawer ? 'py-3.5 pr-4' : 'py-2.5 pr-2'} ${pl}
+              ${isActive
+                ? 'text-[var(--color-primary)] font-black bg-[var(--color-primary)]/5'
+                : 'text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] font-bold opacity-80 hover:opacity-100'
+              }`}
+          >
+            {/* The active vertical indicator overlaying the track */}
+            {isActive && (
+              <div className="absolute left-[6px] top-0 bottom-0 w-[4px] bg-[var(--color-primary)] rounded-full shadow-[0_0_8px_rgba(var(--color-primary-rgb),0.5)] z-10" />
             )}
-            <ChevronRight size={16} className={`shrink-0 transition-transform duration-500 ${activeId === item.id ? 'translate-x-0 opacity-100' : '-translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-40'}`} />
-          </div>
-        </button>
-      ))}
+            <span className={`${isDrawer ? 'text-[15px]' : 'text-[13px]'} leading-snug tracking-tight line-clamp-2`}>{item.text}</span>
+            <div className="flex items-center gap-2 pl-2 shrink-0">
+               {isActive && <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] animate-pulse" />}
+            </div>
+          </button>
+        );
+      })}
     </nav>
   );
 }

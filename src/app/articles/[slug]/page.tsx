@@ -14,6 +14,7 @@ import { Card } from '@/components/ui/Card';
 import { CommentBox } from './CommentBox';
 import ArticleReaderControls, { CopyProtected } from './ArticleReaderControls';
 import { marked } from 'marked';
+import { gfmHeadingId } from 'marked-gfm-heading-id';
 import ArticleActionBar from '@/components/ArticleActionBar';
 import TableOfContents from '@/components/TableOfContents';
 import ChapterNav from '@/components/ChapterNav';
@@ -163,6 +164,8 @@ export default async function ArticlePage({ params }: Props) {
   const category = Array.isArray(article.category) ? article.category[0] : article.category;
   const categoryName = category?.name || 'ARTICLE';
   const date = formatDate(article.published_at || article.created_at);
+  
+  marked.use(gfmHeadingId());
   const renderedHtml = marked.parse(translateNum(article.content || '')) as string;
 
   return (
