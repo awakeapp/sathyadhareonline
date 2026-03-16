@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { User, Mail, Lock, ShieldCheck, ArrowLeft, Eye, EyeOff } from 'lucide-react'
+import { User, Mail, Lock, ShieldCheck, ArrowLeft, Eye, EyeOff, CheckCircle2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const GoogleIcon = () => (
@@ -14,17 +14,30 @@ const GoogleIcon = () => (
   </svg>
 )
 
-const FacebookIcon = () => (
-    <svg viewBox="0 0 24 24" className="w-5 h-5 flex-shrink-0" fill="#1877F2">
-        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-    </svg>
-)
+// Friendly error messages
+function friendlyError(msg: string): string {
+  if (msg.includes('already registered') || msg.includes('User already registered')) return 'An account with this email already exists. Try signing in instead.'
+  if (msg.includes('Password should be')) return 'Password must be at least 6 characters long.'
+  if (msg.includes('Too many requests')) return 'Too many attempts. Please wait a few minutes and try again.'
+  if (msg.includes('network')) return 'Network error. Please check your connection and try again.'
+  return msg
+}
 
-const TwitterIcon = () => (
-    <svg viewBox="0 0 24 24" className="w-5 h-5 flex-shrink-0" fill="currentColor">
-        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-    </svg>
-)
+// Password strength calculator
+function getPasswordStrength(password: string): { score: number; label: string; color: string } {
+  if (!password) return { score: 0, label: '', color: '' }
+  let score = 0
+  if (password.length >= 8) score++
+  if (password.length >= 12) score++
+  if (/[A-Z]/.test(password)) score++
+  if (/[0-9]/.test(password)) score++
+  if (/[^A-Za-z0-9]/.test(password)) score++
+
+  if (score <= 1) return { score: 1, label: 'Weak', color: '#ef4444' }
+  if (score <= 2) return { score: 2, label: 'Fair', color: '#f59e0b' }
+  if (score <= 3) return { score: 3, label: 'Good', color: '#3b82f6' }
+  return { score: 4, label: 'Strong', color: '#22c55e' }
+}
 
 export default function SignupPage() {
   const [fullName, setFullName] = useState('')
@@ -32,16 +45,17 @@ export default function SignupPage() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
-  
+  const [signedUp, setSignedUp] = useState(false)
+
   const [error, setError] = useState<string | null>(null)
-  const [message, setMessage] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
+
+  const strength = useMemo(() => getPasswordStrength(password), [password])
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
-    setMessage(null)
 
     if (!agreedToTerms) {
       setError('You must agree to the User Agreement & Privacy Policy')
@@ -59,11 +73,14 @@ export default function SignupPage() {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } },
+      options: {
+        data: { full_name: fullName },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     })
 
     if (signUpError) {
-      setError(signUpError.message)
+      setError(friendlyError(signUpError.message))
       setLoading(false)
       return
     }
@@ -76,10 +93,8 @@ export default function SignupPage() {
       })
     }
 
-    setMessage('Account created! Redirecting to login…')
-    setTimeout(() => {
-      window.location.href = '/login'
-    }, 1800)
+    setSignedUp(true)
+    setLoading(false)
   }
 
   async function handleGoogleSignup() {
@@ -93,9 +108,41 @@ export default function SignupPage() {
       },
     })
     if (oauthError) {
-      setError(oauthError.message)
+      setError(friendlyError(oauthError.message))
       setGoogleLoading(false)
     }
+  }
+
+  // ── Success Screen ──
+  if (signedUp) {
+    return (
+      <main className="min-h-screen flex flex-col items-center justify-center bg-[var(--color-background)] px-6">
+        <div className="w-full max-w-[420px] flex flex-col items-center text-center gap-6 animate-in fade-in zoom-in-95">
+          <div className="w-24 h-24 rounded-[2.5rem] bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+            <CheckCircle2 className="w-12 h-12 text-emerald-500" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-[28px] font-black text-[var(--color-text)] tracking-tight">Account Created!</h1>
+            <p className="text-[14px] font-bold text-[var(--color-muted)] leading-relaxed px-4">
+              We sent a confirmation link to<br />
+              <span className="text-[var(--color-text)]">{email}</span>
+            </p>
+            <p className="text-[12px] font-bold text-[var(--color-muted)]/70 leading-relaxed px-4">
+              Please check your inbox and click the link to verify your account before signing in.
+            </p>
+          </div>
+          <Link
+            href="/login"
+            className="w-full h-14 rounded-full bg-[var(--color-primary)] text-white font-black text-[15px] shadow-lg shadow-[var(--color-primary)]/20 hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center uppercase tracking-widest"
+          >
+            Go to Sign In
+          </Link>
+          <p className="text-[12px] font-bold text-[var(--color-muted)]">
+            Didn&apos;t get the email? Check your spam folder.
+          </p>
+        </div>
+      </main>
+    )
   }
 
   return (
@@ -111,20 +158,13 @@ export default function SignupPage() {
 
         {/* Title */}
         <div className="text-center mb-10">
-          <h1 className="text-[28px] font-black text-[var(--color-text)] tracking-tight">Sign Up</h1>
+          <h1 className="text-[28px] font-black text-[var(--color-text)] tracking-tight">Create Account</h1>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[13px] flex items-center gap-3 font-bold animate-in fade-in zoom-in-95">
+          <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[13px] flex items-center gap-3 font-bold animate-in fade-in zoom-in-95">
             <ShieldCheck className="w-5 h-5 shrink-0" />
             {error}
-          </div>
-        )}
-
-        {message && (
-          <div className="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[13px] flex items-center gap-3 font-bold animate-in fade-in zoom-in-95">
-            <ShieldCheck className="w-5 h-5 shrink-0" />
-            {message}
           </div>
         )}
 
@@ -141,6 +181,7 @@ export default function SignupPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email address"
+              autoComplete="email"
               className="w-full h-14 pl-14 pr-5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] placeholder:text-[var(--color-muted)]/50 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all font-semibold text-[15px] shadow-sm"
             />
           </div>
@@ -155,29 +196,59 @@ export default function SignupPage() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Full Name"
+              autoComplete="name"
               className="w-full h-14 pl-14 pr-5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] placeholder:text-[var(--color-muted)]/50 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all font-semibold text-[15px] shadow-sm"
             />
           </div>
 
-          <div className="relative">
-            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--color-muted)]">
-              <Lock className="w-5 h-5" />
+          <div className="space-y-2">
+            <div className="relative">
+              <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--color-muted)]">
+                <Lock className="w-5 h-5" />
+              </div>
+              <input
+                required
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                autoComplete="new-password"
+                className="w-full h-14 pl-14 pr-14 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] placeholder:text-[var(--color-muted)]/50 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all font-semibold text-[15px] shadow-sm"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-5 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-text)]"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
-            <input
-              required
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              className="w-full h-14 pl-14 pr-14 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] placeholder:text-[var(--color-muted)]/50 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all font-semibold text-[15px] shadow-sm"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-5 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-text)]"
-            >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
+
+            {/* Password Strength Indicator */}
+            {password.length > 0 && (
+              <div className="px-2 space-y-1.5 animate-in fade-in slide-in-from-top-2">
+                <div className="flex gap-1.5">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div
+                      key={i}
+                      className="h-1.5 flex-1 rounded-full transition-all duration-500"
+                      style={{
+                        backgroundColor: i <= strength.score ? strength.color : 'var(--color-border)',
+                      }}
+                    />
+                  ))}
+                </div>
+                {strength.label && (
+                  <p className="text-[11px] font-black uppercase tracking-widest" style={{ color: strength.color }}>
+                    {strength.label}
+                    {strength.score === 1 && ' — use at least 8 characters with numbers'}
+                    {strength.score === 2 && ' — add uppercase letters or symbols'}
+                    {strength.score === 3 && ' — add symbols to make it stronger'}
+                    {strength.score === 4 && ' — excellent password!'}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="flex items-start gap-3 px-3 mt-6">
@@ -189,11 +260,14 @@ export default function SignupPage() {
               className="mt-1 w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-primary)] focus:ring-[var(--color-primary)] cursor-pointer"
             />
             <label htmlFor="terms" className="text-[12px] font-bold text-[var(--color-muted)] leading-tight cursor-pointer">
-              I Have Read And Agree To <Link href="/terms" className="text-[var(--color-primary)] hover:underline">User Agreement Privacy Policy</Link>
+              I have read and agree to the{' '}
+              <Link href="/terms" className="text-[var(--color-primary)] hover:underline">
+                User Agreement & Privacy Policy
+              </Link>
             </label>
           </div>
 
-          <div className="pt-6">
+          <div className="pt-4">
             <button
               type="submit"
               disabled={loading || googleLoading}
@@ -201,13 +275,13 @@ export default function SignupPage() {
             >
               {loading
                 ? <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                : "Continue"}
+                : 'Create Account'}
             </button>
           </div>
         </form>
 
         {/* Divider */}
-        <div className="relative my-10">
+        <div className="relative my-8">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-[var(--color-border)]"></div>
           </div>
@@ -216,31 +290,25 @@ export default function SignupPage() {
           </div>
         </div>
 
-        {/* Social Login */}
-        <div className="flex justify-center gap-6 mb-12">
-            <button className="w-12 h-12 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center hover:bg-[var(--color-surface-2)] transition-colors shadow-sm">
-                <TwitterIcon />
-            </button>
-            <button className="w-12 h-12 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center hover:bg-[var(--color-surface-2)] transition-colors shadow-sm">
-                <FacebookIcon />
-            </button>
-            <button 
-                onClick={handleGoogleSignup} 
-                disabled={googleLoading || loading}
-                className="w-12 h-12 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center hover:bg-[var(--color-surface-2)] transition-colors shadow-sm"
-            >
-                {googleLoading ? <div className="w-5 h-5 border-2 border-[var(--color-muted)] border-t-transparent rounded-full animate-spin" /> : <GoogleIcon />}
-            </button>
-        </div>
+        {/* Google Signup - Full Width */}
+        <button
+          onClick={handleGoogleSignup}
+          disabled={googleLoading || loading}
+          className="w-full h-14 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center gap-3 hover:bg-[var(--color-surface-2)] transition-colors shadow-sm font-bold text-[var(--color-text)] text-[14px] disabled:opacity-50 mb-8"
+        >
+          {googleLoading
+            ? <div className="w-5 h-5 border-2 border-[var(--color-muted)] border-t-transparent rounded-full animate-spin" />
+            : <><GoogleIcon /> Continue with Google</>}
+        </button>
 
         {/* Footer Link */}
         <div className="text-center pb-12">
-            <p className="text-[14px] font-bold text-[var(--color-muted)]">
-                Joined us before?{' '}
-                <Link href="/login" className="text-[var(--color-primary)] hover:underline underline-offset-4">
-                    Sign In
-                </Link>
-            </p>
+          <p className="text-[14px] font-bold text-[var(--color-muted)]">
+            Already have an account?{' '}
+            <Link href="/login" className="text-[var(--color-primary)] hover:underline underline-offset-4">
+              Sign In
+            </Link>
+          </p>
         </div>
 
       </div>

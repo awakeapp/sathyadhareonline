@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Mail, Lock, ShieldCheck, ArrowLeft, Eye, EyeOff } from 'lucide-react'
+import { Mail, Lock, ShieldCheck, ArrowLeft, Eye, EyeOff, Wand2, CheckCircle2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { getRedirectPath } from '@/lib/auth/redirectAfterLogin'
 
@@ -15,25 +15,25 @@ const GoogleIcon = () => (
   </svg>
 )
 
-const FacebookIcon = () => (
-    <svg viewBox="0 0 24 24" className="w-5 h-5 flex-shrink-0" fill="#1877F2">
-        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-    </svg>
-)
-
-const TwitterIcon = () => (
-    <svg viewBox="0 0 24 24" className="w-5 h-5 flex-shrink-0" fill="currentColor">
-        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-    </svg>
-)
+// Friendly error message map
+function friendlyError(msg: string): string {
+  if (msg.includes('Invalid login credentials')) return 'Incorrect email or password. Please try again.'
+  if (msg.includes('Email not confirmed')) return 'Please confirm your email address first. Check your inbox.'
+  if (msg.includes('User not found')) return 'No account found with this email.'
+  if (msg.includes('Too many requests')) return 'Too many attempts. Please wait a few minutes and try again.'
+  if (msg.includes('network')) return 'Network error. Please check your connection and try again.'
+  return msg
+}
 
 export default function LoginPage() {
+  const [tab, setTab] = useState<'password' | 'magic'>('password')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const [magicSent, setMagicSent] = useState(false)
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -44,7 +44,7 @@ export default function LoginPage() {
     const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
 
     if (signInError || !data.user) {
-      setError(signInError?.message ?? 'Login failed. Please try again.')
+      setError(friendlyError(signInError?.message ?? 'Login failed. Please try again.'))
       setLoading(false)
       return
     }
@@ -53,6 +53,32 @@ export default function LoginPage() {
     const returnTo = params.get('return_to')
     const destination = await getRedirectPath(supabase, data.user.id, returnTo)
     window.location.href = destination
+  }
+
+  async function handleMagicLink(e: React.FormEvent) {
+    e.preventDefault()
+    setError(null)
+    setLoading(true)
+
+    const supabase = createClient()
+    const params = new URLSearchParams(window.location.search)
+    const returnTo = params.get('return_to')
+    const redirectToUrl = new URL(`${window.location.origin}/auth/callback`)
+    if (returnTo) redirectToUrl.searchParams.set('return_to', returnTo)
+
+    const { error: magicError } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: redirectToUrl.toString() },
+    })
+
+    if (magicError) {
+      setError(friendlyError(magicError.message))
+      setLoading(false)
+      return
+    }
+
+    setMagicSent(true)
+    setLoading(false)
   }
 
   async function handleGoogleLogin() {
@@ -69,7 +95,7 @@ export default function LoginPage() {
       options: { redirectTo: redirectToUrl.toString() },
     })
     if (oauthError) {
-      setError(oauthError.message)
+      setError(friendlyError(oauthError.message))
       setGoogleLoading(false)
     }
   }
@@ -86,109 +112,183 @@ export default function LoginPage() {
         </div>
 
         {/* Title */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-8">
           <h1 className="text-[28px] font-black text-[var(--color-text)] tracking-tight">Sign In</h1>
         </div>
 
+        {/* Tab Toggle */}
+        <div className="flex items-center gap-1 p-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-full mb-8 shadow-sm">
+          <button
+            onClick={() => { setTab('password'); setError(null); setMagicSent(false); }}
+            className={`flex-1 flex items-center justify-center gap-2 h-10 rounded-full text-[12px] font-black uppercase tracking-widest transition-all ${tab === 'password' ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/30' : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'}`}
+          >
+            <Lock className="w-3.5 h-3.5" /> Password
+          </button>
+          <button
+            onClick={() => { setTab('magic'); setError(null); setMagicSent(false); }}
+            className={`flex-1 flex items-center justify-center gap-2 h-10 rounded-full text-[12px] font-black uppercase tracking-widest transition-all ${tab === 'magic' ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/30' : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'}`}
+          >
+            <Wand2 className="w-3.5 h-3.5" /> Magic Link
+          </button>
+        </div>
+
         {error && (
-          <div className="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[13px] flex items-center gap-3 font-bold animate-in fade-in zoom-in-95">
+          <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[13px] flex items-center gap-3 font-bold animate-in fade-in zoom-in-95">
             <ShieldCheck className="w-5 h-5 shrink-0" />
             {error}
           </div>
         )}
 
-        {/* Form */}
-        <form onSubmit={handleLogin} className="space-y-4">
-          
-          <div className="relative">
-            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--color-muted)]">
-              <Mail className="w-5 h-5" />
+        {/* Password Form */}
+        {tab === 'password' && (
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="relative">
+              <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--color-muted)]">
+                <Mail className="w-5 h-5" />
+              </div>
+              <input
+                required
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email address"
+                autoComplete="email"
+                className="w-full h-14 pl-14 pr-5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] placeholder:text-[var(--color-muted)]/50 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all font-semibold text-[15px] shadow-sm"
+              />
             </div>
-            <input
-              required
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email address"
-              className="w-full h-14 pl-14 pr-5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] placeholder:text-[var(--color-muted)]/50 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all font-semibold text-[15px] shadow-sm"
-            />
-          </div>
 
-          <div className="relative">
-            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--color-muted)]">
-              <Lock className="w-5 h-5" />
+            <div className="relative">
+              <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--color-muted)]">
+                <Lock className="w-5 h-5" />
+              </div>
+              <input
+                required
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                autoComplete="current-password"
+                className="w-full h-14 pl-14 pr-14 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] placeholder:text-[var(--color-muted)]/50 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all font-semibold text-[15px] shadow-sm"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-5 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-text)]"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
-            <input
-              required
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              className="w-full h-14 pl-14 pr-14 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] placeholder:text-[var(--color-muted)]/50 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all font-semibold text-[15px] shadow-sm"
-            />
+
+            <div className="flex justify-end pr-2">
+              <Link href="/forgot-password" className="text-[13px] font-bold text-[var(--color-primary)] hover:underline underline-offset-4">
+                Forgotten Password?
+              </Link>
+            </div>
+
+            <div className="pt-4">
+              <button
+                type="submit"
+                disabled={loading || googleLoading}
+                className="w-full h-14 rounded-full bg-[var(--color-primary)] text-white font-black text-[15px] shadow-lg shadow-[var(--color-primary)]/20 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center uppercase tracking-widest"
+              >
+                {loading
+                  ? <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  : 'Sign In'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* Magic Link Form */}
+        {tab === 'magic' && !magicSent && (
+          <form onSubmit={handleMagicLink} className="space-y-4">
+            <p className="text-[13px] font-bold text-[var(--color-muted)] text-center px-4 leading-relaxed">
+              Enter your email and we&apos;ll send you a one-click sign-in link. No password needed.
+            </p>
+            <div className="relative mt-4">
+              <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--color-muted)]">
+                <Mail className="w-5 h-5" />
+              </div>
+              <input
+                required
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email address"
+                autoComplete="email"
+                className="w-full h-14 pl-14 pr-5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] placeholder:text-[var(--color-muted)]/50 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all font-semibold text-[15px] shadow-sm"
+              />
+            </div>
+            <div className="pt-4">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full h-14 rounded-full bg-[var(--color-primary)] text-white font-black text-[15px] shadow-lg shadow-[var(--color-primary)]/20 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 uppercase tracking-widest"
+              >
+                {loading
+                  ? <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  : <><Wand2 className="w-5 h-5" /> Send Magic Link</>}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* Magic link success */}
+        {tab === 'magic' && magicSent && (
+          <div className="flex flex-col items-center gap-6 py-8 animate-in fade-in zoom-in-95">
+            <div className="w-20 h-20 rounded-[2rem] bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+              <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+            </div>
+            <div className="text-center space-y-2">
+              <h2 className="text-[20px] font-black text-[var(--color-text)] tracking-tight">Check Your Inbox</h2>
+              <p className="text-[13px] font-bold text-[var(--color-muted)] leading-relaxed px-4">
+                We sent a sign-in link to<br />
+                <span className="text-[var(--color-text)]">{email}</span>
+              </p>
+              <p className="text-[11px] font-bold text-[var(--color-muted)] opacity-70">The link expires in 60 minutes.</p>
+            </div>
             <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-5 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-text)]"
+              onClick={() => { setMagicSent(false); setEmail(''); }}
+              className="text-[13px] font-black text-[var(--color-primary)] hover:underline underline-offset-4"
             >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              Use a different email
             </button>
           </div>
-
-          <div className="flex justify-end pr-2">
-            <Link href="/forgot-password" title="Forgot Password" className="text-[13px] font-bold text-[var(--color-primary)] hover:underline underline-offset-4">
-              Forgotten Password?
-            </Link>
-          </div>
-
-          <div className="pt-6">
-            <button
-              type="submit"
-              disabled={loading || googleLoading}
-              className="w-full h-14 rounded-full bg-[var(--color-primary)] text-white font-black text-[15px] shadow-lg shadow-[var(--color-primary)]/20 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center uppercase tracking-widest"
-            >
-              {loading
-                ? <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                : "Sign In"}
-            </button>
-          </div>
-        </form>
+        )}
 
         {/* Divider */}
-        <div className="relative my-10">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-[var(--color-border)]"></div>
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-[var(--color-background)] px-4 text-[var(--color-muted)] font-bold tracking-widest">OR</span>
-          </div>
-        </div>
+        {!magicSent && (
+          <>
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[var(--color-border)]"></div>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-[var(--color-background)] px-4 text-[var(--color-muted)] font-bold tracking-widest">OR</span>
+              </div>
+            </div>
 
-        {/* Social Login */}
-        <div className="flex justify-center gap-6 mb-12">
-            <button className="w-12 h-12 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center hover:bg-[var(--color-surface-2)] transition-colors shadow-sm">
-                <TwitterIcon />
-            </button>
-            <button className="w-12 h-12 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center hover:bg-[var(--color-surface-2)] transition-colors shadow-sm">
-                <FacebookIcon />
-            </button>
-            <button 
-                onClick={handleGoogleLogin} 
-                disabled={googleLoading || loading}
-                className="w-12 h-12 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center hover:bg-[var(--color-surface-2)] transition-colors shadow-sm"
+            {/* Google Login */}
+            <button
+              onClick={handleGoogleLogin}
+              disabled={googleLoading || loading}
+              className="w-full h-14 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center gap-3 hover:bg-[var(--color-surface-2)] transition-colors shadow-sm font-bold text-[var(--color-text)] text-[14px] disabled:opacity-50 mb-8"
             >
-                {googleLoading ? <div className="w-5 h-5 border-2 border-[var(--color-muted)] border-t-transparent rounded-full animate-spin" /> : <GoogleIcon />}
+              {googleLoading
+                ? <div className="w-5 h-5 border-2 border-[var(--color-muted)] border-t-transparent rounded-full animate-spin" />
+                : <><GoogleIcon /> Continue with Google</>}
             </button>
-        </div>
+          </>
+        )}
 
         {/* Footer Link */}
         <div className="text-center">
-            <p className="text-[14px] font-bold text-[var(--color-muted)]">
-                New to Sathyadhare?{' '}
-                <Link href="/signup" className="text-[var(--color-primary)] hover:underline underline-offset-4">
-                    Register
-                </Link>
-            </p>
+          <p className="text-[14px] font-bold text-[var(--color-muted)]">
+            New to Sathyadhare?{' '}
+            <Link href="/signup" className="text-[var(--color-primary)] hover:underline underline-offset-4">
+              Register
+            </Link>
+          </p>
         </div>
 
       </div>

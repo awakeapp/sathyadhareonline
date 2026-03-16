@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { 
   ShieldCheck, User, Check, 
   BookOpen, Bookmark, MessageSquare, 
-  Quote, Highlighter
+  Quote, Highlighter, Lock, Eye, EyeOff, KeyRound
 } from 'lucide-react';
 import ReadingStreak from '@/components/ReadingStreak';
 import { Input, Label } from '@/components/ui/Input';
@@ -42,6 +42,69 @@ export default function ProfileForm({ profile: initialProfile, stats }: ProfileF
   const [fullName, setFullName] = useState(initialProfile.full_name || '');
   const [bio, setBio] = useState(initialProfile.bio || '');
   const [isSaving, setIsSaving] = useState(false);
+
+  // password change state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwError, setPwError] = useState<string | null>(null);
+  const [pwSuccess, setPwSuccess] = useState(false);
+
+  // password strength
+  function getStrength(pw: string) {
+    if (!pw) return { score: 0, label: '', color: '' };
+    let s = 0;
+    if (pw.length >= 8) s++;
+    if (pw.length >= 12) s++;
+    if (/[A-Z]/.test(pw)) s++;
+    if (/[0-9]/.test(pw)) s++;
+    if (/[^A-Za-z0-9]/.test(pw)) s++;
+    if (s <= 1) return { score: 1, label: 'Weak', color: '#ef4444' };
+    if (s <= 2) return { score: 2, label: 'Fair', color: '#f59e0b' };
+    if (s <= 3) return { score: 3, label: 'Good', color: '#3b82f6' };
+    return { score: 4, label: 'Strong', color: '#22c55e' };
+  }
+  const pwStrength = getStrength(newPassword);
+
+  async function handleChangePassword(e: React.FormEvent) {
+    e.preventDefault();
+    setPwError(null);
+    setPwSuccess(false);
+
+    if (newPassword.length < 6) {
+      setPwError('New password must be at least 6 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPwError('Passwords do not match.');
+      return;
+    }
+
+    setPwLoading(true);
+    // Re-authenticate first with current password
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: '', // will be set from supabase session automatically
+      password: currentPassword,
+    });
+
+    // Then update password
+    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+
+    if (updateError || signInError) {
+      setPwError(updateError?.message ?? 'Failed to update password. Check your current password.');
+      setPwLoading(false);
+      return;
+    }
+
+    setPwSuccess(true);
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setPwLoading(false);
+  }
 
   // Use a generated avatar from DiceBear
   const avatarUrl = profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.id}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
@@ -173,6 +236,116 @@ export default function ProfileForm({ profile: initialProfile, stats }: ProfileF
               </Link>
             </Button>
           </div>
+        </form>
+      </section>
+
+      {/* ── SECURITY / CHANGE PASSWORD ── */}
+      <section className="max-w-xl">
+        <div className="mb-6">
+          <h2 className="text-lg font-black text-[var(--color-text)] uppercase tracking-tight">Security</h2>
+          <p className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest mt-1">Update your login password</p>
+        </div>
+
+        <form onSubmit={handleChangePassword} className="space-y-4 bg-[var(--color-surface)] p-8 rounded-[2rem] border border-[var(--color-border)]">
+          {pwError && (
+            <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[13px] flex items-center gap-3 font-bold animate-in fade-in zoom-in-95">
+              <ShieldCheck className="w-4 h-4 shrink-0" />{pwError}
+            </div>
+          )}
+          {pwSuccess && (
+            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-[13px] flex items-center gap-3 font-bold animate-in fade-in zoom-in-95">
+              <Check className="w-4 h-4 shrink-0" />Password updated successfully!
+            </div>
+          )}
+
+          {/* Current Password */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[var(--color-muted)]">
+              <Lock size={13} strokeWidth={2.5} /> Current Password
+            </label>
+            <div className="relative">
+              <input
+                type={showCurrent ? 'text' : 'password'}
+                value={currentPassword}
+                onChange={e => setCurrentPassword(e.target.value)}
+                placeholder="Enter current password"
+                autoComplete="current-password"
+                className="w-full h-12 pl-4 pr-12 rounded-2xl bg-[var(--color-surface-2)] border-none text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
+              />
+              <button type="button" onClick={() => setShowCurrent(!showCurrent)} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-text)]">
+                {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
+
+          {/* New Password */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[var(--color-muted)]">
+              <KeyRound size={13} strokeWidth={2.5} /> New Password
+            </label>
+            <div className="relative">
+              <input
+                type={showNew ? 'text' : 'password'}
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                placeholder="Enter new password"
+                autoComplete="new-password"
+                className="w-full h-12 pl-4 pr-12 rounded-2xl bg-[var(--color-surface-2)] border-none text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
+              />
+              <button type="button" onClick={() => setShowNew(!showNew)} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-text)]">
+                {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+            {/* Strength bar */}
+            {newPassword.length > 0 && (
+              <div className="space-y-1 animate-in fade-in slide-in-from-top-2">
+                <div className="flex gap-1">
+                  {[1,2,3,4].map(i => (
+                    <div key={i} className="h-1.5 flex-1 rounded-full transition-all duration-500"
+                      style={{ backgroundColor: i <= pwStrength.score ? pwStrength.color : 'var(--color-border)' }} />
+                  ))}
+                </div>
+                <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: pwStrength.color }}>
+                  {pwStrength.label}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Confirm Password */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[var(--color-muted)]">
+              <ShieldCheck size={13} strokeWidth={2.5} /> Confirm New Password
+            </label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+              placeholder="Repeat new password"
+              autoComplete="new-password"
+              className="w-full h-12 pl-4 pr-4 rounded-2xl bg-[var(--color-surface-2)] border-none text-sm font-bold focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
+            />
+          </div>
+
+          <div className="pt-2">
+            <Button
+              type="submit"
+              disabled={pwLoading || !currentPassword || !newPassword || !confirmPassword}
+              className="w-full h-12 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] bg-[var(--color-primary)] text-white hover:opacity-90 disabled:opacity-50 transition-all"
+            >
+              {pwLoading
+                ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                : <div className="flex items-center gap-2"><Lock size={14} strokeWidth={3} /> Update Password</div>
+              }
+            </Button>
+          </div>
+
+          <p className="text-[11px] font-bold text-[var(--color-muted)] text-center">
+            Forgot your current password?{' '}
+            <Link href="/forgot-password" className="text-[var(--color-primary)] hover:underline">
+              Reset via email
+            </Link>
+          </p>
         </form>
       </section>
 
