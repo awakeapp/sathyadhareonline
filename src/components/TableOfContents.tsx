@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { List, X } from 'lucide-react';
 
 interface TocItem {
@@ -120,9 +121,9 @@ export default function TableOfContents({ contentHtml }: TableOfContentsProps) {
       </aside>
 
       {/* Modern Drawer (Mobile / Triggered) */}
-      {isOpen && (
+      {isOpen && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-[1200] flex flex-col justify-end" onClick={() => setIsOpen(false)}>
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-xl animate-fade-in" />
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] animate-fade-in" />
           <div 
             className="relative w-full max-w-2xl mx-auto bg-[var(--color-surface)] rounded-t-[3.5rem] p-9 pb-[calc(env(safe-area-inset-bottom)+2rem)] shadow-[0_-20px_100px_rgba(0,0,0,0.5)] max-h-[85vh] flex flex-col animate-toc-up border-x border-t border-[var(--color-border)]/50"
             onClick={e => e.stopPropagation()}
@@ -155,7 +156,8 @@ export default function TableOfContents({ contentHtml }: TableOfContentsProps) {
               <TocList items={items} activeId={activeId} scrollTo={scrollTo} isDrawer />
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
