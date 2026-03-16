@@ -15,123 +15,150 @@ export function ReaderSettingsSheet({ isOpen, onClose }: ReaderSettingsSheetProp
   const { setTheme } = useTheme();
 
   return (
-    <BottomSheet isOpen={isOpen} onClose={onClose} title="Appearance Settings">
-      <div className="space-y-7 pb-8">
+    <BottomSheet isOpen={isOpen} onClose={onClose} title="Appearance">
+      <div className="space-y-8 pb-6 px-1">
         
-        {/* Font Size */}
+        {/* Typeface Selection */}
         <section>
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="text-base font-bold text-[var(--color-text)] mb-1">ಅಕ್ಷರದ ಗಾತ್ರ (Text Size)</h4>
-            <span className="text-xs font-bold bg-[var(--color-surface-2)] border border-[var(--color-border)] px-2 py-1 rounded-md text-[var(--color-muted)]">{settings.fontSize}</span>
+           <h4 className="text-[10px] font-black tracking-[0.15em] text-[var(--color-muted)] uppercase mb-3 ml-2">Typeface Selection</h4>
+           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[1.25rem] overflow-hidden shadow-sm">
+             <div className="grid grid-cols-2 divide-x divide-[var(--color-border)] border-b border-[var(--color-border)]">
+               <button
+                 onClick={() => updateSettings({ fontFamily: 'serif' })}
+                 className={`py-4 transition-colors font-serif text-[15px] font-bold ${settings.fontFamily === 'serif' ? 'text-[#685de6] bg-[#685de6]/5' : 'text-[var(--color-text)] hover:bg-[var(--color-surface-2)]'}`}
+               >
+                 ನೋಟೋ ಸೆರಿಫ್
+               </button>
+               <button
+                 onClick={() => updateSettings({ fontFamily: 'sans' })}
+                 className={`py-4 transition-colors font-sans text-[15px] font-bold ${settings.fontFamily === 'sans' ? 'text-[#685de6] bg-[#685de6]/5' : 'text-[var(--color-text)] hover:bg-[var(--color-surface-2)]'}`}
+               >
+                 ನೋಟೋ ಸ್ಯಾನ್ಸ್
+               </button>
+             </div>
+             <div className="grid grid-cols-2 divide-x divide-[var(--color-border)]">
+               <button
+                 onClick={() => updateSettings({ fontFamily: 'modern' })}
+                 className={`py-4 transition-colors font-baloo text-[15px] font-bold ${settings.fontFamily === 'modern' ? 'text-[#685de6] bg-[#685de6]/5' : 'text-[var(--color-text)] hover:bg-[var(--color-surface-2)]'}`}
+               >
+                 ಬಾಲೂ ತಮ್ಮ
+               </button>
+               <button
+                 onClick={() => updateSettings({ fontFamily: 'tiro' })}
+                 className={`py-4 transition-colors font-tiro text-[15px] font-bold ${settings.fontFamily === 'tiro' ? 'text-[#685de6] bg-[#685de6]/5' : 'text-[var(--color-text)] hover:bg-[var(--color-surface-2)]'}`}
+               >
+                 ಟಿರೋ ಕನ್ನಡ
+               </button>
+             </div>
+           </div>
+        </section>
+
+        {/* Text Size */}
+        <section>
+          <div className="flex items-center gap-2 mb-2 ml-2">
+             <h4 className="text-[10px] font-black tracking-[0.15em] text-[var(--color-muted)] uppercase">Text Size</h4>
+             <span className="text-[10px] font-black bg-[#685de6]/10 text-[#685de6] px-1.5 py-[1px] rounded inline-flex">{settings.fontSize}pt</span>
           </div>
-          <div className="flex items-center gap-4 bg-[var(--color-surface-2)] p-2 rounded-2xl border border-[var(--color-border)]">
+          <div className="flex items-center gap-4 bg-[var(--color-surface-2)] p-2 rounded-[2rem] border border-[var(--color-border)] shadow-inner">
             <button 
               onClick={() => updateSettings({ fontSize: Math.max(12, settings.fontSize - 1) })}
-              className="w-12 h-12 rounded-xl flex items-center justify-center hover:bg-[var(--color-border)] transition-colors text-lg font-bold"
+              className="w-14 h-14 bg-[var(--color-surface)] shadow-md rounded-full flex items-center justify-center text-[var(--color-text)] hover:scale-105 active:scale-95 transition-transform"
             >
-              A-
+              <div className="w-4 h-0.5 bg-current rounded-full" />
             </button>
-            <div className="flex-1 h-1.5 bg-[var(--color-border)] rounded-full relative overflow-hidden">
-              <div 
-                className="absolute inset-y-0 left-0 bg-[var(--color-primary)] transition-all"
-                style={{ width: `${((settings.fontSize - 12) / (32 - 12)) * 100}%` }}
-              />
+            <div className="flex-1 px-2">
+               <div className="h-2.5 bg-[var(--color-border)] rounded-full relative overflow-hidden">
+                 <div 
+                   className="absolute inset-y-0 left-0 bg-[#685de6] transition-all duration-300 ease-out rounded-full"
+                   style={{ width: `${((settings.fontSize - 12) / (32 - 12)) * 100}%` }}
+                 />
+               </div>
             </div>
             <button 
               onClick={() => updateSettings({ fontSize: Math.min(32, settings.fontSize + 1) })}
-              className="w-12 h-12 rounded-xl flex items-center justify-center hover:bg-[var(--color-border)] transition-colors text-xl font-bold"
+              className="w-14 h-14 bg-[var(--color-surface)] shadow-md rounded-full flex items-center justify-center text-[var(--color-text)] hover:scale-105 active:scale-95 transition-transform relative"
             >
-              A+
+              <div className="w-4 h-0.5 bg-current rounded-full absolute" />
+              <div className="w-0.5 h-4 bg-current rounded-full absolute" />
             </button>
           </div>
         </section>
 
-        {/* Font Family */}
+        {/* Readability Spacing */}
         <section>
-          <h4 className="text-base font-bold text-[var(--color-text)] mb-3">ಅಕ್ಷರ ಶೈಲಿ (Font Style)</h4>
-          <div className="grid grid-cols-2 gap-3">
+          <h4 className="text-[10px] font-black tracking-[0.15em] text-[var(--color-muted)] uppercase mb-3 ml-2">Readability Spacing</h4>
+          <div className="flex p-1.5 bg-[var(--color-surface-2)] rounded-[1.5rem] border border-[var(--color-border)] shadow-inner">
             {[
-              { id: 'serif', kn: 'ನೋಟೋ ಸೆರಿಫ್', en: 'Noto Serif' },
-              { id: 'sans', kn: 'ನೋಟೋ ಸ್ಯಾನ್ಸ್', en: 'Noto Sans' },
-              { id: 'modern', kn: 'ಬಾಲೂ ತಮ್ಮ', en: 'Baloo Tamma' },
-              { id: 'tiro', kn: 'ಟಿರೋ ಕನ್ನಡ', en: 'Tiro Kannada' },
-            ].map((f) => {
-              const fontClass = f.id === 'serif' ? 'font-serif' : f.id === 'sans' ? 'font-sans' : f.id === 'modern' ? 'font-baloo' : 'font-tiro';
+              { label: 'Dense', value: 1.4 },
+              { label: 'Standard', value: 1.6 },
+              { label: 'Airy', value: 1.85 },
+              { label: 'Loose', value: 2.1 }
+            ].map((sp) => {
+              const isActive = settings.lineHeight === sp.value;
               return (
-              <button
-                key={f.id}
-                onClick={() => updateSettings({ fontFamily: f.id as 'serif' | 'sans' | 'modern' | 'tiro' })}
-                className={`p-3 rounded-2xl border-2 text-center transition-all ${
-                  settings.fontFamily === f.id 
-                    ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5 shadow-sm' 
-                    : 'border-[var(--color-border)] bg-[var(--color-surface-2)] hover:border-[var(--color-muted)]'
-                }`}
-              >
-                <div className={`text-[17px] leading-tight mb-1 ${fontClass}`}>{f.kn}</div>
-                <div className="text-[10px] font-bold uppercase tracking-widest opacity-50">{f.en}</div>
-              </button>
-            )})}
+                <button
+                  key={sp.value}
+                  onClick={() => updateSettings({ lineHeight: sp.value })}
+                  className={`flex-1 py-3.5 rounded-[1.25rem] text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${
+                    isActive 
+                      ? 'bg-[var(--color-surface)] text-[#685de6] shadow-[0_4px_12px_rgba(0,0,0,0.08)] scale-100 z-10 border border-[#685de6]/10' 
+                      : 'text-[var(--color-muted)] scale-95 hover:text-[var(--color-text)]'
+                  }`}
+                >
+                  {sp.label}
+                </button>
+              );
+            })}
           </div>
         </section>
 
-        {/* Line Height */}
+        {/* Theme Settings Component */}
         <section>
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="text-base font-bold text-[var(--color-text)]">ಸಾಲುಗಳ ಅಂತರ (Spacing)</h4>
-          </div>
-          <div className="flex gap-2">
-            {[1.4, 1.6, 1.85, 2.1].map((lh) => (
-              <button
-                key={lh}
-                onClick={() => updateSettings({ lineHeight: lh })}
-                className={`flex-1 h-12 rounded-xl flex items-center justify-center transition-all ${
-                  settings.lineHeight === lh 
-                    ? 'bg-[var(--color-primary)] text-white shadow-md' 
-                    : 'bg-[var(--color-surface-2)] text-[var(--color-muted)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/50'
+          <h4 className="text-[10px] font-black tracking-[0.15em] text-[var(--color-muted)] uppercase mb-3 ml-2">Page Theme</h4>
+          <div className="flex gap-3">
+             <button
+                onClick={() => { updateSettings({ theme: 'light' }); setTheme('light'); }}
+                className={`flex-1 py-4 rounded-[1.5rem] border-2 transition-all flex flex-col items-center justify-center gap-2 ${
+                  settings.theme === 'light' ? 'border-[#685de6] bg-[#685de6]/5 shadow-sm' : 'border-[var(--color-border)] bg-[var(--color-surface-2)]'
                 }`}
-              >
-                <AlignLeft size={16 + (lh - 1.4) * 8} />
-              </button>
-            ))}
+             >
+                <div className="w-6 h-6 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-gray-800 font-serif font-bold text-sm">A</div>
+                <span className={`text-[10px] font-black uppercase tracking-wider ${settings.theme === 'light' ? 'text-[#685de6]' : 'text-[var(--color-muted)]'}`}>Light</span>
+             </button>
+
+             <button
+                onClick={() => { updateSettings({ theme: 'sepia' }); setTheme('sepia'); }}
+                className={`flex-1 py-4 rounded-[1.5rem] border-2 transition-all flex flex-col items-center justify-center gap-2 ${
+                  settings.theme === 'sepia' ? 'border-[#685de6] bg-[#685de6]/5 shadow-sm' : 'border-[var(--color-border)] bg-[var(--color-surface-2)]'
+                }`}
+             >
+                <div className="w-6 h-6 rounded-full bg-[#f4ecd8] border border-[#d4b896] shadow-sm flex items-center justify-center text-[#3d2b1f] font-serif font-bold text-sm">A</div>
+                <span className={`text-[10px] font-black uppercase tracking-wider ${settings.theme === 'sepia' ? 'text-[#685de6]' : 'text-[var(--color-muted)]'}`}>Sepia</span>
+             </button>
+
+             <button
+                onClick={() => { updateSettings({ theme: 'dark' }); setTheme('dark'); }}
+                className={`flex-1 py-4 rounded-[1.5rem] border-2 transition-all flex flex-col items-center justify-center gap-2 ${
+                  settings.theme === 'dark' ? 'border-[#685de6] bg-[#685de6]/5 shadow-sm' : 'border-[var(--color-border)] bg-[var(--color-surface-2)]'
+                }`}
+             >
+                <div className="w-6 h-6 rounded-full bg-[#181623] border border-gray-700 shadow-sm flex items-center justify-center text-white font-serif font-bold text-sm">A</div>
+                <span className={`text-[10px] font-black uppercase tracking-wider ${settings.theme === 'dark' ? 'text-[#685de6]' : 'text-[var(--color-muted)]'}`}>Dark</span>
+             </button>
           </div>
         </section>
 
-        {/* Theme Toggles */}
-        <section>
-          <h4 className="text-base font-bold text-[var(--color-text)] mb-3">ಬಣ್ಣ (Theme)</h4>
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { id: 'light', label: 'Light', bg: 'bg-white', text: 'text-zinc-900', border: 'border-zinc-200' },
-              { id: 'sepia', label: 'Sepia', bg: 'bg-[#f4ecd8]', text: 'text-[#5b4636]', border: 'border-[#e4dcc8]' },
-              { id: 'dark', label: 'Dark', bg: 'bg-[#181623]', text: 'text-zinc-100', border: 'border-zinc-800' },
-            ].map((t) => (
-              <button
-                key={t.id}
-                onClick={() => {
-                  updateSettings({ theme: t.id as 'light' | 'dark' | 'sepia' });
-                  setTheme(t.id);
-                }}
-                className={`flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all ${
-                  settings.theme === t.id 
-                    ? 'border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/10 bg-[var(--color-surface-2)] shadow-sm' 
-                    : 'border-[var(--color-border)] bg-[var(--color-surface)]'
-                }`}
-              >
-                <div className={`w-full aspect-video rounded-xl ${t.bg} ${t.border} border shadow-inner flex items-center justify-center overflow-hidden`}>
-                   <span className={`text-2xl font-bold font-sans ${t.text}`}>A</span>
-                </div>
-                <span className="text-xs font-bold text-[var(--color-text)]">{t.label}</span>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <button 
-          onClick={resetSettings}
-          className="w-full h-12 rounded-2xl border border-dashed border-[var(--color-border)] text-xs font-black uppercase tracking-widest text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-all"
-        >
-          Reset to default
-        </button>
+        <div className="pt-2">
+          <button 
+            onClick={resetSettings}
+            className="flex items-center justify-center gap-2 w-full py-4 rounded-3xl border-2 border-dashed border-[var(--color-border)] text-[11px] font-black uppercase tracking-[0.15em] text-[var(--color-muted)] hover:text-[#685de6] hover:border-[#685de6]/50 hover:bg-[#685de6]/5 transition-all outline-none"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+               <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" />
+            </svg>
+            Default Settings
+          </button>
+        </div>
 
       </div>
     </BottomSheet>
