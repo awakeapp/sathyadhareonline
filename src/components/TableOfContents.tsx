@@ -166,15 +166,11 @@ function TocList({ items, activeId, scrollTo, isDrawer = false }: {
   isDrawer?: boolean;
 }) {
   return (
-    <nav className="relative flex flex-col items-stretch">
-      {/* Background vertical continuous track */}
-      <div className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-[var(--color-border)] rounded-full" />
-      
-      {items.map((item, index) => {
+    <nav className="relative flex flex-col items-stretch gap-1">
+      {items.map((item) => {
         const isActive = activeId === item.id;
         // Indentation logic
         const pl = item.level <= 1 ? 'pl-6' : item.level === 2 ? 'pl-10' : 'pl-14';
-        const isLast = index === items.length - 1;
 
         return (
           <button
@@ -182,15 +178,17 @@ function TocList({ items, activeId, scrollTo, isDrawer = false }: {
             onClick={() => scrollTo(item.id)}
             className={`group relative flex items-center justify-between text-left transition-all duration-300 w-full rounded-r-2xl
               ${isDrawer ? 'py-4 pr-4' : 'py-3 pr-2'} ${pl}
-              ${!isLast ? 'border-b border-[var(--color-border)]/50' : ''}
               ${isActive
                 ? 'text-[var(--color-primary)] font-black bg-[var(--color-primary)]/5'
                 : 'text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] font-bold opacity-80 hover:opacity-100'
               }`}
           >
-            {/* The active vertical indicator overlaying the track */}
+            {/* Background inactive vertical segment track */}
+            <div className="absolute left-[6px] top-2 bottom-2 w-[4px] bg-[var(--color-border)] rounded-full opacity-50 transition-all group-hover:bg-[var(--color-muted)] group-hover:opacity-30" />
+            
+            {/* The active vertical indicator overlaying the track segment */}
             {isActive && (
-              <div className="absolute left-[6px] top-0 bottom-0 w-[4px] bg-[var(--color-primary)] rounded-full shadow-[0_0_8px_rgba(var(--color-primary-rgb),0.5)] z-10" />
+              <div className="absolute left-[6px] top-2 bottom-2 w-[4px] bg-[var(--color-primary)] rounded-full shadow-[0_0_8px_rgba(var(--color-primary-rgb),0.5)] z-10" />
             )}
             <div className="flex items-start gap-2 overflow-hidden w-full">
               <ChevronRight size={14} strokeWidth={3} className={`shrink-0 mt-1 transition-transform ${isActive ? 'text-[var(--color-primary)] translate-x-1' : 'text-[var(--color-muted)] opacity-40 group-hover:translate-x-1 group-hover:opacity-70 group-hover:text-[var(--color-text)]'}`} />
