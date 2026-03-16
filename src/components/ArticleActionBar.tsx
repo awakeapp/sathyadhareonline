@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Share2, Link as LinkIcon, Check, Bookmark, Heart, Volume2, Square, X, FileText, AlignLeft, Loader2, ChevronDown, Settings } from 'lucide-react';
+import { Share2, Link as LinkIcon, Check, Bookmark, Heart, Volume2, Square } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
-
 /* ─── helpers ─────────────────────────────────────────────── */
 function getArticleUrl(slug: string) {
   return `${typeof window !== 'undefined' ? window.location.origin : 'https://sathyadhareonline.vercel.app'}/articles/${slug}`;
@@ -43,11 +42,9 @@ function getBestMaleVoice(): SpeechSynthesisVoice | null {
 
 /* ─── types ───────────────────────────────────────────────── */
 interface ArticleActionBarProps {
-  articleId: string;
   slug: string;
   title: string;
   content: string;
-  existingSummary?: string | null;
   isAuthenticated?: boolean;
   initialSaved?: boolean;
   onSave?: () => void;
@@ -102,7 +99,11 @@ function SpeakerButton({ content, title }: { content: string; title?: string }) 
     const u = new SpeechSynthesisUtterance(txt);
     u.lang = 'kn-IN'; u.rate = 0.85; u.pitch = 0.9; u.volume = 1;
     const applyVoice = () => { const v = getBestMaleVoice(); if (v) u.voice = v; };
-    window.speechSynthesis.getVoices().length ? applyVoice() : (window.speechSynthesis.onvoiceschanged = applyVoice);
+    if (window.speechSynthesis.getVoices().length) {
+      applyVoice();
+    } else {
+      window.speechSynthesis.onvoiceschanged = applyVoice;
+    }
     u.onstart = () => { setPlaying(true); setPaused(false); };
     u.onboundary = (e) => { if (txt.length) setProgress(Math.round((e.charIndex / txt.length) * 100)); };
     u.onend = () => { setPlaying(false); setPaused(false); setProgress(0); };
@@ -160,112 +161,14 @@ function SpeakerButton({ content, title }: { content: string; title?: string }) 
   );
 }
 
-/* ─── AI Summary strip ────────────────────────────────────── */
-function AISummaryStrip({
-  articleId, content, title, existingSummary,
-}: { articleId: string; content: string; title: string; existingSummary?: string | null }) {
-  const [summary, setSummary] = useState<string | null>(existingSummary || null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
-
-  const generate = async () => {
-    if (loading) return;
-    setLoading(true); setError(null);
-    try {
-      const res = await fetch('/api/ai-summary', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ articleId, content, title }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
-      if (!data.summary) throw new Error('No summary returned');
-      
-      setSummary(data.summary);
-      setOpen(true);
-    } catch (err: any) {
-      setError(err.message || 'Failed. Try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!content || content.length < 300) return null;
-
-  return (
-    <div className="mb-6 overflow-hidden">
-      {/* Trigger strip — always visible */}
-      <button
-        onClick={() => {
-          if (!summary) generate();
-          else setOpen(o => !o);
-        }}
-        disabled={loading}
-        className={`w-full flex items-center gap-3 px-4 h-11 rounded-2xl border transition-all text-left group ${
-          open
-            ? 'bg-[var(--color-primary)]/5 border-[var(--color-primary)]/30 rounded-b-none border-b-0'
-            : 'bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-primary)]/30'
-        }`}
-      >
-        {/* Icon */}
-        <div className={`w-6 h-6 rounded-lg shrink-0 flex items-center justify-center transition-all ${
-          summary ? 'bg-[var(--color-primary)] text-white' : 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
-        }`}>
-          {loading ? <Loader2 size={12} className="animate-spin" /> : <FileText size={12} />}
-        </div>
-
-        <span className="text-[11px] font-black uppercase tracking-widest text-[var(--color-primary)] flex-1">
-          {loading ? 'Summarizing…' : error ? error : summary ? 'Summary' : 'Summarize Article'}
-        </span>
-
-        {!summary && !loading && (
-          <div className="flex items-center gap-1.5 px-3 h-7 rounded-xl bg-[var(--color-primary)] text-white text-[9px] font-black uppercase tracking-wider shrink-0 shadow-md shadow-[var(--color-primary)]/25 group-hover:bg-[var(--color-primary)]/90 transition-colors">
-            <AlignLeft size={10} />
-            Summarize
-          </div>
-        )}
-        {summary && (
-          <ChevronDown size={14} className={`text-[var(--color-primary)] shrink-0 transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
-        )}
-      </button>
-
-      {/* Summary panel — slides open */}
-      {open && summary && (
-        <div className="bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/25 border-t-0 rounded-b-2xl px-5 py-4 animate-fade-in">
-          <p className="text-[13.5px] leading-relaxed text-[var(--color-text)] font-medium mb-3">
-            {summary}
-          </p>
-          <div className="flex items-center justify-between">
-            <span className="text-[8px] font-black uppercase tracking-widest text-[var(--color-primary)]/50 flex items-center gap-1.5">
-              <span className="w-1 h-1 rounded-full bg-[var(--color-primary)]/40 inline-block" />
-              Gemini 1.5 Flash
-            </span>
-            <button
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-[var(--color-muted)] hover:text-rose-500 transition-colors"
-            >
-              <X size={11} />
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-import { ReaderSettingsSheet } from './ReaderSettingsSheet';
-
 /* ─── MAIN EXPORT: full action bar ───────────────────────── */
 export default function ArticleActionBar({
-  articleId, slug, title, content, existingSummary,
+  slug, title, content,
   isAuthenticated, initialSaved, onSave, onUnsave,
 }: ArticleActionBarProps) {
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(initialSaved ?? false);
   const [liked, setLiked] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isClientAuth, setIsClientAuth] = useState(isAuthenticated);
 
   useEffect(() => {
@@ -331,11 +234,6 @@ export default function ArticleActionBar({
           <Bookmark size={16} strokeWidth={2.5} className={saved ? 'fill-[var(--color-primary)]' : ''} />
         </IBtn>
 
-        {/* Reader Appearance */}
-        <IBtn onClick={() => setIsSettingsOpen(true)} title="Appearance settings">
-          <Settings size={16} strokeWidth={2.5} />
-        </IBtn>
-
         {/* Speaker with circular progress */}
         <SpeakerButton content={content} title={title} />
 
@@ -357,18 +255,6 @@ export default function ArticleActionBar({
           <Heart size={14} className={liked ? 'fill-white' : ''} strokeWidth={2.5} />
           {liked ? 'Liked' : 'Like'}
         </button>
-      </div>
-
-      <ReaderSettingsSheet isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
-
-      {/* ── AI Summary strip (below action row, before content) ── */}
-      <div className="mt-4">
-        <AISummaryStrip
-          articleId={articleId}
-          content={content}
-          title={title}
-          existingSummary={existingSummary}
-        />
       </div>
     </div>
   );

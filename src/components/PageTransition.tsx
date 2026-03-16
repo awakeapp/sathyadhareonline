@@ -55,6 +55,12 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
           damping: 35,
           mass: 0.8
         }}
+        onAnimationComplete={() => {
+          // Clear transform so that position: fixed/sticky in children work properly
+          const el = document.getElementById('page-transition-container');
+          if (el) el.style.transform = '';
+        }}
+        id="page-transition-container"
         className="w-full flex-1 flex flex-col min-w-0"
         style={{
           backgroundColor: 'var(--color-background)',
