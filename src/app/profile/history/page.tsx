@@ -1,7 +1,9 @@
+
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { History, ArrowLeft, Calendar, BookOpen } from 'lucide-react';
 import Link from 'next/link';
-import { ChevronLeft, History } from 'lucide-react';
+import { format } from 'date-fns';
 import ArticleCard from '@/components/ui/ArticleCard';
 
 export const dynamic = 'force-dynamic';
@@ -14,9 +16,6 @@ export default async function ReadingHistoryPage() {
     redirect('/login');
   }
 
-  // Fetch unique article views, ordered by most recent
-  // We use a subquery or just group by in logic if needed, 
-  // but for simplicity we'll fetch the latest 50 views.
   const { data: views } = await supabase
     .from('article_views')
     .select(`
@@ -25,68 +24,84 @@ export default async function ReadingHistoryPage() {
       article:articles (
         id, title, slug, excerpt, cover_image,
         status, is_deleted, published_at,
-        category:categories(name),
-        reactions:article_reactions(count)
+        author_name,
+        category:categories(name)
       )
     `)
     .eq('user_id', user.id)
-    .eq('article.status', 'published')
-    .eq('article.is_deleted', false)
     .order('viewed_at', { ascending: false })
     .limit(50);
 
-  // Group by article ID to avoid duplicates in the history list
+  // Group by article ID to avoid duplicates
   const seen = new Set();
   const history = (views ?? [])
     .map(v => {
       const art = Array.isArray(v.article) ? v.article[0] : v.article;
-      return { ...art, viewedAt: v.viewed_at };
+      return art ? { ...art, viewedAt: v.viewed_at } : null;
     })
-    .filter(a => {
+    .filter((a): a is any => {
       if (!a || seen.has(a.id)) return false;
       seen.add(a.id);
-      return true;
+      return a.status === 'published' && !a.is_deleted;
     });
 
   return (
-    <div className="max-w-xl mx-auto py-8 px-4 sm:px-6">
-      <header className="mb-8">
-        <Link 
-          href="/profile" 
-          className="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-[var(--color-muted)] hover:text-[var(--color-primary)] mb-4 transition-colors"
-        >
-          <ChevronLeft size={14} strokeWidth={3} />
-          Back to Profile
-        </Link>
-        <div className="flex items-center gap-3 mb-1">
-          <History className="text-[var(--color-primary)]" size={28} />
-          <h1 className="text-3xl font-black tracking-tight text-[var(--color-text)]">Reading History</h1>
-        </div>
-        <p className="text-sm text-[var(--color-muted)] font-medium">
-          The articles you&apos;ve read recently on Sathyadhare.
-        </p>
-      </header>
-
-      {history.length === 0 ? (
-        <div className="py-20 flex flex-col items-center justify-center text-center bg-[var(--color-surface)] rounded-[2rem] border border-dashed border-[var(--color-border)]">
-          <div className="w-16 h-16 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center mb-4">
-            <History className="w-8 h-8 text-[var(--color-muted)] opacity-20" />
-          </div>
-          <h2 className="text-lg font-black text-[var(--color-text)]">No history yet</h2>
-          <p className="text-sm text-[var(--color-muted)] mt-1 max-w-[200px]">
-            Articles you read will appear here automatically.
-          </p>
-          <Link href="/" className="mt-6 px-6 py-3 rounded-xl bg-[var(--color-primary)] text-white text-[11px] font-black uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all">
-            Start Reading
+    <div className="min-h-screen bg-[var(--color-background)] pt-6 sm:pt-10 pb-24 px-4 sm:px-10">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <header className="mb-12">
+          <Link 
+            href="/profile" 
+            className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-colors mb-6"
+          >
+            <ArrowLeft size={14} /> Back to Profile
           </Link>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-6">
-          {history.map((article) => (
-            <ArticleCard key={article.id} variant="list-horizontal" article={article} />
-          ))}
-        </div>
-      )}
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-3xl bg-indigo-500 flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
+              <History size={28} strokeWidth={2.5} />
+            </div>
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-black text-[var(--color-text)] tracking-tight">Reading History</h1>
+              <p className="text-sm font-medium text-[var(--color-muted)] mt-1">Pick up right where you left off</p>
+            </div>
+          </div>
+        </header>
+
+        {history.length === 0 ? (
+          <div className="p-16 rounded-[3rem] border-2 border-dashed border-[var(--color-border)] flex flex-col items-center justify-center text-center opacity-60">
+            <BookOpen size={48} className="text-[var(--color-muted)] mb-6" />
+            <h3 className="text-xl font-black mb-2">No History Yet</h3>
+            <p className="text-sm font-medium max-w-xs leading-relaxed">
+              Explore our journal and read articles to see your history grow here.
+            </p>
+            <Link href="/" className="mt-8 px-8 py-4 rounded-2xl bg-[var(--color-primary)] text-white text-xs font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all">
+              Start Reading
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6">
+            {history.map((article) => (
+              <div key={article.id} className="relative group">
+                {/* View Date Marker */}
+                <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-indigo-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                
+                <ArticleCard 
+                  variant="list-horizontal" 
+                  article={{
+                    ...article,
+                    category: article.category
+                  }} 
+                />
+                
+                <div className="absolute bottom-4 right-6 pointer-events-none flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-[var(--color-muted)] opacity-60">
+                  <Calendar size={12} />
+                  Last read {format(new Date(article.viewedAt), 'MMM dd')}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

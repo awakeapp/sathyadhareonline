@@ -61,6 +61,11 @@ export async function updateUserAction(formData: FormData) {
     const fullName = formData.get('full_name') as string;
     const role = formData.get('role') as string;
 
+    // Permissions toggles
+    const canArticles = formData.get('can_articles') === 'on';
+    const canSequels = formData.get('can_sequels') === 'on';
+    const canLibrary = formData.get('can_library') === 'on';
+
     const supabase = await createClient();
 
     // Safeguard: Last super admin check
@@ -74,21 +79,41 @@ export async function updateUserAction(formData: FormData) {
       }
     }
 
-    const { error } = await supabase
+    // 1. Update Profile
+    const { error: profileError } = await supabase
       .from('profiles')
       .update({ full_name: fullName, role })
       .eq('id', userId);
 
-    if (error) throw error;
+    if (profileError) throw profileError;
 
-    await logAuditEvent(caller.id, 'USER_UPDATED', { target_user_id: userId, fullName, role });
+    // 2. Update Permissions
+    const { error: permError } = await supabase
+      .from('user_content_permissions')
+      .upsert({
+        user_id: userId,
+        can_articles: canArticles,
+        can_sequels: canSequels,
+        can_library: canLibrary,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+
+    if (permError) console.error('Permissions update failed:', permError);
+
+    await logAuditEvent(caller.id, 'USER_UPDATED', { 
+      target_user_id: userId, 
+      fullName, 
+      role,
+      permissions: { canArticles, canSequels, canLibrary }
+    });
 
     revalidatePath('/admin/users');
-    return { success: true, message: 'User role updated successfully.' };
+    return { success: true, message: 'User updated successfully.' };
   } catch (error: unknown) {
     return { error: error instanceof Error ? error.message : 'Failed to update user' };
   }
 }
+
 
 export async function deleteUserAction(formData: FormData) {
   try {
@@ -176,3 +201,28 @@ export async function toggleStatusAction(formData: FormData) {
     return { error: error instanceof Error ? error.message : 'Failed to update status' };
   }
 }
+
+export async function setUserPermissionsAction(userId: string, permissions: { can_articles: boolean; can_sequels: boolean; can_library: boolean }) {
+  try {
+    const caller = await verifySuperAdmin();
+    const supabase = await createClient();
+
+    const { error } = await supabase
+      .from('user_content_permissions')
+      .upsert({
+        user_id: userId,
+        ...permissions,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+
+    if (error) throw error;
+
+    await logAuditEvent(caller.id, 'USER_PERMISSIONS_UPDATED', { target_user_id: userId, permissions });
+
+    revalidatePath('/admin/users');
+    return { success: true };
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : 'Failed to update permissions' };
+  }
+}
+

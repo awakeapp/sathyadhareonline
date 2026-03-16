@@ -1,65 +1,104 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import { ArrowLeft, Download, Printer } from 'lucide-react'
+import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 
 export default function TermsPage() {
-  return (
-    <main className="min-h-[100dvh] flex flex-col items-center pt-8 p-4 bg-[var(--color-background)]">
-      
-      <div className="w-full max-w-[480px] bg-[var(--color-background)] rounded-[2.5rem] relative z-10 animate-fade-up">
+  const router = useRouter();
+  const lastUpdated = "March 16, 2026";
 
-        {/* Top App Bar with actions */}
-        <div className="flex items-center justify-between py-6 sticky top-0 bg-[var(--color-background)]/80 backdrop-blur-md z-20">
-          <Link href="/signup" className="p-2 -ml-2 rounded-full hover:bg-[var(--color-surface)] transition-colors">
-            <ArrowLeft className="w-6 h-6 text-[var(--color-text)]" />
-          </Link>
-          
-          <div className="flex items-center gap-4">
-            <button className="text-[var(--color-text)] hover:text-[#f04a4c] transition-colors">
-              <Download className="w-5 h-5" />
-            </button>
-            <button className="text-[var(--color-text)] hover:text-[#f04a4c] transition-colors">
-              <Printer className="w-5 h-5" />
-            </button>
+  const handleAccept = () => {
+    localStorage.setItem('terms-accepted', 'true');
+    // We send them back with a query param to be extra sure the signup page picks it up
+    router.push('/signup?accepted=true');
+  };
+
+  const handleDecline = () => {
+    localStorage.removeItem('terms-accepted');
+    router.back();
+  };
+
+  return (
+    <main className="min-h-[100dvh] flex flex-col bg-gradient-to-b from-[#5c4df0] to-[#7165f2] relative overflow-hidden">
+      
+      {/* Dynamic Status Bar Filler (Ensures no white peak-through) */}
+      <div className="fixed top-0 left-0 right-0 h-[env(safe-area-inset-top)] bg-[#5c4df0] z-[60]" />
+
+      {/* Back Arrow */}
+      <div className="px-6 relative z-10 flex items-center" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 20px)', paddingBottom: '20px' }}>
+        <button onClick={() => router.back()} className="text-white hover:opacity-80 transition-opacity focus:outline-none p-2 -ml-2 rounded-full active:bg-white/10">
+          <ArrowLeft className="w-6 h-6" strokeWidth={3} />
+        </button>
+      </div>
+
+      {/* Greeting Section - Matching Design */}
+      <div className="px-8 pb-10 pt-2 relative z-10">
+        <h2 className="text-[20px] font-bold text-white mb-6 opacity-90">Hello 👋</h2>
+        <h3 className="text-[26px] font-black text-white leading-[1.2] tracking-tight">
+          Before you create an account,<br />
+          please read<br />
+          and accept our Terms & Conditions
+        </h3>
+      </div>
+
+      {/* Main Content Card */}
+      <div className="flex-1 bg-white rounded-t-[3.5rem] px-8 pt-14 pb-32 relative z-10 rugged-shadow overflow-y-auto scrollbar-none shadow-[0_-20px_60px_rgba(0,0,0,0.15)]">
+        <div className="max-w-xl mx-auto">
+          <header className="mb-10">
+            <h1 className="text-[28px] font-black text-[#1a1c20] tracking-tight mb-2">
+               Terms & Conditions
+            </h1>
+            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+               <span className="w-2 h-2 rounded-full bg-[#5c4df0]" />
+               Last updated: {lastUpdated}
+            </div>
+          </header>
+
+          <div className="space-y-10 text-slate-600 font-medium leading-[1.8] text-[15px]">
+             <p className="font-bold text-slate-500 italic">
+                {"Please read these terms and conditions (\"terms and conditions\", \"terms\") carefully before using Sathyadhare online publication (\"platform\", \"service\") operated by Sathyadhare Kannada Samithi."}
+             </p>
+
+             <section>
+                <h3 className="text-[18px] font-black text-[#1a1c20] mb-4">1. Conditions of Use</h3>
+                <p>
+                   {"By using this app, you certify that you have read and reviewed this Agreement and that you agree to comply with its terms. If you do not want to be bound by the terms of this Agreement, you are advised to stop using the app accordingly. Sathyadhare only grants use and access of this app, its products, and its services to those who have accepted its terms."}
+                </p>
+             </section>
+
+             <section>
+                <h3 className="text-[18px] font-black text-[#1a1c20] mb-4">2. User Accounts and Security</h3>
+                <p>
+                   {"As a user of this app, you may be asked to register with us and provide private information. You are responsible for ensuring the accuracy of this information, and you are responsible for maintaining the safety and security of your identifying information."}
+                </p>
+             </section>
+
+             <section>
+                <h3 className="text-[18px] font-black text-[#1a1c20] mb-4">3. Privacy Policy</h3>
+                <p>
+                   {"Before you continue using our app, we advise you to read our privacy policy regarding our user data collection. It will help you better understand our practices."}
+                </p>
+             </section>
           </div>
         </div>
-
-        {/* Main Header */}
-        <div className="mb-10 mt-4">
-          <h1 className="text-3xl font-extrabold text-[var(--color-text)] tracking-tight mb-2">Terms &<br />Agreement</h1>
-        </div>
-
-        {/* Content area matching the clean, highly-legible design in Screen 12 */}
-        <div className="space-y-8 pb-16">
-          <section>
-            <p className="text-[13px] leading-relaxed text-[var(--color-muted)] font-medium">
-              These Terms and Conditions constitute a legally binding agreement made between you, whether personally or on behalf of an entity ("you") and Sathyadhare ("we," "us" or "our"), concerning your access to and use of the Sathyadhare website as well as any other media form, media channel, mobile website or mobile application related, linked, or otherwise connected thereto (collectively, the "Site").
-            </p>
-            <p className="text-[13px] leading-relaxed text-[var(--color-muted)] font-medium mt-4">
-              You agree that by accessing the Site, you have read, understood, and agree to be bound by all of these Terms and Conditions. If you do not agree with all of these Terms and Conditions, then you are expressly prohibited from using the Site and you must discontinue use immediately.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-base font-extrabold text-[var(--color-text)] mb-3">Property Rights</h2>
-            <p className="text-[13px] leading-relaxed text-[var(--color-muted)] font-medium">
-              Unless otherwise indicated, the Site is our proprietary property and all source code, databases, functionality, software, website designs, audio, video, text, photographs, and graphics on the Site (collectively, the "Content") and the trademarks, service marks, and logos contained therein (the "Marks") are owned or controlled by us or licensed to us.
-            </p>
-            <p className="text-[13px] leading-relaxed text-[var(--color-muted)] font-medium mt-4">
-              The Content and the Marks are provided on the Site "AS IS" for your information and personal use only. Except as expressly provided in these Terms and Conditions, no part of the Site and no Content or Marks may be copied, reproduced, aggregated, republished, uploaded, posted, publicly displayed, encoded, translated, transmitted, distributed, sold, licensed, or otherwise exploited for any commercial purpose whatsoever, without our express prior written permission.
-            </p>
-          </section>
-          
-          <section>
-            <h2 className="text-base font-extrabold text-[var(--color-text)] mb-3">User Representations</h2>
-            <p className="text-[13px] leading-relaxed text-[var(--color-muted)] font-medium">
-              By using the Site, you represent and warrant that: (1) all registration information you submit will be true, accurate, current, and complete; (2) you will maintain the accuracy of such information and promptly update such registration information as necessary; (3) you have the legal capacity and you agree to comply with these Terms and Conditions; (4) you are not a minor in the jurisdiction in which you reside.
-            </p>
-          </section>
-        </div>
-
       </div>
+
+      {/* Fixed Bottom Action Bar */}
+      <div className="fixed bottom-0 left-0 right-0 p-8 pb-10 bg-white/90 backdrop-blur-md z-50 flex gap-4 border-t border-slate-100">
+         <button 
+           onClick={handleDecline}
+           className="flex-1 h-[64px] rounded-[2rem] bg-slate-100 text-[#1a1c20] font-black uppercase tracking-[0.2em] text-xs hover:bg-slate-200 transition-all active:scale-95"
+         >
+           Decline
+         </button>
+         <button 
+           onClick={handleAccept}
+           className="flex-1 h-[64px] rounded-[2rem] bg-[#5c4df0] text-white font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-[#5c4df0]/30 hover:opacity-90 transition-all active:scale-95"
+         >
+           Accept
+         </button>
+      </div>
+
     </main>
-  )
+  );
 }

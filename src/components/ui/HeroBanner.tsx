@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/Card';
 
 type Article = {
@@ -18,11 +19,13 @@ export default function HeroBanner({ article }: { article: Article }) {
       <Link href={`/articles/${article.slug}`} className="group block relative w-full aspect-[4/3] sm:aspect-[16/9] bg-[var(--color-surface-2)] rounded-[2.5rem] tap-highlight z-0 outline-none">
         <Card hoverable className="absolute inset-0 rounded-[2.5rem] overflow-hidden isolate border-transparent shadow-[0_8px_32px_rgba(0,0,0,0.4)] group-hover:shadow-[0_12px_48px_rgba(0,0,0,0.6)]">
           {article.cover_image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={article.cover_image}
               alt={article.title}
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
+              fill
+              priority
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 700px, 1200px"
+              className="object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
             />
           ) : (
             <div className="absolute inset-0 bg-[var(--color-surface-2)]" />

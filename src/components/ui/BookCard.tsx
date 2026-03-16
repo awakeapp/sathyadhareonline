@@ -38,7 +38,7 @@ export default function BookCard({ book }: BookCardProps) {
       if (!user) return;
       
       // If the backend doesn't support book bookmarks yet, this will just fail silently or we can ignore
-      const { data } = await supabase.from('bookmarks').select('id').eq('user_id', user.id).eq('article_id', book.id).maybeSingle();
+      const { data } = await supabase.from('bookmarks').select('id').eq('user_id', user.id).eq('book_id', book.id).maybeSingle();
       if (data && mounted) setIsSaved(true);
     }
     checkSaved();
@@ -58,10 +58,10 @@ export default function BookCard({ book }: BookCardProps) {
     setIsSaved(nextSaved); 
     try {
       if (nextSaved) {
-        await supabase.from('bookmarks').insert({ user_id: user.id, article_id: book.id });
+        await supabase.from('bookmarks').insert({ user_id: user.id, book_id: book.id });
         toast.success('Book saved to your library.');
       } else {
-        await supabase.from('bookmarks').delete().match({ user_id: user.id, article_id: book.id });
+        await supabase.from('bookmarks').delete().match({ user_id: user.id, book_id: book.id });
         toast.success('Book removed from library.');
       }
     } catch {

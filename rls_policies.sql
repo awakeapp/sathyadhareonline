@@ -3,17 +3,39 @@
 -- ============================================================
 
 -- ============================================================
--- HELPER: inline role check (avoids repeated sub-selects)
+-- HELPER: Role Checks
 -- ============================================================
-CREATE OR REPLACE FUNCTION is_admin()
+
+-- Manager: can publish, manage users, delete content
+CREATE OR REPLACE FUNCTION is_manager()
 RETURNS boolean
 LANGUAGE sql STABLE SECURITY DEFINER AS $$
   SELECT EXISTS (
     SELECT 1 FROM profiles
     WHERE id = auth.uid()
-      AND role IN ('super_admin', 'editor', 'admin')
+      AND role IN ('super_admin', 'admin')
   );
 $$;
+
+-- Staff: can write, edit, and see backends
+CREATE OR REPLACE FUNCTION is_staff()
+RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM profiles
+    WHERE id = auth.uid()
+      AND role IN ('super_admin', 'admin', 'editor')
+  );
+$$;
+
+-- Alias is_admin to is_staff for backward compatibility where appropriate, 
+-- but we should transition to is_manager for destructive/public actions.
+CREATE OR REPLACE FUNCTION is_admin()
+RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER AS $$
+  SELECT is_staff();
+$$;
+
 
 -- ============================================================
 -- ENABLE RLS

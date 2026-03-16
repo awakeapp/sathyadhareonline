@@ -55,12 +55,13 @@ export function CommentBox({ articleId, isAuthenticated }: { articleId: string, 
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
-              handleSend();
+              if (isClientAuth) handleSend();
+              else handleClick();
             }
           }}
         />
         
-        {isClientAuth && (
+        {isClientAuth ? (
           <button 
             onClick={handleSend}
             disabled={!comment.trim() || isPending}
@@ -68,6 +69,16 @@ export function CommentBox({ articleId, isAuthenticated }: { articleId: string, 
             aria-label="Send Comment"
           >
             {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <SendHorizontal className="w-5 h-5" />}
+          </button>
+        ) : (
+          <button
+            onClick={() => {
+              const currentPath = window.location.pathname;
+              window.location.href = `/login?redirectTo=${encodeURIComponent(currentPath)}#comments`;
+            }}
+            className="shrink-0 h-11 px-6 rounded-xl bg-[var(--color-primary)] text-white font-bold text-xs uppercase tracking-widest flex items-center justify-center hover:opacity-90 active:scale-90 transition-all shadow-sm"
+          >
+            Sign In
           </button>
         )}
       </div>

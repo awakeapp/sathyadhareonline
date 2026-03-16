@@ -24,12 +24,15 @@ export default async function SavedPage() {
         id, title, slug, excerpt, cover_image,
         status, is_deleted, published_at,
         category:categories(name)
+      ),
+      book:books (
+        id, title, slug, cover_image, author_name
       )
     `)
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
-  type ArticleRow = {
+  interface UnifiedItem {
     id: string;
     title: string;
     slug: string;
@@ -39,11 +42,50 @@ export default async function SavedPage() {
     is_deleted: boolean;
     published_at: string;
     category?: { name: string } | { name: string }[] | null;
-  };
+    type: 'article' | 'book';
+    savedAt: string;
+    href: string;
+  }
 
   const saved = (bookmarks ?? [])
-    .map(b => ({ ...b.article as unknown as ArticleRow, savedAt: b.created_at }))
-    .filter(a => a && a.status === 'published' && !a.is_deleted);
+    .flatMap((b): UnifiedItem[] => {
+      const art = b.article as unknown as Record<string, unknown> | null;
+      if (art) {
+        return [{ 
+          id: art.id as string,
+          title: art.title as string,
+          slug: art.slug as string,
+          excerpt: art.excerpt as string | null,
+          cover_image: art.cover_image as string | null,
+          status: art.status as string,
+          is_deleted: !!art.is_deleted,
+          published_at: art.published_at as string,
+          category: art.category as UnifiedItem['category'],
+          savedAt: b.created_at as string,
+          type: 'article' as const,
+          href: `/articles/${art.slug}`
+        }];
+      }
+      const book = b.book as unknown as Record<string, unknown> | null;
+      if (book) {
+        return [{
+          id: book.id as string,
+          title: book.title as string,
+          slug: (book.slug || book.id) as string,
+          excerpt: book.author_name ? `By ${book.author_name}` : 'Library Book',
+          cover_image: book.cover_image as string | null,
+          status: 'published',
+          is_deleted: false,
+          published_at: b.created_at as string,
+          category: { name: 'LIBRARY' },
+          savedAt: b.created_at as string,
+          type: 'book' as const,
+          href: `/library/${book.slug || book.id}`
+        }];
+      }
+      return [];
+    })
+    .filter((a) => a.status === 'published' && !a.is_deleted);
 
-  return <SavedClientPage articles={saved as any} />;
+  return <SavedClientPage articles={saved} />;
 }

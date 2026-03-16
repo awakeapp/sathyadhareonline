@@ -45,6 +45,7 @@ export default async function NewArticlePage() {
     const author_name = formData.get('author_name') as string;
     const coverFile = formData.get('cover_image') as File | null;
     const action_type = formData.get('action_type') as string;
+    const is_standalone = formData.get('is_standalone') === 'on';
 
     const { data: { user: actionUser }, error: userError } = await supabaseAction.auth.getUser();
     if (userError || !actionUser) throw new Error('Unauthorized');
@@ -89,7 +90,9 @@ export default async function NewArticlePage() {
         author_id: actionUser.id,
         author_name,
         published_at,
+        is_standalone,
       })
+
       .select('id')
       .maybeSingle();
 

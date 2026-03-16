@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { LucideIcon, Search, Bell, Plus, Settings, Eye } from 'lucide-react';
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase/client';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { globalSearchAction, SearchResult, ADMIN_PAGES } from '@/app/admin/search-actions';
 import { useTransition, useEffect, useRef } from 'react';
@@ -88,6 +89,13 @@ export function PresenceHeader({
       if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
     };
   }, [searchQuery, serverResults.length]);
+
+  async function handleSignOut() {
+    setIsProfileOpen(false);
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.href = '/';
+  }
 
   const displayResults = React.useMemo(() => {
     return [...localResults, ...serverResults];
@@ -176,10 +184,13 @@ export function PresenceHeader({
                   Edit Profile
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-muted)]"><path d="M9 18l6-6-6-6"/></svg>
                 </Link>
-                <Link href="/logout" onClick={() => setIsProfileOpen(false)} className="flex items-center justify-between w-full px-4 py-3.5 text-[14px] font-bold text-rose-500 bg-rose-500/5 hover:bg-rose-500/10 transition-colors rounded-2xl border border-rose-500/10 mt-2">
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center justify-between w-full px-4 py-3.5 text-[14px] font-bold text-rose-500 bg-rose-500/5 hover:bg-rose-500/10 transition-colors rounded-2xl border border-rose-500/10 mt-2 text-left"
+                >
                   Logout
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-                </Link>
+                </button>
               </div>
 
             </div>

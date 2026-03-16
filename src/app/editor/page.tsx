@@ -35,7 +35,6 @@ export default async function EditorDashboard() {
 
     if (!profile || profile.role !== 'editor') redirect('/login');
 
-    // ── Stats with fetch settlement ─────────────────────────────────
     const results = await Promise.allSettled([
       supabase.from('articles').select('*', { count: 'exact', head: true }).eq('author_id', user.id).eq('is_deleted', false),
       supabase.from('articles').select('*', { count: 'exact', head: true }).eq('author_id', user.id).eq('status', 'published').eq('is_deleted', false),
@@ -53,6 +52,7 @@ export default async function EditorDashboard() {
       reviewCount: getVal(3)?.count ?? 0,
       recent: getVal(4)?.data || [],
     };
+
   } catch (err) {
     console.error('Editor dashboard fetch error:', err);
   }

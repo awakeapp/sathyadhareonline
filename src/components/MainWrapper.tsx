@@ -4,11 +4,11 @@ import { usePathname } from 'next/navigation'
 import ReaderModeBar from '@/components/ReaderModeBar'
 import ScrollToTop from '@/components/ui/ScrollToTop'
 
-const AUTH_PATHS = ['/login', '/signup']
+const AUTH_PATHS = ['/login', '/signup', '/forgot-password', '/update-password', '/terms', '/onboarding']
 
 export default function MainWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const isAuthPage   = AUTH_PATHS.includes(pathname)
+  const isAuthPage   = AUTH_PATHS.includes(pathname) || pathname === '/terms' // Inclusion safety
   const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/editor')
   const isArticlePage = pathname.startsWith('/articles/')
 

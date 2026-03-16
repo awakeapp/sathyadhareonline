@@ -10,20 +10,21 @@ export default async function LibraryIndexPage() {
   const supabase = await createClient();
   const { data: books } = await supabase
     .from('books')
-    .select('*')
+    .select(`
+      *,
+      chapters:chapters(count)
+    `)
+    .eq('status', 'published')
     .eq('is_active', true)
     .order('created_at', { ascending: false });
 
+
   const hasBooks = books && books.length > 0;
 
-  // Map db books to BookItem structure to handle missing columns elegantly
-  const mappedBooks: BookItem[] = (books || []).map((b) => {
-    let chCount = 1;
-    try {
-      const parsed = JSON.parse(b.drive_link);
-      if (Array.isArray(parsed)) chCount = parsed.length;
-    } catch {}
+  const mappedBooks: BookItem[] = (books || []).map((b: { id: string, title: string, slug: string, author_name: string, cover_image: string, chapters: { count: number }[] }) => {
+    const chCount = b.chapters?.[0]?.count || 0;
 
+    
     return {
       id: b.id,
       title: b.title,
@@ -33,6 +34,7 @@ export default async function LibraryIndexPage() {
       chapter_count: chCount,
     };
   });
+
 
   return (
     <div className="min-h-[100svh] px-4 pt-1 pb-32 max-w-lg mx-auto sm:max-w-2xl lg:max-w-5xl">

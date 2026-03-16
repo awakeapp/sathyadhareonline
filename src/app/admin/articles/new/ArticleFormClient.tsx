@@ -104,6 +104,24 @@ export default function ArticleFormClient({ categories, users, role, onSubmit, c
               </div>
             </div>
 
+            <div className={`flex items-center justify-between p-6 rounded-2xl border transition-all ${
+              true ? 'bg-indigo-50/20 border-indigo-100' : ''
+            }`}>
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-white dark:bg-zinc-900 border border-indigo-100 flex items-center justify-center text-indigo-500 shadow-sm">
+                  <CheckCircle className="w-5 h-5" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <h3 className="text-[14px] font-bold text-[var(--color-text)]">Standalone Article</h3>
+                  <p className="text-[11px] text-[var(--color-muted)] mt-0.5">Visible on homepage and article listings.</p>
+                </div>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" name="is_standalone" defaultChecked={true} className="sr-only peer" />
+                <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-indigo-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5" />
+              </label>
+            </div>
+
             <div className="space-y-2">
               <label className="text-[13px] font-semibold text-[var(--color-text)]">Article Summary (Optional)</label>
               <textarea 
@@ -113,6 +131,7 @@ export default function ArticleFormClient({ categories, users, role, onSubmit, c
                 className="w-full p-4 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[14px] leading-relaxed focus:ring-2 focus:ring-[var(--color-primary)] outline-none transition-all resize-none" 
               />
             </div>
+
          </div>
 
          <div className="flex items-center justify-end gap-3 mt-8 pb-10">

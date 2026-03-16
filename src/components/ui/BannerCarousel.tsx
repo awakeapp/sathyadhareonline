@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Banner {
   id: string;
@@ -35,12 +36,13 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
           className="absolute inset-0 transition-opacity duration-700 ease-in-out"
           style={{ opacity: i === current ? 1 : 0, zIndex: i === current ? 1 : 0 }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={b.image_url}
             alt=""
-            className="w-full h-full object-cover"
-            loading={i === 0 ? 'eager' : 'lazy'}
+            fill
+            sizes="100vw"
+            className="object-cover"
+            priority={i === 0}
           />
         </div>
       ))}

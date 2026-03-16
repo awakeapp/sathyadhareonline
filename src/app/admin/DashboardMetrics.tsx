@@ -25,6 +25,10 @@ export default async function DashboardMetrics() {
     supabase.from('guest_submissions').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('comments').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'published').gt('published_at', nowStr),
+    // Internal review counts
+    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'in_review').eq('is_deleted', false),
+    supabase.from('sequels').select('*', { count: 'exact', head: true }).eq('status', 'in_review').eq('is_deleted', false),
+    supabase.from('books').select('*', { count: 'exact', head: true }).eq('status', 'in_review').eq('is_deleted', false),
     // Activity queries
     supabase.from('articles').select('id, title, status, created_at, author:profiles!author_id(full_name)').eq('is_deleted', false).order('created_at', { ascending: false }).limit(3),
     supabase.from('guest_submissions').select('id, name, title, created_at').order('created_at', { ascending: false }).limit(3),
@@ -39,10 +43,11 @@ export default async function DashboardMetrics() {
     monthlyReaders: gC(1),
     activeAuthors: gC(2),
     communityEngagement: gC(3),
-    pendingSubmissions: gC(4),
+    pendingSubmissions: gC(4) + gC(7) + gC(8) + gC(9), // Guests + Staff Articles + Sequels + Books
     pendingComments: gC(5),
     scheduledArticles: gC(6),
   };
+
 
   const aArts: DashboardActivity[] = (gD(7)).map((a: any) => ({
     id: a.id, type: 'article', title: `New article: ${a.title}`, user: a.author?.full_name || 'Admin', ts: a.created_at, href: `/admin/articles/${a.id}/edit`

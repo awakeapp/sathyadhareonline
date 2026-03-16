@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { DM_Sans, Baloo_Tamma_2, Noto_Serif_Kannada, Noto_Sans_Kannada, Tiro_Kannada } from 'next/font/google'
 import './globals.css'
-import { createClient } from '@/lib/supabase/server'
 import InstallPrompt from '@/components/InstallPrompt'
 import TopHeader from '@/components/ui/TopHeader'
 import MainWrapper from '@/components/MainWrapper'
@@ -74,46 +73,12 @@ export const metadata: Metadata = {
   },
 }
 
+import { getCachedProfile } from '@/lib/auth/getCachedProfile'
+
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  let profile: {
-    role: string | null;
-    full_name: string | null;
-    avatar_url: string | null;
-  } | null = null
-  if (user) {
-    try {
-      const { data: p, error } = await supabase
-        .from('profiles')
-        .select('role, full_name')
-        .eq('id', user.id)
-        .maybeSingle()
-      
-      if (!error && p) {
-        profile = { ...p, avatar_url: null } as { role: string | null; full_name: string | null; avatar_url: string | null; }
-      } else if (user) {
-        const { data: newProfile } = await supabase
-          .from('profiles')
-          .insert({
-            id: user.id,
-            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Member',
-            role: 'reader'
-          })
-          .select('role, full_name')
-          .maybeSingle();
-        
-        if (newProfile) {
-          profile = { ...newProfile, avatar_url: null } as { role: string | null; full_name: string | null; avatar_url: string | null; }
-        }
-      }
-    } catch (e) {
-      console.error('Layout profile fetch error:', e)
-    }
-  }
+  const { user, profile } = await getCachedProfile()
 
   return (
     <html lang="en" className={`${dmSans.variable} ${balooTamma.variable} ${notoSerifKannada.variable} ${notoSansKannada.variable} ${tiroKannada.variable}`} suppressHydrationWarning>

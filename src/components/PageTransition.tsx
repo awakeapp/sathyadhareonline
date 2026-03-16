@@ -65,7 +65,6 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
         style={{
           backgroundColor: 'var(--color-background)',
           boxShadow: '-2px 0 10px rgba(0,0,0,0.08)',
-          zIndex: 10
         }}
       >
         <Suspense fallback={<PageContentFallback />}>

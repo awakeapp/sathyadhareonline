@@ -32,7 +32,11 @@ export async function bulkUpdateStatus(ids: string[], status: string) {
 
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   const role = profile?.role || '';
-  if (!['admin', 'super_admin'].includes(role)) return { error: 'Permission denied' };
+  
+  // Only managers can bulk update or publish
+  if (!['admin', 'super_admin'].includes(role)) {
+    return { error: 'Only admins can bulk update status' };
+  }
 
   const updatePayload: Record<string, unknown> = { status };
   if (status === 'published') updatePayload.published_at = new Date().toISOString();
@@ -46,6 +50,7 @@ export async function bulkUpdateStatus(ids: string[], status: string) {
 
   await logAuditEvent(user.id, 'BULK_ARTICLES_STATUS', { count: ids.length, ids, new_status: status });
   revalidatePath('/admin/articles');
+  revalidatePath('/editor/articles');
   revalidatePath('/');
   return { success: true };
 }
@@ -57,14 +62,19 @@ export async function setArticleStatusAction(id: string, status: string) {
 
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   const role = profile?.role || '';
+  
+  // STAFF check
   if (!['admin', 'super_admin', 'editor'].includes(role)) return { error: 'Permission denied' };
 
-  if (role === 'editor' && ['published', 'archived'].includes(status)) {
-    return { error: 'Editors cannot publish or archive articles' };
+  // PUBLISH check
+  if (status === 'published' && role === 'editor') {
+    return { error: 'Editors cannot publish. Please submit for review instead.' };
   }
 
   const updatePayload: Record<string, unknown> = { status };
-  if (status === 'published') updatePayload.published_at = new Date().toISOString();
+  if (status === 'published') {
+    updatePayload.published_at = new Date().toISOString();
+  }
 
   const { error } = await supabase
     .from('articles')
@@ -75,6 +85,7 @@ export async function setArticleStatusAction(id: string, status: string) {
 
   await logAuditEvent(user.id, 'ARTICLE_STATUS_CHANGED', { article_id: id, new_status: status });
   revalidatePath('/admin/articles');
+  revalidatePath('/editor/articles');
   revalidatePath('/');
   return { success: true };
 }

@@ -39,16 +39,22 @@ export default async function AdminUsersPage() {
     console.error('[AdminUsers] Auth fetch failed:', err);
   }
 
-  // Fetch all profiles
-  const { data: fetchUsers, error } = await supabase
+  // Fetch all profiles and permissions
+  const { data: fetchUsers, error: profileError } = await supabase
     .from('profiles')
     .select('id, full_name, email, role, status, created_at')
     .order('created_at', { ascending: false });
+
+  const { data: fetchPermissions } = await supabase
+    .from('user_content_permissions')
+    .select('*');
+
+  const permissionsMap = new Map(fetchPermissions?.map(p => [p.user_id, p]) || []);
     
   let profileRecords = fetchUsers || [];
 
-  if (error) {
-    console.warn('Could not fetch with status (migration likely missing), falling back:', error.message);
+  if (profileError) {
+    console.warn('Profile fetch error:', profileError.message);
     const fallback = await supabase
       .from('profiles')
       .select('id, full_name, email, role, created_at')
@@ -63,12 +69,13 @@ export default async function AdminUsersPage() {
     }));
   }
   
-  // Merge Auth users with Profiles to ensure no user is left behind
+  // Merge Auth users with Profiles and Permissions
   const profileMap = new Map<string, any>(profileRecords.map((p: any) => [p.id, p]));
   
-  const users: UserProfile[] = authUsers.length > 0 
+  const users: any[] = authUsers.length > 0 
     ? authUsers.map(au => {
         const uProfile = profileMap.get(au.id);
+        const uPerms = permissionsMap.get(au.id);
         return {
           id: au.id,
           email: au.email || uProfile?.email || null,
@@ -76,16 +83,21 @@ export default async function AdminUsersPage() {
           role: uProfile?.role || au.user_metadata?.role || 'reader',
           status: uProfile?.status || 'active',
           created_at: uProfile?.created_at || au.created_at,
+          permissions: uPerms || { can_articles: true, can_sequels: false, can_library: false }
         };
       })
-    : profileRecords.map((p: any) => ({
-        id: p.id,
-        email: p.email || null,
-        full_name: p.full_name || null,
-        role: p.role || 'reader',
-        status: p.status || 'active',
-        created_at: p.created_at
-      }));
+    : profileRecords.map((p: any) => {
+        const uPerms = permissionsMap.get(p.id);
+        return {
+          id: p.id,
+          email: p.email || null,
+          full_name: p.full_name || null,
+          role: p.role || 'reader',
+          status: p.status || 'active',
+          created_at: p.created_at,
+          permissions: uPerms || { can_articles: true, can_sequels: false, can_library: false }
+        };
+      });
   
   // Sort by created_at desc
   users.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());

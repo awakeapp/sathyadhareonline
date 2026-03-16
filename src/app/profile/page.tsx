@@ -60,10 +60,10 @@ export default async function ProfilePage() {
 
   return (
     <div className="max-w-xl mx-auto py-8 px-4 sm:px-6">
-      <header className="mb-8">
-        <h1 className="text-3xl font-black tracking-tight text-[var(--color-text)]">My Profile</h1>
-        <p className="text-sm text-[var(--color-muted)] font-medium mt-1">
-          Manage your personal information and see your reading stats.
+      <header className="mb-10">
+        <h1 className="text-3xl sm:text-4xl font-black text-[var(--color-text)] tracking-tight">Account Settings</h1>
+        <p className="text-sm font-medium text-[var(--color-muted)] mt-1">
+          Manage your identity and track your reading journey
         </p>
       </header>
 

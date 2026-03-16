@@ -30,7 +30,7 @@ interface ArticleReaderControlsProps {
   userId?: string | null;
 }
 
-export default function ArticleReaderControls({ }: ArticleReaderControlsProps) {
+export default function ArticleReaderControls({ articleId, userId }: ArticleReaderControlsProps) {
   const [mounted, setMounted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [scrollPos, setScrollPos] = useState<'top' | 'middle' | 'bottom'>('top');

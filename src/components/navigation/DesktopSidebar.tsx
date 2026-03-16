@@ -46,7 +46,8 @@ function DesktopSidebar({ role }: SidebarProps) {
   const pathname  = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
-  const isAuthPage   = pathname === '/login' || pathname === '/signup';
+  const authPaths = ['/login', '/signup', '/forgot-password', '/update-password', '/terms'];
+  const isAuthPage = authPaths.includes(pathname);
   const isPrivileged = role === 'super_admin' || role === 'admin' || role === 'editor';
   const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/editor');
 

@@ -1,16 +1,17 @@
+
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import SectionHeader from '@/components/ui/SectionHeader';
 import { Card, CardContent } from '@/components/ui/Card';
-import { Calendar, Clock, BookOpen, ChevronLeft, TrendingUp } from 'lucide-react';
+import { Clock, BookOpen, ArrowLeft, TrendingUp, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
 
 export default async function AnalyticsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) redirect('/login');
+  if (!user) {
+    redirect('/login');
+  }
 
   // Fetch view history for the last 30 days
   const thirtyDaysAgo = new Date();
@@ -36,7 +37,7 @@ export default async function AnalyticsPage() {
   const catStats: Record<string, number> = {};
   views?.forEach(v => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const catName = (v.article as any)?.category?.name || 'Uncategorized';
+    const catName = (v.article as any)?.category?.name || 'General';
     catStats[catName] = (catStats[catName] ?? 0) + 1;
   });
 
@@ -45,150 +46,137 @@ export default async function AnalyticsPage() {
     .slice(0, 5);
 
   return (
-    <div className="font-sans antialiased min-h-[100svh] px-4 py-8 pb-12 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl border-t border-[var(--color-border)]">
-      
-      <Button asChild variant="ghost" size="sm" className="mb-6 -ml-2 text-[var(--color-muted)] hover:text-[var(--color-text)]">
-        <Link href="/profile">
-          <ChevronLeft className="w-4 h-4 mr-1" />
-          Back to Profile
-        </Link>
-      </Button>
-
-      <div className="mb-10">
-        <h1 className="text-3xl font-black text-[var(--color-text)] tracking-tight">Reading Analytics</h1>
-        <p className="text-[var(--color-muted)] text-sm font-medium mt-1">Your reading journey over the last 30 days</p>
-      </div>
-
-      {/* Summary Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-        <Card className="bg-[var(--color-surface)] border-[var(--color-border)] shadow-none rounded-3xl">
-          <CardContent className="p-5">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-3">
-              <BookOpen size={20} />
+    <div className="min-h-screen bg-[var(--color-background)] pt-6 sm:pt-10 pb-24 px-4 sm:px-10">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <header className="mb-12">
+          <Link 
+            href="/profile" 
+            className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-colors mb-6"
+          >
+            <ArrowLeft size={14} /> Back to Profile
+          </Link>
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-3xl bg-blue-500 flex items-center justify-center text-white shadow-xl shadow-blue-500/20">
+              <BarChart3 size={28} strokeWidth={2.5} />
             </div>
-            <p className="text-2xl font-black text-[var(--color-text)]">{viewCount}</p>
-            <p className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest">Articles Read</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-[var(--color-surface)] border-[var(--color-border)] shadow-none rounded-3xl">
-          <CardContent className="p-5">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-3">
-              <Clock size={20} />
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-black text-[var(--color-text)] tracking-tight">Reading Insights</h1>
+              <p className="text-sm font-medium text-[var(--color-muted)] mt-1">Analysis of your engagement since last month</p>
             </div>
-            <p className="text-2xl font-black text-[var(--color-text)]">{Math.floor(viewCount * 4.5)}m</p>
-            <p className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest">Est. Read Time</p>
-          </CardContent>
-        </Card>
+          </div>
+        </header>
 
-        <Card className="bg-[var(--color-surface)] border-[var(--color-border)] shadow-none rounded-3xl col-span-2 md:col-span-1">
-          <CardContent className="p-5">
-            <div className="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-3">
-              <TrendingUp size={20} />
-            </div>
-            <p className="text-2xl font-black text-[var(--color-text)]">
-              {topCategories[0]?.[0] || 'N/A'}
-            </p>
-            <p className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest">Top Interest</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts / Lists */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        
-        {/* Weekly Activity */}
-        <section>
-          <SectionHeader title="Daily Activity" />
-          <Card className="mt-4 bg-[var(--color-surface)] border-[var(--color-border)] shadow-none rounded-[2rem] overflow-hidden">
-            <CardContent className="p-6">
-              {Object.keys(dailyStats).length === 0 ? (
-                <div className="py-10 text-center text-[var(--color-muted)] text-sm font-medium italic">
-                  No activity recorded yet.
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {Object.entries(dailyStats).slice(0, 7).map(([day, count]) => (
-                    <div key={day} className="flex items-center gap-4">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-muted)] w-16">{day}</span>
-                      <div className="flex-1 h-2.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-[var(--color-primary)] rounded-full transition-all duration-500" 
-                          style={{ width: `${Math.min(100, (count / 10) * 100)}%` }}
-                        />
-                      </div>
-                      <span className="text-xs font-bold text-[var(--color-text)]">{count}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
+        {/* Summary Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-12">
+          <Card className="bg-[var(--color-surface)] border-[var(--color-border)] shadow-sm rounded-[2rem]">
+            <CardContent className="p-8">
+              <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-6">
+                <BookOpen size={20} />
+              </div>
+              <p className="text-3xl font-black text-[var(--color-text)]">{viewCount}</p>
+              <p className="text-[10px] font-black text-[var(--color-muted)] uppercase tracking-widest mt-1">Articles Read</p>
             </CardContent>
           </Card>
-        </section>
 
-        {/* Interests */}
-        <section>
-          <SectionHeader title="Your Interests" />
-          <Card className="mt-4 bg-[var(--color-surface)] border-[var(--color-border)] shadow-none rounded-[2rem] overflow-hidden">
-            <CardContent className="p-6">
-              {topCategories.length === 0 ? (
-                <div className="py-10 text-center text-[var(--color-muted)] text-sm font-medium italic">
-                  Start reading to discover your interests!
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {topCategories.map(([name, count]) => (
-                    <div key={name} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-[var(--color-primary)]" />
-                        <span className="text-sm font-bold text-[var(--color-text)]">{name}</span>
-                      </div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-muted)] bg-[var(--color-surface-2)] px-2 py-0.5 rounded-full">
-                        {count} Articles
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
+          <Card className="bg-[var(--color-surface)] border-[var(--color-border)] shadow-sm rounded-[2rem]">
+            <CardContent className="p-8">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-6">
+                <Clock size={20} />
+              </div>
+              <p className="text-3xl font-black text-[var(--color-text)]">{Math.floor(viewCount * 4.5)}m</p>
+              <p className="text-[10px] font-black text-[var(--color-muted)] uppercase tracking-widest mt-1">Reading Time</p>
             </CardContent>
           </Card>
-        </section>
 
-      </div>
-
-      {/* Recent History */}
-      <section className="mt-12">
-        <SectionHeader title="Recent Reading History" />
-        <div className="mt-4 space-y-3">
-          {views?.slice(0, 10).map((view, i) => (
-            <Link 
-              key={i} 
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              href={`/articles/${(view.article as any)?.slug}`}
-              className="flex items-center justify-between p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors group"
-            >
-              <div className="min-w-0 pr-4">
-                <p className="text-sm font-bold text-[var(--color-text)] truncate group-hover:text-[var(--color-primary)] transition-colors">
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {(view.article as any)?.title}
-                </p>
-                <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-muted)] mt-1">
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {(view.article as any)?.category?.name}
-                </p>
+          <Card className="bg-[var(--color-surface)] border-[var(--color-border)] shadow-sm rounded-[2rem] col-span-2 md:col-span-1">
+            <CardContent className="p-8">
+              <div className="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-6">
+                <TrendingUp size={20} />
               </div>
-              <div className="text-[10px] font-black uppercase tracking-widest text-[var(--color-muted)] shrink-0 flex items-center gap-1.5">
-                <Calendar size={12} />
-                {new Date(view.viewed_at).toLocaleDateString()}
-              </div>
-            </Link>
-          ))}
-          {(!views || views.length === 0) && (
-            <p className="text-center py-10 text-[var(--color-muted)] text-sm font-medium italic">Your history is currently empty.</p>
-          )}
+              <p className="text-3xl font-black text-[var(--color-text)] truncate pr-2">
+                {topCategories[0]?.[0] || 'N/A'}
+              </p>
+              <p className="text-[10px] font-black text-[var(--color-muted)] uppercase tracking-widest mt-1">Top Interest</p>
+            </CardContent>
+          </Card>
         </div>
-      </section>
 
+        {/* Details Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          {/* Daily Activity */}
+          <section>
+            <div className="flex items-center gap-3 mb-6">
+              <h2 className="text-lg font-black uppercase tracking-widest opacity-80">Activity Pattern</h2>
+              <div className="h-px flex-1 bg-[var(--color-border)]" />
+            </div>
+            <Card className="bg-[var(--color-surface)] border-[var(--color-border)] shadow-none rounded-[2.5rem] overflow-hidden">
+              <CardContent className="p-8">
+                {Object.keys(dailyStats).length === 0 ? (
+                  <div className="py-20 text-center text-[var(--color-muted)] text-sm font-medium italic">
+                    No activity recorded in the last 30 days.
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {Object.entries(dailyStats).slice(0, 10).map(([day, count]) => (
+                      <div key={day} className="flex items-center gap-6">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-muted)] w-20">{day}</span>
+                        <div className="flex-1 h-3 bg-[var(--color-surface-2)] rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-blue-500 rounded-full transition-all duration-1000 ease-out shadow-lg shadow-blue-500/20" 
+                            style={{ width: `${Math.min(100, (count / 8) * 100)}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-black text-[var(--color-text)] tabular-nums">{count}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </section>
+
+          {/* Categories */}
+          <section>
+             <div className="flex items-center gap-3 mb-6">
+              <h2 className="text-lg font-black uppercase tracking-widest opacity-80">Interest Clusters</h2>
+              <div className="h-px flex-1 bg-[var(--color-border)]" />
+            </div>
+            <Card className="bg-[var(--color-surface)] border-[var(--color-border)] shadow-none rounded-[2.5rem] overflow-hidden">
+              <CardContent className="p-8">
+                {topCategories.length === 0 ? (
+                  <div className="py-20 text-center text-[var(--color-muted)] text-sm font-medium italic">
+                    Read more to see your interest map.
+                  </div>
+                ) : (
+                  <div className="space-y-8">
+                    {topCategories.map(([name, count]) => (
+                      <div key={name} className="flex items-center justify-between group">
+                        <div className="flex items-center gap-4">
+                          <div className="w-3 h-3 rounded-full bg-blue-500 shadow-lg shadow-blue-500/40" />
+                          <span className="text-sm font-black text-[var(--color-text)] group-hover:text-blue-500 transition-colors">{name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                           <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-muted)]">
+                            {count} {count === 1 ? 'Article' : 'Articles'}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </section>
+        </div>
+
+        {/* Footer info */}
+        <footer className="mt-16 pt-8 border-t border-[var(--color-border)] opacity-40">
+           <p className="text-[10px] font-black uppercase tracking-widest text-center">
+             Verified Data Stream • {new Date().getFullYear()} Sathyadhare Systems
+           </p>
+        </footer>
+      </div>
     </div>
   );
 }

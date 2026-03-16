@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { User, Mail, Lock, ShieldCheck, ArrowLeft, Eye, EyeOff, CheckCircle2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -51,7 +51,25 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
 
+  // Auto-check terms if accepted from Terms & Conditions page
+  useEffect(() => {
+    // Check both localStorage and URL params for maximum reliability
+    const isAcceptedInStorage = localStorage.getItem('terms-accepted') === 'true';
+    const isAcceptedInUrl = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('accepted') === 'true';
+
+    if (isAcceptedInStorage || isAcceptedInUrl) {
+      // Defer to next tick to avoid cascading render lint error
+      setTimeout(() => setAgreedToTerms(true), 0);
+      localStorage.removeItem('terms-accepted');
+    }
+  }, []);
+
   const strength = useMemo(() => getPasswordStrength(password), [password])
+
+  async function handleToggleTerms() {
+    import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
+    setAgreedToTerms(!agreedToTerms);
+  }
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
@@ -251,17 +269,26 @@ export default function SignupPage() {
             )}
           </div>
 
-          <div className="flex items-start gap-3 px-3 mt-6">
-            <input
-              type="checkbox"
-              id="terms"
-              checked={agreedToTerms}
-              onChange={(e) => setAgreedToTerms(e.target.checked)}
-              className="mt-1 w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-primary)] focus:ring-[var(--color-primary)] cursor-pointer"
-            />
-            <label htmlFor="terms" className="text-[12px] font-bold text-[var(--color-muted)] leading-tight cursor-pointer">
+          <div className="flex items-start gap-4 px-3 mt-8">
+            <button
+              type="button"
+              id="terms-toggle"
+              onClick={handleToggleTerms}
+              className="mt-0.5 shrink-0 transition-transform active:scale-90"
+            >
+              {agreedToTerms ? (
+                <div className="animate-in zoom-in-50 duration-300">
+                  <div className="w-7 h-7 rounded-lg bg-[var(--color-primary)] flex items-center justify-center text-white shadow-lg shadow-[var(--color-primary)]/20">
+                    <CheckCircle2 className="w-5 h-5" strokeWidth={3} />
+                  </div>
+                </div>
+              ) : (
+                <div className="w-7 h-7 rounded-lg border-2 border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)]/50 transition-all" />
+              )}
+            </button>
+            <label htmlFor="terms-toggle" className="text-[13px] font-bold text-[var(--color-muted)] leading-snug cursor-pointer select-none">
               I have read and agree to the{' '}
-              <Link href="/terms" className="text-[var(--color-primary)] hover:underline">
+              <Link href="/terms" className="text-[var(--color-primary)] hover:underline underline-offset-4">
                 User Agreement & Privacy Policy
               </Link>
             </label>

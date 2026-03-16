@@ -17,6 +17,7 @@ interface MobileBottomNavProps {
 
 /* ═══════════════════════════════════════════════════════════════════
    Floating Bottom Nav (Island / Pill style)
+   z-index is set to 50 to stay above content but below modals (z-999)
 ═══════════════════════════════════════════════════════════════════ */
 
   /* ──────────────────────────────────────────────────────────────
@@ -24,7 +25,7 @@ interface MobileBottomNavProps {
   ────────────────────────────────────────────────────────────── */
   const FloatingContainer = ({ children, visible = true }: { children: React.ReactNode, visible?: boolean }) => (
     <nav
-      className={`md:hidden fixed z-[90] bottom-0 left-0 right-0 bg-[var(--color-surface)]/95 backdrop-blur-2xl border-t border-[var(--color-border)] transition-transform duration-500 ${visible ? 'translate-y-0' : 'translate-y-full'}`}
+      className={`md:hidden fixed z-[50] bottom-0 left-0 right-0 bg-[var(--color-surface)]/95 backdrop-blur-2xl border-t border-[var(--color-border)] transition-transform duration-500 ${visible ? 'translate-y-0' : 'translate-y-full'}`}
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="flex items-center justify-between h-[60px] px-1 relative w-full max-w-[500px] mx-auto">
@@ -60,14 +61,13 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY, isArticlePage, visible]);
 
-  const isAuthPage  = pathname === '/login' || pathname === '/signup';
+  const authPaths = ['/login', '/signup', '/forgot-password', '/update-password', '/terms'];
+  const isAuthPage = authPaths.includes(pathname);
   const isPrivileged = role === 'super_admin' || role === 'admin' || role === 'editor';
   const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/editor');
   const isAdminView  = isAdminRoute && isPrivileged;
 
   if (isAuthPage) return null;
-
-
 
   /* ──────────────────────────────────────────────────────────────
      SUPER ADMIN — 4-tab + Create Floating Nav
@@ -81,7 +81,7 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
       <>
         {/* Create Quick Action Panel (Modal) */}
         {isCreateOpen && (
-          <div className="fixed inset-0 z-[100] flex flex-col justify-end bg-black/20 dark:bg-black/60 backdrop-blur-md"
+          <div className="fixed inset-0 z-[999] flex flex-col justify-end bg-black/20 dark:bg-black/60 backdrop-blur-md"
                onClick={() => setIsCreateOpen(false)}>
             <div className="bg-[var(--color-surface)] rounded-t-3xl w-full max-w-[430px] mx-auto overflow-hidden animate-slide-up shadow-2xl"
                  style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 24px)' }}
@@ -203,7 +203,6 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
           { label: 'Dash',      href: '/admin',          icon: LayoutDashboard, exact: true  },
           { label: 'Articles',  href: '/admin/articles', icon: FileText,        exact: false },
           { label: 'Comments',  href: '/admin/comments', icon: MessageSquare,   exact: false },
-          { label: 'Users',     href: '/admin/users',    icon: Users,           exact: false },
         ].map(tab => (
           <NavTabLink key={tab.href} href={tab.href} icon={tab.icon} label={tab.label}
             active={tab.exact ? pathname === tab.href : pathname.startsWith(tab.href)} />
@@ -211,6 +210,7 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
       </FloatingContainer>
     );
   }
+
 
   /* ──────────────────────────────────────────────────────────────
      EDITOR nav
@@ -238,11 +238,11 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
       {/* More quick-action sheet */}
       {isCreateOpen && (
         <div
-          className="fixed inset-0 z-[100] flex flex-col justify-end bg-black/30 backdrop-blur-sm"
+          className="fixed inset-0 z-[999] flex flex-col justify-end bg-black/30 backdrop-blur-sm"
           onClick={() => setIsCreateOpen(false)}
         >
           <div
-            className="bg-[var(--color-surface)] rounded-t-3xl w-full max-w-[430px] mx-auto overflow-hidden shadow-2xl"
+            className="bg-[var(--color-surface)] rounded-t-3xl w-full max-w-[430px] mx-auto overflow-hidden shadow-2xl animate-slide-up"
             style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 24px)' }}
             onClick={e => e.stopPropagation()}
           >

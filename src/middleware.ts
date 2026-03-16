@@ -3,9 +3,11 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 // Route access rules — middleware is the outermost gate
 const ROUTE_ROLES: Record<string, string[] | '*'> = {
-  '/admin':  ['super_admin', 'admin'],
-  '/editor': ['editor'],
-  '/profile': '*',
+  '/admin':      ['super_admin', 'admin'],
+  '/editor':     ['editor'],
+  '/profile':    '*',
+  '/saved':      '*',
+  '/highlights': '*',
 }
 
 export async function middleware(request: NextRequest) {
@@ -65,53 +67,68 @@ export async function middleware(request: NextRequest) {
     return redirectRes
   }
 
-  // 1. Check Protected Routes
+  // 1. Identify protective rule
   const protectedPrefix = Object.keys(ROUTE_ROLES).find(prefix => pathname.startsWith(prefix))
 
-  // NOTE: Reader mode is a UI concern only — middleware does not block access based on it.
-  // RBAC below already protects /admin and /editor by role.
-
   if (protectedPrefix) {
-    if (!user) return redirectWithCookies('/login')
-
-    // SELECT BOTH: If 'status' column is missing (e.g. migration not applied), 
-    // the query will return an error and role will be null, triggering a redirect to /login.
-    const { data: profile } = await supabase
-      .from('profiles').select('role, status').eq('id', user.id).maybeSingle()
-
-    const role = profile?.role as string | undefined
-    const status = profile?.status as string | undefined
-    const allowed = ROUTE_ROLES[protectedPrefix]
-
-    if (status === 'suspended' || status === 'banned') {
-      return redirectWithCookies('/login?error=account_suspended')
+    if (!user) {
+      // Not logged in -> redirect to login
+      return redirectWithCookies('/login')
     }
 
-    if (allowed !== '*') {
-      if (!role || !allowed.includes(role)) {
+    const allowed = ROUTE_ROLES[protectedPrefix]
+
+    // For public-but-auth routes ('*'), we just need the 'user' to exist.
+    // However, we still check for 'suspended' status if we can find it.
+    // To be robust, we only perform the database lookup once.
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role, status')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      const status = profile?.status
+      const role = profile?.role
+
+      if (status === 'suspended' || status === 'banned') {
+        return redirectWithCookies('/login?error=account_suspended')
+      }
+
+      // If specific roles are required, check them now.
+      if (allowed !== '*') {
+        if (!role || !allowed.includes(role)) {
+          // Logged in but wrong role -> redirect to login (or access denied)
+          return redirectWithCookies('/login')
+        }
+      }
+    } catch (e) {
+      // If DB fails, allow '*' routes through if user exists
+      if (allowed !== '*') {
         return redirectWithCookies('/login')
       }
     }
   }
 
-  // 1b. Status check already happens above for protected routes.
-  // We skip it for public routes to speed up response times.
-
   // 2. Auth Pages Routing (Skip login/signup if already logged in)
   if (user && (pathname === '/login' || pathname === '/signup')) {
-    const { data: profile } = await supabase
-      .from('profiles').select('role, status').eq('id', user.id).maybeSingle()
-    const role = profile?.role as string | undefined
+    try {
+      const { data: profile } = await supabase
+        .from('profiles').select('role, status').eq('id', user.id).maybeSingle()
+      
+      if (profile?.status === 'suspended' || profile?.status === 'banned') {
+        return supabaseResponse 
+      }
 
-    if (profile?.status === 'suspended' || profile?.status === 'banned') {
-       return supabaseResponse; // Keep them on login so they see error and can log out
-    }
-
-    if (role === 'super_admin' || role === 'admin') {
-      return redirectWithCookies('/admin')
-    } else if (role === 'editor') {
-      return redirectWithCookies('/editor')
-    } else {
+      const role = profile?.role
+      if (role === 'super_admin' || role === 'admin') {
+        return redirectWithCookies('/admin')
+      } else if (role === 'editor') {
+        return redirectWithCookies('/editor')
+      } else {
+        return redirectWithCookies('/')
+      }
+    } catch (e) {
       return redirectWithCookies('/')
     }
   }

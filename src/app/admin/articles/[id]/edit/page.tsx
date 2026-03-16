@@ -5,7 +5,7 @@ import Link from 'next/link';
 import sharp from 'sharp';
 import RichTextEditor from '@/components/RichTextEditorClient';
 import { CoverImageUpload } from './CoverImageUpload';
-import { Star, ChevronLeft, Bell, PenTool, Sparkles } from 'lucide-react';
+import { Star, ChevronLeft, Bell, PenTool, Sparkles, CheckCircle } from 'lucide-react';
 import { logAuditEvent } from '@/lib/audit';
 import { 
   PresenceWrapper, 
@@ -33,7 +33,7 @@ export default async function EditArticlePage({
   // Fetch article data
   const { data: article, error: articleError } = await supabase
     .from('articles')
-    .select('id, title, slug, excerpt, content, category_id, status, cover_image, is_featured, published_at, author_name')
+    .select('id, title, slug, excerpt, content, category_id, status, cover_image, is_featured, published_at, author_name, is_standalone')
     .eq('id', id)
     .single();
 
@@ -208,25 +208,46 @@ export default async function EditArticlePage({
         <PresenceCard className="p-0 overflow-hidden">
           <form id="admin-edit-form" action={updateArticleAction} encType="multipart/form-data" className="p-10 space-y-10">
             
-            {['admin', 'super_admin'].includes(role) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              {['admin', 'super_admin'].includes(role) && (
+                <div className={`flex items-center justify-between p-6 rounded-[2rem] border-2 transition-all ${
+                  article.is_featured ? 'border-zinc-900 dark:border-white bg-indigo-50/50' : 'border-indigo-50 bg-gray-50'
+                }`}>
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${article.is_featured ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white shadow-lg shadow-indigo-500/50' : 'bg-white text-zinc-400 shadow-sm'}`}>
+                      <Star className="w-6 h-6" strokeWidth={1.25} fill={article.is_featured ? "currentColor" : "none"} />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Featured Article</h3>
+                      <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mt-1">Prioritize this article on the homepage</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="is_featured" defaultChecked={article.is_featured ?? false} className="sr-only peer" />
+                    <div className="w-14 h-8 bg-gray-200 rounded-full peer peer-checked:bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:after:translate-x-6" />
+                  </label>
+                </div>
+              )}
+
               <div className={`flex items-center justify-between p-6 rounded-[2rem] border-2 transition-all ${
-                article.is_featured ? 'border-zinc-900 dark:border-white bg-indigo-50/50' : 'border-indigo-50 bg-gray-50'
+                article.is_standalone ? 'border-zinc-900 dark:border-white bg-indigo-50/50' : 'border-indigo-50 bg-gray-50'
               }`}>
                 <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${article.is_featured ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white shadow-lg shadow-indigo-500/50' : 'bg-white text-zinc-400 shadow-sm'}`}>
-                    <Star className="w-6 h-6" strokeWidth={1.25} fill={article.is_featured ? "currentColor" : "none"} />
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${article.is_standalone ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white shadow-lg shadow-indigo-500/50' : 'bg-white text-zinc-400 shadow-sm'}`}>
+                    <CheckCircle className="w-6 h-6" strokeWidth={1.25} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Featured Article</h3>
-                    <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mt-1">Prioritize this article on the homepage</p>
+                    <h3 className="text-sm font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Standalone</h3>
+                    <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mt-1">Visible on homepage listings</p>
                   </div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" name="is_featured" defaultChecked={article.is_featured ?? false} className="sr-only peer" />
+                  <input type="checkbox" name="is_standalone" defaultChecked={article.is_standalone ?? true} className="sr-only peer" />
                   <div className="w-14 h-8 bg-gray-200 rounded-full peer peer-checked:bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:after:translate-x-6" />
                 </label>
               </div>
-            )}
+            </div>
+
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                <div className="space-y-4">

@@ -12,39 +12,42 @@ export default async function ArticlesPage({
   const { cat, sort } = await searchParams;
   const supabase = await createClient();
 
-  // Fetch categories
-  const { data: categories } = await supabase
+  // Parallelize category list and article list fetching
+  const categoriesPromise = supabase
     .from('categories')
     .select('name, slug')
     .is('deleted_at', null)
     .order('name');
 
-  // Fetch articles, filter by category if selected
-  let query = supabase
+  // Prepare article query
+  let articlesQuery = supabase
     .from('articles')
-    .select('id, title, slug, excerpt, cover_image, published_at, category:categories(name), reactions:article_reactions(count)')
+    .select('id, title, slug, excerpt, cover_image, published_at, category:categories!inner(name, slug), reactions:article_reactions(count)')
     .eq('article_reactions.type', 'like')
-    .eq('status', 'published');
+    .eq('status', 'published')
+    .eq('is_standalone', true);
+
 
   if (cat) {
-    const { data: catRow } = await supabase
-      .from('categories')
-      .select('id')
-      .eq('slug', cat)
-      .single();
-    if (catRow) query = query.eq('category_id', catRow.id);
+    articlesQuery = articlesQuery.eq('category.slug', cat);
   }
 
-  // Sort
   const ascending = sort === 'oldest';
-  query = query.order('published_at', { ascending });
+  articlesQuery = articlesQuery.order('published_at', { ascending }).limit(60);
 
-  const { data: articles } = await query.limit(60);
+  // Execute both in parallel
+  const [catResponse, artResponse] = await Promise.all([
+    categoriesPromise,
+    articlesQuery
+  ]);
+
+  const categories = catResponse.data || [];
+  const articles = artResponse.data || [];
 
   return (
     <ArticlesClientPage
       categories={categories || []}
-      initialArticles={(articles || []) as unknown as any[]}
+      initialArticles={(articles || []) as unknown as React.ComponentProps<typeof ArticlesClientPage>['initialArticles']}
       activeCategory={cat || null}
       sortOrder={sort || 'newest'}
     />

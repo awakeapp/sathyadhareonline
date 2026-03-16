@@ -118,12 +118,12 @@ export default function ArticlesClientPage({ categories, initialArticles, active
       {/* ── Bottom Sheet Filter Modal ── */}
       {filterOpen && (
         <div 
-          className="fixed inset-0 z-[200] flex flex-col justify-end bg-black/40 backdrop-blur-sm transition-opacity" 
+          className="fixed inset-0 z-[1000] flex flex-col justify-end bg-black/40 backdrop-blur-sm transition-opacity" 
           onClick={() => setFilterOpen(false)}
         >
           <div
             className="bg-[var(--color-surface)] rounded-t-3xl w-full max-w-[430px] mx-auto overflow-hidden shadow-2xl animate-fade-up"
-            style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 24px)' }}
+            style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 32px)' }}
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-5 border-b border-[var(--color-border)]">

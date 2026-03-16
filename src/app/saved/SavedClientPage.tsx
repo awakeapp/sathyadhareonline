@@ -13,6 +13,8 @@ interface Article {
   published_at: string;
   category?: { name: string } | { name: string }[] | null;
   savedAt?: string;
+  type?: 'article' | 'book';
+  href?: string;
 }
 
 interface Props { articles: Article[]; }
@@ -139,10 +141,10 @@ export default function SavedClientPage({ articles }: Props) {
 
       {/* Calendar bottom-sheet */}
       {showDatePicker && (
-        <div className="fixed inset-0 z-[200] flex flex-col justify-end bg-black/40 backdrop-blur-sm" onClick={() => setShowDatePicker(false)}>
+        <div className="fixed inset-0 z-[1000] flex flex-col justify-end bg-black/40 backdrop-blur-sm" onClick={() => setShowDatePicker(false)}>
           <div
             className="bg-[var(--color-surface)] rounded-t-3xl w-full max-w-[430px] mx-auto overflow-hidden shadow-2xl"
-            style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 24px)' }}
+            style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 32px)' }}
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-5 border-b border-[var(--color-border)]">
@@ -231,7 +233,7 @@ export default function SavedClientPage({ articles }: Props) {
         ) : (
           <div className="flex flex-col gap-4">
             {filtered.map(article => (
-              <ArticleCard key={article.id} variant="list" article={article as unknown as React.ComponentProps<typeof ArticleCard>['article']} />
+              <ArticleCard key={article.id} variant="list" article={article as Article} href={article.href} />
             ))}
           </div>
         )}

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Plus, X, Trash2, Image as ImageIcon, BookOpen } from 'lucide-react';
+import Link from 'next/link';
+import { Plus, X, Trash2, Image as ImageIcon, BookOpen, Layers } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { createBook, updateBook, deleteBook, toggleBook } from './actions';
@@ -463,7 +464,14 @@ export default function LibraryClient({ initialBooks, availableArticles }: Props
                   <p className="text-[11px] font-semibold text-[var(--color-muted)] truncate mb-3">{b.author_name}</p>
                 )}
                 
-                <div className="mt-auto grid grid-cols-3 gap-1.5 pt-3 border-t border-[var(--color-border)]">
+                <div className="mt-auto grid grid-cols-2 gap-1.5 pt-3 border-t border-[var(--color-border)]">
+                  <Link
+                    href={`/admin/library/${b.id}/chapters`}
+                    className="col-span-2 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white transition-all mb-1.5"
+                  >
+                    <Layers size={14} />
+                    Manage Chapters
+                  </Link>
                   <button
                     onClick={() => handleToggle(b)}
                     className="flex flex-col items-center justify-center py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all hover:-translate-y-0.5"
@@ -487,6 +495,7 @@ export default function LibraryClient({ initialBooks, availableArticles }: Props
                     Del
                   </button>
                 </div>
+
               </div>
             </div>
             )

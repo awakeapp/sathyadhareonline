@@ -19,7 +19,8 @@ import {
   updateUserAction, 
   deleteUserAction, 
   inviteUserAction, 
-  toggleStatusAction 
+  toggleStatusAction,
+  setUserPermissionsAction
 } from './actions';
 
 interface UserProfile {
@@ -29,6 +30,11 @@ interface UserProfile {
   role: string;
   status: string;
   created_at: string;
+  permissions?: {
+    can_articles: boolean;
+    can_sequels: boolean;
+    can_library: boolean;
+  };
 }
 
 const ROLE_META: Record<string, { label: string; color: string }> = {
@@ -329,6 +335,27 @@ export default function UserManagementClient({ users: initialUsers, currentUserR
                     <p className="text-xs text-amber-500 font-bold mt-2">Cannot demote the last active Super Admin.</p>
                   )}
                 </div>
+                <div className="space-y-4 pt-4 border-t border-zinc-100 dark:border-white/5">
+                  <p className="text-xs font-black uppercase tracking-widest text-zinc-500">Resource Access (Allowed List)</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {[
+                      { id: 'can_articles', label: 'Independent Articles', key: 'can_articles' },
+                      { id: 'can_sequels', label: 'Sequels (Webzines)', key: 'can_sequels' },
+                      { id: 'can_library', label: 'Library (Books)', key: 'can_library' },
+                    ].map((p) => (
+                      <label key={p.id} className="flex items-center justify-between p-3 rounded-xl border border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/5 cursor-pointer hover:bg-zinc-50 transition-colors">
+                        <span className="text-sm font-bold">{p.label}</span>
+                        <input 
+                          type="checkbox" 
+                          name={p.id} 
+                          defaultChecked={(selectedUser.permissions as any)?.[p.key] ?? true}
+                          className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" 
+                        />
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
                 <ModalFooter>
                   <Button type="button" variant="outline" onClick={() => setShowEdit(false)}>Cancel</Button>
                   <Button type="submit" loading={isPending} disabled={selectedUser.role === 'super_admin' && initialUsers.filter(u => u.role === 'super_admin' && u.status === 'active').length <= 1}>Save Changes</Button>

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import NextImage from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import type { User } from '@supabase/supabase-js';
@@ -29,7 +30,8 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
   // ── Reader‑mode context ──────────────────────────────────────────────────
   const { disableReaderMode } = useReaderMode();
 
-  const isAuthPage       = pathname === '/login' || pathname === '/signup';
+  const authPaths = ['/login', '/signup', '/forgot-password', '/update-password', '/terms'];
+  const isAuthPage = authPaths.includes(pathname);
   const isAdminRoute     = pathname.startsWith('/admin') || pathname.startsWith('/editor');
   const isPrivilegedRole = role === 'super_admin' || role === 'admin' || role === 'editor';
   // Check if we are on ANY article reading page
@@ -138,6 +140,14 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
     window.location.href = dashboardHref
   }
 
+  async function handleSignOut() {
+    import('@/lib/haptics').then(({ haptics }) => haptics.impact('medium'));
+    setIsMenuOpen(false);
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.href = '/';
+  }
+
   // Don't render nav chrome on auth pages
   if (isAuthPage) return null;
   // CRIT-02: On admin/editor routes the PresenceHeader handles everything.
@@ -149,7 +159,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
     <>
       {!isAdminRoute && (
       <header
-        className={`fixed top-0 left-0 right-0 z-[100] glass-ribbon overflow-visible transition-all duration-500`}
+        className={`fixed top-0 left-0 right-0 z-[50] glass-ribbon overflow-visible transition-all duration-500`}
         style={{
           // Tighter vertical rhythm to prevent "Forehead" gap
           height: isSearchOpen ? 'calc(var(--safe-top) + 116px)' : 'calc(var(--safe-top) + 56px)',
@@ -165,11 +175,13 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
         >
           {/* Logo */}
           <Link href={isAdminRoute ? dashboardHref : '/'} className="flex items-center flex-shrink-0 transition-transform active:scale-95">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <NextImage
               src={currentTheme === 'dark' ? '/logo-dark.png' : '/logo-light.png'}
               alt="Sathyadhare Logo"
-              className="h-[32px] min-w-[120px] object-left object-contain"
+              width={120}
+              height={32}
+              className="h-[32px] w-auto object-left object-contain"
+              priority
               suppressHydrationWarning
             />
           </Link>
@@ -248,8 +260,13 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                   aria-label="Open profile"
                 >
                   {user?.user_metadata?.avatar_url || profile?.avatar_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user?.user_metadata?.avatar_url || profile?.avatar_url} alt="Profile" className="w-6 h-6 rounded-full object-cover" />
+                    <NextImage 
+                      src={user?.user_metadata?.avatar_url || profile?.avatar_url || ''} 
+                      alt="Profile" 
+                      width={24}
+                      height={24}
+                      className="w-6 h-6 rounded-full object-cover" 
+                    />
                   ) : (
                     <UserIcon size={22} strokeWidth={2.25} />
                   )}
@@ -270,7 +287,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
       {/* ── Drawer overlay (moved out of header to escape backdrop stacking context) ────────────────────────────────────────── */}
       {isMenuOpen && (
         <div
-            className="fixed inset-0 z-[100] flex justify-end bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[999] flex justify-end bg-black/60 backdrop-blur-sm"
             onClick={() => setIsMenuOpen(false)}
           >
             {/* Sidebar drawer */}
@@ -284,11 +301,12 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
             >
               {/* Drawer header */}
               <div className="flex items-center justify-between px-5 pt-4 pb-4 border-b border-[var(--color-border)]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <NextImage
                   src={theme === 'dark' ? '/logo-dark.png' : '/logo-light.png'}
                   alt="Sathyadhare"
-                  className="h-[24px] object-contain"
+                  width={100}
+                  height={24}
+                  className="h-[24px] w-auto object-contain"
                   suppressHydrationWarning
                 />
                 <button
@@ -352,11 +370,13 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                       Back to Site
                     </Link>
-                    <Link href="/logout" onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-3 py-3 text-sm font-semibold text-red-400 hover:text-red-300 transition-colors">
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center gap-3 py-3 text-sm font-semibold text-red-400 hover:text-red-300 transition-colors w-full text-left"
+                    >
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                       Logout
-                    </Link>
+                    </button>
                   </nav>
                 ) : (
                   /* ─── SETTINGS / ACCOUNT PANEL ───────────────── */
@@ -364,30 +384,68 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
 
                     {/* User identity card */}
                     {clientUser ? (
-                      <div className="flex items-center gap-3 p-4 rounded-2xl bg-[var(--color-surface-2)] mb-3">
-                        <div className="w-12 h-12 rounded-full bg-[#685de6]/10 border-2 border-[#685de6]/20 flex items-center justify-center shrink-0">
-                          <svg className="w-6 h-6 text-[#685de6]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                          </svg>
+                      <div className="flex items-center gap-4 p-4 rounded-[2rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] mb-4">
+                        <div className="relative">
+                          {profile?.avatar_url || user?.user_metadata?.avatar_url ? (
+                            <NextImage 
+                              src={profile?.avatar_url || user?.user_metadata?.avatar_url || ''} 
+                              alt="Avatar" 
+                              width={56}
+                              height={56}
+                              className="w-14 h-14 rounded-2xl object-cover border-2 border-[var(--color-primary)]/20" 
+                            />
+                          ) : (
+                            <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center">
+                              <UserIcon size={24} className="text-[var(--color-primary)]" />
+                            </div>
+                          )}
+                          <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-[var(--color-background)]" title="Online" />
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-[11px] font-black uppercase tracking-[0.15em] text-[var(--color-muted)] mb-0.5">Signed in as</p>
-                          <p className="text-sm font-bold text-[var(--color-text)] truncate">{clientUser.email}</p>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="text-sm font-black text-[var(--color-text)] truncate">{profile?.full_name || 'Reader'}</h4>
+                          <p className="text-[10px] font-bold text-[var(--color-muted)] truncate mb-1">{clientUser.email}</p>
+                          <div className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-[9px] font-black uppercase tracking-widest border border-[var(--color-primary)]/20">
+                            {role === 'super_admin' ? 'Super Admin' : role === 'admin' ? 'Admin' : role === 'editor' ? 'Editor' : 'Reader'}
+                          </div>
                         </div>
                       </div>
                     ) : (
-                      <div className="p-4 rounded-2xl bg-[#685de6]/5 border border-[#685de6]/15 mb-3 text-center">
-                        <p className="text-sm font-bold text-[var(--color-text)] mb-3">Sign in to unlock full access</p>
+                      <div className="p-6 rounded-[2rem] bg-[var(--color-surface-2)] border border-[var(--color-border)] mb-4 text-center">
+                        <div className="w-16 h-16 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center mx-auto mb-4">
+                           <UserIcon size={32} className="text-[var(--color-primary)]" />
+                        </div>
+                        <h4 className="text-base font-black text-[var(--color-text)] mb-1">Join Sathyadhare</h4>
+                        <p className="text-xs font-medium text-[var(--color-muted)] mb-4 leading-relaxed">Sign in to sync your bookmarks and track your reading journey.</p>
                         <div className="flex gap-2">
                           <Link href="/login" onClick={() => setIsMenuOpen(false)}
-                            className="flex-1 py-2.5 rounded-xl bg-[#685de6] text-white text-[12px] font-black uppercase tracking-widest text-center active:scale-95 transition-all">
+                            className="flex-1 py-3 rounded-xl bg-[var(--color-primary)] text-white text-[10px] font-black uppercase tracking-widest text-center shadow-lg shadow-[var(--color-primary)]/20 active:scale-95 transition-all">
                             Log In
                           </Link>
                           <Link href="/signup" onClick={() => setIsMenuOpen(false)}
-                            className="flex-1 py-2.5 rounded-xl border border-[#685de6]/30 text-[#685de6] text-[12px] font-black uppercase tracking-widest text-center active:scale-95 transition-all">
+                            className="flex-1 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-[10px] font-black uppercase tracking-widest text-center active:scale-95 transition-all">
                             Sign Up
                           </Link>
                         </div>
+                      </div>
+                    )}
+
+                    {/* Quick Access Grid (New) */}
+                    {clientUser && (
+                      <div className="grid grid-cols-2 gap-2 mb-4">
+                        <Link href="/saved" onClick={() => setIsMenuOpen(false)} 
+                          className="flex flex-col items-center justify-center p-3 rounded-2xl bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 hover:bg-[var(--color-surface)] transition-all group">
+                          <svg className="w-5 h-5 text-emerald-500 mb-1.5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                          </svg>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text)]">Saved</span>
+                        </Link>
+                        <Link href="/profile/history" onClick={() => setIsMenuOpen(false)} 
+                          className="flex flex-col items-center justify-center p-3 rounded-2xl bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 hover:bg-[var(--color-surface)] transition-all group">
+                          <svg className="w-5 h-5 text-indigo-500 mb-1.5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text)]">History</span>
+                        </Link>
                       </div>
                     )}
 
@@ -397,22 +455,35 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                       <Link href="/profile" onClick={() => setIsMenuOpen(false)}
                         className="flex items-center gap-3.5 px-4 py-3.5 hover:bg-[var(--color-surface)] transition-colors active:scale-[0.98]">
                         <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)]">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                          </svg>
+                          <UserIcon size={18} strokeWidth={2.25} />
                         </div>
-                        <span className="text-sm font-semibold text-[var(--color-text)] flex-1">My Profile</span>
-                        <svg className="w-4 h-4 text-[var(--color-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" /></svg>
+                        <span className="text-sm font-semibold text-[var(--color-text)] flex-1">Account Settings</span>
+                        <svg className="w-4 h-4 text-[var(--color-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" /></svg>
                       </Link>
 
-                      {/* Theme toggle */}
-                      <div className="flex items-center gap-3.5 px-4 py-3.5">
-                        <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)]">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707" /></svg>
+                      {/* Highlights */}
+                      <Link href="/highlights" onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center gap-3.5 px-4 py-3.5 hover:bg-[var(--color-surface)] transition-colors active:scale-[0.98]">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)] text-orange-500">
+                          <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.25}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
                         </div>
-                        <span className="text-sm font-semibold text-[var(--color-text)] flex-1">Appearance</span>
-                        <ThemeSwitcher />
-                      </div>
+                        <span className="text-sm font-semibold text-[var(--color-text)] flex-1">My Highlights</span>
+                        <svg className="w-4 h-4 text-[var(--color-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" /></svg>
+                      </Link>
+
+                      {/* Analytics */}
+                      <Link href="/profile/analytics" onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center gap-3.5 px-4 py-3.5 hover:bg-[var(--color-surface)] transition-colors active:scale-[0.98]">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)] text-blue-500">
+                          <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.25}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                          </svg>
+                        </div>
+                        <span className="text-sm font-semibold text-[var(--color-text)] flex-1">Reading Insights</span>
+                        <svg className="w-4 h-4 text-[var(--color-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" /></svg>
+                      </Link>
 
                       {/* About Us */}
                       <Link href="/about" onClick={() => setIsMenuOpen(false)}
@@ -437,13 +508,15 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
 
                       {/* Login / Logout */}
                       {clientUser ? (
-                        <Link href="/logout" onClick={() => setIsMenuOpen(false)}
-                          className="flex items-center gap-3.5 px-4 py-3.5 hover:bg-red-500/5 transition-colors active:scale-[0.98]">
+                        <button
+                          onClick={handleSignOut}
+                          className="flex items-center gap-3.5 px-4 py-3.5 hover:bg-red-500/5 transition-colors active:scale-[0.98] w-full text-left"
+                        >
                           <div className="w-9 h-9 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400">
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7" /></svg>
                           </div>
                           <span className="text-sm font-semibold text-red-400 flex-1">Sign Out</span>
-                        </Link>
+                        </button>
                       ) : (
                         <Link href="/login" onClick={() => setIsMenuOpen(false)}
                           className="flex items-center gap-3.5 px-4 py-3.5 hover:bg-[var(--color-surface)] transition-colors active:scale-[0.98]">
@@ -459,29 +532,8 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                 )}
               </div>
 
-              {/* Footer — readers only */}
-              {!isAdminRoute && (
-                <div className="bg-[var(--color-surface)] p-5 flex flex-col items-center text-center"
-                  style={{ paddingBottom: 'calc(1.25rem + env(safe-area-inset-bottom))' }}>
-                  <span className="bg-red-500 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded tracking-widest mb-2">
-                    Subscribe
-                  </span>
-                  <p className="text-xs text-[var(--color-text)] mb-4">Get email updates from Sathyadhare</p>
-                  <div className="flex gap-5">
-                    {[
-                      { name: 'fb', d: 'M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z' },
-                      { name: 'ig', d: 'M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zm1.5-4.87h.01M6.5 6.5h11a5 5 0 015 5v11a5 5 0 01-5 5h-11a5 5 0 01-5-5v-11a5 5 0 015-5z' },
-                      { name: 'yt', d: 'M22.54 6.42a2.78 2.78 0 00-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 00-1.94 2A29.01 29.01 0 001 11.75a29.13 29.13 0 00.46 5.33 2.78 2.78 0 001.94 2C5.12 19.5 12 19.5 12 19.5s6.88 0 8.6-.46a2.78 2.78 0 001.94-2 29.01 29.01 0 00.46-5.33 29.01 29.01 0 00-.46-5.33z' },
-                    ].map((s) => (
-                      <button key={s.name} className="text-[var(--color-text)] hover:text-[var(--color-primary)] transition-colors">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-                          <path d={s.d} />
-                        </svg>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+
+
             </div>
           </div>
         )}

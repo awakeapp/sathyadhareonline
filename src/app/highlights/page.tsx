@@ -1,11 +1,10 @@
-'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import { Highlighter, Trash2, Calendar, Layout, ChevronRight, Share2, ArrowLeft } from 'lucide-react';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
+import { Highlighter, Trash2, Calendar, Layout, ChevronRight, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { revalidatePath } from 'next/cache';
 
 interface Highlight {
   id: string;
@@ -17,99 +16,49 @@ interface Highlight {
   };
 }
 
-export default function HighlightsPage() {
-  const [highlights, setHighlights] = useState<Highlight[]>([]);
-  const [loading, setLoading] = useState(true);
-  const supabase = createClient();
+export const dynamic = 'force-dynamic';
 
-  const fetchHighlights = useCallback(async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setLoading(false);
-        return;
-      }
+export default async function HighlightsPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-      const { data, error } = await supabase
-        .from('article_highlights')
-        .select(`
-          id,
-          content,
-          created_at,
-          article:articles (
-            title,
-            slug
-          )
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      
-      interface DBHighlight {
-        id: string;
-        content: string;
-        created_at: string;
-        article: {
-          title: string;
-          slug: string;
-        }[];
-      }
-
-      setHighlights((data as unknown as DBHighlight[] || []).map((h) => ({
-        id: h.id,
-        content: h.content,
-        created_at: h.created_at,
-        article: Array.isArray(h.article) ? h.article[0] : h.article
-      })) as Highlight[]);
-    } catch (e) {
-      console.error(e);
-      toast.error('Failed to load highlights');
-    } finally {
-      setLoading(false);
-    }
-  }, [supabase]);
-
-  useEffect(() => {
-    fetchHighlights();
-  }, [fetchHighlights]);
-
-  async function deleteHighlight(id: string) {
-    try {
-      const { error } = await supabase
-        .from('article_highlights')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      setHighlights(highlights.filter(h => h.id !== id));
-      toast.success('Highlight deleted');
-    } catch (e) {
-      console.error(e);
-      toast.error('Failed to delete highlight');
-    }
+  if (!user) {
+    redirect('/login');
   }
 
-  const shareHighlight = (h: Highlight) => {
-    const text = `"${h.content}" — found on Sathyadhare: ${window.location.origin}/articles/${h.article.slug}`;
-    if (navigator.share) {
-      navigator.share({
-        title: 'Article Highlight',
-        text: text,
-      });
-    } else {
-      const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(text)}`;
-      window.open(whatsappUrl, '_blank');
-    }
-  };
+  const { data, error } = await supabase
+    .from('article_highlights')
+    .select(`
+      id,
+      content,
+      created_at,
+      article:articles (
+        title,
+        slug
+      )
+    `)
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
 
-  if (loading) {
-    return (
-      <div className="min-h-screen pt-24 pb-20 px-4 flex flex-col items-center justify-center">
-        <div className="w-12 h-12 rounded-full border-4 border-[var(--color-primary)]/20 border-t-[var(--color-primary)] animate-spin mb-4" />
-        <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-muted)]">Loading Your Vault</p>
-      </div>
-    );
+  if (error) {
+    console.error('Highlights fetch error:', error);
+  }
+
+  // Handle nested array result from Supabase query if needed
+  const highlights = (data || []).map((h: any) => ({
+    ...h,
+    article: Array.isArray(h.article) ? h.article[0] : h.article
+  })) as Highlight[];
+
+  // Server Action for deletion
+  async function deleteHighlightAction(formData: FormData) {
+    'use server';
+    const id = formData.get('highlightId') as string;
+    if (!id) return;
+
+    const supabase = await createClient();
+    await supabase.from('article_highlights').delete().eq('id', id);
+    revalidatePath('/highlights');
   }
 
   return (
@@ -166,12 +115,12 @@ export default function HighlightsPage() {
                   {/* Article Reference */}
                   <div className="flex items-center justify-between">
                     <Link 
-                      href={`/articles/${h.article.slug}`}
+                      href={`/articles/${h.article?.slug}`}
                       className="flex items-center gap-2 group/link"
                     >
                       <span className="w-2 h-2 rounded-full bg-[var(--color-primary)]" />
                       <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-muted)] group-hover/link:text-[var(--color-primary)] transition-colors">
-                        {h.article.title}
+                        {h.article?.title || 'Unknown Article'}
                       </span>
                       <ChevronRight size={12} className="text-[var(--color-muted)] opacity-0 group-hover/link:opacity-100 -translate-x-2 group-hover/link:translate-x-0 transition-all" />
                     </Link>
@@ -191,20 +140,16 @@ export default function HighlightsPage() {
 
                   {/* Actions */}
                   <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--color-border)]/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button 
-                      onClick={() => shareHighlight(h)}
-                      className="w-10 h-10 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)] transition-all"
-                      title="Share Highlight"
-                    >
-                      <Share2 size={16} />
-                    </button>
-                    <button 
-                      onClick={() => deleteHighlight(h.id)}
-                      className="w-10 h-10 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:bg-rose-500/10 hover:text-rose-500 transition-all"
-                      title="Delete Highlight"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    <form action={deleteHighlightAction}>
+                       <input type="hidden" name="highlightId" value={h.id} />
+                       <button 
+                        type="submit"
+                        className="w-10 h-10 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:bg-rose-500/10 hover:text-rose-500 transition-all"
+                        title="Delete Highlight"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </form>
                   </div>
                 </div>
               </div>
