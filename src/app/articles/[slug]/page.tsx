@@ -209,11 +209,9 @@ export default async function ArticlePage({ params }: Props) {
       )}
 
       <ArticleActionBar
-        articleId={article.id}
         slug={article.slug}
         title={article.title}
         content={article.content || ''}
-        existingSummary={article.ai_summary || null}
         isAuthenticated={!!user}
         initialSaved={initialSaved}
         onSave={saveArticle.bind(null, article.id)}

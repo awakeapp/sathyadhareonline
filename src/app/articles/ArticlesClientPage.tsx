@@ -103,38 +103,82 @@ export default function ArticlesClientPage({ categories, initialArticles, active
             {activeCategory ? ` in ${categories.find(c => c.slug === activeCategory)?.name || activeCategory}` : ''}
           </p>
 
-          {/* Sort dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setFilterOpen(p => !p)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[11px] font-bold text-[var(--color-text)] uppercase tracking-wider"
-            >
-              <SlidersHorizontal className="w-3 h-3" />
-              {sortOrder === 'oldest' ? 'Oldest First' : 'Newest First'}
-              <ChevronDown className={`w-3 h-3 transition-transform ${filterOpen ? 'rotate-180' : ''}`} />
-            </button>
-            {filterOpen && (
-              <div className="absolute right-0 top-full mt-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-xl overflow-hidden z-50 min-w-[150px]">
-                {[
-                  { label: 'Newest First', value: 'newest' },
-                  { label: 'Oldest First', value: 'oldest' },
-                ].map(opt => (
-                  <button
-                    key={opt.value}
-                    onClick={() => { setFilterOpen(false); navigate(activeCategory, opt.value); }}
-                    className={`w-full px-4 py-3 text-left text-sm font-semibold flex items-center gap-2 hover:bg-[var(--color-surface-2)] transition-colors ${
-                      sortOrder === opt.value ? 'text-[#685de6]' : 'text-[var(--color-text)]'
-                    }`}
-                  >
-                    {sortOrder === opt.value && <Check className="w-4 h-4" />}
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          {/* Filter Trigger */}
+          <button
+            onClick={() => setFilterOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[11px] font-bold text-[var(--color-text)] uppercase tracking-wider active:scale-95 transition-all"
+          >
+            <SlidersHorizontal className="w-3 h-3" />
+            Sort & Filter
+            {sortOrder !== 'newest' && <span className="w-1.5 h-1.5 rounded-full bg-[#685de6] ml-0.5" />}
+          </button>
         </div>
       </div>
+
+      {/* ── Bottom Sheet Filter Modal ── */}
+      {filterOpen && (
+        <div 
+          className="fixed inset-0 z-[200] flex flex-col justify-end bg-black/40 backdrop-blur-sm transition-opacity" 
+          onClick={() => setFilterOpen(false)}
+        >
+          <div
+            className="bg-[var(--color-surface)] rounded-t-3xl w-full max-w-[430px] mx-auto overflow-hidden shadow-2xl animate-fade-up"
+            style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 24px)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-5 border-b border-[var(--color-border)]">
+              <h3 className="text-[17px] font-black text-[var(--color-text)] flex items-center gap-2">
+                <SlidersHorizontal className="w-5 h-5 text-[#685de6]" />
+                Sort Options
+              </h3>
+              <button onClick={() => setFilterOpen(false)} className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-border)] transition-colors">
+                <X size={18} strokeWidth={2.5} />
+              </button>
+            </div>
+            
+            <div className="p-5 flex flex-col gap-3">
+              <p className="text-[11px] font-black uppercase tracking-widest text-[var(--color-muted)] mb-1">Date Published</p>
+              
+              <button
+                onClick={() => { navigate(activeCategory, 'newest'); setFilterOpen(false); }}
+                className={`flex items-center justify-between w-full px-4 py-3.5 rounded-2xl border transition-all ${
+                  sortOrder === 'newest' 
+                    ? 'bg-[#685de6]/10 border-[#685de6]/30 text-[#685de6] shadow-sm' 
+                    : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-2)]'
+                }`}
+              >
+                <span className="font-bold text-sm">Newest First</span>
+                <div className={`w-5 h-5 rounded-full border-[1.5px] flex items-center justify-center transition-colors ${sortOrder === 'newest' ? 'border-[#685de6]' : 'border-[var(--color-muted)]/40'}`}>
+                  {sortOrder === 'newest' && <div className="w-2.5 h-2.5 rounded-full bg-[#685de6]" />}
+                </div>
+              </button>
+
+              <button
+                onClick={() => { navigate(activeCategory, 'oldest'); setFilterOpen(false); }}
+                className={`flex items-center justify-between w-full px-4 py-3.5 rounded-2xl border transition-all ${
+                  sortOrder === 'oldest' 
+                    ? 'bg-[#685de6]/10 border-[#685de6]/30 text-[#685de6] shadow-sm' 
+                    : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-2)]'
+                }`}
+              >
+                <span className="font-bold text-sm">Oldest First</span>
+                <div className={`w-5 h-5 rounded-full border-[1.5px] flex items-center justify-center transition-colors ${sortOrder === 'oldest' ? 'border-[#685de6]' : 'border-[var(--color-muted)]/40'}`}>
+                  {sortOrder === 'oldest' && <div className="w-2.5 h-2.5 rounded-full bg-[#685de6]" />}
+                </div>
+              </button>
+            </div>
+            
+            <div className="px-5 pt-2 pb-2">
+               <button 
+                 onClick={() => setFilterOpen(false)}
+                 className="w-full py-4 rounded-2xl bg-[#685de6] text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-[#685de6]/25 active:scale-95 transition-all"
+               >
+                 Show {initialArticles.length} Results
+               </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Article list ── */}
       <div className="px-4 pt-4 max-w-lg mx-auto sm:max-w-2xl lg:max-w-3xl">
