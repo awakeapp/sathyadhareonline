@@ -137,11 +137,7 @@ export default function TableOfContents({ contentHtml }: TableOfContentsProps) {
                   <List size={28} className="text-[var(--color-primary)]" strokeWidth={2.5} />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-2xl font-black tracking-tight text-[var(--color-text)]">Table of Contents</h3>
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-0.5 bg-[var(--color-primary)] rounded-full" />
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-primary)] opacity-70">Navigation summary</p>
-                  </div>
+                  <h3 className="text-2xl font-black tracking-tight text-[var(--color-text)]">Index</h3>
                 </div>
               </div>
               <button 
@@ -174,17 +170,19 @@ function TocList({ items, activeId, scrollTo, isDrawer = false }: {
       {/* Background vertical continuous track */}
       <div className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-[var(--color-border)] rounded-full" />
       
-      {items.map((item) => {
+      {items.map((item, index) => {
         const isActive = activeId === item.id;
         // Indentation logic
         const pl = item.level <= 1 ? 'pl-6' : item.level === 2 ? 'pl-10' : 'pl-14';
+        const isLast = index === items.length - 1;
 
         return (
           <button
             key={item.id}
             onClick={() => scrollTo(item.id)}
             className={`group relative flex items-center justify-between text-left transition-all duration-300 w-full rounded-r-2xl
-              ${isDrawer ? 'py-3.5 pr-4' : 'py-2.5 pr-2'} ${pl}
+              ${isDrawer ? 'py-4 pr-4' : 'py-3 pr-2'} ${pl}
+              ${!isLast ? 'border-b border-[var(--color-border)]/50' : ''}
               ${isActive
                 ? 'text-[var(--color-primary)] font-black bg-[var(--color-primary)]/5'
                 : 'text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)] font-bold opacity-80 hover:opacity-100'
