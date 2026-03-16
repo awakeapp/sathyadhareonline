@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Mail, Lock, ShieldCheck, ArrowLeft, Eye, EyeOff, Wand2, CheckCircle2 } from 'lucide-react'
+import { Mail, Lock, ShieldCheck, ArrowLeft, Eye, EyeOff, Link as LinkIcon, CheckCircle2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { getRedirectPath } from '@/lib/auth/redirectAfterLogin'
 
@@ -128,7 +128,7 @@ export default function LoginPage() {
             onClick={() => { setTab('magic'); setError(null); setMagicSent(false); }}
             className={`flex-1 flex items-center justify-center gap-2 h-10 rounded-full text-[12px] font-black uppercase tracking-widest transition-all ${tab === 'magic' ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/30' : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'}`}
           >
-            <Wand2 className="w-3.5 h-3.5" /> Magic Link
+            <LinkIcon className="w-3.5 h-3.5" /> Email Link
           </button>
         </div>
 
@@ -203,7 +203,7 @@ export default function LoginPage() {
         {tab === 'magic' && !magicSent && (
           <form onSubmit={handleMagicLink} className="space-y-4">
             <p className="text-[13px] font-bold text-[var(--color-muted)] text-center px-4 leading-relaxed">
-              Enter your email and we&apos;ll send you a one-click sign-in link. No password needed.
+              Enter your email and we&apos;ll send you a secure link to sign in instantly. No password required.
             </p>
             <div className="relative mt-4">
               <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--color-muted)]">
@@ -227,7 +227,7 @@ export default function LoginPage() {
               >
                 {loading
                   ? <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  : <><Wand2 className="w-5 h-5" /> Send Magic Link</>}
+                  : <><LinkIcon className="w-5 h-5" /> Send Sign-In Link</>}
               </button>
             </div>
           </form>
