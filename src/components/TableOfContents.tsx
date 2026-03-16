@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { List, X } from 'lucide-react';
+import { List, X, ChevronRight } from 'lucide-react';
 
 interface TocItem {
   id: string;
@@ -192,7 +192,10 @@ function TocList({ items, activeId, scrollTo, isDrawer = false }: {
             {isActive && (
               <div className="absolute left-[6px] top-0 bottom-0 w-[4px] bg-[var(--color-primary)] rounded-full shadow-[0_0_8px_rgba(var(--color-primary-rgb),0.5)] z-10" />
             )}
-            <span className={`${isDrawer ? 'text-[15px]' : 'text-[13px]'} leading-snug tracking-tight line-clamp-2`}>{item.text}</span>
+            <div className="flex items-start gap-2 overflow-hidden w-full">
+              <ChevronRight size={14} strokeWidth={3} className={`shrink-0 mt-1 transition-transform ${isActive ? 'text-[var(--color-primary)] translate-x-1' : 'text-[var(--color-muted)] opacity-40 group-hover:translate-x-1 group-hover:opacity-70 group-hover:text-[var(--color-text)]'}`} />
+              <span className={`${isDrawer ? 'text-[15px]' : 'text-[13px]'} leading-snug tracking-tight line-clamp-2 pt-[1px]`}>{item.text}</span>
+            </div>
             <div className="flex items-center gap-2 pl-2 shrink-0">
                {isActive && <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] animate-pulse" />}
             </div>
