@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
+import sharp from 'sharp';
 import RichTextEditor from '@/components/RichTextEditorClient';
 import { CoverImageUpload } from './CoverImageUpload';
 import { Star, ChevronLeft, Bell, PenTool, Sparkles } from 'lucide-react';
@@ -93,11 +94,16 @@ export default async function EditArticlePage({
     }
 
     if (coverFile && coverFile.size > 0) {
-      const ext = coverFile.name.split('.').pop();
-      const path = `articles/${id}/cover.${ext}`;
+      const buffer = Buffer.from(await coverFile.arrayBuffer());
+      const compressedBuffer = await sharp(buffer)
+        .resize(1600, 1600, { fit: 'inside', withoutEnlargement: true })
+        .webp({ quality: 80 })
+        .toBuffer();
+
+      const path = `articles/${id}/cover.webp`;
       const { error: uploadError } = await supabaseAction.storage
         .from('article-images')
-        .upload(path, coverFile, { upsert: true, contentType: coverFile.type });
+        .upload(path, compressedBuffer, { upsert: true, contentType: 'image/webp' });
 
       if (!uploadError) {
         const { data: urlData } = supabaseAction.storage.from('article-images').getPublicUrl(path);

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import RichTextEditor from '@/components/RichTextEditorClient';
 import { ChevronLeft, Bell, Sparkles, Send, FileText } from 'lucide-react';
+import sharp from 'sharp';
 import { 
   PresenceWrapper, 
   PresenceHeader,
@@ -62,11 +63,16 @@ export default async function EditorNewArticlePage() {
     }
 
     if (coverFile && coverFile.size > 0) {
-      const ext  = coverFile.name.split('.').pop();
-      const path = `articles/${inserted.id}/cover.${ext}`;
+      const buffer = Buffer.from(await coverFile.arrayBuffer());
+      const compressedBuffer = await sharp(buffer)
+        .resize(1600, 1600, { fit: 'inside', withoutEnlargement: true })
+        .webp({ quality: 80 })
+        .toBuffer();
+
+      const path = `articles/${inserted.id}/cover.webp`;
       const { error: uploadError } = await sb.storage
         .from('article-images')
-        .upload(path, coverFile, { upsert: true, contentType: coverFile.type });
+        .upload(path, compressedBuffer, { upsert: true, contentType: 'image/webp' });
 
       if (!uploadError) {
         const { data: urlData } = sb.storage.from('article-images').getPublicUrl(path);

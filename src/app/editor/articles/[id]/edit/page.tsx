@@ -4,6 +4,7 @@ import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import RichTextEditor from '@/components/RichTextEditorClient';
 import { CoverImageUpload } from '@/app/admin/articles/[id]/edit/CoverImageUpload';
+import sharp from 'sharp';
 import { Send, ChevronLeft, Bell, PenTool, Sparkles, AlertTriangle, Check } from 'lucide-react';
 import { 
   PresenceWrapper, 
@@ -71,11 +72,16 @@ export default async function EditorEditArticlePage({
     };
 
     if (coverFile && coverFile.size > 0) {
-      const ext  = coverFile.name.split('.').pop();
-      const path = `articles/${id}/cover.${ext}`;
+      const buffer = Buffer.from(await coverFile.arrayBuffer());
+      const compressedBuffer = await sharp(buffer)
+        .resize(1600, 1600, { fit: 'inside', withoutEnlargement: true })
+        .webp({ quality: 80 })
+        .toBuffer();
+
+      const path = `articles/${id}/cover.webp`;
       const { error: uploadError } = await sb.storage
         .from('article-images')
-        .upload(path, coverFile, { upsert: true, contentType: coverFile.type });
+        .upload(path, compressedBuffer, { upsert: true, contentType: 'image/webp' });
       if (!uploadError) {
         const { data: urlData } = sb.storage.from('article-images').getPublicUrl(path);
         updateData.cover_image = `${urlData.publicUrl}?t=${new Date().getTime()}`;
