@@ -220,18 +220,13 @@ export default function ArticleReaderControls({ }: ArticleReaderControlsProps) {
 
               {/* 2. Font Size - Modern Slider Style */}
               <div className="space-y-4">
-                <div className="flex items-center justify-between section-label !mb-0 text-[11px]">
-                  <span>Text size</span>
-                  <div className="px-2 py-0.5 bg-[var(--color-primary)]/10 rounded-md">
-                    <span className="text-[var(--color-primary)] font-black">{settings.fontSize}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 bg-[var(--color-surface-2)] p-2 rounded-3xl border border-[var(--color-border)]/60 shadow-inner">
+                <span className="section-label !mb-0 text-[11px]">Text size</span>
+                <div className="flex items-center gap-4 bg-[var(--color-surface-2)] p-2 rounded-[2.5rem] border border-[var(--color-border)]/60 shadow-inner">
                   <button 
                     onClick={decFont} 
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[var(--color-surface)] text-[var(--color-text)] hover:text-white hover:bg-rose-500 transition-all shadow-md active:scale-90 border border-[var(--color-border)]/40"
+                    className="w-12 h-12 rounded-full flex items-center justify-center bg-[var(--color-surface)] text-[var(--color-text)] hover:scale-105 active:scale-95 transition-all shadow-md border border-[var(--color-border)]/40 shrink-0"
                   >
-                    <Minus size={22} strokeWidth={3} />
+                    <Minus size={20} strokeWidth={2.5} />
                   </button>
                   <div className="flex-1 h-2 bg-[var(--color-border)]/30 rounded-full relative overflow-hidden mx-1">
                     <div 
@@ -241,9 +236,9 @@ export default function ArticleReaderControls({ }: ArticleReaderControlsProps) {
                   </div>
                   <button 
                     onClick={incFont} 
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[var(--color-surface)] text-[var(--color-text)] hover:text-white hover:bg-emerald-500 transition-all shadow-md active:scale-90 border border-[var(--color-border)]/40"
+                    className="w-12 h-12 rounded-full flex items-center justify-center bg-[var(--color-surface)] text-[var(--color-text)] hover:scale-105 active:scale-95 transition-all shadow-md border border-[var(--color-border)]/40 shrink-0"
                   >
-                    <Plus size={22} strokeWidth={3} />
+                    <Plus size={20} strokeWidth={2.5} />
                   </button>
                 </div>
               </div>
@@ -253,9 +248,9 @@ export default function ArticleReaderControls({ }: ArticleReaderControlsProps) {
                 <span className="section-label !mb-0 text-[11px]">Readability Spacing</span>
                 <div className="flex bg-[var(--color-surface-2)] p-1.5 rounded-[1.5rem] border border-[var(--color-border)]/60 shadow-inner">
                   {[
-                    { val: 1.4, label: 'Dense' },
-                    { val: 1.85, label: 'Standard' },
-                    { val: 2.3, label: 'Airy' }
+                    { val: 1.4, label: 'Compact' },
+                    { val: 1.85, label: 'Normal' },
+                    { val: 2.3, label: 'Relaxed' }
                   ].map(lh => (
                     <button 
                       key={lh.val} 
@@ -263,7 +258,7 @@ export default function ArticleReaderControls({ }: ArticleReaderControlsProps) {
                         haptics.impact('light');
                         updateSettings({ lineHeight: lh.val });
                       }} 
-                      className={`flex-1 h-12 rounded-[1rem] text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${settings.lineHeight === lh.val ? 'bg-[var(--color-surface)] text-[var(--color-primary)] shadow-md border border-[var(--color-border)]/30' : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'}`}
+                      className={`flex-1 h-12 rounded-[1.25rem] text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${settings.lineHeight === lh.val ? 'bg-[var(--color-surface)] text-[var(--color-primary)] shadow-[0_4px_12px_rgba(0,0,0,0.06)] border border-[var(--color-border)]/30 scale-100 relative z-10' : 'text-[var(--color-muted)] hover:text-[var(--color-text)] scale-95'}`}
                     >
                       {lh.label}
                     </button>
