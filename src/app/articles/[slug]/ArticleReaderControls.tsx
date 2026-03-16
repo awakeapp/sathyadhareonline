@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { 
   ChevronUp, ChevronDown, Minimize2,
-  Settings, Plus, Minus, 
+  Plus, Minus, 
   List, RotateCcw, Highlighter, Share2, 
   Clipboard, X, Loader2
 } from 'lucide-react';
@@ -303,7 +303,7 @@ export default function ArticleReaderControls({ }: ArticleReaderControlsProps) {
             </div>
           </button>
         )}
-        <button onClick={() => setShowSettings(!showSettings)} className={`${controlBtnBase} pointer-events-auto ${showSettings ? 'scale-110 border-[var(--color-primary)] ring-8 ring-[var(--color-primary)]/10 text-[var(--color-primary)]' : ''}`}><Settings className={showSettings ? 'rotate-90' : ''}/></button>
+        <button onClick={() => setShowSettings(!showSettings)} className={`${controlBtnBase} pointer-events-auto ${showSettings ? 'scale-110 border-[var(--color-primary)] ring-8 ring-[var(--color-primary)]/10 text-[var(--color-primary)]' : ''}`}><span className={`font-serif text-[22px] font-bold leading-none select-none tracking-tight transition-transform duration-300 ${showSettings ? 'rotate-90' : ''}`}>Aa</span></button>
         {hasTOC && (
           <button onClick={() => window.dispatchEvent(new CustomEvent('toggle-toc'))} className={`${controlBtnBase} !rounded-full relative group pointer-events-auto`}>
             <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 48 48"><circle cx="24" cy="24" r="21.5" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray="135" strokeDashoffset={135 - (135 * progress) / 100} className="text-[var(--color-primary)] transition-all"/></svg>
