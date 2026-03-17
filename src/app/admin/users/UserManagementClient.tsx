@@ -57,10 +57,10 @@ const ROLE_META: Record<string, { label: string; color: string }> = {
   reader:      { label: 'Reader',      color: 'bg-gray-500/10 text-zinc-500 border-gray-400/40' },
 };
 
-const STATUS_META: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  active:    { label: 'Active',    color: 'text-emerald-500', icon: CheckCircle },
-  suspended: { label: 'Suspended', color: 'text-amber-500',   icon: Slash },
-  banned:    { label: 'Banned',    color: 'text-red-500',     icon: Ban },
+const STATUS_META: Record<string, { label: string; color: string; icon: React.ElementType; bg: string }> = {
+  active:    { label: 'Active',    color: 'text-emerald-500', bg: 'bg-emerald-500/10', icon: CheckCircle },
+  suspended: { label: 'Suspended', color: 'text-amber-500',   bg: 'bg-amber-500/10',   icon: Slash },
+  banned:    { label: 'Banned',    color: 'text-red-500',     bg: 'bg-red-500/10',     icon: Ban },
 };
 
 export default function UserManagementClient({
@@ -169,68 +169,73 @@ export default function UserManagementClient({
   return (
     <div className="flex flex-col gap-4">
 
-      {/* ── Action Bar ── */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-2">
-        <PresenceButton onClick={() => setShowInvite(true)} className="flex-1 h-12 bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/20">
-          <Mail className="w-4 h-4 mr-2" strokeWidth={1.5} /> Invite by Email
-        </PresenceButton>
-        <PresenceButton onClick={() => setShowCreate(true)} className="flex-1 h-12 bg-[var(--color-surface)] !text-[var(--color-text)] border border-[var(--color-border)] shadow-none hover:bg-[var(--color-surface-2)]">
-          <UserPlus className="w-4 h-4 mr-2" strokeWidth={1.5} /> Manual Create
-        </PresenceButton>
+      {/* ── Action Bar (Minimal) ── */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-1">
+        <button 
+          onClick={() => setShowInvite(true)} 
+          className="flex-1 h-[52px] rounded-2xl bg-[var(--color-primary)] text-white font-bold text-[14px] flex items-center justify-center gap-2 hover:opacity-90 transition-all active:scale-95 shadow-xl shadow-[var(--color-primary)]/10"
+        >
+          <Mail className="w-4 h-4" strokeWidth={2.5} /> Invite Member
+        </button>
+        <button 
+          onClick={() => setShowCreate(true)} 
+          className="flex-1 h-[52px] rounded-2xl bg-[var(--color-surface)] text-[var(--color-text)] font-bold text-[14px] flex items-center justify-center gap-2 border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-all active:scale-95"
+        >
+          <UserPlus className="w-4 h-4" strokeWidth={2.5} /> Create Account
+        </button>
       </div>
 
-      {/* ── Tabs (People Categorization) ── */}
-      <div className="flex bg-[var(--color-surface)] p-1.5 rounded-[1.25rem] border border-[var(--color-border)] mb-2">
+      {/* ── Tabs (Premium Minimal Style) ── */}
+      <div className="flex bg-[var(--color-surface-2)]/50 p-1 rounded-[1.25rem] border border-[var(--color-border)] relative mb-1">
         {(['users', 'readers', 'subscribed'] as const).map((mode) => (
           <button
             key={mode}
             onClick={() => setViewMode(mode)}
-            className={`flex-1 py-1.5 text-[12px] font-black uppercase tracking-widest rounded-xl transition-all ${
+            className={`relative flex-1 py-2.5 text-[11px] font-extrabold uppercase tracking-[0.1em] rounded-xl transition-all duration-300 ${
               viewMode === mode 
-                ? 'bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/10' 
+                ? 'text-[var(--color-primary)]' 
                 : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'
             }`}
           >
-            {mode === 'users' ? 'Users (Staff)' : mode === 'readers' ? 'Readers' : 'Subscribed'}
+            {mode === 'users' ? 'Staff' : mode === 'readers' ? 'Readers' : 'Subscribers'}
+            {viewMode === mode && (
+              <div className="absolute inset-0 bg-[var(--color-surface)] rounded-xl shadow-sm -z-10 animate-in fade-in zoom-in-95 duration-300 border border-[var(--color-border)]" />
+            )}
           </button>
         ))}
       </div>
 
-      {/* ── Filters ── */}
-      <PresenceCard className="p-3">
-        <div className="flex flex-col md:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" strokeWidth={1.5} />
-            <input
-              placeholder="Search by name or email..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="w-full h-10 pl-9 pr-4 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[14px] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all"
-            />
-          </div>
-          <div className="flex gap-2 shrink-0">
-            <select value={roleFilter} onChange={e => setRoleFilter(e.target.value)}
-              className="h-10 px-3 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[13px] font-medium focus:ring-1 focus:ring-[var(--color-primary)] outline-none">
-              <option value="all">All Roles</option>
-              <option value="super_admin">Super Admin</option>
-              <option value="admin">Admin</option>
-              <option value="editor">Editor</option>
-              <option value="reader">Reader</option>
-            </select>
-            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-              className="h-10 px-3 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[13px] font-medium focus:ring-1 focus:ring-[var(--color-primary)] outline-none">
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="suspended">Suspended</option>
-              <option value="banned">Banned</option>
-            </select>
-            <button onClick={exportCSV} title="Export CSV"
-              className="h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-colors">
-              <Download className="w-4 h-4" strokeWidth={1.5} />
-            </button>
-          </div>
+      {/* ── Filters (Clean & Minimal) ── */}
+      <div className="flex flex-col md:flex-row gap-2">
+        <div className="relative flex-1">
+          <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" strokeWidth={2} />
+          <input
+            placeholder="Search by name or email..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="w-full h-12 pl-11 pr-4 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[14px] font-medium focus:border-[var(--color-primary)]/50 focus:ring-4 focus:ring-[var(--color-primary)]/5 outline-none transition-all placeholder:text-[var(--color-muted)]/50"
+          />
         </div>
-      </PresenceCard>
+        <div className="flex gap-2">
+          <div className="relative group">
+            <select value={roleFilter} onChange={e => setRoleFilter(e.target.value)}
+              className="h-12 pl-4 pr-10 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[13px] font-bold text-[var(--color-text)] focus:border-[var(--color-primary)]/50 outline-none appearance-none cursor-pointer hover:bg-[var(--color-surface-2)] transition-all">
+              <option value="all">Every Role</option>
+              <option value="super_admin">Super Admins</option>
+              <option value="admin">Admins</option>
+              <option value="editor">Editors</option>
+              <option value="reader">Readers</option>
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-muted)]">
+              <User size={14} />
+            </div>
+          </div>
+          <button onClick={exportCSV} title="Export Directory"
+            className="h-12 w-12 flex items-center justify-center rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)]/30 transition-all active:scale-95 shadow-sm">
+            <Download className="w-5 h-5" strokeWidth={1.5} />
+          </button>
+        </div>
+      </div>
 
       {/* ── Stats bar ── */}
       <div className="flex gap-3 flex-wrap text-[12px] font-bold text-[var(--color-muted)]/80 px-1">
@@ -273,103 +278,102 @@ export default function UserManagementClient({
             const lastSeen = formatRelative(u.last_sign_in_at);
 
             return (
-              <PresenceCard
-                key={u.id}
-                noPadding
-                className={`group transition-all duration-200 active:scale-[0.99] ${u.status !== 'active' ? 'opacity-60' : ''}`}
-              >
-                <div className="p-4 flex items-center gap-4">
-
-                  {/* Avatar — Fix #4: show real photo when available */}
+              <div key={u.id} className="group relative">
+                <div className="flex items-center p-4 bg-[var(--color-surface)] rounded-[1.5rem] border border-[var(--color-border)] hover:border-[var(--color-primary)]/30 hover:shadow-xl hover:shadow-black/5 transition-all duration-300 gap-4">
+                  
+                  {/* Avatar — Minimal & Professional */}
                   <div className="relative shrink-0">
-                    <div className={`w-12 h-12 rounded-2xl overflow-hidden flex items-center justify-center text-white font-black text-lg shadow-md
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-[20px] font-extrabold text-white overflow-hidden shadow-sm transition-transform group-hover:scale-[1.02] duration-500
                       ${u.status === 'active'
                         ? 'bg-gradient-to-br from-[var(--color-primary)] to-indigo-400'
-                        : 'bg-[var(--color-muted)]/40'}`}>
+                        : 'bg-zinc-400'}`}>
                       {u.avatar_url ? (
                         <Image
                           src={u.avatar_url}
-                          alt={u.full_name || 'User'}
-                          width={48}
-                          height={48}
-                          className="w-full h-full object-cover"
+                          alt={u.full_name || 'U'}
+                          width={56}
+                          height={56}
+                          className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500"
                           unoptimized
                         />
                       ) : (
                         initials
                       )}
                     </div>
-                    <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[var(--color-surface)] flex items-center justify-center ${statusMeta.color} bg-[var(--color-surface)]`}>
-                      <statusMeta.icon className="w-2.5 h-2.5" />
+                    {/* Status Dot */}
+                    <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-4 border-[var(--color-surface)] flex items-center justify-center ${statusMeta.color} ${statusMeta.bg} shadow-sm`}>
+                      <statusMeta.icon className={`w-2 h-2 ${u.status === 'active' ? 'animate-pulse' : ''}`} strokeWidth={3} />
                     </div>
                   </div>
 
-                  {/* Info — Stacked for clarity (ARRANGE UI PROPERLY) */}
-                  <div className="flex-1 min-w-0 py-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="font-extrabold text-[17px] text-[var(--color-text)] truncate leading-none">
-                        {u.full_name || 'Unnamed User'}
+                  {/* Info — Modern Stack (ARRANGE UI PROPERLY) */}
+                  <div className="flex-1 min-w-0 pr-2">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <p className="font-black text-[17px] text-[var(--color-text)] tracking-tight leading-none group-hover:text-[var(--color-primary)] transition-colors">
+                        {u.full_name || 'Member'}
                       </p>
-                      <span className={`shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border border-current opacity-80 ${roleMeta.color}`}>
+                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-[0.1em] border border-current opacity-80 ${roleMeta.color}`}>
                         {roleMeta.label}
                       </span>
                     </div>
                     
-                    <p className="text-[13px] text-[var(--color-muted)] truncate mb-3">{u.email}</p>
+                    <p className="text-[13px] text-[var(--color-muted)] font-medium mb-2.5 opacity-60 group-hover:opacity-100 transition-opacity truncate max-w-[200px] sm:max-w-none">
+                      {u.email}
+                    </p>
                     
-                    <div className="flex items-center gap-x-4 gap-y-1.5 flex-wrap">
-                      <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--color-muted)]/60 bg-[var(--color-surface-2)] px-2 py-0.5 rounded-lg border border-[var(--color-border)]">
-                        <Users className="w-3 h-3" />
-                        Joined {formatDate(u.created_at)}
+                    <div className="flex items-center gap-x-3.5 gap-y-2 flex-wrap">
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--color-muted)]/40 tracking-wider uppercase">
+                        <Users className="w-3 h-3" strokeWidth={2.5} />
+                        Member since {formatDate(u.created_at)}
                       </div>
                       
                       {lastSeen && (
-                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--color-primary)]/80 bg-[var(--color-primary)]/5 px-2 py-0.5 rounded-lg border border-[var(--color-primary)]/10">
-                          <Clock className="w-3 h-3" />
-                          Seen {lastSeen}
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--color-primary)] tracking-wider uppercase bg-[var(--color-primary)]/5 px-1.5 py-0.5 rounded-md">
+                          <Clock className="w-3 h-3" strokeWidth={2.5} />
+                          Active {lastSeen}
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Actions — Updated to 3-dot menu to reduce crowdedness */}
+                  {/* Actions — Updated 3-dot menu */}
                   <div className="shrink-0 ml-auto">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button className="w-10 h-10 rounded-2xl bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-all active:scale-90">
-                          <MoreVertical className="w-5 h-5" strokeWidth={1.5} />
+                        <button className="w-10 h-10 rounded-2xl bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 transition-all active:scale-95 border border-transparent shadow-sm">
+                          <MoreVertical className="w-5 h-5" strokeWidth={2} />
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuPortal>
-                        <DropdownMenuContent align="end" className="w-[200px]">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowEdit(true); }}>
-                            <Edit2 className="w-4 h-4 mr-2" />
-                            Edit Role & Perms
+                        <DropdownMenuContent align="end" className="w-[200px] p-2 bg-[var(--color-surface)] border-[var(--color-border)] shadow-2xl rounded-3xl animate-in fade-in zoom-in-95">
+                          <DropdownMenuLabel className="px-3 py-2 text-[10px] opacity-40 uppercase tracking-widest font-black">Management</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowEdit(true); }} className="rounded-2xl py-2.5 px-4 font-bold text-[13px]">
+                            <Edit2 className="w-4 h-4 mr-3 opacity-60" />
+                            Edit Permissions
                           </DropdownMenuItem>
                           
-                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowReset(true); }} className="text-emerald-600 focus:text-emerald-600">
-                            <KeyRound className="w-4 h-4 mr-2" />
-                            Password Reset
+                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowReset(true); }} className="rounded-2xl py-2.5 px-4 font-bold text-[13px] text-emerald-600 focus:bg-emerald-50 focus:text-emerald-700">
+                            <KeyRound className="w-4 h-4 mr-3" />
+                            Reset Password
                           </DropdownMenuItem>
 
-                          <DropdownMenuSeparator />
+                          <DropdownMenuSeparator className="my-2 opacity-50" />
 
-                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowStatus(true); }} className="text-amber-600 focus:text-amber-600">
-                            <Slash className="w-4 h-4 mr-2" />
-                            {u.status === 'active' ? 'Suspend Account' : 'Reactivate'}
+                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowStatus(true); }} className="rounded-2xl py-2.5 px-4 font-bold text-[13px] text-amber-600 focus:bg-amber-50 focus:text-amber-700">
+                            <Slash className="w-4 h-4 mr-3" />
+                            {u.status === 'active' ? 'Suspend Access' : 'Reactivate'}
                           </DropdownMenuItem>
 
-                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowDelete(true); }} className="text-rose-600 focus:text-rose-600">
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Delete Account
+                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowDelete(true); }} className="rounded-2xl py-2.5 px-4 font-black text-[13px] text-rose-600 focus:bg-rose-50 focus:text-rose-700">
+                            <Trash2 className="w-4 h-4 mr-3" />
+                            Remove Account
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenuPortal>
                     </DropdownMenu>
                   </div>
                 </div>
-              </PresenceCard>
+              </div>
             );
           })
         )}

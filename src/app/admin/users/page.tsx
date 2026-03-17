@@ -87,15 +87,15 @@ export default async function AdminUsersPage() {
     const uProfile = profileMap.get(au.id);
     const uPerms = permissionsMap.get(au.id);
 
-    // Realistic role detection: Auth metadata often contains the "real" intended role.
-    // We prioritize that if it exists, otherwise use profile table, otherwise reader.
-    const metadataRole = au.user_metadata?.role as string | undefined;
-    const profileRole = uProfile?.role as string | undefined;
+    // Realistic role detection (FIX): 
+    // We check both sources. If the metadata role is a valid staff role, use it.
+    // Otherwise, if the profile table role is a valid staff role, use that.
+    const metaRole = (au.user_metadata?.role as string || '').toLowerCase().trim().replace(/\s+/g, '_');
+    const tableRole = (uProfile?.role as string || '').toLowerCase().trim().replace(/\s+/g, '_');
     
-    let rawRole = metadataRole || profileRole || 'reader';
-    
-    // Normalize: "Super Admin" -> "super_admin", "Editor" -> "editor"
-    const role = rawRole.toLowerCase().trim().replace(/\s+/g, '_');
+    // Logic: If either is a staff role (not reader/empty), use it. Table role usually more reliable for existing users.
+    const isValidStaff = (r: string) => ['admin', 'super_admin', 'editor'].includes(r);
+    const role = isValidStaff(tableRole) ? tableRole : (isValidStaff(metaRole) ? metaRole : 'reader');
 
     return {
       id: au.id,

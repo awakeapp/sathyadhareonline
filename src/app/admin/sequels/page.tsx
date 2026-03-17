@@ -18,7 +18,7 @@ export default async function SequelsPage() {
     .eq('id', user.id)
     .maybeSingle();
 
-  if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
+  if (!profile || !['admin', 'super_admin', 'editor'].includes(profile.role)) {
     redirect('/admin?denied=1');
   }
 
