@@ -5,6 +5,7 @@ import Link from 'next/link';
 import NextImage from 'next/image';
 import { Bell, Eye, ChevronRight, LogOut, User as UserIcon } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { useTheme } from 'next-themes';
 
 /* ── Types ──────────────────────────────────────────────────────────── */
 export interface DashboardUser {
@@ -53,14 +54,19 @@ function roleBadge(role: string): string {
    — Fixed top bar shared across super_admin / admin / editor dashboards
 ══════════════════════════════════════════════════════════════════════ */
 export default function DashboardHeader({ user, profile, role, roleLabel }: Props) {
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   /* Close panels on route change (Next.js soft-nav) */
   useEffect(() => {
+    setMounted(true);
     setIsNotifOpen(false);
     setIsProfileOpen(false);
   }, []);
+
+  const currentTheme = mounted ? (theme === 'system' ? resolvedTheme : theme) : 'dark';
 
   /* Sign out */
   async function handleSignOut() {
@@ -149,16 +155,16 @@ export default function DashboardHeader({ user, profile, role, roleLabel }: Prop
             {/* User identity card */}
             <div className="flex items-center gap-4 px-5 py-5 border-b border-[var(--color-border)]">
               {/* Avatar */}
-              {avatarUrl ? (
+              {avatarUrl && avatarUrl.length > 5 ? (
                 <NextImage
                   src={avatarUrl}
                   alt={displayName}
-                  width={48}
-                  height={48}
-                  className="w-12 h-12 rounded-xl object-cover border border-[var(--color-border)]"
+                  width={56}
+                  height={56}
+                  className="w-14 h-14 rounded-2xl object-cover border border-[var(--color-border)] shadow-sm"
                 />
               ) : (
-                <div className="w-12 h-12 rounded-xl bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)] font-bold text-lg shrink-0">
+                <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)] font-bold text-xl shrink-0">
                   {initials}
                 </div>
               )}
@@ -222,12 +228,17 @@ export default function DashboardHeader({ user, profile, role, roleLabel }: Prop
       >
         <div className="flex items-center justify-between h-[60px] px-4 w-full max-w-[1400px] mx-auto">
           {/* ── Left: Logo + role label ─────────────────────────────── */}
-          <div className="flex flex-col justify-center gap-0.5 min-w-0">
+          <div className="flex flex-col justify-center gap-1 min-w-0">
             <Link href="/" className="flex items-center shrink-0 transition-transform active:scale-95" tabIndex={-1} aria-label="Sathyadhare home">
-              {/* Text wordmark — reliable across all themes */}
-              <span className="text-[18px] font-black tracking-tight text-[var(--color-text)] leading-none">
-                ಸತ್ಯಧಾರೆ
-              </span>
+              <NextImage
+                src={currentTheme === 'dark' ? '/logo-dark.png' : '/logo-light.png'}
+                alt="Sathyadhare"
+                width={120}
+                height={32}
+                className="h-[32px] w-auto object-left object-contain"
+                priority
+                suppressHydrationWarning
+              />
             </Link>
             <span className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest leading-none">
               {roleLabel}
@@ -275,16 +286,16 @@ export default function DashboardHeader({ user, profile, role, roleLabel }: Prop
               aria-label="Open profile"
               title={displayName}
             >
-              {avatarUrl ? (
+              {avatarUrl && avatarUrl.length > 5 ? (
                 <NextImage
                   src={avatarUrl}
                   alt={displayName}
-                  width={32}
-                  height={32}
-                  className="w-8 h-8 rounded-full object-cover border border-[var(--color-border)]"
+                  width={34}
+                  height={34}
+                  className="w-8.5 h-8.5 rounded-full object-cover border border-[var(--color-border)]"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)] text-[13px] font-bold">
+                <div className="w-8.5 h-8.5 rounded-full bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)] text-[13px] font-bold">
                   {initials}
                 </div>
               )}
