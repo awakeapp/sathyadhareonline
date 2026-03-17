@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { LucideIcon } from 'lucide-react';
+import * as Icons from 'lucide-react';
 
 /* ── Types ──────────────────────────────────────────────────────────── */
 
@@ -10,7 +10,7 @@ import type { LucideIcon } from 'lucide-react';
 export interface DashNavItem {
   href: string;
   label: string;
-  icon: LucideIcon;
+  icon: string;
 
   /**
    * If true, use exact path match for active detection.
@@ -101,7 +101,10 @@ function DashNavTab({
   active: boolean;
   accentColor: string;
 }) {
-  const { href, label, icon: Icon } = item;
+  const { href, label, icon: iconName } = item;
+  
+  // Resolve icon component from string
+  const Icon = (Icons as any)[iconName] || Icons.HelpCircle;
 
   return (
     <Link

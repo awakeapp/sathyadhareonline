@@ -10,74 +10,65 @@
  *   Inbox    → /admin/inbox     (submissions queue + SA notifications)
  *   Comments → /admin/comments  (moderation queue)
  */
-import {
-  LayoutDashboard,
-  FolderOpen,
-  PenLine,
-  Inbox,
-  MessageSquare,
-} from 'lucide-react';
+// No longer importing icons here, using string names for serialization safety.
 import type { DashNavItem } from '@/components/dashboard/DashboardBottomNav';
 
 export const ADMIN_NAV_ITEMS: DashNavItem[] = [
   {
     href:  '/admin',
     label: 'Home',
-    icon:  LayoutDashboard,
+    icon:  'LayoutDashboard',
     exact: true,
   },
   {
     href:  '/admin/content',
     label: 'Content',
-    icon:  FolderOpen,
+    icon:  'FolderOpen',
   },
   {
     href:  '/admin/editors',
     label: 'Editors',
-    icon:  PenLine,
+    icon:  'PenLine',
   },
   {
     href:  '/admin/inbox',
     label: 'Inbox',
-    icon:  Inbox,
+    icon:  'Inbox',
   },
   {
     href:  '/admin/comments',
     label: 'Comments',
-    icon:  MessageSquare,
+    icon:  'MessageSquare',
   },
 ];
 
-import {
-  Users,
-  Settings,
-} from 'lucide-react';
+// Super Admin additions
 
 export const SUPER_ADMIN_NAV_ITEMS: DashNavItem[] = [
   {
     href:  '/admin',
     label: 'Home',
-    icon:  LayoutDashboard,
+    icon:  'LayoutDashboard',
     exact: true,
   },
   {
     href:  '/admin/manage',
     label: 'Manage',
-    icon:  Users,
+    icon:  'Users',
   },
   {
     href:  '/admin/content',
     label: 'Content',
-    icon:  FolderOpen,
+    icon:  'FolderOpen',
   },
   {
     href:  '/admin/inbox',
     label: 'Inbox',
-    icon:  Inbox,
+    icon:  'Inbox',
   },
   {
     href:  '/admin/settings',
     label: 'Settings',
-    icon:  Settings,
+    icon:  'Settings',
   },
 ];
