@@ -31,19 +31,19 @@ export function PresenceHeader({
   icon1Node,
   icon2Node,
   icon1Href,
-  icon2Href,
   icon2Badge = false,
-  renderActions
+  renderActions,
+  hideActions
 }: { 
   title?: string; 
   roleLabel?: string; 
   profileName?: string;
   initials?: string; 
   renderActions?: React.ReactNode;
+  hideActions?: boolean;
   icon1Node?: React.ReactNode;
   icon2Node?: React.ReactNode;
   icon1Href?: string; 
-  icon2Href?: string; 
   icon2Badge?: boolean;
 }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -71,12 +71,11 @@ export function PresenceHeader({
   }, [searchQuery]);
 
   useEffect(() => {
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+
     if (searchQuery.length < 2) {
-      setServerResults(prev => prev.length > 0 ? [] : prev);
       return;
     }
-
-    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
 
     searchTimeoutRef.current = setTimeout(() => {
       startSearch(async () => {
@@ -98,8 +97,9 @@ export function PresenceHeader({
   }
 
   const displayResults = React.useMemo(() => {
+    if (searchQuery.length < 2) return [];
     return [...localResults, ...serverResults];
-  }, [localResults, serverResults]);
+  }, [localResults, serverResults, searchQuery]);
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -280,57 +280,59 @@ export function PresenceHeader({
           </div>
           
           <div className="flex items-center gap-2 sm:gap-4">
-            {renderActions}
-            {/* Reader Mode Action */}
-            <button 
-               onClick={() => {
-                 try {
-                   localStorage.setItem('sathyadhare:readerMode', 'true');
-                   document.cookie = `sathyadhare:readerMode=true; path=/; max-age=31536000`;
-                 } catch {}
-                 window.location.href = '/';
-               }} 
-               className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full font-bold transition-all active:scale-95 hover:bg-[var(--color-surface-2)] border border-[var(--color-border)]"
-               title="Switch to Reader Mode"
-               style={{ color: 'var(--color-primary)' }}
-            >
-               <Eye className="w-4 h-4" />
-               <span className="text-[11px] uppercase tracking-widest">Reader Mode</span>
-            </button>
-            <button 
-               onClick={() => {
-                 try {
-                   localStorage.setItem('sathyadhare:readerMode', 'true');
-                   document.cookie = `sathyadhare:readerMode=true; path=/; max-age=31536000`;
-                 } catch {}
-                 window.location.href = '/';
-               }} 
-               className="sm:hidden flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors text-[var(--color-primary)]"
-               title="Switch to Reader Mode"
-            >
-               <Eye className="w-5 h-5" />
-            </button>
+            {!hideActions && (
+              <>
+                {renderActions}
+                {/* Reader Mode Action */}
+                <button 
+                   onClick={() => {
+                     try {
+                       localStorage.setItem('sathyadhare:readerMode', 'true');
+                       document.cookie = `sathyadhare:readerMode=true; path=/; max-age=31536000`;
+                     } catch {}
+                     window.location.href = '/';
+                   }} 
+                   className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-full font-bold transition-all active:scale-95 hover:bg-[var(--color-surface-2)] border border-[var(--color-border)]"
+                   title="Switch to Reader Mode"
+                   style={{ color: 'var(--color-primary)' }}
+                >
+                   <Eye className="w-4 h-4" />
+                   <span className="text-[11px] uppercase tracking-widest">Reader Mode</span>
+                </button>
+                <button 
+                   onClick={() => {
+                     try {
+                       localStorage.setItem('sathyadhare:readerMode', 'true');
+                       document.cookie = `sathyadhare:readerMode=true; path=/; max-age=31536000`;
+                     } catch {}
+                     window.location.href = '/';
+                   }} 
+                   className="sm:hidden flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors text-[var(--color-primary)]"
+                   title="Switch to Reader Mode"
+                >
+                   <Eye className="w-5 h-5" />
+                </button>
+                
+                {/* Dynamic Action 1 (e.g. Submissions) */}
+                {icon1Node ? (
+                  <Link href={icon1Href || '#'} className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors">
+                    {icon1Node}
+                  </Link>
+                ) : (
+                  <Link href="/admin/articles/new" className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors">
+                    <Plus className="w-5 h-5 text-[var(--color-text)]" strokeWidth={1.5} />
+                  </Link>
+                )}
+    
+                {/* Dynamic Action 2 (e.g. Notifications/Logs) */}
+                <button onClick={() => setIsNotifOpen(true)} className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors">
+                  {icon2Node || <Bell className="w-5 h-5 text-[var(--color-text)]" strokeWidth={1.5} />}
+                  {icon2Badge && <span className="absolute top-2 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-[var(--color-surface)]" />}
+                </button>
+              </>
+            )}
             
-            {/* Dynamic Action 1 (e.g. Submissions) */}
-            {icon1Node && (
-              <Link href={icon1Href || '#'} className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors">
-                {icon1Node}
-              </Link>
-            )}
-
-            {!icon1Node && (
-              <Link href="/admin/articles/new" className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors">
-                <Plus className="w-5 h-5 text-[var(--color-text)]" strokeWidth={1.5} />
-              </Link>
-            )}
-
-            {/* Dynamic Action 2 (e.g. Notifications/Logs) */}
-            <button onClick={() => setIsNotifOpen(true)} className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors">
-              {icon2Node || <Bell className="w-5 h-5 text-[var(--color-text)]" strokeWidth={1.5} />}
-              {icon2Badge && <span className="absolute top-2 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-[var(--color-surface)]" />}
-            </button>
-
-            {/* User Settings Trigger */}
+            {/* User Settings Trigger - Always show if not explicitly hidden or kept */}
             <button
                onClick={() => setIsProfileOpen(true)}
                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[var(--color-surface-2)] transition-colors ml-1 shrink-0 text-[var(--color-text)]"

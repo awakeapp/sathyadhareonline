@@ -23,6 +23,8 @@ export async function createUserAction(formData: FormData) {
     const role = formData.get('role') as string;
 
     const adminClient = createAdminClient();
+    if (!adminClient) throw new Error('Service role key not configured.');
+
     const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
       email,
       password,
@@ -122,6 +124,7 @@ export async function deleteUserAction(formData: FormData) {
 
     const supabase = await createClient();
     const adminClient = createAdminClient();
+    if (!adminClient) throw new Error('Service role key not configured.');
 
     // Safeguard: Check if it's the last super admin
     const { data: target } = await supabase.from('profiles').select('role, status').eq('id', userId).maybeSingle();
@@ -152,6 +155,8 @@ export async function inviteUserAction(formData: FormData) {
     const role = formData.get('role') as string;
 
     const adminClient = createAdminClient();
+    if (!adminClient) throw new Error('Service role key not configured.');
+
     const { error } = await adminClient.auth.admin.inviteUserByEmail(email, {
       data: { role }
     });
