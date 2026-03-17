@@ -205,34 +205,46 @@ export default function UserManagementClient({
         ))}
       </div>
 
-      {/* ── Filters (Clean & Minimal) ── */}
-      <div className="flex flex-col md:flex-row gap-2">
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" strokeWidth={2} />
+      {/* ── Search & Filter (Dynamic based on Tab) ── */}
+      <div className="flex flex-col gap-3">
+        <div className="relative">
+          <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" strokeWidth={2.5} />
           <input
-            placeholder="Search by name or email..."
+            placeholder={`Search ${viewMode === 'users' ? 'Staff' : viewMode === 'readers' ? 'Readers' : 'Subscribers'}...`}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full h-12 pl-11 pr-4 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[14px] font-medium focus:border-[var(--color-primary)]/50 focus:ring-4 focus:ring-[var(--color-primary)]/5 outline-none transition-all placeholder:text-[var(--color-muted)]/50"
+            className="w-full h-[56px] pl-12 pr-4 rounded-[1.25rem] bg-[var(--color-surface)] border border-[var(--color-border)] text-[15px] font-bold focus:border-[var(--color-primary)]/40 focus:ring-[6px] focus:ring-[var(--color-primary)]/5 outline-none transition-all placeholder:text-[var(--color-muted)]/40"
           />
         </div>
-        <div className="flex gap-2">
-          <div className="relative group">
-            <select value={roleFilter} onChange={e => setRoleFilter(e.target.value)}
-              className="h-12 pl-4 pr-10 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[13px] font-bold text-[var(--color-text)] focus:border-[var(--color-primary)]/50 outline-none appearance-none cursor-pointer hover:bg-[var(--color-surface-2)] transition-all">
-              <option value="all">Every Role</option>
-              <option value="super_admin">Super Admins</option>
-              <option value="admin">Admins</option>
-              <option value="editor">Editors</option>
-              <option value="reader">Readers</option>
-            </select>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-muted)]">
-              <User size={14} />
+
+        <div className="flex items-center gap-2">
+          {viewMode === 'users' ? (
+            <div className="relative group flex-1 max-w-[160px]">
+              <select 
+                value={roleFilter} 
+                onChange={e => setRoleFilter(e.target.value)}
+                className="w-full h-11 pl-4 pr-10 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[12px] font-black uppercase tracking-widest text-[var(--color-text)] focus:border-[var(--color-primary)]/40 outline-none appearance-none cursor-pointer hover:bg-[var(--color-surface-2)] transition-all"
+              >
+                <option value="all">Every Role</option>
+                <option value="super_admin">Super Admins</option>
+                <option value="admin">Admins</option>
+                <option value="editor">Editors</option>
+              </select>
+              <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-muted)]">
+                <Users size={12} strokeWidth={3} />
+              </div>
             </div>
-          </div>
-          <button onClick={exportCSV} title="Export Directory"
-            className="h-12 w-12 flex items-center justify-center rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)]/30 transition-all active:scale-95 shadow-sm">
-            <Download className="w-5 h-5" strokeWidth={1.5} />
+          ) : (
+            <div className="flex-1" /> // Spacer for Readers/Subscribers
+          )}
+
+          <button 
+            onClick={exportCSV} 
+            title="Download List"
+            className="h-11 px-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)]/30 transition-all active:scale-95 flex items-center gap-2 text-[12px] font-black uppercase tracking-widest"
+          >
+            <Download className="w-4 h-4" strokeWidth={2.5} />
+            <span className="hidden sm:inline">Export</span>
           </button>
         </div>
       </div>
