@@ -13,10 +13,11 @@ export default async function ArticlesPage({
   const supabase = await createClient();
 
   // Parallelize category list and article list fetching
+  // Filter for 'article' type categories only
   const categoriesPromise = supabase
     .from('categories')
     .select('name, slug')
-    .is('deleted_at', null)
+    .eq('type', 'article')
     .order('name');
 
   // Prepare article query

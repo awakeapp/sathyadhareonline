@@ -1,12 +1,10 @@
 import { createClient } from '@/lib/supabase/server';
 import HeroBanner from '@/components/ui/HeroBanner';
 import BannerCarousel from '@/components/ui/BannerCarousel';
-import Link from 'next/link';
-import Image from 'next/image';
-import { ChevronRight, Layers, BookOpen } from 'lucide-react';
-import ArticleCard from '@/components/ui/ArticleCard';
+import { ChevronRight } from 'lucide-react';
 import SectionHeader from '@/components/ui/SectionHeader';
 import HomeLatestArticles from '@/components/HomeLatestArticles';
+import ArticleCard from '@/components/ui/ArticleCard';
 
 
 export const revalidate = 60;
@@ -32,7 +30,7 @@ export default async function HomePage() {
     .select('id, title, slug, excerpt, cover_image, category:categories(name), reactions:article_reactions(count), author:profiles(full_name)')
     .eq('article_reactions.type', 'like')
     .eq('is_featured', true).eq('status', 'published').eq('is_deleted', false)
-    .eq('is_standalone', true) // Only standalone for home hero
+    .eq('is_standalone', true) 
     .single();
 
   let featured = featuredData as unknown as ArticleWithCategory | null;
@@ -59,24 +57,6 @@ export default async function HomePage() {
   if (!latestArticles) {
     latestArticles = [];
   }
-
-  // 2.5) Latest Sequels (Digital Issues)
-  const { data: latestSequels } = await supabase
-    .from('sequels')
-    .select('id, title, slug, banner_image, published_at')
-    .eq('status', 'published')
-    .eq('is_deleted', false)
-    .order('published_at', { ascending: false })
-    .limit(4);
-
-  // 2.6) Latest Books (Library)
-  const { data: latestBooks } = await supabase
-    .from('books')
-    .select('id, title, slug, cover_image, author_name')
-    .eq('status', 'published')
-    .eq('is_deleted', false)
-    .order('created_at', { ascending: false })
-    .limit(4);
 
   // 3) Trending
   const sevenDaysAgo = new Date();
@@ -105,7 +85,7 @@ export default async function HomePage() {
       .in('id', topIds)
       .eq('status', 'published')
       .eq('is_deleted', false)
-      .eq('is_standalone', true); // Only standalone trending on home
+      .eq('is_standalone', true); 
     
     if (td) {
       trending = (td as unknown as ArticleWithCategory[]).sort((a, b) => (viewCounts[b.id] ?? 0) - (viewCounts[a.id] ?? 0));
@@ -133,38 +113,6 @@ export default async function HomePage() {
         ) : null}
       </div>
 
-      {/* Latest Digital Issues (Sequels) - New Section */}
-      {latestSequels && latestSequels.length > 0 && (
-        <section className="mb-12">
-          <SectionHeader title="Digital Issues" href="/sequels" />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5">
-            {latestSequels.map((seq) => (
-              <Link key={seq.id} href={`/sequels/${seq.slug}`} className="group block">
-                <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)] shadow-sm group-hover:shadow-md transition-all">
-                  {seq.banner_image ? (
-                    <Image 
-                      src={seq.banner_image} 
-                      alt={seq.title} 
-                      fill 
-                      className="object-cover group-hover:scale-105 transition-transform duration-500" 
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[var(--color-muted)]">
-                       <Layers size={24} />
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
-                  <div className="absolute inset-x-0 bottom-0 p-4">
-                     <p className="text-[10px] font-black uppercase tracking-widest text-[#685de6] mb-1">Weekly Issue</p>
-                     <p className="text-white font-bold text-xs line-clamp-2 leading-tight uppercase tracking-tight italic">{seq.title}</p>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
       {/* Trending Articles */}
       {trending.length > 0 && (
         <section className="mb-12">
@@ -172,33 +120,6 @@ export default async function HomePage() {
           <div className="flex flex-col gap-4 mt-5">
             {trending.map((article) => (
               <ArticleCard key={article.id} variant="list" article={article as unknown as ArticleWithCategory} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Latest Books (Library) - New Section */}
-      {latestBooks && latestBooks.length > 0 && (
-        <section className="mb-12">
-          <SectionHeader title="Digital Library" href="/library" />
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mt-5">
-            {latestBooks.map((book) => (
-              <Link key={book.id} href={`/library/${book.slug}`} className="group block">
-                 <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-[var(--color-surface-2)] shadow-[0_10px_30px_rgba(0,0,0,0.1)] group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all">
-                    {book.cover_image ? (
-                      <Image src={book.cover_image} alt={book.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-[var(--color-muted)]">
-                        <BookOpen size={30} />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
-                    {/* Spine lighting */}
-                    <div className="absolute inset-y-0 left-0 w-2 bg-gradient-to-r from-white/20 to-transparent" />
-                 </div>
-                 <h4 className="mt-3 text-xs font-black text-[var(--color-text)] uppercase tracking-tight line-clamp-1 group-hover:text-[var(--color-primary)] transition-colors">{book.title}</h4>
-                 <p className="text-[9px] font-bold text-[var(--color-muted)] uppercase tracking-widest mt-1">{book.author_name}</p>
-              </Link>
             ))}
           </div>
         </section>
@@ -229,7 +150,6 @@ export default async function HomePage() {
         rel="noopener noreferrer"
         className="block rounded-[2rem] p-8 sm:p-10 flex flex-col sm:flex-row items-center gap-8 shadow-[0_20px_50px_rgba(104,93,230,0.12)] mt-16 mb-12 bg-white dark:bg-[#111b21] border border-[var(--color-border)] overflow-hidden relative group active:scale-[0.98] transition-all"
       >
-        {/* Decorative background accent */}
         <div className="absolute -top-12 -right-12 w-48 h-48 bg-[var(--color-primary)]/5 rounded-full blur-3xl group-hover:bg-[var(--color-primary)]/10 transition-colors" />
         
         <div className="sm:w-[60%] flex flex-col justify-center gap-3 relative z-10 text-center sm:text-left">
