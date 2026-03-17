@@ -13,7 +13,7 @@ export default async function ReadingHistoryPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login');
+    redirect('/sign-in');
   }
 
   const { data: views } = await supabase

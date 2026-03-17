@@ -8,7 +8,7 @@ export default async function ProfileLayout({ children }: { children: React.Reac
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login');
+    redirect('/sign-in');
   }
 
   // Double-verify that the user has a profile record and hasn't been suspended/banned

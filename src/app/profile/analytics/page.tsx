@@ -10,7 +10,7 @@ export default async function AnalyticsPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login');
+    redirect('/sign-in');
   }
 
   // Fetch view history for the last 30 days
