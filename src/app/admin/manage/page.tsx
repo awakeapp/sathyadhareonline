@@ -41,7 +41,7 @@ export default async function ManagePage() {
     .select('full_name, role')
     .eq('id', user.id)
     .maybeSingle();
-  if (!profile || profile.role !== 'super_admin') redirect('/admin?error=unauthorized');
+  if (!profile || profile.role !== 'super_admin') redirect('/dashboard/admin?denied=1');
 
   let pendingComments = 0;
   try {

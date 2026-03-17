@@ -1,10 +1,11 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-// Route access rules — middleware is the outermost gate
+// Route access rules — proxy is the outermost gate
 const ROUTE_ROLES: Record<string, string[] | '*'> = {
   '/admin':      ['super_admin', 'admin'],
   '/editor':     ['editor'],
+  '/dashboard':  '*',   // any authenticated user; page-level does role redirect
   '/profile':    '*',
   '/saved':      '*',
   '/highlights': '*',

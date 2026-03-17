@@ -22,7 +22,7 @@ export default async function SettingsPage() {
     .maybeSingle();
 
   if (!profile || profile.role !== 'super_admin') {
-    redirect('/admin?error=unauthorized');
+    redirect('/dashboard/admin?denied=1');
   }
 
   const { data: settings, error } = await supabase

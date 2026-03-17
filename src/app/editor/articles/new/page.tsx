@@ -2,13 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import RichTextEditor from '@/components/RichTextEditorClient';
-import { ChevronLeft, Bell, Sparkles, Send, FileText } from 'lucide-react';
+import { Send, Sparkles } from 'lucide-react';
 import sharp from 'sharp';
-import { 
-  PresenceWrapper, 
-  PresenceHeader,
-  PresenceCard 
-} from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,12 +11,12 @@ export default async function EditorNewArticlePage() {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/sign-in');
 
   const { data: profile } = await supabase
     .from('profiles').select('full_name, role').eq('id', user.id).single();
 
-  if (!profile || profile.role !== 'editor') redirect('/login');
+  if (!profile || profile.role !== 'editor') redirect('/sign-in');
 
   const authorName = profile.full_name ?? 'Editor';
 
@@ -83,113 +78,106 @@ export default async function EditorNewArticlePage() {
     redirect('/editor/articles');
   }
 
-  const initials = (profile?.full_name || 'E').charAt(0).toUpperCase();
-
   return (
-    <PresenceWrapper>
-      <PresenceHeader 
-        title="Presence"
-        roleLabel="Create a new article for publication"
-        initials={initials}
-        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Href="/editor/articles"
-        renderActions={
-          <button 
-            type="submit" 
-            form="editor-article-form"
-            className="flex items-center gap-2 px-4 h-9 rounded-full bg-[#5c4ae4] text-white font-bold text-[11px] uppercase tracking-widest shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
-          >
-            <Send className="w-3.5 h-3.5" />
-            <span>Save Draft</span>
-          </button>
-        }
-      />
-      
-      <div className="px-5 pb-10 space-y-6 relative z-20 max-w-4xl mx-auto">
-        
-        <div className="flex items-center gap-5 mb-6">
-           <div className="w-12 h-12 rounded-2xl bg-[#5c4ae4] flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
-              <FileText className="w-6 h-6" />
-           </div>
-           <div>
-              <h2 className="text-2xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight">New Article</h2>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Drafting a new story</p>
-           </div>
+    <div className="flex flex-col gap-6 w-full pb-6">
+
+      {/* Page heading with inline save button */}
+      <div className="pt-2 flex items-center justify-between">
+        <div>
+          <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight">Write</h1>
+          <p className="text-[12px] text-[var(--color-muted)] mt-0.5">New article draft</p>
+        </div>
+        <button
+          type="submit"
+          form="editor-article-form"
+          className="flex items-center gap-1.5 px-4 h-9 rounded-full bg-[var(--color-primary)] text-white font-bold text-[11px] uppercase tracking-widest active:scale-95 transition-all"
+        >
+          <Send size={14} />
+          Save Draft
+        </button>
+      </div>
+
+      <form id="editor-article-form" action={createArticleAction} encType="multipart/form-data" className="flex flex-col gap-5">
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] font-bold uppercase tracking-widest text-[var(--color-muted)]">Title</label>
+          <input
+            required name="title" type="text" placeholder="Article title…"
+            className="w-full h-14 px-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[15px] font-bold text-[var(--color-text)] focus:outline-none focus:border-[var(--color-primary)]"
+          />
         </div>
 
-        <PresenceCard className="p-0 overflow-hidden">
-          <form id="editor-article-form" action={createArticleAction} encType="multipart/form-data" className="p-10 space-y-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[11px] font-bold uppercase tracking-widest text-[var(--color-muted)]">URL Slug</label>
+            <input
+              required name="slug" type="text" placeholder="article-url-slug"
+              className="w-full h-12 px-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] font-mono text-[13px] text-[var(--color-primary)] focus:outline-none focus:border-[var(--color-primary)]"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[11px] font-bold uppercase tracking-widest text-[var(--color-muted)]">Author Name</label>
+            <input
+              required name="author_name" type="text" defaultValue={authorName}
+              className="w-full h-12 px-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[14px] font-bold text-[var(--color-text)] focus:outline-none focus:border-[var(--color-primary)]"
+            />
+          </div>
+        </div>
 
-            <div className="space-y-3">
-                <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Article Title</label>
-              <input required name="title" type="text" placeholder="The Core Statement..."
-                className="w-full h-16 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-md font-bold shadow-inner" />
-            </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[11px] font-bold uppercase tracking-widest text-[var(--color-muted)]">Category</label>
+            <select
+              name="category_id"
+              className="w-full h-12 px-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[13px] font-bold text-[var(--color-text)] focus:outline-none focus:border-[var(--color-primary)]"
+            >
+              <option value="">Uncategorized</option>
+              {categories?.map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[11px] font-bold uppercase tracking-widest text-[var(--color-muted)]">Cover Image</label>
+            <input
+              name="cover_image" type="file" accept="image/*"
+              className="w-full h-12 px-4 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[12px] text-[var(--color-muted)] file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-[var(--color-primary)] file:text-white file:text-[10px] file:font-bold file:uppercase file:tracking-wider"
+            />
+          </div>
+        </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              <div className="space-y-3">
-                 <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">URL Shortcut / Link</label>
-                <input required name="slug" type="text" placeholder="example-article-shortcut"
-                  className="w-full h-14 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none font-mono text-xs font-bold shadow-inner text-indigo-400" />
-              </div>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] font-bold uppercase tracking-widest text-[var(--color-muted)]">Excerpt</label>
+          <textarea
+            required name="excerpt" rows={3} placeholder="Brief summary of the article…"
+            className="w-full p-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[14px] text-[var(--color-text)] resize-none leading-relaxed focus:outline-none focus:border-[var(--color-primary)]"
+          />
+        </div>
 
-              <div className="space-y-3">
-                 <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Author Name</label>
-                <input required name="author_name" type="text" placeholder="Display Identity" defaultValue={authorName}
-                  className="w-full h-14 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-sm font-bold shadow-inner" />
-              </div>
-            </div>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] font-bold uppercase tracking-widest text-[var(--color-muted)] flex items-center gap-2">
+            <Sparkles size={13} /> Article Body
+          </label>
+          <div className="min-h-[500px] rounded-xl overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface)]">
+            <RichTextEditor name="content" />
+          </div>
+        </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              <div className="space-y-3">
-                 <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Category</label>
-                <select name="category_id"
-                  className="w-full h-16 px-6 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none text-xs font-black uppercase tracking-widest shadow-inner accent-[#5c4ae4]">
-                   <option value="">Uncategorized</option>
-                  {categories?.map((cat) => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-3">
-                 <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Cover Image</label>
-                <input name="cover_image" type="file" accept="image/*"
-                  className="w-full h-16 px-6 py-4 rounded-2xl bg-gray-50 dark:bg-[#1b1929] border-none shadow-inner text-xs font-black text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-[#5c4ae4] file:text-white file:text-[10px] file:uppercase file:tracking-widest" />
-              </div>
-            </div>
-
-            <div className="space-y-3">
-               <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4]">Short Description (Excerpt)</label>
-              <textarea required name="excerpt" rows={3} placeholder="Brief summary of the article..."
-                className="w-full p-6 rounded-[2rem] bg-gray-50 dark:bg-[#1b1929] border-none text-md font-bold shadow-inner resize-none leading-relaxed" />
-            </div>
-
-            <div className="space-y-4">
-              <label className="text-[11px] font-black uppercase tracking-widest text-[#5c4ae4] flex items-center gap-3">
-                  <Sparkles className="w-4 h-4" /> Article Body
-              </label>
-              <div className="min-h-[600px] rounded-[2rem] overflow-hidden border-none shadow-2xl bg-white dark:bg-[#1b1929]">
-                 <RichTextEditor name="content" />
-              </div>
-            </div>
-
-            <div className="pt-10 border-t border-indigo-50 dark:border-white/5 flex flex-col sm:flex-row justify-end gap-4">
-              <Link href="/editor/articles"
-                className="h-16 px-10 rounded-2xl bg-gray-50 dark:bg-white/5 border-none font-black text-[11px] uppercase tracking-widest text-gray-400 flex items-center justify-center hover:bg-gray-100 transition-all">
-                Cancel
-              </Link>
-              <button 
-                type="submit" 
-                className="h-16 px-12 bg-[#5c4ae4] text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3"
-              >
-                 <Send className="w-5 h-5" /> Save Draft
-              </button>
-            </div>
-          </form>
-        </PresenceCard>
-      </div>
-    </PresenceWrapper>
+        <div className="flex gap-3 justify-end pt-2">
+          <Link
+            href="/editor/articles"
+            className="h-11 px-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[13px] font-bold text-[var(--color-muted)] flex items-center hover:bg-[var(--color-surface-2)] transition-colors"
+          >
+            Cancel
+          </Link>
+          <button
+            type="submit"
+            className="h-11 px-6 bg-[var(--color-primary)] text-white font-bold text-[13px] rounded-xl active:scale-95 transition-all flex items-center gap-2"
+          >
+            <Send size={15} /> Save Draft
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }

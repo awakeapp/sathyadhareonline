@@ -22,7 +22,7 @@ export default async function AdminCommentsPage() {
     .maybeSingle();
 
   if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
-    redirect('/admin?error=unauthorized');
+    redirect('/dashboard/admin?denied=1');
   }
 
   const { data: comments, error } = await supabase

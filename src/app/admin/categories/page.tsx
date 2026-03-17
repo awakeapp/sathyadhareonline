@@ -20,7 +20,7 @@ export default async function CategoriesPage() {
     .from('profiles').select('full_name, role').eq('id', user.id).maybeSingle();
 
   if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
-    redirect('/admin?error=unauthorized');
+    redirect('/dashboard/admin?denied=1');
   }
 
   const { data: rawCats } = await supabase

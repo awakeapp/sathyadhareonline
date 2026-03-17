@@ -23,7 +23,7 @@ export default async function AuditLogsPage() {
     .maybeSingle();
 
   if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
-    redirect('/admin?error=unauthorized');
+    redirect('/dashboard/admin?denied=1');
   }
 
   const { data: profiles, error } = await supabase

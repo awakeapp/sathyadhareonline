@@ -1,39 +1,31 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { SquarePen, FileText, ChevronRight, Eye, Bell } from 'lucide-react';
-import ReaderModeSwitch from '@/components/ReaderModeSwitch';
-import { 
-  PresenceWrapper, 
-  PresenceHeader, 
-  PresenceCard, 
-  PresenceStatCircle, 
-  PresenceActionTile, 
-  PresenceButton, 
-  PresenceSectionHeader 
-} from '@/components/PresenceUI';
+import { FileText, ChevronRight, CheckCircle, Clock, Edit3 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
+
+const STATUS_META: Record<string, { label: string; color: string }> = {
+  draft:     { label: 'Draft',        color: '#94a3b8' },
+  in_review: { label: 'In Review',    color: '#f59e0b' },
+  published: { label: 'Published',    color: '#10b981' },
+  archived:  { label: 'Archived',     color: '#8b5cf6' },
+};
 
 export default async function EditorDashboard() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/sign-in');
 
   let profile: { full_name: string | null; role: string } | null = null;
-  const statsFallback = {
-    totalCount: 0, publishedCount: 0, draftCount: 0, reviewCount: 0,
-    recent: [] as any[]
-  };
-
-  let pageData = statsFallback;
+  let pageData = { totalCount: 0, publishedCount: 0, draftCount: 0, reviewCount: 0, recent: [] as any[] };
 
   try {
     const { data: p } = await supabase
       .from('profiles').select('role, full_name').eq('id', user.id).maybeSingle();
     profile = p as any;
 
-    if (!profile || profile.role !== 'editor') redirect('/login');
+    if (!profile || profile.role !== 'editor') redirect('/sign-in');
 
     const results = await Promise.allSettled([
       supabase.from('articles').select('*', { count: 'exact', head: true }).eq('author_id', user.id).eq('is_deleted', false),
@@ -44,105 +36,104 @@ export default async function EditorDashboard() {
     ]);
 
     const getVal = (idx: number) => (results[idx].status === 'fulfilled' ? (results[idx] as any).value : null);
-
     pageData = {
-      totalCount: getVal(0)?.count ?? 0,
+      totalCount:     getVal(0)?.count ?? 0,
       publishedCount: getVal(1)?.count ?? 0,
-      draftCount: getVal(2)?.count ?? 0,
-      reviewCount: getVal(3)?.count ?? 0,
-      recent: getVal(4)?.data || [],
+      draftCount:     getVal(2)?.count ?? 0,
+      reviewCount:    getVal(3)?.count ?? 0,
+      recent:         getVal(4)?.data || [],
     };
-
   } catch (err) {
     console.error('Editor dashboard fetch error:', err);
   }
 
   const { totalCount, publishedCount, draftCount, reviewCount, recent } = pageData;
 
-  const initials = (profile?.full_name || 'E').charAt(0).toUpperCase();
-
   return (
-    <PresenceWrapper>
-      <PresenceHeader 
-        title="Editor"
-        roleLabel="Editor Workspace"
-        initials={initials}
-        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Node={<Eye className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Href="/"
-      />
+    <div className="flex flex-col gap-4 w-full">
 
-      <div className="flex flex-col gap-4 relative z-20">
-        <PresenceCard className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400">
-              <SquarePen className="w-6 h-6" />
-            </div>
-            <p className="font-bold text-gray-600 dark:text-gray-300">New Article</p>
-          </div>
-          <Link href="/editor/articles/new">
-            <PresenceButton>Write</PresenceButton>
-          </Link>
-        </PresenceCard>
-
-        <PresenceCard>
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <span className="text-5xl font-black text-[#5c4ae4]">
-                {totalCount}
-                <FileText className="inline-block w-4 h-4 ml-1 mb-6 text-indigo-300" />
-              </span>
-              <div>
-                <p className="text-lg font-black leading-none">Total Articles</p>
-                <p className="text-xs font-bold text-gray-400 mt-1 uppercase tracking-wider">Your Progress</p>
-              </div>
-            </div>
-            <Link href="/editor/articles" className="w-10 h-10 rounded-full border border-gray-100 dark:border-white/10 flex items-center justify-center text-indigo-400 hover:bg-indigo-50 transition-colors">
-              <ChevronRight className="w-5 h-5" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            <PresenceStatCircle percent={Math.min(100, (publishedCount / (totalCount || 1)) * 100)} value={publishedCount} label="Published" color="#10b981" />
-            <PresenceStatCircle percent={Math.min(100, (reviewCount / (totalCount || 1)) * 100)} value={reviewCount} label="Review" color="#f59e0b" />
-            <PresenceStatCircle percent={Math.min(100, (draftCount / (totalCount || 1)) * 100)} value={draftCount} label="Drafts" color="#6b7280" />
-          </div>
-        </PresenceCard>
-
-        <PresenceCard className="grid grid-cols-2 gap-y-6">
-          <PresenceActionTile href="/editor/articles/new" iconNode={<SquarePen className="w-6 h-6" strokeWidth={1.5} />} label="Write New" />
-          <PresenceActionTile href="/editor/articles" iconNode={<FileText className="w-6 h-6" strokeWidth={1.5} />} label="My Articles" />
-        </PresenceCard>
-
-        <div className="pt-4">
-          <ReaderModeSwitch role="editor" />
-        </div>
-
-        <div className="pt-4">
-          <PresenceSectionHeader title="Recent Activity" action="See All" actionHref="/editor/articles" />
-          <div className="space-y-3">
-            {recent.map((a) => (
-              <Link key={a.id} href={`/editor/articles/${a.id}/edit`}>
-                <PresenceCard className="flex items-center justify-between py-4 px-5 active:scale-[0.98] transition-transform">
-                  <div className="flex items-center gap-4 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-[#5c4ae4] shrink-0">
-                      <FileText className="w-5 h-5" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-bold text-sm truncate">{a.title}</p>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">{(a.status || 'draft').replace('_', ' ')} · {new Date(a.updated_at).toLocaleDateString()}</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-gray-300" />
-                </PresenceCard>
-              </Link>
-            ))}
-            {recent.length === 0 && (
-              <div className="py-10 text-center text-gray-400 font-bold text-sm">No recent activity</div>
-            )}
-          </div>
-        </div>
+      {/* Greeting + stats strip */}
+      <div className="pt-2">
+        <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight leading-tight">
+          {profile?.full_name ? `Hey, ${profile.full_name.split(' ')[0]}` : 'Editor Dashboard'}
+        </h1>
+        <p className="text-[13px] text-[var(--color-muted)] mt-0.5">Editor Workspace</p>
       </div>
-    </PresenceWrapper>
+
+      {/* Stats row */}
+      <div className="grid grid-cols-3 gap-2">
+        {[
+          { label: 'Total',     value: totalCount,     color: 'var(--color-primary)' },
+          { label: 'Published', value: publishedCount, color: '#10b981' },
+          { label: 'In Review', value: reviewCount,    color: '#f59e0b' },
+        ].map(s => (
+          <div
+            key={s.label}
+            className="flex flex-col items-center justify-center gap-0.5 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] py-4"
+          >
+            <span className="text-[24px] font-black text-[var(--color-text)] leading-none">{s.value}</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: s.color }}>{s.label}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Quick-write CTA */}
+      <Link
+        href="/editor/articles/new"
+        className="flex items-center gap-3 p-4 bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 rounded-xl hover:bg-[var(--color-primary)]/10 active:scale-[0.99] transition-all"
+      >
+        <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
+          <Edit3 size={20} strokeWidth={1.75} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[14px] font-bold text-[var(--color-text)]">Write New Article</p>
+          <p className="text-[12px] text-[var(--color-muted)]">Start a fresh draft now</p>
+        </div>
+        <ChevronRight size={16} className="text-[var(--color-muted)]" />
+      </Link>
+
+      {/* Recent activity */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <p className="text-[12px] font-bold text-[var(--color-muted)] uppercase tracking-widest">Recent Activity</p>
+          <Link href="/editor/articles" className="text-[12px] font-bold text-[var(--color-primary)] hover:underline underline-offset-4">
+            See All
+          </Link>
+        </div>
+
+        {recent.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center gap-2 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)]">
+            <FileText size={28} className="text-[var(--color-muted)] opacity-40" />
+            <p className="text-[14px] font-bold text-[var(--color-text)]">No articles yet</p>
+            <p className="text-[12px] text-[var(--color-muted)]">Write your first article to get started.</p>
+          </div>
+        ) : (
+          recent.map((a) => {
+            const meta = STATUS_META[a.status ?? 'draft'] ?? STATUS_META.draft;
+            return (
+              <Link
+                key={a.id}
+                href={`/editor/articles/${a.id}/edit`}
+                className="flex items-center gap-3 p-4 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] active:scale-[0.99] transition-all"
+              >
+                <div
+                  className="w-1.5 self-stretch rounded-full shrink-0"
+                  style={{ background: meta.color }}
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[14px] font-bold text-[var(--color-text)] truncate leading-tight">{a.title}</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-[10px] font-black uppercase tracking-wider" style={{ color: meta.color }}>{meta.label}</span>
+                    <span className="text-[11px] text-[var(--color-muted)]">· {new Date(a.updated_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
+                  </div>
+                </div>
+                <ChevronRight size={15} className="text-[var(--color-muted)] shrink-0" />
+              </Link>
+            );
+          })
+        )}
+      </div>
+
+    </div>
   );
 }

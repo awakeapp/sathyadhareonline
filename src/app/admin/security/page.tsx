@@ -22,7 +22,7 @@ export default async function SecurityPage() {
     .maybeSingle();
 
   if (!profile || profile.role !== 'super_admin') {
-    redirect('/admin?error=unauthorized');
+    redirect('/dashboard/admin?denied=1');
   }
 
   const { data: keys, error } = await supabase

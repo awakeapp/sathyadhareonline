@@ -13,7 +13,7 @@ export default async function LoginHistoryPage() {
 
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (!profile || profile.role !== 'super_admin') {
-    redirect('/admin?error=unauthorized');
+    redirect('/dashboard/admin?denied=1');
   }
 
   // Fetch from the custom security definer function since schema `auth` is restricted

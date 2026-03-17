@@ -9,7 +9,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useReaderMode } from '@/context/ReaderModeContext';
 import { useTheme } from 'next-themes';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
-import { ArrowLeft, Eye, User as UserIcon, Search } from 'lucide-react';
+import { Eye, User as UserIcon, Search } from 'lucide-react';
 import { SA_SECTIONS, ADMIN_SECTIONS, EDITOR_SECTIONS } from '../navigation/nav-items';
 import HomeSearchBar from '@/components/ui/HomeSearchBar';
 
@@ -205,16 +205,21 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
               </button>
             )}
 
-            {/* ── Return to Dashboard button — ONLY on home page ── */}
-            {isPrivilegedRole && isOnReaderSide && pathname === '/' && (
+            {/* ── Go to Dashboard button — visible on all reader pages for privileged roles ── */}
+            {isPrivilegedRole && isOnReaderSide && (
               <Link
                 id="return-dashboard-btn"
                 href={role === 'super_admin' || role === 'admin' ? '/admin' : '/editor'}
-                className="flex items-center gap-1.5 px-3 h-8 rounded-full font-bold transition-transform active:scale-95 hover:bg-[var(--color-surface-2)] text-[var(--color-text)] border border-[var(--color-border)] mr-1"
-                title={`Return to ${dashboardLabel}`}
+                className="flex items-center gap-1.5 px-3 h-8 rounded-full font-bold transition-all active:scale-95 hover:bg-[var(--color-surface-2)] text-[var(--color-text)] border border-[var(--color-border)]"
+                title={`Go to ${dashboardLabel}`}
               >
-                <ArrowLeft size={16} strokeWidth={2.5} />
-                <span className="text-[10px] uppercase tracking-wider leading-none font-black mt-px">Dash</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 flex-shrink-0">
+                  <rect x="3" y="3" width="7" height="7" rx="1"/>
+                  <rect x="14" y="3" width="7" height="7" rx="1"/>
+                  <rect x="3" y="14" width="7" height="7" rx="1"/>
+                  <rect x="14" y="14" width="7" height="7" rx="1"/>
+                </svg>
+                <span className="text-[10px] uppercase tracking-wider leading-none font-black">Dashboard</span>
               </Link>
             )}
 
@@ -500,7 +505,12 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                         <button onClick={() => { setIsMenuOpen(false); handleReturnToDashboard(); }}
                           className="flex items-center gap-3.5 px-4 py-3.5 w-full hover:bg-[var(--color-surface)] transition-colors active:scale-[0.98]">
                           <div className="w-9 h-9 rounded-xl bg-[#685de6]/10 border border-[#685de6]/20 flex items-center justify-center text-[#685de6]">
-                            <ArrowLeft className="w-4 h-4" />
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                              <rect x="3" y="3" width="7" height="7" rx="1"/>
+                              <rect x="14" y="3" width="7" height="7" rx="1"/>
+                              <rect x="3" y="14" width="7" height="7" rx="1"/>
+                              <rect x="14" y="14" width="7" height="7" rx="1"/>
+                            </svg>
                           </div>
                           <span className="text-sm font-semibold text-[#685de6] flex-1 text-left">{dashboardLabel}</span>
                         </button>

@@ -1,34 +1,29 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Plus, Eye, FileText, BarChart2, Bell, Sparkles } from 'lucide-react';
-import { 
-  PresenceWrapper, 
-  PresenceHeader,
-  PresenceCard,
-  PresenceButton 
-} from '@/components/PresenceUI';
+import { Eye, FileText, BarChart2, SquarePen } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 const STATUS_META: Record<string, { label: string; color: string }> = {
-  draft:     { label: 'Draft',          color: '#94a3b8' },
-  in_review: { label: 'Under Review',  color: '#f59e0b' },
-  published: { label: 'Published',     color: '#10b981' },
-  archived:  { label: 'Archived',      color: '#8b5cf6' },
+  draft:     { label: 'Draft',        color: '#94a3b8' },
+  in_review: { label: 'In Review',    color: '#f59e0b' },
+  published: { label: 'Published',    color: '#10b981' },
+  archived:  { label: 'Archived',     color: '#8b5cf6' },
 };
 
 export default async function EditorArticlesPage() {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/sign-in');
 
   const { data: profile } = await supabase
-    .from('profiles').select('full_name, role').eq('id', user.id).single();
+    .from('profiles').select('full_name, role').eq('id', user.id).maybeSingle();
 
-  if (!profile || profile.role !== 'editor') redirect('/login');
+  if (!profile || profile.role !== 'editor') redirect('/sign-in');
 
+  // Only fetch THIS editor's own articles — enforced server-side
   const { data: articles, error } = await supabase
     .from('articles')
     .select('id, title, status, slug, updated_at, created_at')
@@ -38,105 +33,127 @@ export default async function EditorArticlesPage() {
 
   if (error) console.error('Error fetching articles:', error);
 
+  // View counts
   const articleIds = (articles ?? []).map(a => a.id);
   const viewCounts: Record<string, number> = {};
-
   if (articleIds.length > 0) {
     const { data: viewRows } = await supabase
-      .from('article_views')
-      .select('article_id')
-      .in('article_id', articleIds);
-
+      .from('article_views').select('article_id').in('article_id', articleIds);
     for (const row of viewRows ?? []) {
       viewCounts[row.article_id] = (viewCounts[row.article_id] ?? 0) + 1;
     }
   }
 
-  const initials = (profile?.full_name || 'E').charAt(0).toUpperCase();
-
   return (
-    <PresenceWrapper>
-      <PresenceHeader 
-        title="Presence"
-        roleLabel={`Author Dashboard · ${articles?.length ?? 0} Articles`}
-        initials={initials}
-        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Node={<Plus className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Href="/editor/articles/new"
-      />
-      
-      <div className="-mt-12 space-y-4 relative z-20 max-w-4xl mx-auto">
-        
-        {/* Workflow Legend */}
-        <PresenceCard className="bg-[#f0f2ff] dark:bg-indigo-500/5 border-none p-5 flex flex-wrap gap-4 items-center justify-center">
-          {Object.entries(STATUS_META).map(([key, meta]) => (
-            <div key={key} className="flex items-center gap-2">
-               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: meta.color }} />
-               <span className="text-[10px] font-black uppercase tracking-widest text-indigo-300">{meta.label}</span>
-            </div>
-          ))}
-        </PresenceCard>
+    <div className="flex flex-col gap-4 w-full">
 
-        {/* Article Grid */}
-        {!articles || articles.length === 0 ? (
-          <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
-            <FileText className="w-16 h-16 mb-5 text-indigo-100" />
-            <p className="font-black text-xl text-gray-400 uppercase tracking-widest">No Articles Found</p>
-            <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mt-2">Start writing your first article now.</p>
-          </PresenceCard>
-        ) : (
-          <div className="space-y-4">
-            {articles.map(article => {
-              const status = article.status ?? 'draft';
-              const meta   = STATUS_META[status] || STATUS_META.draft;
-              const views  = viewCounts[article.id] ?? 0;
-
-              return (
-                <PresenceCard key={article.id} noPadding className="group overflow-hidden">
-                   <div className="flex items-stretch min-h-[100px]">
-                      {/* Status Strip */}
-                      <div className="w-2 shrink-0 transition-opacity group-hover:opacity-60" style={{ backgroundColor: meta.color }} />
-                      
-                      <div className="flex-1 p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-                         <div className="flex items-center gap-5 min-w-0 flex-1">
-                            <div className="w-14 h-14 rounded-2xl bg-gray-50 dark:bg-white/5 flex items-center justify-center text-[#5c4ae4] shrink-0 shadow-inner group-hover:scale-110 transition-transform">
-                               <Sparkles className="w-7 h-7" />
-                            </div>
-                            <div className="min-w-0">
-                               <h2 className="text-xl font-black text-[#1b1929] dark:text-white uppercase tracking-tight truncate group-hover:text-[#5c4ae4] transition-colors">{article.title}</h2>
-                               <div className="flex items-center gap-3 mt-1 flex-wrap">
-                                  <span className="px-3 py-1 rounded-lg bg-gray-50 text-[9px] font-black uppercase tracking-widest text-gray-400 border border-gray-100">
-                                    {meta.label}
-                                  </span>
-                                  <span className="flex items-center gap-1.5 text-[9px] font-black text-indigo-300 uppercase tracking-[0.2em]">
-                                     <BarChart2 className="w-3 h-3" /> {views.toLocaleString()} Views
-                                  </span>
-                               </div>
-                            </div>
-                         </div>
-
-                         <div className="flex items-center gap-3 shrink-0">
-                            {status === 'published' && article.slug && (
-                              <Link href={`/articles/${article.slug}`} target="_blank">
-                                <button className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-all shadow-sm">
-                                   <Eye className="w-5 h-5" />
-                                </button>
-                              </Link>
-                            )}
-                            <Link href={`/editor/articles/${article.id}/edit`}>
-                               <PresenceButton className="px-8 h-12 bg-indigo-50 border-none text-[#5c4ae4] hover:bg-[#5c4ae4] hover:text-white font-black text-[10px] uppercase tracking-widest">
-                                  Edit Article
-                               </PresenceButton>
-                            </Link>
-                         </div>
-                      </div>
-                   </div>
-                </PresenceCard>
-              );
-            })}
-          </div>
-        )}
+      {/* Page heading */}
+      <div className="pt-2 flex items-center justify-between">
+        <div>
+          <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight">My Work</h1>
+          <p className="text-[13px] text-[var(--color-muted)] mt-0.5">
+            {articles?.length ?? 0} article{(articles?.length ?? 0) !== 1 ? 's' : ''} assigned to you
+          </p>
+        </div>
+        <Link
+          href="/editor/articles/new"
+          className="flex items-center gap-1.5 px-3 h-9 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors text-[var(--color-text)] active:scale-95 font-bold text-[12px]"
+        >
+          <SquarePen size={14} strokeWidth={2} />
+          Write
+        </Link>
       </div>
-    </PresenceWrapper>
+
+      {/* Status legend */}
+      <div className="flex flex-wrap gap-3">
+        {Object.entries(STATUS_META).map(([key, meta]) => (
+          <div key={key} className="flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: meta.color }} />
+            <span className="text-[11px] font-bold text-[var(--color-muted)] uppercase tracking-wide">{meta.label}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Article list */}
+      {!articles || articles.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center gap-3 bg-[var(--color-surface)] rounded-xl border border-dashed border-[var(--color-border)]">
+          <FileText size={32} className="text-[var(--color-muted)] opacity-30" />
+          <p className="text-[15px] font-bold text-[var(--color-text)]">No articles yet</p>
+          <p className="text-[13px] text-[var(--color-muted)]">When the admin assigns you content it will appear here.</p>
+          <Link
+            href="/editor/articles/new"
+            className="mt-2 px-4 py-2.5 rounded-xl bg-[var(--color-primary)] text-white text-[12px] font-bold uppercase tracking-wider active:scale-95 transition-all"
+          >
+            Write First Article
+          </Link>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {articles.map(article => {
+            const status = article.status ?? 'draft';
+            const meta   = STATUS_META[status] || STATUS_META.draft;
+            const views  = viewCounts[article.id] ?? 0;
+            const isEditable = ['draft', 'in_review'].includes(status);
+
+            return (
+              <div
+                key={article.id}
+                className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] overflow-hidden"
+              >
+                <div className="flex items-stretch">
+                  {/* Status strip */}
+                  <div className="w-1 shrink-0" style={{ backgroundColor: meta.color }} />
+
+                  <div className="flex-1 flex items-center gap-3 px-4 py-4">
+                    {/* Text */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[14px] font-bold text-[var(--color-text)] truncate leading-tight">
+                        {article.title}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[10px] font-black uppercase tracking-wider" style={{ color: meta.color }}>
+                          {meta.label}
+                        </span>
+                        <span className="text-[11px] text-[var(--color-muted)]">
+                          · {new Date(article.updated_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                        </span>
+                        {views > 0 && (
+                          <span className="flex items-center gap-0.5 text-[11px] text-[var(--color-muted)]">
+                            · <BarChart2 size={11} strokeWidth={2} className="ml-0.5" /> {views}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2 shrink-0">
+                      {status === 'published' && article.slug && (
+                        <Link
+                          href={`/articles/${article.slug}`}
+                          target="_blank"
+                          className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center hover:bg-emerald-500/20 transition-colors"
+                          title="View published article"
+                        >
+                          <Eye size={16} strokeWidth={2} />
+                        </Link>
+                      )}
+                      {isEditable && (
+                        <Link
+                          href={`/editor/articles/${article.id}/edit`}
+                          className="flex items-center gap-1.5 px-3 h-9 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/20 transition-colors text-[12px] font-bold"
+                        >
+                          <SquarePen size={13} strokeWidth={2} />
+                          Edit
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }

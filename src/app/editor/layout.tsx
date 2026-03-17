@@ -1,38 +1,40 @@
-import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { getCachedProfile } from '@/lib/auth/getCachedProfile';
+import DashboardShell from '@/components/dashboard/DashboardShell';
+import { EDITOR_NAV_ITEMS } from './editor-nav';
 
 export const dynamic = 'force-dynamic';
 
 export default async function EditorLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { user, profile } = await getCachedProfile();
 
-  if (!user) redirect('/login');
+  // 1. Not authenticated → sign-in
+  if (!user) redirect('/sign-in');
 
-  let profile = null;
-  try {
-    const { data: p } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-    profile = p;
-  } catch (e) {
-    console.error('Editor layout fetching error:', e);
-  }
+  const role = profile?.role as string | undefined;
 
-  // ── Defence-in-depth: only editors allowed here ─────────────────
-  // 1. Not authenticated at all → send to login
-  // 2. Authenticated but not an editor → send to reader home (not /login, to avoid re-auth loop)
-  if (!profile || profile.role !== 'editor') {
+  // 2. Only editors allowed — others go to their own dashboard
+  if (!role || role !== 'editor') {
     redirect('/');
   }
 
   return (
-    <div className="flex-1 w-full bg-[var(--color-background)]">
-      <div className="w-full max-w-[1400px] mx-auto min-h-screen">
-        {children}
-      </div>
-    </div>
+    <DashboardShell
+      user={{
+        id: user.id,
+        email: user.email,
+        user_metadata: user.user_metadata,
+      }}
+      profile={{
+        full_name:  profile?.full_name  ?? null,
+        avatar_url: profile?.avatar_url ?? null,
+        role:       role,
+      }}
+      role={role}
+      roleLabel="Editor Workspace"
+      navItems={EDITOR_NAV_ITEMS}
+    >
+      {children}
+    </DashboardShell>
   );
 }

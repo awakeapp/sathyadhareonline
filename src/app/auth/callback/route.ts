@@ -73,5 +73,5 @@ export async function GET(request: NextRequest) {
   }
 
   // Fallback — send back to login with error indicator
-  return NextResponse.redirect(new URL('/login?error=oauth_failed', request.url))
+  return NextResponse.redirect(new URL('/sign-in?error=oauth_failed', request.url))
 }

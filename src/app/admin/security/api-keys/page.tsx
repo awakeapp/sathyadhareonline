@@ -12,7 +12,7 @@ export default async function ApiKeysPage() {
 
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (!profile || profile.role !== 'super_admin') {
-    redirect('/admin?error=unauthorized');
+    redirect('/dashboard/admin?denied=1');
   }
 
   // Fetch only the API keys since schema `auth` is restricted

@@ -16,7 +16,7 @@ export default async function PlansPage() {
   if (!user) redirect('/login');
 
   const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).maybeSingle();
-  if (!profile || profile.role !== 'super_admin') redirect('/admin?error=unauthorized');
+  if (!profile || profile.role !== 'super_admin') redirect('/dashboard/admin?denied=1');
 
   const { data: plans } = await supabase.from('subscription_plans').select('*').order('created_at', { ascending: true });
 

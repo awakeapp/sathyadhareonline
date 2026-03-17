@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 export default async function SavedPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/sign-in');
 
   const { data: bookmarks } = await supabase
     .from('bookmarks')

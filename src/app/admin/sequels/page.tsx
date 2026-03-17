@@ -22,7 +22,7 @@ export default async function SequelsPage() {
     .maybeSingle();
 
   if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
-    redirect('/admin?error=unauthorized');
+    redirect('/dashboard/admin?denied=1');
   }
 
   const { data: sequels, error } = await supabase

@@ -37,7 +37,7 @@ export default async function MorePage() {
     .eq('id', user.id)
     .maybeSingle();
   
-  if (!profile || profile.role !== 'super_admin') redirect('/admin?error=unauthorized');
+  if (!profile || profile.role !== 'super_admin') redirect('/dashboard/admin?denied=1');
 
   return (
     <div className="min-h-screen bg-[#f2f2f6] dark:bg-black pt-[var(--admin-header-h,60px)] pb-[80px]">
