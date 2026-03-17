@@ -10,7 +10,7 @@ export default async function NewArticlePage() {
 
   // Determine user role
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/sign-in');
 
   const { data: profile } = await supabase
     .from('profiles')

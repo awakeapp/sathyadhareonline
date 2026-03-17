@@ -16,7 +16,7 @@ async function verifyStaff() {
   return { user, role, supabase };
 }
 
-export async function createSequelAction(data: { title: string, description: string, bannerUrl: string, status?: string }) {
+export async function createSequelAction(data: { title: string, description: string, bannerUrl: string, categoryId?: string, status?: string }) {
   try {
     const { user, role, supabase } = await verifyStaff();
     
@@ -35,6 +35,7 @@ export async function createSequelAction(data: { title: string, description: str
         slug,
         description: data.description,
         banner_image: data.bannerUrl,
+        category_id: data.categoryId || null,
         status: status
       });
 
@@ -50,7 +51,7 @@ export async function createSequelAction(data: { title: string, description: str
   }
 }
 
-export async function updateSequelAction(id: string, data: { title: string, description: string, bannerUrl: string, status?: string }) {
+export async function updateSequelAction(id: string, data: { title: string, description: string, bannerUrl: string, categoryId?: string, status?: string }) {
   try {
     const { user, role, supabase } = await verifyStaff();
     
@@ -64,6 +65,7 @@ export async function updateSequelAction(id: string, data: { title: string, desc
         title: data.title,
         description: data.description,
         banner_image: data.bannerUrl,
+        category_id: data.categoryId || null,
         status: data.status
       })
       .eq('id', id);

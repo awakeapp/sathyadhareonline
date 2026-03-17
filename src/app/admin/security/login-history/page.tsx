@@ -9,7 +9,7 @@ export default async function LoginHistoryPage() {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/sign-in');
 
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (!profile || profile.role !== 'super_admin') {

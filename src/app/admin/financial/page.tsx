@@ -5,7 +5,7 @@ export default async function FinancialPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    redirect('/login');
+    redirect('/sign-in');
   }
 
   const { data: profile } = await supabase

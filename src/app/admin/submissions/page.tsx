@@ -13,7 +13,7 @@ export default async function SubmissionsPage() {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/sign-in');
 
   const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).maybeSingle();
   if (!profile || !['admin', 'super_admin'].includes(profile.role)) redirect('/admin');

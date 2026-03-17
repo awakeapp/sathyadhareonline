@@ -22,6 +22,7 @@ export interface Category {
   icon_name: string | null;
   sort_order: number;
   article_count: number;
+  type: 'article' | 'sequel';
 }
 
 interface Props { categories: Category[] }
@@ -53,17 +54,21 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
   const [createName, setCreateName] = useState('');
   const [createSlug, setCreateSlug] = useState('');
   const [createDesc, setCreateDesc] = useState('');
+  const [createType, setCreateType] = useState<'article' | 'sequel'>('article');
   const [slugTouched, setSlugTouched] = useState(false);
 
   const [editTarget, setEditTarget] = useState<Category | null>(null);
   const [editName, setEditName] = useState('');
   const [editSlug, setEditSlug] = useState('');
   const [editDesc, setEditDesc] = useState('');
+  const [editType, setEditType] = useState<'article' | 'sequel'>('article');
+
+  const [activeTab, setActiveTab] = useState<'article' | 'sequel'>('article');
 
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
 
   const resetCreate = () => {
-    setCreateName(''); setCreateSlug(''); setCreateDesc(''); setSlugTouched(false);
+    setCreateName(''); setCreateSlug(''); setCreateDesc(''); setCreateType('article'); setSlugTouched(false);
   };
 
   const openEdit = useCallback((cat: Category) => {
@@ -71,6 +76,7 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
     setEditName(cat.name);
     setEditSlug(cat.slug);
     setEditDesc(cat.description ?? '');
+    setEditType(cat.type || 'article');
   }, []);
 
   const handleCreate = () => {
@@ -82,6 +88,7 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
           name: createName.trim(),
           slug: createSlug.trim(),
           description: createDesc.trim() || null,
+          type: createType,
         }),
       });
       const json = await res.json();
@@ -107,6 +114,7 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
           slug: editSlug.trim(),
           description: editDesc.trim() || null,
           icon_name: editTarget.icon_name,
+          type: editType,
         }),
       });
       const json = await res.json();
@@ -114,7 +122,7 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
 
       setCats(prev => prev.map(c =>
         c.id === editTarget.id
-          ? { ...c, name: editName.trim(), slug: editSlug.trim(), description: editDesc.trim() || null }
+          ? { ...c, name: editName.trim(), slug: editSlug.trim(), description: editDesc.trim() || null, type: editType }
           : c
       ));
       setEditTarget(null);
@@ -159,6 +167,8 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
       .finally(() => setReordering(false));
   }, [cats]);
 
+  const filteredCats = cats.filter(c => c.type === activeTab);
+
   return (
     <>
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
@@ -166,22 +176,38 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
            <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50">Content Categories</h2>
            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Structure & Navigation</p>
         </div>
-        <PresenceButton onClick={() => setCreateOpen(true)} className="h-11 px-6 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900">
+        <PresenceButton onClick={() => { setCreateType(activeTab); setCreateOpen(true); }} className="h-11 px-6 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900">
            <Plus className="w-5 h-5 mr-2" strokeWidth={1.25} /> New Category
         </PresenceButton>
       </div>
 
+      <div className="flex bg-zinc-100 dark:bg-white/5 p-1 rounded-2xl mb-6 max-w-[400px]">
+        {(['article', 'sequel'] as const).map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`flex-1 py-2.5 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+              activeTab === tab 
+                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-sm' 
+                : 'text-zinc-500 hover:text-zinc-700'
+            }`}
+          >
+            {tab}s
+          </button>
+        ))}
+      </div>
+
       <div className="space-y-4">
-        {cats.length === 0 ? (
+        {filteredCats.length === 0 ? (
           <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
             <FolderOpen className="w-16 h-16 mb-5 text-indigo-100" />
-            <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">No Categories</p>
-            <PresenceButton onClick={() => setCreateOpen(true)} className="mt-8 bg-indigo-50 !text-zinc-900 dark:text-zinc-50 hover:bg-indigo-100 shadow-none">
+            <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">No {activeTab} Categories</p>
+            <PresenceButton onClick={() => { setCreateType(activeTab); setCreateOpen(true); }} className="mt-8 bg-indigo-50 !text-zinc-900 dark:text-zinc-50 hover:bg-indigo-100 shadow-none">
               Create Category
             </PresenceButton>
           </PresenceCard>
         ) : (
-          cats.map((cat, idx) => {
+          filteredCats.map((cat, idx) => {
              const pill = PILL_COLORS[idx % PILL_COLORS.length];
              const initials = cat.name.charAt(0).toUpperCase();
 
@@ -206,7 +232,7 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
                         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-1">
                            <p className="font-black text-xl tracking-tight text-zinc-900 dark:text-zinc-50 truncate">{cat.name}</p>
                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                              /{cat.slug}
+                               /{cat.slug}
                            </span>
                         </div>
                         <div className="flex flex-wrap justify-center md:justify-start items-center gap-x-5 gap-y-1">
@@ -253,6 +279,25 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
                <label className="text-[11px] font-black uppercase text-zinc-500">Description</label>
                <textarea rows={3} className="w-full rounded-2xl bg-zinc-50 dark:bg-white/5 border-none p-4 text-sm font-medium focus:ring-2 focus:ring-indigo-500/20" placeholder="Optional details..." value={createDesc} onChange={e => setCreateDesc(e.target.value)} />
              </div>
+             <div className="space-y-1.5">
+                <label className="text-[11px] font-black uppercase text-zinc-500">Category Type</label>
+                <div className="flex gap-2">
+                  {(['article', 'sequel'] as const).map(t => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setCreateType(t)}
+                      className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
+                        createType === t 
+                          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-transparent' 
+                          : 'bg-zinc-50 dark:bg-white/5 text-zinc-500 border-transparent'
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
              <ModalFooter>
                 <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
                 <Button onClick={handleCreate} disabled={!createName.trim() || isPending} className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white">Create Category</Button>
@@ -280,6 +325,25 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
                <label className="text-[11px] font-black uppercase text-zinc-500">Description</label>
                <textarea rows={3} className="w-full rounded-2xl bg-zinc-50 dark:bg-white/5 border-none p-4 text-sm font-medium focus:ring-2 focus:ring-indigo-500/20" value={editDesc} onChange={e => setEditDesc(e.target.value)} />
              </div>
+             <div className="space-y-1.5">
+                <label className="text-[11px] font-black uppercase text-zinc-500">Category Type</label>
+                <div className="flex gap-2">
+                  {(['article', 'sequel'] as const).map(t => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setEditType(t)}
+                      className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
+                        editType === t 
+                          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-transparent' 
+                          : 'bg-zinc-50 dark:bg-white/5 text-zinc-500 border-transparent'
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
              <ModalFooter>
                 <Button variant="outline" onClick={() => setEditTarget(null)}>Cancel</Button>
                 <Button onClick={handleUpdate} disabled={isPending} className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white">Save Changes</Button>
@@ -290,16 +354,16 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
 
       <Modal open={!!deleteTarget} onOpenChange={v => !v && setDeleteTarget(null)}>
         <ModalContent>
-           <ModalHeader>
-              <ModalTitle className="text-rose-500">Delete Category?</ModalTitle>
-              <ModalDescription>
-                 Are you sure? Articles in <span className="font-bold">{deleteTarget?.name}</span> will be uncategorised.
-              </ModalDescription>
-           </ModalHeader>
-           <ModalFooter>
-              <Button variant="outline" onClick={() => setDeleteTarget(null)}>No, Keep</Button>
-              <Button variant="destructive" onClick={handleDelete} disabled={isPending}>Yes, Delete</Button>
-           </ModalFooter>
+          <ModalHeader>
+            <ModalTitle className="text-rose-500">Delete Category?</ModalTitle>
+            <ModalDescription>
+              Are you sure? Articles in <span className="font-bold">{deleteTarget?.name}</span> will be uncategorised.
+            </ModalDescription>
+          </ModalHeader>
+          <ModalFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>No, Keep</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={isPending}>Yes, Delete</Button>
+          </ModalFooter>
         </ModalContent>
       </Modal>
 

@@ -25,7 +25,7 @@ export default async function TrashPage() {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/sign-in');
 
   const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).maybeSingle();
   if (!profile || profile.role !== 'super_admin') {

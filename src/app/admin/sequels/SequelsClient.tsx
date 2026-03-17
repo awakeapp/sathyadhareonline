@@ -16,11 +16,17 @@ interface Sequel {
   title: string;
   description: string | null;
   banner_image: string | null;
+  category_id: string | null;
   status: string;
   article_count: number;
 }
 
-export default function SequelsClient({ initialSequels }: { initialSequels: Sequel[] }) {
+interface Props {
+  initialSequels: Sequel[];
+  categories: { id: string; name: string }[];
+}
+
+export default function SequelsClient({ initialSequels, categories }: Props) {
   const [isPending, startTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -30,6 +36,7 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [bannerUrl, setBannerUrl] = useState('');
+  const [categoryId, setCategoryId] = useState('');
 
   const filteredSequels = initialSequels.filter(s => 
     s.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -40,6 +47,7 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
     setTitle('');
     setDescription('');
     setBannerUrl('');
+    setCategoryId('');
     setEditingId(null);
     setShowModal(true);
   };
@@ -48,6 +56,7 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
     setTitle(s.title);
     setDescription(s.description || '');
     setBannerUrl(s.banner_image || '');
+    setCategoryId(s.category_id || '');
     setEditingId(s.id);
     setShowModal(true);
   };
@@ -58,9 +67,9 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
     startTransition(async () => {
       let res;
       if (editingId) {
-        res = await updateSequelAction(editingId, { title, description, bannerUrl });
+        res = await updateSequelAction(editingId, { title, description, bannerUrl, categoryId: categoryId || undefined });
       } else {
-        res = await createSequelAction({ title, description, bannerUrl });
+        res = await createSequelAction({ title, description, bannerUrl, categoryId: categoryId || undefined });
       }
 
       if (res?.error) {
@@ -181,6 +190,19 @@ export default function SequelsClient({ initialSequels }: { initialSequels: Sequ
                      placeholder="Collection summary..." 
                      className="w-full p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-sm font-bold shadow-inner placeholder-gray-300 resize-none h-24"
                    />
+                 </div>
+                 <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Sequel Category</label>
+                    <select 
+                      value={categoryId} 
+                      onChange={e => setCategoryId(e.target.value)} 
+                      className="w-full h-12 px-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border-none text-sm font-bold shadow-inner"
+                    >
+                      <option value="">No Category</option>
+                      {categories.map(cat => (
+                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      ))}
+                    </select>
                  </div>
                  <div className="space-y-2">
                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50">Visual Banner (Asset URL)</label>

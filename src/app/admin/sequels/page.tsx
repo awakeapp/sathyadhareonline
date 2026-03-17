@@ -20,15 +20,22 @@ export default async function SequelsPage() {
     redirect('/admin?denied=1');
   }
 
-  const { data: sequels, error } = await supabase
+   const { data: sequels, error } = await supabase
     .from('sequels')
-    .select('id, title, description, banner_image, status')
+    .select('id, title, description, banner_image, status, category_id')
     .eq('is_deleted', false)
     .order('created_at', { ascending: false });
 
   if (error) {
     console.error('Error fetching sequels:', error);
   }
+
+  // Fetch sequel categories
+  const { data: categories } = await supabase
+    .from('categories')
+    .select('id, name')
+    .eq('type', 'sequel')
+    .order('sort_order', { ascending: true });
 
   const { data: countsData } = await supabase
     .from('sequel_articles')
@@ -52,7 +59,10 @@ export default async function SequelsPage() {
       </div>
 
       <div className="w-full">
-        <SequelsClient initialSequels={sequelsWithCounts} />
+        <SequelsClient 
+          initialSequels={sequelsWithCounts} 
+          categories={categories || []}
+        />
       </div>
     </div>
   );

@@ -28,9 +28,9 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json() as {
-    name: string; slug: string; description?: string; icon_name?: string;
+    name: string; slug: string; description?: string; icon_name?: string; type?: string;
   };
-  const { name, slug, description, icon_name } = body;
+  const { name, slug, description, icon_name, type } = body;
 
   if (!name?.trim() || !slug?.trim()) {
     return NextResponse.json({ error: 'Name and slug are required' }, { status: 400 });
@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
   const { data: maxRow } = await supabase
     .from('categories')
     .select('sort_order')
+    .eq('type', type || 'article')
     .order('sort_order', { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -53,8 +54,9 @@ export async function POST(req: NextRequest) {
       description: description?.trim() || null,
       icon_name: icon_name?.trim() || null,
       sort_order: nextOrder,
+      type: type || 'article',
     })
-    .select('id, name, slug, description, icon_name, sort_order')
+    .select('id, name, slug, description, icon_name, sort_order, type')
     .single();
 
   if (dbError) {
@@ -73,9 +75,9 @@ export async function PATCH(req: NextRequest) {
   }
 
   const body = await req.json() as {
-    id: string; name: string; slug: string; description?: string; icon_name?: string | null;
+    id: string; name: string; slug: string; description?: string; icon_name?: string | null; type?: string;
   };
-  const { id, name, slug, description, icon_name } = body;
+  const { id, name, slug, description, icon_name, type } = body;
 
   if (!id || !name?.trim() || !slug?.trim()) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -88,6 +90,7 @@ export async function PATCH(req: NextRequest) {
       slug: slug.trim(),
       description: description?.trim() || null,
       icon_name: icon_name || null,
+      type: type || 'article',
     })
     .eq('id', id);
 
