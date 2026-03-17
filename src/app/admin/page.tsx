@@ -1,5 +1,3 @@
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { GlobalSearchBar } from '@/components/PresenceUI';
 import DashboardMetrics from './DashboardMetrics';
@@ -11,23 +9,7 @@ const AccessDeniedBanner = nextDynamic(() => import('./AccessDeniedBanner'));
 export const dynamic = 'force-dynamic';
 
 export default async function AdminPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/sign-in');
-
-  let profile: { full_name: string | null; role: string } | null = null;
-  try {
-    const { data: p } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).maybeSingle();
-    profile = p;
-  } catch { /* ignore */ }
-
-  const role = profile?.role;
-  if (!role || (role !== 'super_admin' && role !== 'admin')) redirect('/');
-
   return (
-    /* The layout (AdminLayout → DashboardShell) already provides the
-       fixed header + bottom nav + padding. This page only renders
-       the scrollable inner content. */
     <div className="flex flex-col gap-4 w-full">
 
       {/* Access Denied notice (appears when ?denied=1 is in the URL) */}

@@ -16,44 +16,48 @@ export default async function DashboardMetrics() {
   const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   const nowStr = new Date().toISOString();
 
-  const results = await Promise.allSettled([
-    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('is_deleted', false),
-    supabase.from('article_views').select('*', { count: 'exact', head: true }).gte('viewed_at', thirtyDaysAgo.toISOString()),
-    supabase.from('profiles').select('*', { count: 'exact', head: true }).in('role', ['admin', 'editor', 'super_admin']),
-    supabase.from('comments').select('*', { count: 'exact', head: true }),
-    supabase.from('guest_submissions').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-    supabase.from('comments').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'published').gt('published_at', nowStr),
-    // Internal review counts
-    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'in_review').eq('is_deleted', false),
-    supabase.from('sequels').select('*', { count: 'exact', head: true }).eq('status', 'in_review').eq('is_deleted', false),
-    supabase.from('books').select('*', { count: 'exact', head: true }).eq('status', 'in_review').eq('is_deleted', false),
-    // Activity queries
-    supabase.from('articles').select('id, title, status, created_at, author:profiles!author_id(full_name)').eq('is_deleted', false).order('created_at', { ascending: false }).limit(3),
-    supabase.from('guest_submissions').select('id, name, title, created_at').order('created_at', { ascending: false }).limit(3),
-    supabase.from('comments').select('id, content, created_at, guest_name, profiles!user_id(full_name)').order('created_at', { ascending: false }).limit(3),
-  ]);
+  let results: any[] = [];
+  try {
+    results = await Promise.allSettled([
+      supabase.from('articles').select('*', { count: 'exact', head: true }).eq('is_deleted', false),
+      supabase.from('article_views').select('*', { count: 'exact', head: true }).gte('viewed_at', thirtyDaysAgo.toISOString()),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).in('role', ['admin', 'editor', 'super_admin']),
+      supabase.from('comments').select('*', { count: 'exact', head: true }),
+      supabase.from('guest_submissions').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabase.from('comments').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'published').gt('published_at', nowStr),
+      // Internal review counts
+      supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'in_review').eq('is_deleted', false),
+      supabase.from('sequels').select('*', { count: 'exact', head: true }).eq('status', 'in_review').eq('is_deleted', false),
+      // Activity queries
+      supabase.from('articles').select('id, title, status, created_at, author:profiles!author_id(full_name)').eq('is_deleted', false).order('created_at', { ascending: false }).limit(3),
+      supabase.from('guest_submissions').select('id, name, title, created_at').order('created_at', { ascending: false }).limit(3),
+      supabase.from('comments').select('id, content, created_at, guest_name, profiles!user_id(full_name)').order('created_at', { ascending: false }).limit(3),
+    ]);
+  } catch (e) {
+    console.error("DashboardMetrics: Query failure", e);
+  }
 
-  const gC = (i: number) => results[i].status === 'fulfilled' ? (results[i] as any).value?.count ?? 0 : 0;
-  const gD = (i: number) => results[i].status === 'fulfilled' ? (results[i] as any).value?.data ?? [] : [];
+  const gC = (i: number) => results[i]?.status === 'fulfilled' ? (results[i] as any).value?.count ?? 0 : 0;
+  const gD = (i: number) => results[i]?.status === 'fulfilled' ? (results[i] as any).value?.data ?? [] : [];
 
   const metrics = {
     totalArticles: gC(0),
     monthlyReaders: gC(1),
     activeAuthors: gC(2),
     communityEngagement: gC(3),
-    pendingSubmissions: gC(4) + gC(7) + gC(8) + gC(9), // Guests + Staff Articles + Sequels + Books
+    pendingSubmissions: gC(4) + gC(7) + gC(8), // Guests + Staff Articles + Sequels
     pendingComments: gC(5),
     scheduledArticles: gC(6),
   };
 
-  const aArts: DashboardActivity[] = (gD(10)).map((a: any) => ({
+  const aArts: DashboardActivity[] = (gD(9)).map((a: any) => ({
     id: a.id, type: 'article', title: `New article: ${a.title}`, user: (Array.isArray(a.author) ? a.author[0]?.full_name : a.author?.full_name) || 'Admin', ts: a.created_at, href: `/admin/articles/${a.id}/edit`
   }));
-  const aSubs: DashboardActivity[] = (gD(11)).map((s: any) => ({
+  const aSubs: DashboardActivity[] = (gD(10)).map((s: any) => ({
     id: s.id, type: 'submission', title: `Guest submission: ${s.title}`, user: s.name || 'Guest', ts: s.created_at, href: `/admin/inbox`
   }));
-  const aComs: DashboardActivity[] = (gD(12)).map((c: any) => ({
+  const aComs: DashboardActivity[] = (gD(11)).map((c: any) => ({
     id: c.id, type: 'comment', title: `Commented: "${(c.content || '').substring(0, 30)}..."`, user: (Array.isArray(c.profiles) ? c.profiles[0]?.full_name : c.profiles?.full_name) || c.guest_name || 'Anonymous', ts: c.created_at, href: `/admin/comments`
   }));
 
