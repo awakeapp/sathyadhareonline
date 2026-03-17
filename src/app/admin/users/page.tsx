@@ -65,7 +65,7 @@ export default async function AdminUsersPage() {
   // 4. Fetch ALL profiles via admin client (bypasses RLS)
   const { data: profileRows, error: profileError } = await adminClient
     .from('profiles')
-    .select('id, full_name, email, role, status, created_at')
+    .select('id, full_name, role, status, created_at')
     .order('created_at', { ascending: false });
 
   if (profileError) {
