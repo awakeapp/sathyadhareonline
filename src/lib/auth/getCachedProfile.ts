@@ -29,9 +29,22 @@ export const getCachedProfile = cache(async () => {
       })
       .select('*')
       .maybeSingle();
-      
-    return { user, profile: newProfile || null };
+
+    return { user, profile: newProfile || null, permissions: null };
   }
 
-  return { user, profile };
+  // Fetch content permissions
+  const { data: permissions } = await supabase
+    .from('user_content_permissions')
+    .select('*')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  const defaultPermissions = {
+    can_articles: profile.role === 'super_admin' ? true : (permissions?.can_articles ?? true),
+    can_sequels: profile.role === 'super_admin' ? true : (permissions?.can_sequels ?? false),
+    can_library: profile.role === 'super_admin' ? true : (permissions?.can_library ?? false),
+  };
+
+  return { user, profile, permissions: defaultPermissions };
 });

@@ -146,9 +146,17 @@ export async function reorderSequelArticlesAction(sequelId: string, articleIds: 
       }));
       const { error } = await supabase.from('sequel_articles').insert(inserts);
       if (error) throw error;
+
+      // Ensure all re-inserted articles are marked as non-standalone
+      await supabase
+        .from('articles')
+        .update({ is_standalone: false })
+        .in('id', articleIds);
     }
 
     revalidatePath(`/admin/sequels/${sequelId}/edit`);
+    revalidatePath('/sequels');
+    revalidatePath('/');
     return { success: true };
   } catch (err: unknown) {
     const error = err as Error;
@@ -177,6 +185,12 @@ export async function toggleSequelArticleAction(sequelId: string, articleId: str
         order_index: nextIndex
       });
       if (error) throw error;
+
+      // Mark article as non-standalone so it won't appear on home/articles pages
+      await supabase
+        .from('articles')
+        .update({ is_standalone: false })
+        .eq('id', articleId);
     } else {
       const { error } = await supabase
         .from('sequel_articles')
@@ -184,9 +198,26 @@ export async function toggleSequelArticleAction(sequelId: string, articleId: str
         .eq('sequel_id', sequelId)
         .eq('article_id', articleId);
       if (error) throw error;
+
+      // Check if article still belongs to any other sequel
+      const { data: remaining } = await supabase
+        .from('sequel_articles')
+        .select('sequel_id')
+        .eq('article_id', articleId)
+        .limit(1);
+
+      // If no longer in any sequel, restore it as standalone
+      if (!remaining || remaining.length === 0) {
+        await supabase
+          .from('articles')
+          .update({ is_standalone: true })
+          .eq('id', articleId);
+      }
     }
 
     revalidatePath(`/admin/sequels/${sequelId}/edit`);
+    revalidatePath('/sequels');
+    revalidatePath('/');
     return { success: true };
   } catch (err: unknown) {
     const error = err as Error;

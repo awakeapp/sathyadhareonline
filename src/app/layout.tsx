@@ -78,7 +78,7 @@ import { getCachedProfile } from '@/lib/auth/getCachedProfile'
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const { user, profile } = await getCachedProfile()
+  const { user, profile, permissions } = await getCachedProfile()
 
   return (
     <html lang="en" className={`${dmSans.variable} ${balooTamma.variable} ${notoSerifKannada.variable} ${notoSansKannada.variable} ${tiroKannada.variable}`} suppressHydrationWarning>
@@ -97,7 +97,7 @@ export default async function RootLayout({
               <GestureProvider>
                 <NavigationProgressBar />
                 <div className="flex min-h-screen">
-                  <NavigationWrapper role={profile?.role || null} />
+                  <NavigationWrapper role={profile?.role || null} permissions={permissions} />
                   
                   <div className="flex-1 flex flex-col min-w-0">
                     <TopHeader user={user} role={profile?.role || null} profile={profile} />

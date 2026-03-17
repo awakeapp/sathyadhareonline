@@ -176,9 +176,6 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
            <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50">Content Categories</h2>
            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Structure & Navigation</p>
         </div>
-        <PresenceButton onClick={() => { setCreateType(activeTab); setCreateOpen(true); }} className="h-11 px-6 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900">
-           <Plus className="w-5 h-5 mr-2" strokeWidth={1.25} /> New Category
-        </PresenceButton>
       </div>
 
       <div className="flex bg-zinc-100 dark:bg-white/5 p-1 rounded-2xl mb-6 max-w-[400px]">
@@ -202,9 +199,6 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
           <PresenceCard className="py-24 text-center border-dashed border-2 border-indigo-100 flex flex-col items-center">
             <FolderOpen className="w-16 h-16 mb-5 text-indigo-100" />
             <p className="font-black text-xl text-zinc-500 uppercase tracking-widest">No {activeTab} Categories</p>
-            <PresenceButton onClick={() => { setCreateType(activeTab); setCreateOpen(true); }} className="mt-8 bg-indigo-50 !text-zinc-900 dark:text-zinc-50 hover:bg-indigo-100 shadow-none">
-              Create Category
-            </PresenceButton>
           </PresenceCard>
         ) : (
           filteredCats.map((cat, idx) => {

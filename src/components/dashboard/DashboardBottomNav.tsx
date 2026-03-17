@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import * as Icons from 'lucide-react';
+import { useState } from 'react';
+import QuickActionMenu from './QuickActionMenu';
 
 /* ── Types ──────────────────────────────────────────────────────────── */
 
@@ -38,6 +40,11 @@ interface Props {
   items: DashNavItem[];
   /** Optional stable accent color. Falls back to --color-primary. */
   accentColor?: string;
+  permissions?: {
+    can_articles: boolean;
+    can_sequels: boolean;
+    can_library: boolean;
+  } | null;
 }
 
 /** Compute whether a nav item is active for the current pathname. */
@@ -67,27 +74,37 @@ function isItemActive(item: DashNavItem, pathname: string): boolean {
    — Mobile-first fixed bottom navigation bar shared across admin roles.
    — Accepts `items` so each role can supply its own tabs.
    — Supports matchPrefixes / excludePrefixes for complex active logic.
-══════════════════════════════════════════════════════════════════════ */
-export default function DashboardBottomNav({ items, accentColor = 'var(--color-primary)' }: Props) {
+  ══════════════════════════════════════════════════════════════════════ */
+export default function DashboardBottomNav({ items, accentColor = 'var(--color-primary)', permissions }: Props) {
   const pathname = usePathname();
+  const [isActionsOpen, setIsActionsOpen] = useState(false);
 
   return (
-    <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-surface)] border-t border-[var(--color-border)]"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-      aria-label="Dashboard bottom navigation"
-    >
-      <div className="flex items-center h-[60px] w-full max-w-[500px] mx-auto px-1">
-        {items.map(item => (
-          <DashNavTab
-            key={item.href}
-            item={item}
-            active={isItemActive(item, pathname)}
-            accentColor={accentColor}
-          />
-        ))}
-      </div>
-    </nav>
+    <>
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-surface)] border-t border-[var(--color-border)]"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        aria-label="Dashboard bottom navigation"
+      >
+        <div className="flex items-center h-[60px] w-full max-w-[500px] mx-auto px-1">
+          {items.map(item => (
+            <DashNavTab
+              key={item.href}
+              item={item}
+              active={isItemActive(item, pathname)}
+              accentColor={accentColor}
+              onAction={() => setIsActionsOpen(true)}
+            />
+          ))}
+        </div>
+      </nav>
+
+      <QuickActionMenu 
+        isOpen={isActionsOpen} 
+        onClose={() => setIsActionsOpen(false)} 
+        permissions={permissions}
+      />
+    </>
   );
 }
 
@@ -96,15 +113,33 @@ function DashNavTab({
   item,
   active,
   accentColor,
+  onAction,
 }: {
   item: DashNavItem;
   active: boolean;
   accentColor: string;
+  onAction: () => void;
 }) {
   const { href, label, icon: iconName } = item;
   
   // Resolve icon component from string
   const Icon = (Icons as any)[iconName] || Icons.HelpCircle;
+
+  const isQuickAction = href === '#quick-action';
+
+  if (isQuickAction) {
+    return (
+      <button
+        onClick={onAction}
+        className="relative flex-1 flex flex-col items-center justify-center transition-none active:opacity-70 select-none tap-highlight-none focus:outline-none"
+        style={{ color: 'var(--color-muted)' }}
+      >
+        <div className="w-12 h-12 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center shadow-lg shadow-[var(--color-primary)]/20 active:scale-95 transition-transform">
+          <Icons.Plus size={24} strokeWidth={2.5} />
+        </div>
+      </button>
+    );
+  }
 
   return (
     <Link
@@ -122,7 +157,7 @@ function DashNavTab({
     >
       {/* Icon */}
       <Icon
-        size={24}
+        size={22}
         strokeWidth={active ? 2.25 : 1.75}
         aria-hidden="true"
       />

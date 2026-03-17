@@ -278,13 +278,6 @@ export default function BannersClient({ initialBanners }: Props) {
             {banners.length} banner{banners.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <button
-          onClick={openNew}
-          className="flex items-center gap-2 h-10 px-4 rounded-2xl bg-[#685de6] text-white text-sm font-black shadow-md shadow-[#685de6]/25 active:scale-95 transition-all"
-        >
-          <Plus size={16} strokeWidth={2.5} />
-          Add Banner
-        </button>
       </div>
 
       {/* ── Banner list ── */}
@@ -298,13 +291,6 @@ export default function BannersClient({ initialBanners }: Props) {
             <p className="text-sm text-[var(--color-muted)] mb-6 max-w-[240px]">
               Add banner images to show on the reader home page. They slide automatically.
             </p>
-            <button
-              onClick={openNew}
-              className="flex items-center gap-2 h-11 px-6 rounded-2xl bg-[#685de6] text-white text-sm font-black shadow-md shadow-[#685de6]/20 active:scale-95 transition-all"
-            >
-              <Plus size={16} strokeWidth={2.5} />
-              Add First Banner
-            </button>
           </div>
         ) : (
           banners.map(b => (

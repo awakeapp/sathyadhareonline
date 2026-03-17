@@ -4,7 +4,6 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 import { logAuditEvent } from '@/lib/audit';
-
 import { verifyRole } from '@/lib/auth-server';
 
 const SUPER_ADMIN = 'super_admin';
@@ -29,30 +28,25 @@ export async function createUserAction(formData: FormData) {
       email,
       password,
       email_confirm: true,
-      user_metadata: { full_name: fullName, role }
+      user_metadata: { full_name: fullName, role },
     });
 
     if (authError) throw authError;
 
-    // Profile is usually created via trigger, but let's ensure it has the correct role 
-    // in case the trigger only defaults to 'reader'
     if (authUser.user) {
       const { error: profileError } = await adminClient
         .from('profiles')
         .update({ role, full_name: fullName || undefined })
         .eq('id', authUser.user.id);
-      
+
       if (profileError) console.error('Profile update error after create:', profileError);
-      
       await logAuditEvent(caller.id, 'USER_CREATED', { target_user_id: authUser.user.id, email, role });
     }
 
     revalidatePath('/admin/users');
-    return { success: true, message: 'User profile manually created.' };
+    return { success: true, message: 'User account created successfully.' };
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Failed to create user';
-    console.error('Create User Error:', error);
-    return { error: message };
+    return { error: error instanceof Error ? error.message : 'Failed to create user' };
   }
 }
 
@@ -63,7 +57,6 @@ export async function updateUserAction(formData: FormData) {
     const fullName = formData.get('full_name') as string;
     const role = formData.get('role') as string;
 
-    // Permissions toggles
     const canArticles = formData.get('can_articles') === 'on';
     const canSequels = formData.get('can_sequels') === 'on';
     const canLibrary = formData.get('can_library') === 'on';
@@ -74,22 +67,23 @@ export async function updateUserAction(formData: FormData) {
     if (role !== SUPER_ADMIN) {
       const { data: target } = await supabase.from('profiles').select('role, status').eq('id', userId).maybeSingle();
       if (target?.role === SUPER_ADMIN) {
-        const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', SUPER_ADMIN).eq('status', 'active');
+        const { count } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('role', SUPER_ADMIN)
+          .eq('status', 'active');
         if ((count || 0) <= 1 && target?.status === 'active') {
           throw new Error('Cannot demote the last active Super Admin.');
         }
       }
     }
 
-    // 1. Update Profile
     const { error: profileError } = await supabase
       .from('profiles')
       .update({ full_name: fullName, role })
       .eq('id', userId);
-
     if (profileError) throw profileError;
 
-    // 2. Update Permissions
     const { error: permError } = await supabase
       .from('user_content_permissions')
       .upsert({
@@ -97,16 +91,15 @@ export async function updateUserAction(formData: FormData) {
         can_articles: canArticles,
         can_sequels: canSequels,
         can_library: canLibrary,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id' });
-
     if (permError) console.error('Permissions update failed:', permError);
 
-    await logAuditEvent(caller.id, 'USER_UPDATED', { 
-      target_user_id: userId, 
-      fullName, 
+    await logAuditEvent(caller.id, 'USER_UPDATED', {
+      target_user_id: userId,
+      fullName,
       role,
-      permissions: { canArticles, canSequels, canLibrary }
+      permissions: { canArticles, canSequels, canLibrary },
     });
 
     revalidatePath('/admin/users');
@@ -115,7 +108,6 @@ export async function updateUserAction(formData: FormData) {
     return { error: error instanceof Error ? error.message : 'Failed to update user' };
   }
 }
-
 
 export async function deleteUserAction(formData: FormData) {
   try {
@@ -126,23 +118,25 @@ export async function deleteUserAction(formData: FormData) {
     const adminClient = createAdminClient();
     if (!adminClient) throw new Error('Service role key not configured.');
 
-    // Safeguard: Check if it's the last super admin
     const { data: target } = await supabase.from('profiles').select('role, status').eq('id', userId).maybeSingle();
     if (target?.role === SUPER_ADMIN) {
-      const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', SUPER_ADMIN).eq('status', 'active');
+      const { count } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', SUPER_ADMIN)
+        .eq('status', 'active');
       if ((count || 0) <= 1 && target?.status === 'active') {
         throw new Error('Cannot delete the last active Super Admin.');
       }
     }
 
-    // Delete from auth (cascades to profiles)
     const { error: authError } = await adminClient.auth.admin.deleteUser(userId);
     if (authError) throw authError;
 
     await logAuditEvent(caller.id, 'USER_DELETED', { target_user_id: userId });
 
     revalidatePath('/admin/users');
-    return { success: true, message: 'User account has been permanently deleted.' };
+    return { success: true, message: 'User account permanently deleted.' };
   } catch (error: unknown) {
     return { error: error instanceof Error ? error.message : 'Failed to delete user' };
   }
@@ -157,10 +151,7 @@ export async function inviteUserAction(formData: FormData) {
     const adminClient = createAdminClient();
     if (!adminClient) throw new Error('Service role key not configured.');
 
-    const { error } = await adminClient.auth.admin.inviteUserByEmail(email, {
-      data: { role }
-    });
-
+    const { error } = await adminClient.auth.admin.inviteUserByEmail(email, { data: { role } });
     if (error) throw error;
 
     await logAuditEvent(caller.id, 'USER_INVITED', { invited_email: email, role });
@@ -176,50 +167,96 @@ export async function toggleStatusAction(formData: FormData) {
   try {
     const caller = await verifySuperAdmin();
     const userId = formData.get('userId') as string;
-    const status = formData.get('status') as string; // 'active', 'suspended', 'banned'
+    const status = formData.get('status') as string;
 
     const supabase = await createClient();
-    
-    // Safeguard: Cannot suspend the last super admin
+    const adminClient = createAdminClient();
+    if (!adminClient) throw new Error('Service role key not configured.');
+
     if (status !== 'active') {
-       const { data: target } = await supabase.from('profiles').select('role, status').eq('id', userId).maybeSingle();
-       if (target?.role === SUPER_ADMIN) {
-          const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', SUPER_ADMIN).eq('status', 'active');
-          if ((count || 0) <= 1 && target?.status === 'active') {
-             throw new Error('Cannot suspend the last active Super Admin.');
-          }
-       }
+      const { data: target } = await supabase
+        .from('profiles')
+        .select('role, status')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (target?.role === SUPER_ADMIN) {
+        const { count } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('role', SUPER_ADMIN)
+          .eq('status', 'active');
+        if ((count || 0) <= 1 && target?.status === 'active') {
+          throw new Error('Cannot suspend the last active Super Admin.');
+        }
+      }
     }
 
-    const { error } = await supabase
+    // 1. Update profiles table
+    const { error: profileErr } = await supabase
       .from('profiles')
       .update({ status })
       .eq('id', userId);
+    if (profileErr) throw profileErr;
 
-    if (error) throw error;
+    // 2. Sync with Supabase Auth — ban_duration='0' = not banned, '876600h' = ~100 years
+    const banDuration = status === 'active' ? '0' : '876600h';
+    const { error: authErr } = await adminClient.auth.admin.updateUserById(userId, {
+      ban_duration: banDuration,
+    });
+    if (authErr) console.error('[toggleStatus] Auth ban update failed:', authErr.message);
 
-    await logAuditEvent(caller.id, `USER_${status.toUpperCase()}`, { target_user_id: userId });
+    // 3. Force sign-out all existing sessions for suspended/banned users
+    if (status !== 'active') {
+      const { error: signOutErr } = await adminClient.auth.admin.signOut(userId, 'global');
+      if (signOutErr) console.error('[toggleStatus] Force signout failed:', signOutErr.message);
+    }
+
+    await logAuditEvent(caller.id, `USER_${status.toUpperCase()}`, {
+      target_user_id: userId,
+      auth_ban_applied: status !== 'active',
+    });
 
     revalidatePath('/admin/users');
-    return { success: true, message: `User status updated to ${status}.` };
+    return {
+      success: true,
+      message: `User ${status === 'active' ? 'reactivated' : status === 'suspended' ? 'suspended' : 'banned'} successfully.`,
+    };
   } catch (error: unknown) {
     return { error: error instanceof Error ? error.message : 'Failed to update status' };
   }
 }
 
-export async function setUserPermissionsAction(userId: string, permissions: { can_articles: boolean; can_sequels: boolean; can_library: boolean }) {
+// Fix #6 — Admin-triggered password reset email
+export async function sendPasswordResetAction(formData: FormData) {
+  try {
+    await verifySuperAdmin();
+    const email = formData.get('email') as string;
+    if (!email) throw new Error('Email is required.');
+
+    const supabase = await createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/update-password`,
+    });
+    if (error) throw error;
+
+    return { success: true, message: `Password reset email sent to ${email}.` };
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : 'Failed to send password reset' };
+  }
+}
+
+export async function setUserPermissionsAction(
+  userId: string,
+  permissions: { can_articles: boolean; can_sequels: boolean; can_library: boolean },
+) {
   try {
     const caller = await verifySuperAdmin();
     const supabase = await createClient();
 
     const { error } = await supabase
       .from('user_content_permissions')
-      .upsert({
-        user_id: userId,
-        ...permissions,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id' });
-
+      .upsert({ user_id: userId, ...permissions, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
     if (error) throw error;
 
     await logAuditEvent(caller.id, 'USER_PERMISSIONS_UPDATED', { target_user_id: userId, permissions });
@@ -230,4 +267,3 @@ export async function setUserPermissionsAction(userId: string, permissions: { ca
     return { error: error instanceof Error ? error.message : 'Failed to update permissions' };
   }
 }
-

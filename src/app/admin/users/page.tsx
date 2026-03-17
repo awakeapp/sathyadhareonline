@@ -12,101 +12,128 @@ interface UserProfile {
   role: string;
   status: string;
   created_at: string;
+  last_sign_in_at?: string | null;
+  permissions?: {
+    can_articles: boolean;
+    can_sequels: boolean;
+    can_library: boolean;
+  };
 }
 
 export default async function AdminUsersPage() {
+  // 1. Verify requesting user is super_admin (regular client — RLS is correct here)
   const supabase = await createClient();
-
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/sign-in');
 
-  const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).maybeSingle();
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name, role')
+    .eq('id', user.id)
+    .maybeSingle();
   if (!profile || profile.role !== 'super_admin') redirect('/admin?denied=1');
 
-  let authUsers: { id: string; email?: string; created_at: string; user_metadata?: Record<string, unknown> }[] = [];
+  // 2. Use the ADMIN client for all data fetches — bypasses RLS so we see ALL rows.
+  //    This is the root fix for roles showing as "reader": the regular client was
+  //    restricted by RLS and only returned the current user's own profile row.
+  const adminClient = createAdminClient();
+  if (!adminClient) {
+    return (
+      <div className="p-8 text-center text-rose-500 font-bold">
+        Admin client unavailable — SUPABASE_SERVICE_ROLE_KEY not configured.
+      </div>
+    );
+  }
+
+  // 3. Fetch all auth users (email, last_sign_in_at, user_metadata)
+  let authUsers: {
+    id: string;
+    email?: string;
+    created_at: string;
+    last_sign_in_at?: string | null;
+    user_metadata?: Record<string, unknown>;
+  }[] = [];
+
   try {
-    const adminAuth = createAdminClient();
-    if (adminAuth) {
-      const { data: authData } = await adminAuth.auth.admin.listUsers();
-      authUsers = authData?.users || [];
-    }
+    const { data: authData, error: authErr } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
+    if (authErr) console.error('[AdminUsers] Auth listUsers error:', authErr.message);
+    authUsers = authData?.users || [];
   } catch (err) {
     console.error('[AdminUsers] Auth fetch failed:', err);
   }
 
-  // Fetch all profiles and permissions
-  const { data: fetchUsers, error: profileError } = await supabase
+  // 4. Fetch ALL profiles via admin client (bypasses RLS)
+  const { data: profileRows, error: profileError } = await adminClient
     .from('profiles')
     .select('id, full_name, email, role, status, created_at')
     .order('created_at', { ascending: false });
 
-  const { data: fetchPermissions } = await supabase
-    .from('user_content_permissions')
-    .select('*');
-
-  const permissionsMap = new Map(fetchPermissions?.map(p => [p.user_id, p]) || []);
-    
-  let profileRecords = fetchUsers || [];
-
   if (profileError) {
-    console.warn('Profile fetch error:', profileError.message);
-    const fallback = await supabase
-      .from('profiles')
-      .select('id, full_name, email, role, created_at')
-      .order('created_at', { ascending: false });
-    profileRecords = (fallback.data || []).map((u: any) => ({ 
-      id: u.id, 
-      full_name: u.full_name, 
-      email: u.email, 
-      role: u.role, 
-      created_at: u.created_at, 
-      status: 'active' 
-    }));
+    console.error('[AdminUsers] Profile fetch error:', profileError.message);
   }
-  
-  // Merge Auth users with Profiles and Permissions
-  const profileMap = new Map<string, any>(profileRecords.map((p: any) => [p.id, p]));
-  
-  const users: any[] = authUsers.length > 0 
-    ? authUsers.map(au => {
-        const uProfile = profileMap.get(au.id);
-        const uPerms = permissionsMap.get(au.id);
-        return {
-          id: au.id,
-          email: au.email || uProfile?.email || null,
-          full_name: uProfile?.full_name || au.user_metadata?.full_name || null,
-          role: uProfile?.role || au.user_metadata?.role || 'reader',
-          status: uProfile?.status || 'active',
-          created_at: uProfile?.created_at || au.created_at,
-          permissions: uPerms || { can_articles: true, can_sequels: false, can_library: false }
-        };
-      })
-    : profileRecords.map((p: any) => {
-        const uPerms = permissionsMap.get(p.id);
-        return {
-          id: p.id,
-          email: p.email || null,
-          full_name: p.full_name || null,
-          role: p.role || 'reader',
-          status: p.status || 'active',
-          created_at: p.created_at,
-          permissions: uPerms || { can_articles: true, can_sequels: false, can_library: false }
-        };
-      });
-  
-  // Sort by created_at desc
+
+  // 5. Fetch ALL permissions via admin client (bypasses RLS)
+  const { data: permissionRows } = await adminClient
+    .from('user_content_permissions')
+    .select('user_id, can_articles, can_sequels, can_library');
+
+  // 6. Build lookup maps
+  const profileMap = new Map<string, any>((profileRows || []).map((p: any) => [p.id, p]));
+  const permissionsMap = new Map<string, any>((permissionRows || []).map((p: any) => [p.user_id, p]));
+
+  // 7. Merge: Auth → Profiles → Permissions
+  const source = authUsers.length > 0 ? authUsers : (profileRows || []);
+  const users: UserProfile[] = source.map((au: any) => {
+    const uProfile = profileMap.get(au.id);
+    const uPerms = permissionsMap.get(au.id);
+
+    // Realistic role detection: Auth metadata often contains the "real" intended role.
+    // We prioritize that if it exists, otherwise use profile table, otherwise reader.
+    const metadataRole = au.user_metadata?.role as string | undefined;
+    const profileRole = uProfile?.role as string | undefined;
+    
+    let rawRole = metadataRole || profileRole || 'reader';
+    
+    // Normalize: "Super Admin" -> "super_admin", "Editor" -> "editor"
+    const role = rawRole.toLowerCase().trim().replace(/\s+/g, '_');
+
+    return {
+      id: au.id,
+      email: au.email || uProfile?.email || null,
+      full_name: uProfile?.full_name || (au.user_metadata?.full_name as string) || (au.email?.split('@')[0]) || 'Member',
+      role,
+      status: uProfile?.status || 'active',
+      created_at: uProfile?.created_at || au.created_at,
+      last_sign_in_at: au.last_sign_in_at || null,
+      avatar_url: uProfile?.avatar_url || (au.user_metadata?.avatar_url as string) || null,
+      permissions: uPerms
+        ? {
+            can_articles: uPerms.can_articles ?? (role === 'super_admin' ? true : true),
+            can_sequels: uPerms.can_sequels ?? (role === 'super_admin' ? true : false),
+            can_library: uPerms.can_library ?? (role === 'super_admin' ? true : false),
+          }
+        : { 
+            can_articles: true, 
+            can_sequels: role === 'super_admin', 
+            can_library: role === 'super_admin' 
+          },
+    };
+  });
+
+  // 8. Sort newest join date first
   users.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Page Header */}
       <div className="pt-2">
         <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight">People</h1>
-        <p className="text-[13px] text-[var(--color-muted)] mt-1">Manage user accounts, roles, and content permissions</p>
+        <p className="text-[14px] text-[var(--color-muted)] mt-1 font-medium">
+          Manage staff, readers, and subscriptions
+        </p>
       </div>
-      
+
       <div className="w-full">
-        <UserManagementClient users={(users as UserProfile[]) || []} currentUserRole={profile.role} />
+        <UserManagementClient users={users} currentUserRole={profile.role} />
       </div>
     </div>
   );

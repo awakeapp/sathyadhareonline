@@ -2,25 +2,35 @@
 
 import { useState, useMemo, useTransition, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
 import { Input, Select, Label } from '@/components/ui/Input';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from '@/components/ui/Modal';
 import { toast } from 'sonner';
-import { 
-  UserPlus, Mail, Edit2, Trash2, 
-  Slash, Ban, CheckCircle, Search, Download, User
+import {
+  UserPlus, Mail, Edit2, Trash2,
+  Slash, Ban, CheckCircle, Search, Download, User, Clock, KeyRound, MoreVertical, Users
 } from 'lucide-react';
-import { 
-  PresenceCard, 
-  PresenceButton 
+import {
+  PresenceCard,
+  PresenceButton
 } from '@/components/PresenceUI';
-import { 
-  createUserAction, 
-  updateUserAction, 
-  deleteUserAction, 
-  inviteUserAction, 
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+} from '@/components/ui/Dropdown';
+import {
+  createUserAction,
+  updateUserAction,
+  deleteUserAction,
+  inviteUserAction,
   toggleStatusAction,
-  setUserPermissionsAction
+  sendPasswordResetAction,
 } from './actions';
 
 interface UserProfile {
@@ -30,6 +40,8 @@ interface UserProfile {
   role: string;
   status: string;
   created_at: string;
+  last_sign_in_at?: string | null;
+  avatar_url?: string | null;
   permissions?: {
     can_articles: boolean;
     can_sequels: boolean;
@@ -37,11 +49,12 @@ interface UserProfile {
   };
 }
 
+// Fix: role keys must be lowercase_underscore (normalised in page.tsx)
 const ROLE_META: Record<string, { label: string; color: string }> = {
-  super_admin: { label: 'Super Admin', color: 'bg-purple-500/10 text-purple-500 border-purple-500' },
-  admin:       { label: 'Admin',       color: 'bg-blue-500/10 text-blue-500 border-blue-500' },
-  editor:      { label: 'Editor',      color: 'bg-amber-500/10 text-amber-500 border-amber-500' },
-  reader:      { label: 'Reader',      color: 'bg-gray-500/10 text-zinc-500 border-gray-500' },
+  super_admin: { label: 'Super Admin', color: 'bg-purple-500/10 text-purple-500 border-purple-500/40' },
+  admin:       { label: 'Admin',       color: 'bg-blue-500/10 text-blue-500 border-blue-500/40' },
+  editor:      { label: 'Editor',      color: 'bg-amber-500/10 text-amber-600 border-amber-500/40' },
+  reader:      { label: 'Reader',      color: 'bg-gray-500/10 text-zinc-500 border-gray-400/40' },
 };
 
 const STATUS_META: Record<string, { label: string; color: string; icon: React.ElementType }> = {
@@ -50,218 +63,364 @@ const STATUS_META: Record<string, { label: string; color: string; icon: React.El
   banned:    { label: 'Banned',    color: 'text-red-500',     icon: Ban },
 };
 
-export default function UserManagementClient({ users: initialUsers, currentUserRole }: { users: UserProfile[], currentUserRole: string }) {
+export default function UserManagementClient({
+  users: initialUsers,
+  currentUserRole,
+}: {
+  users: UserProfile[];
+  currentUserRole: string;
+}) {
   const [isPending, startTransition] = useTransition();
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
-  
+
+  // View Modes (ARRANGE LIKE: Users, Readers, Subscribed)
+  const [viewMode, setViewMode] = useState<'users' | 'readers' | 'subscribed'>('users');
+
   // Modal States
   const [showCreate, setShowCreate] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
+  const [showReset, setShowReset] = useState(false);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  
+
   const searchParams = useSearchParams();
 
   useEffect(() => {
     const t = setTimeout(() => {
-      if (searchParams?.get('invite') === 'true') {
-        setShowInvite(true);
-      }
+      if (searchParams?.get('invite') === 'true') setShowInvite(true);
     }, 0);
     return () => clearTimeout(t);
   }, [searchParams]);
 
   const filteredUsers = useMemo(() => {
     return initialUsers.filter(u => {
+      // First filter by View Mode (Tab)
+      if (viewMode === 'users') {
+        if (!['super_admin', 'admin', 'editor'].includes(u.role)) return false;
+      } else if (viewMode === 'readers') {
+        if (u.role !== 'reader') return false;
+      } else if (viewMode === 'subscribed') {
+        return false; // No logic yet
+      }
+
+      // Then filter by Action Bar filters
       if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        const emailMatch = u.email?.toLowerCase().includes(query);
-        const nameMatch = u.full_name?.toLowerCase().includes(query);
-        if (!emailMatch && !nameMatch) return false;
+        const q = searchQuery.toLowerCase();
+        if (!u.email?.toLowerCase().includes(q) && !u.full_name?.toLowerCase().includes(q)) return false;
       }
       if (roleFilter !== 'all' && u.role !== roleFilter) return false;
       if (statusFilter !== 'all' && u.status !== statusFilter) return false;
       return true;
     });
-  }, [initialUsers, searchQuery, roleFilter, statusFilter]);
+  }, [initialUsers, searchQuery, roleFilter, statusFilter, viewMode]);
 
-  async function handleAction(action: (fd: FormData) => Promise<{ error?: string; success?: boolean; message?: string }>, fd: FormData, closeFn: () => void) {
+  async function handleAction(
+    action: (fd: FormData) => Promise<{ error?: string; success?: boolean; message?: string }>,
+    fd: FormData,
+    closeFn: () => void,
+  ) {
     if (isPending) return;
     startTransition(async () => {
       const res = await action(fd);
-      if (res?.error) {
-        toast.error(res.error);
-      } else {
-        toast.success(res?.message || 'Action completed successfully');
-        closeFn();
-      }
+      if (res?.error) toast.error(res.error);
+      else { toast.success(res?.message || 'Action completed'); closeFn(); }
     });
   }
 
   const exportCSV = () => {
-    const headers = ['ID', 'Email', 'Full Name', 'Role', 'Status', 'Joined Date'];
+    const headers = ['ID', 'Email', 'Full Name', 'Role', 'Status', 'Joined', 'Last Login'];
     const rows = filteredUsers.map(u => [
-      u.id, 
-      u.email || 'N/A', 
-      u.full_name || 'N/A', 
-      u.role, 
-      u.status, 
-      new Date(u.created_at).toISOString()
+      u.id, u.email || 'N/A', u.full_name || 'N/A', u.role, u.status,
+      new Date(u.created_at).toISOString(),
+      u.last_sign_in_at ? new Date(u.last_sign_in_at).toISOString() : 'Never',
     ]);
-
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.map(v => `"${(v || '').replace(/"/g, '""')}"`).join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'users_export.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+    a.download = 'users_export.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
   };
 
-  const formatDate = (iso?: string | null) => {
-    if (!iso) return 'Unknown';
+  const formatDate = (iso?: string | null, fallback = '—') => {
+    if (!iso) return fallback;
     const d = new Date(iso);
-    return isNaN(d.getTime()) ? 'Unknown' : d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    return isNaN(d.getTime()) ? fallback : d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  };
+
+  const formatRelative = (iso?: string | null) => {
+    if (!iso) return null;
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    if (days < 30) return `${days}d ago`;
+    return formatDate(iso);
   };
 
   return (
     <div className="flex flex-col gap-4">
-      
-      {/* ── Action Bar ────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-2">
-        <PresenceButton onClick={() => setShowInvite(true)} className="flex-1 h-14 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-indigo-500/20">
-          <Mail className="w-5 h-5 mr-3" strokeWidth={1.25} /> Invite Team Member
+
+      {/* ── Action Bar ── */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-2">
+        <PresenceButton onClick={() => setShowInvite(true)} className="flex-1 h-12 bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/20">
+          <Mail className="w-4 h-4 mr-2" strokeWidth={1.5} /> Invite by Email
         </PresenceButton>
-        <PresenceButton onClick={() => setShowCreate(true)} className="flex-1 h-14 bg-white !text-zinc-900 dark:text-zinc-50 border-2 border-indigo-50 shadow-none hover:bg-indigo-50">
-          <UserPlus className="w-5 h-5 mr-3" strokeWidth={1.25} /> Manual Creation
+        <PresenceButton onClick={() => setShowCreate(true)} className="flex-1 h-12 bg-[var(--color-surface)] !text-[var(--color-text)] border border-[var(--color-border)] shadow-none hover:bg-[var(--color-surface-2)]">
+          <UserPlus className="w-4 h-4 mr-2" strokeWidth={1.5} /> Manual Create
         </PresenceButton>
       </div>
 
-      {/* ── Filters ───────────────────────────────────────────── */}
-      <PresenceCard className="bg-zinc-50 dark:bg-white/5 border-none">
-        <div className="flex flex-col md:flex-row gap-4">
+      {/* ── Tabs (People Categorization) ── */}
+      <div className="flex bg-[var(--color-surface)] p-1.5 rounded-[1.25rem] border border-[var(--color-border)] mb-2">
+        {(['users', 'readers', 'subscribed'] as const).map((mode) => (
+          <button
+            key={mode}
+            onClick={() => setViewMode(mode)}
+            className={`flex-1 py-1.5 text-[12px] font-black uppercase tracking-widest rounded-xl transition-all ${
+              viewMode === mode 
+                ? 'bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/10' 
+                : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'
+            }`}
+          >
+            {mode === 'users' ? 'Users (Staff)' : mode === 'readers' ? 'Readers' : 'Subscribed'}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Filters ── */}
+      <PresenceCard className="p-3">
+        <div className="flex flex-col md:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400" strokeWidth={1.25} />
-            <input 
-              placeholder="Filter by name or email..." 
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" strokeWidth={1.5} />
+            <input
+              placeholder="Search by name or email..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-12 pl-11 pr-4 rounded-2xl bg-white dark:bg-zinc-950 border-none shadow-sm focus:ring-2 focus:ring-indigo-500/20 transition-all font-bold text-sm"
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full h-10 pl-9 pr-4 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[14px] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all"
             />
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-1 md:pb-0 hide-scrollbar shrink-0">
-            <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="h-12 px-4 rounded-2xl bg-white dark:bg-zinc-950 border-none shadow-sm font-bold text-xs focus:ring-2 focus:ring-indigo-500/20">
-              <option value="all">Roles</option>
-              <option value="super_admin">Super Admins</option>
-              <option value="admin">Admins</option>
-              <option value="editor">Editors</option>
-              <option value="reader">Readers</option>
+          <div className="flex gap-2 shrink-0">
+            <select value={roleFilter} onChange={e => setRoleFilter(e.target.value)}
+              className="h-10 px-3 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[13px] font-medium focus:ring-1 focus:ring-[var(--color-primary)] outline-none">
+              <option value="all">All Roles</option>
+              <option value="super_admin">Super Admin</option>
+              <option value="admin">Admin</option>
+              <option value="editor">Editor</option>
+              <option value="reader">Reader</option>
             </select>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="h-12 px-4 rounded-2xl bg-white dark:bg-zinc-950 border-none shadow-sm font-bold text-xs focus:ring-2 focus:ring-indigo-500/20">
-              <option value="all">Status</option>
+            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+              className="h-10 px-3 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[13px] font-medium focus:ring-1 focus:ring-[var(--color-primary)] outline-none">
+              <option value="all">All Status</option>
               <option value="active">Active</option>
               <option value="suspended">Suspended</option>
               <option value="banned">Banned</option>
             </select>
-            <button className="h-12 px-5 rounded-2xl bg-white dark:bg-zinc-950 border-none shadow-sm font-black text-xs text-zinc-500 hover:text-indigo-500 transition-colors" onClick={exportCSV}>
-               <Download className="w-4 h-4" strokeWidth={1.25} />
+            <button onClick={exportCSV} title="Export CSV"
+              className="h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-colors">
+              <Download className="w-4 h-4" strokeWidth={1.5} />
             </button>
           </div>
         </div>
       </PresenceCard>
 
-      {/* ── User List Row Layout ──────────────────────────────────────── */}
-      <div className="space-y-4">
-        {filteredUsers.length === 0 ? (
-          <PresenceCard className="py-20 text-center flex flex-col items-center border-dashed border-2 border-indigo-100">
-            <User className="w-16 h-16 mb-4 text-indigo-100" />
-            <p className="font-black text-xl tracking-tight text-zinc-500">No members found</p>
-            <p className="text-sm text-zinc-500/60 mt-2 font-bold uppercase tracking-widest">Adjust your search or filters</p>
+      {/* ── Stats bar ── */}
+      <div className="flex gap-3 flex-wrap text-[12px] font-bold text-[var(--color-muted)]/80 px-1">
+        <span>{filteredUsers.length} {viewMode === 'users' ? 'Staff Members' : viewMode === 'readers' ? 'Readers' : 'Subscribers'}</span>
+        {viewMode === 'users' && (
+          <>
+            <span>·</span>
+            <span>{initialUsers.filter(u => u.role === 'super_admin').length} Super Admins</span>
+          </>
+        )}
+        {initialUsers.filter(u => u.status !== 'active').length > 0 && (
+          <>
+            <span>·</span>
+            <span className="text-amber-600">{initialUsers.filter(u => u.status !== 'active').length} Restricted</span>
+          </>
+        )}
+      </div>
+
+      {/* ── User List ── */}
+      <div className="space-y-3">
+        {viewMode === 'subscribed' ? (
+          <PresenceCard className="py-24 text-center flex flex-col items-center border-dashed border-2 border-[var(--color-border)]">
+            <Mail className="w-10 h-10 text-[var(--color-muted)] mb-4 opacity-20" />
+            <h3 className="text-lg font-bold text-[var(--color-text)] mb-1">No Active Subscriptions</h3>
+            <p className="text-sm text-[var(--color-muted)] max-w-xs mx-auto">
+              Subscription billing is not yet enabled. Once active, your paying members will appear here.
+            </p>
+          </PresenceCard>
+        ) : filteredUsers.length === 0 ? (
+          <PresenceCard className="py-20 text-center flex flex-col items-center border-dashed border-2 border-[var(--color-border)]">
+            <User className="w-14 h-14 mb-4 text-[var(--color-border)]" />
+            <p className="font-bold text-[16px] text-[var(--color-muted)]">No users found</p>
+            <p className="text-[13px] text-[var(--color-muted)]/60 mt-1">Try adjusting filters</p>
           </PresenceCard>
         ) : (
           filteredUsers.map(u => {
-            const roleMeta = ROLE_META[u.role] ?? ROLE_META.reader;
+            const roleMeta = ROLE_META[u.role] ?? { label: u.role, color: ROLE_META.reader.color };
             const statusMeta = STATUS_META[u.status] ?? STATUS_META.active;
             const initials = (u.full_name || u.email || '?').charAt(0).toUpperCase();
+            const lastSeen = formatRelative(u.last_sign_in_at);
 
             return (
-              <PresenceCard key={u.id} noPadding className={`group active:scale-[0.99] transition-all duration-200 ${u.status !== 'active' ? 'opacity-70 grayscale' : ''}`}>
-                 <div className="p-5 flex flex-col md:flex-row items-center gap-4">
-                   
-                   <div className="relative shrink-0">
-                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg ${u.status === 'active' ? 'bg-gradient-to-br from-[#5c4ae4] to-indigo-400' : 'bg-gray-400'}`}>
-                       {initials}
-                     </div>
-                     <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-4 border-white dark:border-[#1b1929] flex items-center justify-center shadow-sm ${statusMeta.color} bg-white dark:bg-zinc-950`}>
-                       <statusMeta.icon className="w-3 h-3" />
-                     </div>
-                   </div>
+              <PresenceCard
+                key={u.id}
+                noPadding
+                className={`group transition-all duration-200 active:scale-[0.99] ${u.status !== 'active' ? 'opacity-60' : ''}`}
+              >
+                <div className="p-4 flex items-center gap-4">
 
-                   <div className="flex-1 min-w-0 text-center md:text-left">
-                     <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 mb-1">
-                        <p className="font-black text-lg md:text-xl tracking-tight truncate">{u.full_name || 'Incognito User'}</p>
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider border-2 w-max lg:mx-0 mx-auto ${roleMeta.color.replace('border-', 'border-opacity-30 border-')}`}>
-                          {roleMeta.label}
-                        </span>
-                     </div>
-                     <div className="flex flex-wrap justify-center md:justify-start items-center gap-x-5 gap-y-1">
-                        <span className="text-xs font-bold text-zinc-500">{u.email}</span>
-                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Joined {formatDate(u.created_at)}</span>
-                     </div>
-                   </div>
+                  {/* Avatar — Fix #4: show real photo when available */}
+                  <div className="relative shrink-0">
+                    <div className={`w-12 h-12 rounded-2xl overflow-hidden flex items-center justify-center text-white font-black text-lg shadow-md
+                      ${u.status === 'active'
+                        ? 'bg-gradient-to-br from-[var(--color-primary)] to-indigo-400'
+                        : 'bg-[var(--color-muted)]/40'}`}>
+                      {u.avatar_url ? (
+                        <Image
+                          src={u.avatar_url}
+                          alt={u.full_name || 'User'}
+                          width={48}
+                          height={48}
+                          className="w-full h-full object-cover"
+                          unoptimized
+                        />
+                      ) : (
+                        initials
+                      )}
+                    </div>
+                    <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[var(--color-surface)] flex items-center justify-center ${statusMeta.color} bg-[var(--color-surface)]`}>
+                      <statusMeta.icon className="w-2.5 h-2.5" />
+                    </div>
+                  </div>
 
-                   <div className="flex items-center gap-3 shrink-0">
-                      <button onClick={() => { setSelectedUser(u); setShowEdit(true); }} className="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50 hover:bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:text-white transition-all shadow-sm">
-                        <Edit2 className="w-5 h-5" strokeWidth={1.25} />
-                      </button>
-                      <button onClick={() => { setSelectedUser(u); setShowStatus(true); }} className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all shadow-sm ${u.status !== 'active' ? 'bg-amber-500 text-white' : 'bg-zinc-50 dark:bg-white/5 text-zinc-500 hover:text-amber-500'}`}>
-                        <Slash className="w-5 h-5" strokeWidth={1.25} />
-                      </button>
-                      <button onClick={() => { setSelectedUser(u); setShowDelete(true); }} className="w-11 h-11 rounded-xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm">
-                        <Trash2 className="w-5 h-5" strokeWidth={1.25} />
-                      </button>
-                   </div>
-                 </div>
+                  {/* Info — Stacked for clarity (ARRANGE UI PROPERLY) */}
+                  <div className="flex-1 min-w-0 py-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-extrabold text-[17px] text-[var(--color-text)] truncate leading-none">
+                        {u.full_name || 'Unnamed User'}
+                      </p>
+                      <span className={`shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border border-current opacity-80 ${roleMeta.color}`}>
+                        {roleMeta.label}
+                      </span>
+                    </div>
+                    
+                    <p className="text-[13px] text-[var(--color-muted)] truncate mb-3">{u.email}</p>
+                    
+                    <div className="flex items-center gap-x-4 gap-y-1.5 flex-wrap">
+                      <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--color-muted)]/60 bg-[var(--color-surface-2)] px-2 py-0.5 rounded-lg border border-[var(--color-border)]">
+                        <Users className="w-3 h-3" />
+                        Joined {formatDate(u.created_at)}
+                      </div>
+                      
+                      {lastSeen && (
+                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--color-primary)]/80 bg-[var(--color-primary)]/5 px-2 py-0.5 rounded-lg border border-[var(--color-primary)]/10">
+                          <Clock className="w-3 h-3" />
+                          Seen {lastSeen}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Actions — Updated to 3-dot menu to reduce crowdedness */}
+                  <div className="shrink-0 ml-auto">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="w-10 h-10 rounded-2xl bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-all active:scale-90">
+                          <MoreVertical className="w-5 h-5" strokeWidth={1.5} />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuPortal>
+                        <DropdownMenuContent align="end" className="w-[200px]">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowEdit(true); }}>
+                            <Edit2 className="w-4 h-4 mr-2" />
+                            Edit Role & Perms
+                          </DropdownMenuItem>
+                          
+                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowReset(true); }} className="text-emerald-600 focus:text-emerald-600">
+                            <KeyRound className="w-4 h-4 mr-2" />
+                            Password Reset
+                          </DropdownMenuItem>
+
+                          <DropdownMenuSeparator />
+
+                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowStatus(true); }} className="text-amber-600 focus:text-amber-600">
+                            <Slash className="w-4 h-4 mr-2" />
+                            {u.status === 'active' ? 'Suspend Account' : 'Reactivate'}
+                          </DropdownMenuItem>
+
+                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowDelete(true); }} className="text-rose-600 focus:text-rose-600">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete Account
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenuPortal>
+                    </DropdownMenu>
+                  </div>
+                </div>
               </PresenceCard>
             );
           })
         )}
       </div>
 
-      {/* ── MODALS ────────────────────────────────────────────── */}
+      {/* ── MODALS ── */}
 
-      {/* 1. Create User Modal */}
+      {/* 6. Password Reset Modal — Fix #6 */}
+      <Modal open={showReset} onOpenChange={setShowReset}>
+        <ModalContent>
+          {selectedUser && (
+            <>
+              <ModalHeader>
+                <ModalTitle>Send Password Reset</ModalTitle>
+                <ModalDescription>
+                  Send a password reset email to <span className="font-bold">{selectedUser.email}</span>. They will receive a secure link to set a new password.
+                </ModalDescription>
+              </ModalHeader>
+              <form action={fd => handleAction(sendPasswordResetAction, fd, () => setShowReset(false))} className="pt-2">
+                <input type="hidden" name="email" value={selectedUser.email || ''} />
+                <ModalFooter>
+                  <Button type="button" variant="outline" onClick={() => setShowReset(false)}>Cancel</Button>
+                  <Button type="submit" loading={isPending} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                    <KeyRound className="w-4 h-4 mr-2" /> Send Reset Email
+                  </Button>
+                </ModalFooter>
+              </form>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
       <Modal open={showCreate} onOpenChange={setShowCreate}>
         <ModalContent>
           <ModalHeader>
-            <ModalTitle>Direct Create User</ModalTitle>
-            <ModalDescription>Bypass email invitation and create a user immediately.</ModalDescription>
+            <ModalTitle>Create User Account</ModalTitle>
+            <ModalDescription>Bypass email invite — account is created immediately.</ModalDescription>
           </ModalHeader>
-          <form action={(fd) => handleAction(createUserAction, fd, () => setShowCreate(false))} className="space-y-4 pt-2">
-            <div className="grid grid-cols-2 gap-4">
+          <form action={fd => handleAction(createUserAction, fd, () => setShowCreate(false))} className="space-y-4 pt-2">
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5 text-left">
                 <Label>Full Name</Label>
-                <Input name="full_name" placeholder="John Doe" required />
+                <Input name="full_name" placeholder="Jane Doe" required />
               </div>
               <div className="space-y-1.5 text-left">
                 <Label>Role</Label>
                 <Select name="role">
-                   <option value="reader">Reader</option>
-                   <option value="editor">Editor</option>
-                   <option value="admin">Admin</option>
-                   {currentUserRole === 'super_admin' && <option value="super_admin">Super Admin</option>}
+                  <option value="reader">Reader</option>
+                  <option value="editor">Editor</option>
+                  <option value="admin">Admin</option>
+                  {currentUserRole === 'super_admin' && <option value="super_admin">Super Admin</option>}
                 </Select>
               </div>
             </div>
@@ -270,45 +429,46 @@ export default function UserManagementClient({ users: initialUsers, currentUserR
               <Input name="email" type="email" placeholder="user@example.com" required />
             </div>
             <div className="space-y-1.5 text-left">
-              <Label>Temp Password</Label>
-              <Input name="password" type="text" placeholder="Minimum 6 chars" required minLength={6} />
+              {/* Fix #2 — was type="text", now type="password" so it's masked */}
+              <Label>Temporary Password</Label>
+              <Input name="password" type="password" placeholder="Minimum 6 characters" required minLength={6} />
             </div>
             <ModalFooter>
-               <Button type="button" variant="outline" onClick={() => setShowCreate(false)}>Cancel</Button>
-               <Button type="submit" loading={isPending}>Create Profile</Button>
+              <Button type="button" variant="outline" onClick={() => setShowCreate(false)}>Cancel</Button>
+              <Button type="submit" loading={isPending}>Create Account</Button>
             </ModalFooter>
           </form>
         </ModalContent>
       </Modal>
 
-      {/* 2. Invite User Modal */}
+      {/* 2. Invite User */}
       <Modal open={showInvite} onOpenChange={setShowInvite}>
         <ModalContent>
           <ModalHeader>
             <ModalTitle>Invite Team Member</ModalTitle>
-            <ModalDescription>User will receive an email with a setup password link.</ModalDescription>
+            <ModalDescription>They will receive an email with a setup link.</ModalDescription>
           </ModalHeader>
-          <form action={(fd) => handleAction(inviteUserAction, fd, () => setShowInvite(false))} className="space-y-4 pt-2 text-left">
+          <form action={fd => handleAction(inviteUserAction, fd, () => setShowInvite(false))} className="space-y-4 pt-2 text-left">
             <div className="space-y-1.5">
-              <Label>Email</Label>
+              <Label>Email Address</Label>
               <Input name="email" type="email" placeholder="editor@sathyadhare.com" required />
             </div>
             <div className="space-y-1.5">
-               <Label>Initial Role</Label>
-               <Select name="role">
-                  <option value="editor">Editor</option>
-                  <option value="admin">Admin</option>
-               </Select>
+              <Label>Initial Role</Label>
+              <Select name="role">
+                <option value="editor">Editor</option>
+                <option value="admin">Admin</option>
+              </Select>
             </div>
             <ModalFooter>
-               <Button type="button" variant="outline" onClick={() => setShowInvite(false)}>Cancel</Button>
-               <Button type="submit" loading={isPending} className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white">Send Invitation</Button>
+              <Button type="button" variant="outline" onClick={() => setShowInvite(false)}>Cancel</Button>
+              <Button type="submit" loading={isPending}>Send Invitation</Button>
             </ModalFooter>
           </form>
         </ModalContent>
       </Modal>
 
-      {/* 3. Edit User Modal */}
+      {/* 3. Edit User */}
       <Modal open={showEdit} onOpenChange={setShowEdit}>
         <ModalContent>
           {selectedUser && (
@@ -317,14 +477,14 @@ export default function UserManagementClient({ users: initialUsers, currentUserR
                 <ModalTitle>Edit Profile</ModalTitle>
                 <ModalDescription>Updating {selectedUser.email}</ModalDescription>
               </ModalHeader>
-              <form action={(fd) => handleAction(updateUserAction, fd, () => setShowEdit(false))} className="space-y-4 pt-2 text-left">
+              <form action={fd => handleAction(updateUserAction, fd, () => setShowEdit(false))} className="space-y-4 pt-2 text-left">
                 <input type="hidden" name="userId" value={selectedUser.id} />
                 <div className="space-y-1.5">
                   <Label>Full Name</Label>
                   <Input name="full_name" defaultValue={selectedUser.full_name || ''} required />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Change Role</Label>
+                  <Label>Role</Label>
                   <Select name="role" defaultValue={selectedUser.role}>
                     <option value="reader">Reader</option>
                     <option value="editor">Editor</option>
@@ -332,33 +492,39 @@ export default function UserManagementClient({ users: initialUsers, currentUserR
                     {currentUserRole === 'super_admin' && <option value="super_admin">Super Admin</option>}
                   </Select>
                   {selectedUser.role === 'super_admin' && initialUsers.filter(u => u.role === 'super_admin' && u.status === 'active').length <= 1 && (
-                    <p className="text-xs text-amber-500 font-bold mt-2">Cannot demote the last active Super Admin.</p>
+                    <p className="text-[11px] text-amber-500 font-semibold mt-1">⚠️ Cannot demote the last active Super Admin.</p>
                   )}
                 </div>
-                <div className="space-y-4 pt-4 border-t border-zinc-100 dark:border-white/5">
-                  <p className="text-xs font-black uppercase tracking-widest text-zinc-500">Resource Access (Allowed List)</p>
-                  <div className="grid grid-cols-1 gap-2">
-                    {[
-                      { id: 'can_articles', label: 'Independent Articles', key: 'can_articles' },
-                      { id: 'can_sequels', label: 'Sequels (Webzines)', key: 'can_sequels' },
-                      { id: 'can_library', label: 'Library (Books)', key: 'can_library' },
-                    ].map((p) => (
-                      <label key={p.id} className="flex items-center justify-between p-3 rounded-xl border border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/5 cursor-pointer hover:bg-zinc-50 transition-colors">
-                        <span className="text-sm font-bold">{p.label}</span>
-                        <input 
-                          type="checkbox" 
-                          name={p.id} 
-                          defaultChecked={(selectedUser.permissions as any)?.[p.key] ?? true}
-                          className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" 
-                        />
-                      </label>
-                    ))}
-                  </div>
+
+                {/* Content Permissions */}
+                <div className="space-y-2 pt-3 border-t border-[var(--color-border)]">
+                  <p className="text-[11px] font-black uppercase tracking-widest text-[var(--color-muted)]">Content Access</p>
+                  {[
+                    { id: 'can_articles', label: 'Articles', key: 'can_articles' },
+                    { id: 'can_sequels', label: 'Sequels', key: 'can_sequels' },
+                    { id: 'can_library', label: 'Library', key: 'can_library' },
+                  ].map(p => (
+                    <label key={p.id} className="flex items-center justify-between p-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] cursor-pointer hover:bg-[var(--color-surface)] transition-colors">
+                      <span className="text-[13px] font-semibold text-[var(--color-text)]">{p.label}</span>
+                      <input
+                        type="checkbox"
+                        name={p.id}
+                        defaultChecked={(selectedUser.permissions as any)?.[p.key] ?? true}
+                        className="w-4 h-4 rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
+                      />
+                    </label>
+                  ))}
                 </div>
 
                 <ModalFooter>
                   <Button type="button" variant="outline" onClick={() => setShowEdit(false)}>Cancel</Button>
-                  <Button type="submit" loading={isPending} disabled={selectedUser.role === 'super_admin' && initialUsers.filter(u => u.role === 'super_admin' && u.status === 'active').length <= 1}>Save Changes</Button>
+                  <Button
+                    type="submit"
+                    loading={isPending}
+                    disabled={selectedUser.role === 'super_admin' && initialUsers.filter(u => u.role === 'super_admin' && u.status === 'active').length <= 1}
+                  >
+                    Save Changes
+                  </Button>
                 </ModalFooter>
               </form>
             </>
@@ -366,68 +532,95 @@ export default function UserManagementClient({ users: initialUsers, currentUserR
         </ModalContent>
       </Modal>
 
-      {/* 4. Delete User Modal */}
+      {/* 4. Delete User */}
       <Modal open={showDelete} onOpenChange={setShowDelete}>
         <ModalContent>
           {selectedUser && (
             <>
               <ModalHeader>
-                <ModalTitle className="text-red-500 text-left">Delete User Account?</ModalTitle>
+                <ModalTitle className="text-rose-500 text-left">Delete Account?</ModalTitle>
                 <ModalDescription className="text-left">
-                  This will PERMANENTLY delete <span className="font-bold">{selectedUser.full_name || selectedUser.email}</span>. 
-                  This action cannot be undone.
+                  This will permanently delete <span className="font-bold">{selectedUser.full_name || selectedUser.email}</span>.
+                  This cannot be undone.
                 </ModalDescription>
               </ModalHeader>
-              <form action={(fd) => handleAction(deleteUserAction, fd, () => setShowDelete(false))}>
+              <form action={fd => handleAction(deleteUserAction, fd, () => setShowDelete(false))}>
                 <input type="hidden" name="userId" value={selectedUser.id} />
-                <ModalFooter>
-                  <Button type="button" variant="outline" onClick={() => setShowDelete(false)} disabled={isPending}>Keep User</Button>
-                  <Button type="submit" variant="destructive" loading={isPending} disabled={selectedUser.role === 'super_admin' && initialUsers.filter(u => u.role === 'super_admin').length <= 1}>Yes, Delete Account</Button>
-                </ModalFooter>
                 {selectedUser.role === 'super_admin' && initialUsers.filter(u => u.role === 'super_admin').length <= 1 && (
-                  <p className="text-xs text-amber-500 font-bold mt-4 text-center">Cannot remove the last Super Admin.</p>
+                  <p className="text-[12px] text-amber-500 font-bold mb-4 text-center">Cannot delete the last Super Admin.</p>
                 )}
+                <ModalFooter>
+                  <Button type="button" variant="outline" onClick={() => setShowDelete(false)} disabled={isPending}>Keep Account</Button>
+                  <Button
+                    type="submit"
+                    variant="destructive"
+                    loading={isPending}
+                    disabled={selectedUser.role === 'super_admin' && initialUsers.filter(u => u.role === 'super_admin').length <= 1}
+                  >
+                    Yes, Delete
+                  </Button>
+                </ModalFooter>
               </form>
             </>
           )}
         </ModalContent>
       </Modal>
 
-      {/* 5. Status / Suspend Modal */}
+      {/* 5. Status Modal — now includes real Auth ban notice */}
       <Modal open={showStatus} onOpenChange={setShowStatus}>
         <ModalContent>
           {selectedUser && (
             <>
               <ModalHeader>
-                <ModalTitle>Manage Access Status</ModalTitle>
-                <ModalDescription>Set login permissions for {selectedUser.full_name || selectedUser.email}.</ModalDescription>
+                <ModalTitle>Manage Account Access</ModalTitle>
+                <ModalDescription>
+                  Set login permissions for <span className="font-bold">{selectedUser.full_name || selectedUser.email}</span>.
+                  Suspended and banned users will have their sessions terminated.
+                </ModalDescription>
               </ModalHeader>
-              <form action={(fd) => handleAction(toggleStatusAction, fd, () => setShowStatus(false))} className="space-y-4 pt-2">
+              <form action={fd => handleAction(toggleStatusAction, fd, () => setShowStatus(false))} className="space-y-4 pt-2">
                 <input type="hidden" name="userId" value={selectedUser.id} />
-                <div className="grid grid-cols-1 gap-3">
+                <div className="grid grid-cols-1 gap-2">
                   {[
-                    { val: 'active',    label: 'Active',    desc: 'Full access to account features.', icon: CheckCircle, col: 'text-emerald-500' },
-                    { val: 'suspended', label: 'Suspended', desc: 'Temporary login restriction.', icon: Slash, col: 'text-amber-500' },
-                    { val: 'banned',    label: 'Banned',    desc: 'Permanent restriction from login.', icon: Ban, col: 'text-red-500' },
-                  ].map((s) => (
-                    <label key={s.val} className={`group flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${selectedUser.status === s.val ? 'bg-indigo-50/30 border-zinc-900 dark:border-white' : 'border-zinc-100 dark:border-white/5 hover:border-indigo-200'}`}>
+                    { val: 'active',    label: 'Active',    desc: 'Full access — can log in normally.', icon: CheckCircle, col: 'text-emerald-500' },
+                    { val: 'suspended', label: 'Suspended', desc: 'Temporarily blocked from login.', icon: Slash, col: 'text-amber-500' },
+                    { val: 'banned',    label: 'Banned',    desc: 'Permanently blocked from all access.', icon: Ban, col: 'text-red-500' },
+                  ].map(s => (
+                    <label key={s.val}
+                      className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all
+                        ${selectedUser.status === s.val
+                          ? 'bg-[var(--color-surface-2)] border-[var(--color-primary)]/50'
+                          : 'border-[var(--color-border)] hover:border-[var(--color-primary)]/30'}`}
+                    >
                       <input type="radio" name="status" value={s.val} defaultChecked={selectedUser.status === s.val} className="sr-only" />
-                      <div className={`w-10 h-10 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-100 dark:border-white/10 flex items-center justify-center transition-colors group-hover:scale-110 ${s.col}`}>
-                        <s.icon className="w-5 h-5" />
+                      <div className={`w-9 h-9 rounded-xl border border-[var(--color-border)] flex items-center justify-center ${s.col}`}>
+                        <s.icon className="w-4 h-4" />
                       </div>
                       <div className="flex-1 text-left">
-                        <p className={`text-sm font-black italic tracking-tighter ${s.col}`}>{s.label}</p>
-                        <p className="text-[10px] text-zinc-500 font-medium">{s.desc}</p>
+                        <p className={`text-[13px] font-bold ${s.col}`}>{s.label}</p>
+                        <p className="text-[11px] text-[var(--color-muted)]">{s.desc}</p>
                       </div>
                     </label>
                   ))}
                 </div>
                 {selectedUser.role === 'super_admin' && initialUsers.filter(u => u.role === 'super_admin' && u.status === 'active').length <= 1 && selectedUser.status === 'active' && (
-                  <p className="text-xs text-amber-500 font-bold mt-2 text-center">Cannot suspend/ban the last active Super Admin.</p>
+                  <p className="text-[12px] text-amber-500 font-bold text-center">
+                    ⚠️ Cannot suspend/ban the last active Super Admin.
+                  </p>
                 )}
                 <ModalFooter>
                   <Button type="button" variant="outline" onClick={() => setShowStatus(false)}>Cancel</Button>
-                  <Button type="submit" loading={isPending} disabled={selectedUser.role === 'super_admin' && initialUsers.filter(u => u.role === 'super_admin' && u.status === 'active').length <= 1 && selectedUser.status === 'active'}>Update Status</Button>
+                  <Button
+                    type="submit"
+                    loading={isPending}
+                    disabled={
+                      selectedUser.role === 'super_admin' &&
+                      initialUsers.filter(u => u.role === 'super_admin' && u.status === 'active').length <= 1 &&
+                      selectedUser.status === 'active'
+                    }
+                  >
+                    Update Status
+                  </Button>
                 </ModalFooter>
               </form>
             </>

@@ -388,13 +388,6 @@ export default function LibraryClient({ initialBooks, availableArticles }: Props
             {books.length} book{books.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <button
-          onClick={openNew}
-          className="flex items-center gap-2 h-10 px-4 rounded-2xl bg-[#685de6] text-white text-sm font-black shadow-md shadow-[#685de6]/25 active:scale-95 transition-all"
-        >
-          <Plus size={16} strokeWidth={2.5} />
-          Add to Library
-        </button>
       </div>
 
       {/* ── Book list ── */}
@@ -408,13 +401,6 @@ export default function LibraryClient({ initialBooks, availableArticles }: Props
             <p className="text-sm text-[var(--color-muted)] mb-6 max-w-[240px] leading-relaxed">
               Combine existing articles and editorials to create your first book chapter index.
             </p>
-            <button
-              onClick={openNew}
-              className="flex items-center gap-2 h-11 px-6 rounded-2xl bg-[#685de6] text-white text-sm font-black shadow-lg shadow-[#685de6]/20 active:scale-95 transition-all"
-            >
-              <Plus size={16} strokeWidth={2.5} />
-              Create First Book
-            </button>
           </div>
         ) : (
           books.map(b => {

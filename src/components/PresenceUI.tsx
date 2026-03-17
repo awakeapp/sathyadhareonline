@@ -319,9 +319,7 @@ export function PresenceHeader({
                     {icon1Node}
                   </Link>
                 ) : (
-                  <Link href="/admin/articles/new" className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors">
-                    <Plus className="w-5 h-5 text-[var(--color-text)]" strokeWidth={1.5} />
-                  </Link>
+                  null
                 )}
     
                 {/* Dynamic Action 2 (e.g. Notifications/Logs) */}

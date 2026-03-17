@@ -12,8 +12,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const role = profile?.role as string | undefined;
 
-  // 2. Wrong role → own dashboard (avoids re-auth loop)
-  if (!role || (role !== 'admin' && role !== 'super_admin')) {
+  // 2. Verified roles allowed in Admin namespace
+  if (!role || !['admin', 'super_admin', 'editor'].includes(role)) {
     redirect('/');
   }
 

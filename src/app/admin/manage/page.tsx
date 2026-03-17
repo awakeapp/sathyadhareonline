@@ -19,12 +19,10 @@ interface CardItem {
 }
 
 const MANAGE_ITEMS: CardItem[] = [
-  { label: 'Users', href: '/admin/users', icon: Users, description: 'Manage accounts and roles' },
+  { label: 'People', href: '/admin/users', icon: Users, description: 'Manage accounts and roles' },
   { label: 'Analytics', href: '/admin/analytics', icon: BarChart2, description: 'Platform growth and traffic' },
   { label: 'Comments', href: '/admin/comments', icon: MessageSquare, description: 'Moderate reader discussion' },
   { label: 'Media', href: '/admin/media', icon: ImageIcon, description: 'Global asset library' },
-  { label: 'Categories', href: '/admin/categories', icon: Library, description: 'Taxonomy management' },
-  { label: 'Sequels', href: '/admin/sequels', icon: Layers, description: 'Planning and issues' },
   { label: 'Audit Logs', href: '/admin/audit-logs', icon: ScrollText, description: 'Admin activity history' },
 ];
 
@@ -93,17 +91,6 @@ export default async function ManagePage() {
             </Link>
           );
         })}
-      </div>
-
-      {/* Quick Setup / Help Footer */}
-      <div className="mt-4 p-5 rounded-2xl bg-[var(--color-surface)] border border-dashed border-[var(--color-border)] flex items-center gap-4">
-        <div className="w-10 h-10 rounded-full bg-[var(--color-muted)]/10 flex items-center justify-center text-[var(--color-muted)] shrink-0">
-          <SlidersHorizontal size={18} />
-        </div>
-        <div>
-          <p className="text-[13px] font-bold text-[var(--color-text)] leading-tight">Admin System</p>
-          <p className="text-[11px] text-[var(--color-muted)] mt-0.5">Use these tools to maintain platform integrity and monitor usage.</p>
-        </div>
       </div>
     </div>
   );

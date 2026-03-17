@@ -105,9 +105,6 @@ export default function SequelsClient({ initialSequels, categories }: Props) {
                className="w-full h-14 pl-12 pr-4 rounded-2xl bg-white dark:bg-zinc-950 border-none shadow-sm focus:ring-2 focus:ring-indigo-500/20 font-bold text-sm"
             />
           </div>
-          <PresenceButton onClick={openCreate} className="h-14 px-8 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black tracking-widest text-[10px] uppercase shadow-xl shadow-indigo-500/20">
-             New Collection
-          </PresenceButton>
         </div>
       </PresenceCard>
 

@@ -19,9 +19,9 @@ export const ADMIN_NAV_ITEMS: DashNavItem[] = [
     exact: true,
   },
   {
-    href:  '/admin/content',
-    label: 'Content',
-    icon:  'FolderOpen',
+    href:  '#quick-action',
+    label: 'Create',
+    icon:  'PlusCircle',
   },
   {
     href:  '/admin/editors',
@@ -55,9 +55,9 @@ export const SUPER_ADMIN_NAV_ITEMS: DashNavItem[] = [
     icon:  'Users',
   },
   {
-    href:  '/admin/content',
-    label: 'Content',
-    icon:  'FolderOpen',
+    href:  '#quick-action',
+    label: 'Create',
+    icon:  'PlusCircle',
   },
   {
     href:  '/admin/inbox',

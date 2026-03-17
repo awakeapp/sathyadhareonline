@@ -11,9 +11,14 @@ import { EDITOR_NAV_ITEMS } from '@/app/editor/editor-nav';
 interface NavigationWrapperProps {
   user?: User | null;
   role?: string | null;
+  permissions?: {
+    can_articles: boolean;
+    can_sequels: boolean;
+    can_library: boolean;
+  } | null;
 }
 
-export default function NavigationWrapper({ user, role }: NavigationWrapperProps) {
+export default function NavigationWrapper({ user, role, permissions }: NavigationWrapperProps) {
   const pathname = usePathname();
   const authPaths = ['/login', '/signup', '/forgot-password', '/update-password', '/terms'];
   const isAuthPage = authPaths.includes(pathname);
@@ -29,7 +34,7 @@ export default function NavigationWrapper({ user, role }: NavigationWrapperProps
       : (role === 'super_admin' ? SUPER_ADMIN_NAV_ITEMS : ADMIN_NAV_ITEMS);
 
     return (
-      <DashboardBottomNav items={items} />
+      <DashboardBottomNav items={items} permissions={permissions} />
     );
   }
 

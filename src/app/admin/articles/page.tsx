@@ -26,6 +26,19 @@ export default async function ArticlesPage() {
     redirect('/');
   }
 
+  // Fix #7: Permission Enforcement
+  if (role !== 'super_admin') {
+    const { data: permissions } = await supabase
+      .from('user_content_permissions')
+      .select('can_articles')
+      .eq('user_id', user.id)
+      .maybeSingle();
+      
+    if (!permissions || !permissions.can_articles) {
+      redirect('/admin?denied=1');
+    }
+  }
+
   const { data: articles, error } = await supabase
     .from('articles')
     .select('id, title, slug, status, is_deleted, is_featured, created_at, published_at, author_id, category_id, profiles(full_name), categories(name)')
