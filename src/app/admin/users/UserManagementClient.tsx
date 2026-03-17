@@ -172,15 +172,15 @@ export default function UserManagementClient({
       <div className="grid grid-cols-2 gap-2">
         <button 
           onClick={() => setShowInvite(true)} 
-          className="h-10 rounded-xl bg-[var(--color-primary)] text-white font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:opacity-90 transition-all active:scale-95 shadow-lg shadow-[var(--color-primary)]/10"
+          className="h-10 rounded-xl bg-[var(--color-primary)] text-white font-bold text-[12px] uppercase tracking-widest flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-[var(--color-primary)]/10"
         >
-          <Mail className="w-3.5 h-3.5" strokeWidth={3} /> Invite
+          <Mail className="w-3.5 h-3.5" strokeWidth={2.5} /> Invite
         </button>
         <button 
           onClick={() => setShowCreate(true)} 
-          className="h-10 rounded-xl bg-[var(--color-surface)] text-[var(--color-text)] font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-all active:scale-95"
+          className="h-10 rounded-xl bg-[var(--color-surface)] text-[var(--color-text)] font-bold text-[12px] uppercase tracking-widest flex items-center justify-center gap-2 border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-all"
         >
-          <UserPlus className="w-3.5 h-3.5" strokeWidth={3} /> Create
+          <UserPlus className="w-3.5 h-3.5" strokeWidth={2.5} /> Create
         </button>
       </div>
 
@@ -190,7 +190,7 @@ export default function UserManagementClient({
           <button
             key={mode}
             onClick={() => setViewMode(mode)}
-            className={`relative flex-1 py-1.5 text-[9px] font-black uppercase tracking-[0.15em] rounded-lg transition-all duration-300 ${
+            className={`relative flex-1 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] rounded-lg transition-all duration-300 ${
               viewMode === mode 
                 ? 'text-[var(--color-primary)]' 
                 : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'
@@ -207,12 +207,12 @@ export default function UserManagementClient({
       {/* ── Search & Filter Row (Single Compact Row) ── */}
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" strokeWidth={3} />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" strokeWidth={2.5} />
           <input
             placeholder={`Search...`}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full h-9 pl-9 pr-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[12px] font-bold focus:border-[var(--color-primary)]/40 outline-none transition-all placeholder:text-[var(--color-muted)]/30"
+            className="w-full h-10 pl-10 pr-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[15px] font-medium focus:border-[var(--color-primary)]/40 outline-none transition-all placeholder:text-[var(--color-muted)]/30"
           />
         </div>
 
@@ -221,7 +221,7 @@ export default function UserManagementClient({
             <select 
               value={roleFilter} 
               onChange={e => setRoleFilter(e.target.value)}
-              className="w-full h-9 pl-3 pr-8 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[9px] font-black uppercase tracking-widest text-[var(--color-text)] outline-none appearance-none cursor-pointer hover:bg-[var(--color-surface-2)]"
+              className="w-full h-10 pl-3 pr-8 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[11px] font-bold uppercase tracking-wider text-[var(--color-text)] outline-none appearance-none cursor-pointer hover:bg-[var(--color-surface-2)]"
             >
               <option value="all">Roles</option>
               <option value="super_admin">S.Admin</option>
@@ -229,16 +229,16 @@ export default function UserManagementClient({
               <option value="editor">Editor</option>
             </select>
             <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-muted)]">
-              <Users size={9} strokeWidth={3} />
+              <Users size={12} strokeWidth={2.5} />
             </div>
           </div>
         )}
 
         <button 
           onClick={exportCSV} 
-          className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-text)] transition-all active:scale-95 flex items-center justify-center shadow-sm shrink-0"
+          className="w-10 h-10 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-text)] transition-all flex items-center justify-center shadow-sm shrink-0"
         >
-          <Download className="w-3.5 h-3.5" strokeWidth={3} />
+          <Download className="w-4 h-4" strokeWidth={2.5} />
         </button>
       </div>
 
@@ -314,27 +314,27 @@ export default function UserManagementClient({
                   {/* Info — Perfectly Vertically Centered */}
                   <div className="flex-1 min-w-0 py-0.5">
                     <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                      <p className="font-extrabold text-[15px] text-[var(--color-text)] tracking-tight leading-tight group-hover:text-[var(--color-primary)] transition-colors truncate">
+                      <p className="font-bold text-[17px] text-[var(--color-text)] tracking-tight leading-tight group-hover:text-[var(--color-primary)] transition-colors truncate">
                         {u.full_name || 'Member'}
                       </p>
-                      <span className={`inline-flex items-center px-1 py-0.5 rounded-md text-[8px] font-black uppercase tracking-[0.12em] border border-current opacity-70 ${roleMeta.color} leading-none`}>
+                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-[0.1em] border border-current opacity-70 ${roleMeta.color} leading-none`}>
                         {roleMeta.label}
                       </span>
                     </div>
                     
-                    <p className="text-[12px] text-[var(--color-muted)] font-bold mb-2 opacity-50 group-hover:opacity-100 transition-opacity truncate">
+                    <p className="text-[14px] text-[var(--color-muted)] font-medium mb-2 group-hover:text-[var(--color-text)] transition-colors truncate">
                       {u.email}
                     </p>
                     
                     <div className="flex items-center gap-x-3 gap-y-1 flex-wrap">
-                      <div className="flex items-center gap-1 text-[9px] font-black text-[var(--color-muted)]/30 tracking-widest uppercase">
-                        <Users className="w-2.5 h-2.5" strokeWidth={3} />
+                      <div className="flex items-center gap-1 text-[11px] font-medium text-[var(--color-muted)]/60 tracking-normal uppercase">
+                        <Users className="w-3 h-3" strokeWidth={2} />
                         Joined {formatDate(u.created_at)}
                       </div>
                       
                       {lastSeen && (
-                        <div className="flex items-center gap-1 text-[9px] font-black text-[var(--color-primary)] tracking-widest uppercase bg-[var(--color-primary)]/5 px-1.5 py-0.5 rounded-md">
-                          <Clock className="w-2.5 h-2.5" strokeWidth={3} />
+                        <div className="flex items-center gap-1 text-[11px] font-bold text-[var(--color-primary)] tracking-normal uppercase bg-[var(--color-primary)]/5 px-2 py-0.5 rounded-md">
+                          <Clock className="w-3 h-3" strokeWidth={2.5} />
                           {lastSeen}
                         </div>
                       )}
