@@ -45,7 +45,6 @@ import DashboardHeader, {
   type DashboardUser,
   type DashboardProfile,
 } from './DashboardHeader';
-import DashboardBottomNav, { type DashNavItem } from './DashboardBottomNav';
 
 interface Props {
   children: React.ReactNode;
@@ -55,15 +54,6 @@ interface Props {
   role: string;
   /** Human-readable label shown in the header, e.g. "Admin Dashboard" */
   roleLabel: string;
-  /**
-   * Bottom nav items for this role.
-   * Pass an empty array to suppress the bottom nav entirely.
-   */
-  navItems: DashNavItem[];
-  /**
-   * Optional accent colour for the active nav tab.
-   * Defaults to var(--color-primary) (#685de6).
-   */
   navAccentColor?: string;
 }
 
@@ -73,10 +63,9 @@ export default function DashboardShell({
   profile,
   role,
   roleLabel,
-  navItems,
   navAccentColor,
 }: Props) {
-  const hasNav = navItems.length > 0;
+  const hasNav = true; // Still using this for padding, maybe check pathname
 
   return (
     /*
@@ -104,17 +93,9 @@ export default function DashboardShell({
       <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 py-4 flex flex-col gap-4 sm:gap-6">
         {children}
       </main>
-
-      {/* Fixed bottom navigation (only when items are provided) */}
-      {hasNav && (
-        <DashboardBottomNav
-          items={navItems}
-          accentColor={navAccentColor}
-        />
-      )}
     </div>
   );
 }
 
 /* Re-export types so consumers only need one import */
-export type { DashNavItem, DashboardUser, DashboardProfile };
+export type { DashboardUser, DashboardProfile };

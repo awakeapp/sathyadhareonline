@@ -1,5 +1,3 @@
-'use client';
-
 /**
  * Editor nav items — used by EditorLayout to wire the DashboardShell bottom nav.
  *

@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getCachedProfile } from '@/lib/auth/getCachedProfile';
 import DashboardShell from '@/components/dashboard/DashboardShell';
-import { EDITOR_NAV_ITEMS } from './editor-nav';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +31,6 @@ export default async function EditorLayout({ children }: { children: React.React
       }}
       role={role}
       roleLabel="Editor Workspace"
-      navItems={EDITOR_NAV_ITEMS}
     >
       {children}
     </DashboardShell>

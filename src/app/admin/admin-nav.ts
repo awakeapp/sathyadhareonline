@@ -1,5 +1,3 @@
-'use client';
-
 /**
  * Admin nav items — used by AdminLayout to wire the DashboardShell bottom nav.
  *
