@@ -79,7 +79,7 @@ export default async function EditorDashboard() {
 
       {/* Quick-write CTA */}
       <Link
-        href="/editor/articles/new"
+        href="/editor/articles/write"
         className="flex items-center gap-3 p-4 bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 rounded-xl hover:bg-[var(--color-primary)]/10 active:scale-[0.99] transition-all"
       >
         <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">

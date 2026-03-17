@@ -176,7 +176,7 @@ export default function ArticlesClient({
       {/* ── Page Header & Desktop Actions ── */}
       <div className="flex items-center justify-end mb-2">
         <div className="hidden md:flex gap-3">
-          <Link href="/admin/articles/new">
+          <Link href="/admin/articles/write">
             <PresenceButton className="shadow-sm">
               <Plus className="w-4 h-4 mr-2" /> Create Article
             </PresenceButton>
@@ -348,7 +348,7 @@ export default function ArticlesClient({
 
       {/* ── Mobile FAB ── */}
       <div className="md:hidden fixed bottom-[80px] right-4 z-40">
-        <Link href="/admin/articles/new" className="flex items-center justify-center w-14 h-14 bg-[var(--color-primary)] text-white rounded-full shadow-lg hover:scale-105 transition-transform active:scale-95">
+        <Link href="/admin/articles/write" className="flex items-center justify-center w-14 h-14 bg-[var(--color-primary)] text-white rounded-full shadow-lg hover:scale-105 transition-transform active:scale-95">
           <Plus className="w-6 h-6" strokeWidth={2} />
         </Link>
       </div>
