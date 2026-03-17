@@ -124,11 +124,11 @@ export default async function AdminUsersPage() {
   users.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="pt-2">
-        <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight">People</h1>
-        <p className="text-[14px] text-[var(--color-muted)] mt-1 font-medium">
-          Manage staff, readers, and subscriptions
+    <div className="flex flex-col gap-4">
+      <div className="pt-1">
+        <h1 className="text-[20px] font-extrabold text-[var(--color-text)] tracking-tight">People</h1>
+        <p className="text-[13px] text-[var(--color-muted)] mt-0.5 font-bold opacity-60">
+          Staff and Members Directory
         </p>
       </div>
 

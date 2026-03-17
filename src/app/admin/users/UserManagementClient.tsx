@@ -167,31 +167,30 @@ export default function UserManagementClient({
   };
 
   return (
-    <div className="flex flex-col gap-4">
-
-      {/* ── Action Bar (Minimal) ── */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-1">
+    <div className="flex flex-col gap-3">
+      {/* ── Action Bar (Consolidated & Compact) ── */}
+      <div className="grid grid-cols-2 gap-2">
         <button 
           onClick={() => setShowInvite(true)} 
-          className="flex-1 h-[52px] rounded-2xl bg-[var(--color-primary)] text-white font-bold text-[14px] flex items-center justify-center gap-2 hover:opacity-90 transition-all active:scale-95 shadow-xl shadow-[var(--color-primary)]/10"
+          className="h-10 rounded-xl bg-[var(--color-primary)] text-white font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:opacity-90 transition-all active:scale-95 shadow-lg shadow-[var(--color-primary)]/10"
         >
-          <Mail className="w-4 h-4" strokeWidth={2.5} /> Invite Member
+          <Mail className="w-3.5 h-3.5" strokeWidth={3} /> Invite
         </button>
         <button 
           onClick={() => setShowCreate(true)} 
-          className="flex-1 h-[52px] rounded-2xl bg-[var(--color-surface)] text-[var(--color-text)] font-bold text-[14px] flex items-center justify-center gap-2 border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-all active:scale-95"
+          className="h-10 rounded-xl bg-[var(--color-surface)] text-[var(--color-text)] font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-all active:scale-95"
         >
-          <UserPlus className="w-4 h-4" strokeWidth={2.5} /> Create Account
+          <UserPlus className="w-3.5 h-3.5" strokeWidth={3} /> Create
         </button>
       </div>
 
-      {/* ── Tabs (Premium Minimal Style) ── */}
-      <div className="flex bg-[var(--color-surface-2)]/50 p-1 rounded-[1.25rem] border border-[var(--color-border)] relative mb-1">
+      {/* ── Tabs (Minimal) ── */}
+      <div className="flex bg-[var(--color-surface-2)]/50 p-1 rounded-xl border border-[var(--color-border)] relative">
         {(['users', 'readers', 'subscribed'] as const).map((mode) => (
           <button
             key={mode}
             onClick={() => setViewMode(mode)}
-            className={`relative flex-1 py-2.5 text-[11px] font-extrabold uppercase tracking-[0.1em] rounded-xl transition-all duration-300 ${
+            className={`relative flex-1 py-1.5 text-[9px] font-black uppercase tracking-[0.15em] rounded-lg transition-all duration-300 ${
               viewMode === mode 
                 ? 'text-[var(--color-primary)]' 
                 : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'
@@ -199,54 +198,48 @@ export default function UserManagementClient({
           >
             {mode === 'users' ? 'Staff' : mode === 'readers' ? 'Readers' : 'Subscribers'}
             {viewMode === mode && (
-              <div className="absolute inset-0 bg-[var(--color-surface)] rounded-xl shadow-sm -z-10 animate-in fade-in zoom-in-95 duration-300 border border-[var(--color-border)]" />
+              <div className="absolute inset-0 bg-[var(--color-surface)] rounded-lg shadow-sm -z-10 animate-in fade-in zoom-in-95 duration-300 border border-[var(--color-border)]" />
             )}
           </button>
         ))}
       </div>
 
-      {/* ── Search & Filter (Dynamic based on Tab) ── */}
-      <div className="flex flex-col gap-3">
-        <div className="relative">
-          <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" strokeWidth={2.5} />
+      {/* ── Search & Filter Row (Single Compact Row) ── */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" strokeWidth={3} />
           <input
-            placeholder={`Search ${viewMode === 'users' ? 'Staff' : viewMode === 'readers' ? 'Readers' : 'Subscribers'}...`}
+            placeholder={`Search...`}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full h-[56px] pl-12 pr-4 rounded-[1.25rem] bg-[var(--color-surface)] border border-[var(--color-border)] text-[15px] font-bold focus:border-[var(--color-primary)]/40 focus:ring-[6px] focus:ring-[var(--color-primary)]/5 outline-none transition-all placeholder:text-[var(--color-muted)]/40"
+            className="w-full h-9 pl-9 pr-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[12px] font-bold focus:border-[var(--color-primary)]/40 outline-none transition-all placeholder:text-[var(--color-muted)]/30"
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          {viewMode === 'users' ? (
-            <div className="relative group flex-1 max-w-[160px]">
-              <select 
-                value={roleFilter} 
-                onChange={e => setRoleFilter(e.target.value)}
-                className="w-full h-11 pl-4 pr-10 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[12px] font-black uppercase tracking-widest text-[var(--color-text)] focus:border-[var(--color-primary)]/40 outline-none appearance-none cursor-pointer hover:bg-[var(--color-surface-2)] transition-all"
-              >
-                <option value="all">Every Role</option>
-                <option value="super_admin">Super Admins</option>
-                <option value="admin">Admins</option>
-                <option value="editor">Editors</option>
-              </select>
-              <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-muted)]">
-                <Users size={12} strokeWidth={3} />
-              </div>
+        {viewMode === 'users' && (
+          <div className="relative group min-w-[120px]">
+            <select 
+              value={roleFilter} 
+              onChange={e => setRoleFilter(e.target.value)}
+              className="w-full h-9 pl-3 pr-8 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[9px] font-black uppercase tracking-widest text-[var(--color-text)] outline-none appearance-none cursor-pointer hover:bg-[var(--color-surface-2)]"
+            >
+              <option value="all">Roles</option>
+              <option value="super_admin">S.Admin</option>
+              <option value="admin">Admin</option>
+              <option value="editor">Editor</option>
+            </select>
+            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-muted)]">
+              <Users size={9} strokeWidth={3} />
             </div>
-          ) : (
-            <div className="flex-1" /> // Spacer for Readers/Subscribers
-          )}
+          </div>
+        )}
 
-          <button 
-            onClick={exportCSV} 
-            title="Download List"
-            className="h-11 px-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)]/30 transition-all active:scale-95 flex items-center gap-2 text-[12px] font-black uppercase tracking-widest"
-          >
-            <Download className="w-4 h-4" strokeWidth={2.5} />
-            <span className="hidden sm:inline">Export</span>
-          </button>
-        </div>
+        <button 
+          onClick={exportCSV} 
+          className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-text)] transition-all active:scale-95 flex items-center justify-center shadow-sm shrink-0"
+        >
+          <Download className="w-3.5 h-3.5" strokeWidth={3} />
+        </button>
       </div>
 
       {/* ── Stats bar ── */}
@@ -291,11 +284,11 @@ export default function UserManagementClient({
 
             return (
               <div key={u.id} className="group relative">
-                <div className="flex items-center p-4 bg-[var(--color-surface)] rounded-[1.5rem] border border-[var(--color-border)] hover:border-[var(--color-primary)]/30 hover:shadow-xl hover:shadow-black/5 transition-all duration-300 gap-4">
+                <div className="flex items-center p-3 bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 hover:shadow-xl hover:shadow-black/5 transition-all duration-300 gap-3">
                   
-                  {/* Avatar — Minimal & Professional */}
-                  <div className="relative shrink-0">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-[20px] font-extrabold text-white overflow-hidden shadow-sm transition-transform group-hover:scale-[1.02] duration-500
+                  {/* Avatar — Strict & Aligned */}
+                  <div className="relative shrink-0 flex items-center justify-center">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-[18px] font-black text-white overflow-hidden shadow-sm transition-transform group-hover:scale-105 duration-500
                       ${u.status === 'active'
                         ? 'bg-gradient-to-br from-[var(--color-primary)] to-indigo-400'
                         : 'bg-zinc-400'}`}>
@@ -303,82 +296,82 @@ export default function UserManagementClient({
                         <Image
                           src={u.avatar_url}
                           alt={u.full_name || 'U'}
-                          width={56}
-                          height={56}
-                          className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500"
+                          width={48}
+                          height={48}
+                          className="w-full h-full object-cover"
                           unoptimized
                         />
                       ) : (
                         initials
                       )}
                     </div>
-                    {/* Status Dot */}
-                    <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-4 border-[var(--color-surface)] flex items-center justify-center ${statusMeta.color} ${statusMeta.bg} shadow-sm`}>
-                      <statusMeta.icon className={`w-2 h-2 ${u.status === 'active' ? 'animate-pulse' : ''}`} strokeWidth={3} />
+                    {/* Minimal status dot */}
+                    <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-[3px] border-[var(--color-surface)] flex items-center justify-center ${statusMeta.color} ${statusMeta.bg} shadow-sm`}>
+                      <statusMeta.icon className={`w-1.5 h-1.5 ${u.status === 'active' ? 'animate-pulse' : ''}`} strokeWidth={4} />
                     </div>
                   </div>
 
-                  {/* Info — Modern Stack (ARRANGE UI PROPERLY) */}
-                  <div className="flex-1 min-w-0 pr-2">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <p className="font-black text-[17px] text-[var(--color-text)] tracking-tight leading-none group-hover:text-[var(--color-primary)] transition-colors">
+                  {/* Info — Perfectly Vertically Centered */}
+                  <div className="flex-1 min-w-0 py-0.5">
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                      <p className="font-extrabold text-[15px] text-[var(--color-text)] tracking-tight leading-tight group-hover:text-[var(--color-primary)] transition-colors truncate">
                         {u.full_name || 'Member'}
                       </p>
-                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-[0.1em] border border-current opacity-80 ${roleMeta.color}`}>
+                      <span className={`inline-flex items-center px-1 py-0.5 rounded-md text-[8px] font-black uppercase tracking-[0.12em] border border-current opacity-70 ${roleMeta.color} leading-none`}>
                         {roleMeta.label}
                       </span>
                     </div>
                     
-                    <p className="text-[13px] text-[var(--color-muted)] font-medium mb-2.5 opacity-60 group-hover:opacity-100 transition-opacity truncate max-w-[200px] sm:max-w-none">
+                    <p className="text-[12px] text-[var(--color-muted)] font-bold mb-2 opacity-50 group-hover:opacity-100 transition-opacity truncate">
                       {u.email}
                     </p>
                     
-                    <div className="flex items-center gap-x-3.5 gap-y-2 flex-wrap">
-                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--color-muted)]/40 tracking-wider uppercase">
-                        <Users className="w-3 h-3" strokeWidth={2.5} />
-                        Member since {formatDate(u.created_at)}
+                    <div className="flex items-center gap-x-3 gap-y-1 flex-wrap">
+                      <div className="flex items-center gap-1 text-[9px] font-black text-[var(--color-muted)]/30 tracking-widest uppercase">
+                        <Users className="w-2.5 h-2.5" strokeWidth={3} />
+                        Joined {formatDate(u.created_at)}
                       </div>
                       
                       {lastSeen && (
-                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--color-primary)] tracking-wider uppercase bg-[var(--color-primary)]/5 px-1.5 py-0.5 rounded-md">
-                          <Clock className="w-3 h-3" strokeWidth={2.5} />
-                          Active {lastSeen}
+                        <div className="flex items-center gap-1 text-[9px] font-black text-[var(--color-primary)] tracking-widest uppercase bg-[var(--color-primary)]/5 px-1.5 py-0.5 rounded-md">
+                          <Clock className="w-2.5 h-2.5" strokeWidth={3} />
+                          {lastSeen}
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Actions — Updated 3-dot menu */}
-                  <div className="shrink-0 ml-auto">
+                  {/* Actions — Center Aligned */}
+                  <div className="shrink-0 flex items-center pr-1">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button className="w-10 h-10 rounded-2xl bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 transition-all active:scale-95 border border-transparent shadow-sm">
-                          <MoreVertical className="w-5 h-5" strokeWidth={2} />
+                        <button className="w-9 h-9 rounded-xl bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 transition-all active:scale-95 shadow-sm">
+                          <MoreVertical className="w-4 h-4" strokeWidth={2.5} />
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuPortal>
-                        <DropdownMenuContent align="end" className="w-[200px] p-2 bg-[var(--color-surface)] border-[var(--color-border)] shadow-2xl rounded-3xl animate-in fade-in zoom-in-95">
-                          <DropdownMenuLabel className="px-3 py-2 text-[10px] opacity-40 uppercase tracking-widest font-black">Management</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowEdit(true); }} className="rounded-2xl py-2.5 px-4 font-bold text-[13px]">
-                            <Edit2 className="w-4 h-4 mr-3 opacity-60" />
-                            Edit Permissions
+                        <DropdownMenuContent align="end" className="w-[180px] p-1.5 bg-[var(--color-surface)] border-[var(--color-border)] shadow-2xl rounded-2xl animate-in fade-in zoom-in-95">
+                          <DropdownMenuLabel className="px-3 py-1.5 text-[9px] opacity-40 uppercase tracking-widest font-black">Controls</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowEdit(true); }} className="rounded-xl py-2 px-3 font-bold text-[12px]">
+                            <Edit2 className="w-3.5 h-3.5 mr-2.5 opacity-60" />
+                            Permissions
                           </DropdownMenuItem>
                           
-                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowReset(true); }} className="rounded-2xl py-2.5 px-4 font-bold text-[13px] text-emerald-600 focus:bg-emerald-50 focus:text-emerald-700">
-                            <KeyRound className="w-4 h-4 mr-3" />
+                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowReset(true); }} className="rounded-xl py-2 px-3 font-bold text-[12px] text-emerald-600 focus:bg-emerald-50 focus:text-emerald-700">
+                            <KeyRound className="w-3.5 h-3.5 mr-2.5" />
                             Reset Password
                           </DropdownMenuItem>
 
-                          <DropdownMenuSeparator className="my-2 opacity-50" />
+                          <DropdownMenuSeparator className="my-1 opacity-50" />
 
-                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowStatus(true); }} className="rounded-2xl py-2.5 px-4 font-bold text-[13px] text-amber-600 focus:bg-amber-50 focus:text-amber-700">
-                            <Slash className="w-4 h-4 mr-3" />
-                            {u.status === 'active' ? 'Suspend Access' : 'Reactivate'}
+                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowStatus(true); }} className="rounded-xl py-2 px-3 font-bold text-[12px] text-amber-600 focus:bg-amber-50 focus:text-amber-700">
+                            <Slash className="w-3.5 h-3.5 mr-2.5" />
+                            {u.status === 'active' ? 'Suspend' : 'Activate'}
                           </DropdownMenuItem>
 
-                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowDelete(true); }} className="rounded-2xl py-2.5 px-4 font-black text-[13px] text-rose-600 focus:bg-rose-50 focus:text-rose-700">
-                            <Trash2 className="w-4 h-4 mr-3" />
-                            Remove Account
+                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowDelete(true); }} className="rounded-xl py-2 px-3 font-black text-[12px] text-rose-600 focus:bg-rose-50 focus:text-rose-700">
+                            <Trash2 className="w-3.5 h-3.5 mr-2.5" />
+                            Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenuPortal>
