@@ -51,10 +51,10 @@ interface UserProfile {
 
 // Fix: role keys must be lowercase_underscore (normalised in page.tsx)
 const ROLE_META: Record<string, { label: string; color: string }> = {
-  super_admin: { label: 'Super Admin', color: 'bg-purple-500/10 text-purple-500 border-purple-500/40' },
-  admin:       { label: 'Admin',       color: 'bg-blue-500/10 text-blue-500 border-blue-500/40' },
-  editor:      { label: 'Editor',      color: 'bg-amber-500/10 text-amber-600 border-amber-500/40' },
-  reader:      { label: 'Reader',      color: 'bg-gray-500/10 text-zinc-500 border-gray-400/40' },
+  super_admin: { label: 'S. Admin', color: 'border-[var(--color-text)]/10 bg-[var(--color-text)]/5 text-[var(--color-text)]/70' },
+  admin:       { label: 'Admin',    color: 'border-[var(--color-text)]/10 bg-[var(--color-text)]/5 text-[var(--color-text)]/70' },
+  editor:      { label: 'Editor',   color: 'border-[var(--color-text)]/10 bg-[var(--color-text)]/5 text-[var(--color-text)]/70' },
+  reader:      { label: 'Reader',   color: 'border-[var(--color-text)]/5 text-[var(--color-muted)]' },
 };
 
 const STATUS_META: Record<string, { label: string; color: string; icon: React.ElementType; bg: string }> = {
@@ -284,20 +284,20 @@ export default function UserManagementClient({
 
             return (
               <div key={u.id} className="group relative">
-                <div className="flex items-center p-3 bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 hover:shadow-xl hover:shadow-black/5 transition-all duration-300 gap-3">
+                <div className="flex items-center p-4 bg-[var(--color-surface)] rounded-3xl border border-[var(--color-border)] hover:border-[var(--color-primary)]/30 hover:shadow-2xl hover:shadow-black/5 transition-all duration-500 gap-4">
                   
-                  {/* Avatar — Strict & Aligned */}
-                  <div className="relative shrink-0 flex items-center justify-center">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-[18px] font-black text-white overflow-hidden shadow-sm transition-transform group-hover:scale-105 duration-500
+                  {/* Avatar Section */}
+                  <div className="relative shrink-0">
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-[20px] font-bold text-white overflow-hidden shadow-sm transition-transform group-hover:scale-105 duration-500
                       ${u.status === 'active'
-                        ? 'bg-gradient-to-br from-[var(--color-primary)] to-indigo-400'
-                        : 'bg-zinc-400'}`}>
+                        ? 'bg-gradient-to-br from-[var(--color-primary)] to-indigo-500'
+                        : 'bg-zinc-500'}`}>
                       {u.avatar_url ? (
                         <Image
                           src={u.avatar_url}
                           alt={u.full_name || 'U'}
-                          width={48}
-                          height={48}
+                          width={56}
+                          height={56}
                           className="w-full h-full object-cover"
                           unoptimized
                         />
@@ -305,35 +305,45 @@ export default function UserManagementClient({
                         initials
                       )}
                     </div>
-                    {/* Minimal status dot */}
-                    <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-[3px] border-[var(--color-surface)] flex items-center justify-center ${statusMeta.color} ${statusMeta.bg} shadow-sm`}>
-                      <statusMeta.icon className={`w-1.5 h-1.5 ${u.status === 'active' ? 'animate-pulse' : ''}`} strokeWidth={4} />
+                    {/* Status indicator on avatar */}
+                    <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-[3px] border-[var(--color-surface)] flex items-center justify-center ${statusMeta.color} ${statusMeta.bg} shadow-sm`}>
+                      <statusMeta.icon className={`w-2 h-2 ${u.status === 'active' ? 'animate-pulse' : ''}`} strokeWidth={3} />
                     </div>
                   </div>
 
-                  {/* Info — Perfectly Vertically Centered */}
-                  <div className="flex-1 min-w-0 py-0.5">
-                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                      <p className="font-bold text-[17px] text-[var(--color-text)] tracking-tight leading-tight group-hover:text-[var(--color-primary)] transition-colors truncate">
-                        {u.full_name || 'Member'}
-                      </p>
-                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-[0.1em] border border-current opacity-70 ${roleMeta.color} leading-none`}>
-                        {roleMeta.label}
-                      </span>
+                  {/* Main Content Area */}
+                  <div className="flex-1 min-w-0 pr-2">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <h3 className="font-bold text-[17px] text-[var(--color-text)] tracking-tight truncate">
+                          {u.full_name || 'Anonymous Member'}
+                        </h3>
+                        <span className={`inline-flex px-1.5 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider border ${roleMeta.color} bg-transparent`}>
+                          {roleMeta.label}
+                        </span>
+                      </div>
+                      
+                      {/* Desktop Last Seen (Subtle) */}
+                      {lastSeen && (
+                        <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-bold text-[var(--color-muted)]/40 uppercase tracking-tighter">
+                          <Clock className="w-3 h-3" />
+                          {lastSeen}
+                        </span>
+                      )}
                     </div>
                     
-                    <p className="text-[14px] text-[var(--color-muted)] font-medium mb-2 group-hover:text-[var(--color-text)] transition-colors truncate">
+                    <p className="text-[14px] text-[var(--color-muted)] font-medium mb-2.5 opacity-60 group-hover:opacity-100 transition-opacity truncate">
                       {u.email}
                     </p>
                     
-                    <div className="flex items-center gap-x-3 gap-y-1 flex-wrap">
-                      <div className="flex items-center gap-1 text-[11px] font-medium text-[var(--color-muted)]/60 tracking-normal uppercase">
-                        <Users className="w-3 h-3" strokeWidth={2} />
+                    <div className="flex items-center gap-4 text-[11px] font-bold text-[var(--color-muted)]/30 uppercase tracking-widest leading-none">
+                      <div className="flex items-center gap-1.5 hover:text-[var(--color-text)] transition-colors">
+                        <Users className="w-3 h-3" strokeWidth={2.5} />
                         Joined {formatDate(u.created_at)}
                       </div>
-                      
+                      {/* Mobile Last Seen */}
                       {lastSeen && (
-                        <div className="flex items-center gap-1 text-[11px] font-bold text-[var(--color-primary)] tracking-normal uppercase bg-[var(--color-primary)]/5 px-2 py-0.5 rounded-md">
+                        <div className="sm:hidden flex items-center gap-1.5 text-[var(--color-primary)]/60">
                           <Clock className="w-3 h-3" strokeWidth={2.5} />
                           {lastSeen}
                         </div>
@@ -341,37 +351,37 @@ export default function UserManagementClient({
                     </div>
                   </div>
 
-                  {/* Actions — Center Aligned */}
-                  <div className="shrink-0 flex items-center pr-1">
+                  {/* Actions — Integral & Refined */}
+                  <div className="shrink-0">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button className="w-9 h-9 rounded-xl bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 transition-all active:scale-95 shadow-sm">
-                          <MoreVertical className="w-4 h-4" strokeWidth={2.5} />
+                        <button className="w-10 h-10 rounded-2xl bg-transparent border border-transparent hover:border-[var(--color-border)] hover:bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)]/40 hover:text-[var(--color-text)] transition-all">
+                          <MoreVertical className="w-4.5 h-4.5" />
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuPortal>
-                        <DropdownMenuContent align="end" className="w-[180px] p-1.5 bg-[var(--color-surface)] border-[var(--color-border)] shadow-2xl rounded-2xl animate-in fade-in zoom-in-95">
-                          <DropdownMenuLabel className="px-3 py-1.5 text-[9px] opacity-40 uppercase tracking-widest font-black">Controls</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowEdit(true); }} className="rounded-xl py-2 px-3 font-bold text-[12px]">
+                        <DropdownMenuContent align="end" className="w-[200px] p-1.5 bg-[var(--color-surface)] border-[var(--color-border)] shadow-2xl rounded-2xl animate-in fade-in slide-in-from-top-2 duration-200">
+                          <DropdownMenuLabel className="px-3 py-2 text-[10px] opacity-40 uppercase tracking-widest font-bold">Member Actions</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowEdit(true); }} className="rounded-xl py-2 px-3 font-bold text-[13px]">
                             <Edit2 className="w-3.5 h-3.5 mr-2.5 opacity-60" />
-                            Permissions
+                            Manage Permissions
                           </DropdownMenuItem>
                           
-                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowReset(true); }} className="rounded-xl py-2 px-3 font-bold text-[12px] text-emerald-600 focus:bg-emerald-50 focus:text-emerald-700">
+                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowReset(true); }} className="rounded-xl py-2 px-3 font-bold text-[13px] text-indigo-600 focus:bg-indigo-50 dark:focus:bg-indigo-500/10">
                             <KeyRound className="w-3.5 h-3.5 mr-2.5" />
-                            Reset Password
+                            Force Password Reset
                           </DropdownMenuItem>
 
-                          <DropdownMenuSeparator className="my-1 opacity-50" />
+                          <DropdownMenuSeparator className="my-1.5 opacity-10" />
 
-                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowStatus(true); }} className="rounded-xl py-2 px-3 font-bold text-[12px] text-amber-600 focus:bg-amber-50 focus:text-amber-700">
+                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowStatus(true); }} className="rounded-xl py-2 px-3 font-bold text-[13px] text-amber-600 focus:bg-amber-50 dark:focus:bg-amber-500/10">
                             <Slash className="w-3.5 h-3.5 mr-2.5" />
-                            {u.status === 'active' ? 'Suspend' : 'Activate'}
+                            {u.status === 'active' ? 'Suspend Access' : 'Restore Access'}
                           </DropdownMenuItem>
 
-                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowDelete(true); }} className="rounded-xl py-2 px-3 font-black text-[12px] text-rose-600 focus:bg-rose-50 focus:text-rose-700">
+                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowDelete(true); }} className="rounded-xl py-2 px-3 font-bold text-[13px] text-rose-600 focus:bg-rose-50 dark:focus:bg-rose-500/10">
                             <Trash2 className="w-3.5 h-3.5 mr-2.5" />
-                            Delete
+                            Delete Account
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenuPortal>
@@ -398,11 +408,11 @@ export default function UserManagementClient({
                 </ModalDescription>
               </ModalHeader>
               <form action={fd => handleAction(sendPasswordResetAction, fd, () => setShowReset(false))} className="pt-2">
-                <input type="hidden" name="email" value={selectedUser.email || ''} />
+                <input type="hidden" name="email" value={selectedUser?.email || ''} />
                 <ModalFooter>
                   <Button type="button" variant="outline" onClick={() => setShowReset(false)}>Cancel</Button>
-                  <Button type="submit" loading={isPending} className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                    <KeyRound className="w-4 h-4 mr-2" /> Send Reset Email
+                  <Button type="submit" loading={isPending} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                    <KeyRound className="w-4 h-4 mr-2" /> Send Reset Link
                   </Button>
                 </ModalFooter>
               </form>
