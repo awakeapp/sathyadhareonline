@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getCachedProfile } from '@/lib/auth/getCachedProfile';
 import DashboardShell from '@/components/dashboard/DashboardShell';
-import { ADMIN_NAV_ITEMS } from './admin-nav';
+import { ADMIN_NAV_ITEMS, SUPER_ADMIN_NAV_ITEMS } from './admin-nav';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +32,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       }}
       role={role}
       roleLabel={role === 'super_admin' ? 'Super Admin Dashboard' : 'Admin Dashboard'}
-      navItems={ADMIN_NAV_ITEMS}
+      navItems={role === 'super_admin' ? SUPER_ADMIN_NAV_ITEMS : ADMIN_NAV_ITEMS}
     >
       {children}
     </DashboardShell>

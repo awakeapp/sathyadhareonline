@@ -1,11 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { ChevronLeft, Bell } from 'lucide-react';
 import SecurityClient from './SecurityClient';
-import { 
-  PresenceWrapper, 
-  PresenceHeader 
-} from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +8,7 @@ export default async function SecurityPage() {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/sign-in');
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -22,7 +17,7 @@ export default async function SecurityPage() {
     .maybeSingle();
 
   if (!profile || profile.role !== 'super_admin') {
-    redirect('/dashboard/admin?denied=1');
+    redirect('/admin?denied=1');
   }
 
   const { data: keys, error } = await supabase
@@ -34,18 +29,17 @@ export default async function SecurityPage() {
     console.error('Error fetching API keys:', error);
   }
 
-  const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
-
   return (
-    <PresenceWrapper>
-      <PresenceHeader 
-        title="Security" 
-        hideActions={true} 
-      />
-      
-      <div className="w-full flex flex-col gap-4 relative z-20">
+    <div className="flex flex-col gap-6">
+      {/* Page Header */}
+      <div className="pt-2">
+        <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight">Security & API</h1>
+        <p className="text-[13px] text-[var(--color-muted)] mt-1">Manage API keys, access control, and platform security</p>
+      </div>
+
+      <div className="w-full">
         <SecurityClient initialKeys={keys || []} />
       </div>
-    </PresenceWrapper>
+    </div>
   );
 }

@@ -1,11 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { ChevronLeft, Bell } from 'lucide-react';
 import NewsletterClient from './NewsletterClient';
-import { 
-  PresenceWrapper, 
-  PresenceHeader 
-} from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,13 +8,13 @@ export default async function AdminNewsletterPage() {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/sign-in');
 
   const { data: profile } = await supabase
     .from('profiles').select('full_name, role').eq('id', user.id).maybeSingle();
 
   if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
-    redirect('/dashboard/admin?denied=1');
+    redirect('/admin?denied=1');
   }
 
   const { data: subscribers, error } = await supabase
@@ -29,18 +24,16 @@ export default async function AdminNewsletterPage() {
 
   if (error) console.error('Newsletter fetch error:', error);
 
-  const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
-
   return (
-    <PresenceWrapper>
-      <PresenceHeader 
-        title="Newsletter" 
-        hideActions={true} 
-      />
-      
-      <div className="w-full flex flex-col gap-4 relative z-20 max-w-3xl mx-auto">
+    <div className="flex flex-col gap-6">
+      <div className="pt-2">
+        <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight">Newsletter</h1>
+        <p className="text-[13px] text-[var(--color-muted)] mt-1">Manage platform subscribers and broadcast updates</p>
+      </div>
+
+      <div className="w-full">
         <NewsletterClient subscribers={subscribers ?? []} />
       </div>
-    </PresenceWrapper>
+    </div>
   );
 }

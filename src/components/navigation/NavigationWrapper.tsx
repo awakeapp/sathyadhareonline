@@ -15,7 +15,9 @@ export default function NavigationWrapper({ user, role }: NavigationWrapperProps
   const authPaths = ['/login', '/signup', '/forgot-password', '/update-password', '/terms'];
   const isAuthPage = authPaths.includes(pathname);
 
-  if (isAuthPage) return null;
+  const isAdminPage = pathname.startsWith('/admin') || pathname.startsWith('/editor');
+
+  if (isAuthPage || isAdminPage) return null;
 
   return (
     <>

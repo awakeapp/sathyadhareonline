@@ -1,11 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { ChevronLeft, Bell } from 'lucide-react';
 import CommentsClient from './CommentsClient';
-import { 
-  PresenceWrapper, 
-  PresenceHeader 
-} from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +8,7 @@ export default async function AdminCommentsPage() {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/sign-in');
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -22,7 +17,7 @@ export default async function AdminCommentsPage() {
     .maybeSingle();
 
   if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
-    redirect('/dashboard/admin?denied=1');
+    redirect('/admin?denied=1');
   }
 
   const { data: comments, error } = await supabase
@@ -52,21 +47,18 @@ export default async function AdminCommentsPage() {
   }
   const articlesList = Array.from(articleMap.entries()).map(([id, title]) => ({ id, title }));
 
-  const pendingCount = comments?.filter(c => c.status === 'pending').length ?? 0;
-  const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
-
   return (
-    <PresenceWrapper>
-      <PresenceHeader 
-        title="Comments" 
-        hideActions={true} 
-      />
-      
-      <div className="w-full flex flex-col gap-4 relative z-20">
+    <div className="flex flex-col gap-6">
+      <div className="pt-2">
+        <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight">Comments & Moderation</h1>
+        <p className="text-[13px] text-[var(--color-muted)] mt-1">Review, approve, or remove discussion across articles</p>
+      </div>
+
+      <div className="w-full">
         <CommentsClient 
           comments={(comments as any) || []}
           articlesList={articlesList} />
       </div>
-    </PresenceWrapper>
+    </div>
   );
 }

@@ -1,12 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { ChevronLeft, Bell } from 'lucide-react';
 import AuditLogsClient from './AuditLogsClient';
 import { getAuditLogsAction } from './actions';
-import { 
-  PresenceWrapper, 
-  PresenceHeader 
-} from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +9,7 @@ export default async function AuditLogsPage() {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/sign-in');
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -23,7 +18,7 @@ export default async function AuditLogsPage() {
     .maybeSingle();
 
   if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
-    redirect('/dashboard/admin?denied=1');
+    redirect('/admin?denied=1');
   }
 
   const { data: profiles, error } = await supabase
@@ -40,8 +35,6 @@ export default async function AuditLogsPage() {
   if (error) {
     console.error('Error fetching users for audit logs:', error);
   }
-
-  const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let initialLogs: any[] = [];
@@ -62,15 +55,16 @@ export default async function AuditLogsPage() {
   }
 
   return (
-    <PresenceWrapper>
-      <PresenceHeader 
-        title="Audit Logs" 
-        hideActions={true} 
-      />
-      
-      <div className="w-full flex flex-col gap-4 relative z-20">
+    <div className="flex flex-col gap-6">
+      {/* Page Header */}
+      <div className="pt-2">
+        <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight">Audit Logs</h1>
+        <p className="text-[13px] text-[var(--color-muted)] mt-1">Review system-wide administrative activity and changes</p>
+      </div>
+
+      <div className="w-full">
         <AuditLogsClient usersList={usersList} initialLogs={initialLogs as any[]} initialCount={initialCount} />
       </div>
-    </PresenceWrapper>
+    </div>
   );
 }

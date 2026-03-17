@@ -1,12 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { ChevronLeft, Bell } from 'lucide-react';
 import AnalyticsClient from './AnalyticsClient';
 import { differenceInDays, parseISO, isValid } from 'date-fns';
-import { 
-  PresenceWrapper, 
-  PresenceHeader 
-} from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,13 +13,13 @@ export default async function AnalyticsPage({
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/sign-in');
 
   const { data: profile } = await supabase
     .from('profiles').select('full_name, role').eq('id', user.id).maybeSingle();
 
   if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
-    redirect('/dashboard/admin?denied=1');
+    redirect('/admin?denied=1');
   }
 
   const params = await searchParams;
@@ -131,16 +126,15 @@ export default async function AnalyticsPage({
   }
   const categoryStats = Object.values(catMap).sort((a, b) => b.count - a.count);
 
-  const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
-
   return (
-    <PresenceWrapper>
-      <PresenceHeader 
-        title="Analytics" 
-        hideActions={true} 
-      />
-      
-      <div className="w-full flex flex-col gap-4 relative z-20">
+    <div className="flex flex-col gap-6">
+      {/* Page Header */}
+      <div className="pt-2">
+        <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight">Platform Analytics</h1>
+        <p className="text-[13px] text-[var(--color-muted)] mt-1">Growth trends, engagement metrics, and top performing content</p>
+      </div>
+
+      <div className="w-full">
         <AnalyticsClient
           startDate={startISO}
           endDate={endISO}
@@ -155,6 +149,6 @@ export default async function AnalyticsPage({
           }}
         />
       </div>
-    </PresenceWrapper>
+    </div>
   );
 }

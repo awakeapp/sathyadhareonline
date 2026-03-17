@@ -1,12 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { ChevronLeft, Bell } from 'lucide-react';
 import UserManagementClient from './UserManagementClient';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { 
-  PresenceWrapper, 
-  PresenceHeader 
-} from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,10 +18,10 @@ export default async function AdminUsersPage() {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/sign-in');
 
   const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).maybeSingle();
-  if (!profile || profile.role !== 'super_admin') redirect('/admin');
+  if (!profile || profile.role !== 'super_admin') redirect('/admin?denied=1');
 
   let authUsers: { id: string; email?: string; created_at: string; user_metadata?: Record<string, unknown> }[] = [];
   try {
@@ -102,15 +97,17 @@ export default async function AdminUsersPage() {
   // Sort by created_at desc
   users.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-  const initials  = (profile?.full_name || user.email || 'A').charAt(0).toUpperCase();
-
   return (
-    <PresenceWrapper>
-      <PresenceHeader title="People" />
+    <div className="flex flex-col gap-6">
+      {/* Page Header */}
+      <div className="pt-2">
+        <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight">People</h1>
+        <p className="text-[13px] text-[var(--color-muted)] mt-1">Manage user accounts, roles, and content permissions</p>
+      </div>
       
-      <div className="w-full flex flex-col gap-4 relative z-20">
+      <div className="w-full">
         <UserManagementClient users={(users as UserProfile[]) || []} currentUserRole={profile.role} />
       </div>
-    </PresenceWrapper>
+    </div>
   );
 }

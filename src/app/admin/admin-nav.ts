@@ -22,7 +22,7 @@ export const ADMIN_NAV_ITEMS: DashNavItem[] = [
     href:  '/admin',
     label: 'Home',
     icon:  LayoutDashboard,
-    exact: true,          // only active on exact /admin
+    exact: true,
   },
   {
     href:  '/admin/content',
@@ -43,5 +43,39 @@ export const ADMIN_NAV_ITEMS: DashNavItem[] = [
     href:  '/admin/comments',
     label: 'Comments',
     icon:  MessageSquare,
+  },
+];
+
+import {
+  Users,
+  Settings,
+} from 'lucide-react';
+
+export const SUPER_ADMIN_NAV_ITEMS: DashNavItem[] = [
+  {
+    href:  '/admin',
+    label: 'Home',
+    icon:  LayoutDashboard,
+    exact: true,
+  },
+  {
+    href:  '/admin/manage',
+    label: 'Manage',
+    icon:  Users,
+  },
+  {
+    href:  '/admin/content',
+    label: 'Content',
+    icon:  FolderOpen,
+  },
+  {
+    href:  '/admin/inbox',
+    label: 'Inbox',
+    icon:  Inbox,
+  },
+  {
+    href:  '/admin/settings',
+    label: 'Settings',
+    icon:  Settings,
   },
 ];
