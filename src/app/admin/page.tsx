@@ -6,25 +6,10 @@ import nextDynamic from 'next/dynamic';
 const AccessDeniedBanner = nextDynamic(() => import('./AccessDeniedBanner'));
 
 
-export const dynamic = 'force-dynamic';
-
 export default async function AdminPage() {
   return (
-    <div className="flex flex-col gap-4 w-full">
-
-      {/* Access Denied notice (appears when ?denied=1 is in the URL) */}
-      <Suspense fallback={null}>
-        <AccessDeniedBanner />
-      </Suspense>
-
-      {/* Search */}
-      <GlobalSearchBar />
-
-      {/* Metrics */}
-      <Suspense fallback={<DashboardSkeleton />}>
-        <DashboardMetrics />
-      </Suspense>
-
+    <div className="flex flex-col gap-4 w-full p-20">
+      <h1 className="text-2xl font-bold">Admin Dashboard Loading...</h1>
     </div>
   );
 }
