@@ -5,8 +5,7 @@ import { GlobalSearchBar } from '@/components/PresenceUI';
 import DashboardMetrics from './DashboardMetrics';
 import nextDynamic from 'next/dynamic';
 
-// Loaded client-side so useSearchParams is safe (ssr: false avoids Suspense requirement)
-const AccessDeniedBanner = nextDynamic(() => import('./AccessDeniedBanner'), { ssr: false });
+const AccessDeniedBanner = nextDynamic(() => import('./AccessDeniedBanner'));
 
 
 export const dynamic = 'force-dynamic';
@@ -32,7 +31,9 @@ export default async function AdminPage() {
     <div className="flex flex-col gap-4 w-full">
 
       {/* Access Denied notice (appears when ?denied=1 is in the URL) */}
-      <AccessDeniedBanner />
+      <Suspense fallback={null}>
+        <AccessDeniedBanner />
+      </Suspense>
 
       {/* Search */}
       <GlobalSearchBar />
