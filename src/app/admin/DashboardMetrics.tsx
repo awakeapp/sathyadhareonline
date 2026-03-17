@@ -54,7 +54,7 @@ export default async function DashboardMetrics() {
     id: s.id, type: 'submission', title: `Guest submission: ${s.title}`, user: s.name || 'Guest', ts: s.created_at, href: `/admin/inbox`
   }));
   const aComs: DashboardActivity[] = (gD(12)).map((c: any) => ({
-    id: c.id, type: 'comment', title: `Commented: "${c.content.substring(0, 30)}..."`, user: (Array.isArray(c.profiles) ? c.profiles[0]?.full_name : c.profiles?.full_name) || c.guest_name || 'Anonymous', ts: c.created_at, href: `/admin/comments`
+    id: c.id, type: 'comment', title: `Commented: "${(c.content || '').substring(0, 30)}..."`, user: (Array.isArray(c.profiles) ? c.profiles[0]?.full_name : c.profiles?.full_name) || c.guest_name || 'Anonymous', ts: c.created_at, href: `/admin/comments`
   }));
 
   const recentActivity = [...aArts, ...aSubs, ...aComs].sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime()).slice(0, 6);
@@ -124,7 +124,10 @@ export default async function DashboardMetrics() {
               <div className="flex-1 min-w-0">
                 <p className="text-[14px] font-bold text-[var(--color-text)] truncate">{activity.title}</p>
                 <p className="text-[11px] text-[var(--color-muted)] mt-0.5">
-                  {activity.user} · {new Date(activity.ts).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                  {activity.user} · {(() => {
+                    const d = new Date(activity.ts);
+                    return isNaN(d.getTime()) ? 'Recently' : d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+                  })()}
                 </p>
               </div>
               <ChevronRight size={14} className="text-[var(--color-muted)] opacity-50 shrink-0" />
