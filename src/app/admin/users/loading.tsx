@@ -2,19 +2,19 @@ export default function AdminLoading() {
   return (
     <div className="font-sans antialiased min-h-screen pb-28 animate-pulse bg-gray-50/50 dark:bg-transparent">
       {/* Presence Header Skeleton */}
-      <div className="h-44 bg-zinc-950 relative overflow-hidden flex items-center px-8 border-b border-white/5">
+      <div className="h-32 bg-[var(--color-surface)] relative overflow-hidden flex items-center px-6 border-b border-[var(--color-border)] rounded-3xl mb-4 shadow-sm">
          <div className="flex items-center justify-between w-full max-w-[1400px] mx-auto">
-            <div className="flex items-center gap-6">
-               <div className="w-16 h-16 rounded-2xl bg-white/5" />
-               <div className="space-y-3">
-                  <div className="h-6 w-48 bg-white/10 rounded-lg" />
-                  <div className="h-3 w-32 bg-white/5 rounded-md" />
+            <div className="flex items-center gap-4">
+               <div className="w-14 h-14 rounded-2xl bg-[var(--color-surface-2)] border border-[var(--color-border)]" />
+               <div className="space-y-2">
+                  <div className="h-5 w-40 bg-[var(--color-surface-2)] rounded-lg" />
+                  <div className="h-3 w-28 bg-[var(--color-muted)]/10 rounded-md" />
                </div>
             </div>
-            <div className="flex items-center gap-4">
-               <div className="w-12 h-12 rounded-2xl bg-white/5" />
-               <div className="w-12 h-12 rounded-2xl bg-white/5" />
-               <div className="w-12 h-12 rounded-full bg-white/10 ml-4" />
+            <div className="flex items-center gap-3">
+               <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-2)]" />
+               <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-2)]" />
+               <div className="w-10 h-10 rounded-full bg-[var(--color-surface-2)] ml-2" />
             </div>
          </div>
       </div>
