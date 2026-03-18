@@ -2,16 +2,16 @@ import { Card, CardContent } from '@/components/ui/Card';
 
 export default function AnalyticsLoading() {
   return (
-    <div className="min-h-screen pb-24 px-4 pt-6 bg-[var(--color-background)] font-sans antialiased text-white">
+    <div className="min-h-screen pb-24 px-4 pt-6 bg-[var(--color-background)] font-sans antialiased text-[var(--color-text)]">
       <div className="max-w-4xl mx-auto space-y-6">
         
         {/* Header Skeleton */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <div className="h-8 w-32 bg-white/10 rounded-lg animate-pulse mb-2"></div>
-            <div className="h-4 w-48 bg-white/5 rounded-md animate-pulse"></div>
+            <div className="h-8 w-40 bg-[var(--color-surface-2)] rounded-lg animate-pulse mb-2"></div>
+            <div className="h-4 w-60 bg-[var(--color-muted)]/10 rounded-md animate-pulse"></div>
           </div>
-          <div className="h-10 w-28 bg-white/5 rounded-xl animate-pulse"></div>
+          <div className="h-10 w-28 bg-[var(--color-surface-2)] rounded-xl animate-pulse"></div>
         </div>
 
         {/* Stat Cards Skeleton */}
