@@ -127,13 +127,7 @@ export default async function AnalyticsPage({
   const categoryStats = Object.values(catMap).sort((a, b) => b.count - a.count);
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Page Header */}
-      <div className="pt-2">
-        <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight">Platform Analytics</h1>
-        <p className="text-[13px] text-[var(--color-muted)] mt-1">Growth trends, engagement metrics, and top performing content</p>
-      </div>
-
+    <div className="flex flex-col gap-4">
       <div className="w-full">
         <AnalyticsClient
           startDate={startISO}

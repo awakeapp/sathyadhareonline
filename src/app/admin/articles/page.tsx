@@ -77,23 +77,14 @@ export default async function ArticlesPage() {
     .select('id, name')
     .order('name');
 
-  const initials = (currentProfile?.full_name || 'A').charAt(0).toUpperCase();
-
   return (
-    <PresenceWrapper>
-      <PresenceHeader 
-        title="Content" 
-        hideActions={true} 
+    <div className="w-full flex flex-col gap-4">
+      <ArticlesClient 
+        articles={mergedArticles}
+        users={(users || []).map(u => ({ id: u.id, name: u.full_name || 'Unknown' }))}
+        categories={categories || []}
+        currentUserRole={role}
       />
-      
-      <div className="w-full flex flex-col gap-4 relative z-20">
-        <ArticlesClient 
-          articles={mergedArticles}
-          users={(users || []).map(u => ({ id: u.id, name: u.full_name || 'Unknown' }))}
-          categories={categories || []}
-          currentUserRole={role}
-        />
-      </div>
-    </PresenceWrapper>
+    </div>
   );
 }

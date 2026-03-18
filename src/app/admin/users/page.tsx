@@ -125,13 +125,6 @@ export default async function AdminUsersPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="pt-1">
-        <h1 className="text-[20px] font-extrabold text-[var(--color-text)] tracking-tight">People</h1>
-        <p className="text-[13px] text-[var(--color-muted)] mt-0.5 font-bold opacity-60">
-          Staff and Members Directory
-        </p>
-      </div>
-
       <div className="w-full">
         <UserManagementClient users={users} currentUserRole={profile.role} />
       </div>

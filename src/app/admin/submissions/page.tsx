@@ -58,21 +58,9 @@ export default async function SubmissionsPage() {
     created_at: g.created_at
   }));
 
-  const initials = (profile?.full_name || user.email || 'A').charAt(0).toUpperCase();
-
   return (
-    <PresenceWrapper>
-      <PresenceHeader 
-        title="Submissions"
-        roleLabel={`Review Queue · ${staffItems.length + guestItems.length} Total Pending`}
-        initials={initials}
-        icon1Node={<Send className="w-5 h-5" strokeWidth={1.5} />}
-        icon2Node={<Bell className="w-5 h-5" strokeWidth={1.5} />}
-      />
-
-      <div className="w-full flex flex-col gap-4 relative z-20">
-        <SubmissionsClient staffItems={staffItems} guestItems={guestItems} />
-      </div>
-    </PresenceWrapper>
+    <div className="w-full flex flex-col gap-4">
+      <SubmissionsClient staffItems={staffItems} guestItems={guestItems} />
+    </div>
   );
 }

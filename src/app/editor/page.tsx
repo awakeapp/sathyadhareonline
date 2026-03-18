@@ -50,15 +50,8 @@ export default async function EditorDashboard() {
   const { totalCount, publishedCount, draftCount, reviewCount, recent } = pageData;
 
   return (
-    <div className="flex flex-col gap-4 w-full">
-
-      {/* Greeting + stats strip */}
-      <div className="pt-2">
-        <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight leading-tight">
-          {profile?.full_name ? `Hey, ${profile.full_name.split(' ')[0]}` : 'Editor Dashboard'}
-        </h1>
-        <p className="text-[13px] text-[var(--color-muted)] mt-0.5">Editor Workspace</p>
-      </div>
+    <div className="flex flex-col gap-4 w-full pt-1">
+      {/* Stats row */}
 
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-2">

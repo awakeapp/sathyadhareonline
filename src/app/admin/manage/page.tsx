@@ -57,14 +57,8 @@ export default async function ManagePage() {
   );
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Page Header */}
-      <div className="pt-2">
-        <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight">Manage Platform</h1>
-        <p className="text-[13px] text-[var(--color-muted)] mt-1">Global administrative controls and insights</p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-3">
+    <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-1 gap-3 pt-1">
         {items.map((item) => {
           const Icon = item.icon;
           return (

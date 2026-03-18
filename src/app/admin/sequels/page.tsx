@@ -54,15 +54,11 @@ export default async function SequelsPage() {
   }));
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="pt-2 flex items-center justify-between">
-        <div>
-          <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight">Sequels</h1>
-          <p className="text-[13px] text-[var(--color-muted)] mt-1">Manage series-based content and recurring issues</p>
-        </div>
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-end p-1">
         <Link 
           href="/admin/sequels/write"
-          className="h-10 px-4 rounded-full bg-[var(--color-primary)] text-black text-[11px] font-black uppercase tracking-widest flex items-center gap-2 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[var(--color-primary)]/20"
+          className="h-9 px-4 rounded-full bg-[var(--color-primary)] text-black text-[11px] font-black uppercase tracking-widest flex items-center gap-2 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[var(--color-primary)]/20"
         >
           <Plus size={16} /> New Sequel
         </Link>

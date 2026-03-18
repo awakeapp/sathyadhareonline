@@ -107,16 +107,8 @@ export default async function AdminInboxPage() {
   ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   return (
-    <div className="flex flex-col gap-3">
-      {/* Page title */}
-      <div className="pt-2 pb-1">
-        <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight">Inbox</h1>
-        <p className="text-[13px] text-[var(--color-muted)] mt-0.5">
-          {items.length > 0
-            ? `${items.length} item${items.length !== 1 ? 's' : ''} pending review`
-            : 'All clear — nothing pending review'}
-        </p>
-      </div>
+    <div className="flex flex-col gap-3 pt-1">
+      {/* Notification banner from super admin */}
 
       {/* Notification banner from super admin */}
       <div className="flex items-start gap-3 p-4 bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/15 rounded-xl">

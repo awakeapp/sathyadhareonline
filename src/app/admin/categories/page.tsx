@@ -43,15 +43,11 @@ export default async function CategoriesPage() {
     icon_name: null,
     sort_order: (c as any).display_order ?? 0,
     article_count: countMap[(c as any).id] ?? 0,
+    type: 'article',
   }));
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="pt-2">
-        <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight">Content Categories</h1>
-        <p className="text-[13px] text-[var(--color-muted)] mt-1">Organize published content into logical taxonomy</p>
-      </div>
-
+    <div className="flex flex-col gap-4">
       <div className="w-full">
         <CategoryManagerClient categories={categories} />
       </div>

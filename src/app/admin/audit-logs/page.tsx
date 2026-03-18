@@ -55,14 +55,8 @@ export default async function AuditLogsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Page Header */}
-      <div className="pt-2">
-        <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight">Audit Logs</h1>
-        <p className="text-[13px] text-[var(--color-muted)] mt-1">Review system-wide administrative activity and changes</p>
-      </div>
-
-      <div className="w-full">
+    <div className="flex flex-col gap-4">
+      <div className="w-full pt-1">
         <AuditLogsClient usersList={usersList} initialLogs={initialLogs as any[]} initialCount={initialCount} />
       </div>
     </div>

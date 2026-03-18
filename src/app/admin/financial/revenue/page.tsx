@@ -1,11 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { ChevronLeft, Bell } from 'lucide-react';
 import RevenueClient from './RevenueClient';
-import { 
-  PresenceWrapper, 
-  PresenceHeader 
-} from '@/components/PresenceUI';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +11,7 @@ export default async function RevenuePage() {
   if (!user) redirect('/sign-in');
 
   const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).maybeSingle();
-  if (!profile || profile.role !== 'super_admin') redirect('/dashboard/admin?denied=1');
+  if (!profile || profile.role !== 'super_admin') redirect('/admin?denied=1');
 
   const { data: txsData } = await supabase
     .from('transactions')
@@ -50,26 +45,13 @@ export default async function RevenuePage() {
     planName: (t.subscription_plans as any)?.name || 'Direct Payment'
   }));
 
-  const initials = (profile?.full_name || 'A').charAt(0).toUpperCase();
-
   return (
-    <PresenceWrapper>
-      <PresenceHeader 
-        title="Super Admin"
-        roleLabel="Financial Intelligence · Revenue"
-        initials={initials}
-        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Href="/admin"
+    <div className="w-full flex flex-col gap-4">
+      <RevenueClient 
+        totalRevenue={totalRevenue} 
+        mrr={mrr} 
+        transactions={mappedTransactions} 
       />
-      
-      <div className="w-full flex flex-col gap-4 relative z-20 max-w-5xl mx-auto">
-        <RevenueClient 
-          totalRevenue={totalRevenue} 
-          mrr={mrr} 
-          transactions={mappedTransactions} 
-        />
-      </div>
-    </PresenceWrapper>
+    </div>
   );
 }

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import NextImage from 'next/image';
+import { usePathname } from 'next/navigation';
 import { Bell, Eye, ChevronRight, LogOut, User as UserIcon } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useTheme } from 'next-themes';
@@ -49,11 +50,49 @@ function roleBadge(role: string): string {
   return map[role] ?? role;
 }
 
+/* ── Path → Page Title mapping ───────────────────────────────────────── */
+const PAGE_TITLES: Record<string, string> = {
+  '/admin':            'Overview',
+  '/editor':           'Workspace',
+  '/admin/users':       'People',
+  '/admin/inbox':       'Inbox',
+  '/admin/settings':    'Settings',
+  '/admin/articles':    'Articles',
+  '/admin/sequels':     'Sequels',
+  '/admin/categories':  'Categories',
+  '/admin/library':     'Library',
+  '/admin/media':       'Media',
+  '/admin/analytics':   'Analytics',
+  '/admin/audit-logs':  'Audit Logs',
+  '/admin/submissions': 'Submissions',
+  '/admin/newsletter':  'Newsletter',
+  '/admin/editors':     'Editors',
+  '/admin/content':     'Content',
+  '/admin/manage':      'Manage',
+  '/admin/more':         'More',
+  '/admin/financial':    'Financial',
+};
+
+function getPageTitle(pathname: string): string {
+  // 1. Direct match
+  if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
+  
+  // 2. Fallback: Parse last segment
+  const segments = pathname.split('/').filter(Boolean);
+  const last = segments[segments.length - 1] || 'Dashboard';
+  
+  // 3. Format: slug-case to Title Case
+  return last
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+
 /* ══════════════════════════════════════════════════════════════════════
    DashboardHeader
    — Fixed top bar shared across super_admin / admin / editor dashboards
 ══════════════════════════════════════════════════════════════════════ */
 export default function DashboardHeader({ user, profile, role, roleLabel }: Props) {
+  const pathname = usePathname();
   const { theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
@@ -64,9 +103,16 @@ export default function DashboardHeader({ user, profile, role, roleLabel }: Prop
     setMounted(true);
     setIsNotifOpen(false);
     setIsProfileOpen(false);
-  }, []);
+  }, [pathname]);
 
   const currentTheme = mounted ? (theme === 'system' ? resolvedTheme : theme) : 'dark';
+
+  /* logic: is this the "Home" page of the dashboard? (root /admin or /editor) */
+  const isDashboardHome = useMemo(() => {
+    return pathname === '/admin' || pathname === '/editor';
+  }, [pathname]);
+
+  const pageTitle = useMemo(() => getPageTitle(pathname), [pathname]);
 
   /* Sign out */
   async function handleSignOut() {
@@ -227,22 +273,32 @@ export default function DashboardHeader({ user, profile, role, roleLabel }: Prop
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
         <div className="flex items-center justify-between h-[60px] px-4 w-full max-w-[1400px] mx-auto">
-          {/* ── Left: Logo + role label ─────────────────────────────── */}
-          <div className="flex flex-col justify-center gap-1 min-w-0">
-            <Link href="/" className="flex items-center shrink-0 transition-transform active:scale-95" tabIndex={-1} aria-label="Sathyadhare home">
-              <NextImage
-                src={currentTheme === 'dark' ? '/logo-dark.png' : '/logo-light.png'}
-                alt="Sathyadhare"
-                width={120}
-                height={32}
-                className="h-[32px] w-auto object-left object-contain"
-                priority
-                suppressHydrationWarning
-              />
-            </Link>
-            <span className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest leading-none">
-              {roleLabel}
-            </span>
+          {/* ── Left: logo (Home) or Title (Sub-pages) ───────────────────────── */}
+          <div className="flex-1 min-w-0 flex items-center pr-2">
+            {isDashboardHome ? (
+              <div className="flex flex-col justify-center gap-0.5 min-w-0">
+                <Link href="/" className="flex items-center shrink-0 transition-transform active:scale-95" tabIndex={-1} aria-label="Sathyadhare home">
+                  <NextImage
+                    src={currentTheme === 'dark' ? '/logo-dark.png' : '/logo-light.png'}
+                    alt="Sathyadhare"
+                    width={110}
+                    height={28}
+                    className="h-[28px] w-auto object-left object-contain"
+                    priority
+                    suppressHydrationWarning
+                  />
+                </Link>
+                <span className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-wider leading-none truncate opacity-60">
+                  {roleLabel}
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 min-w-0">
+                <h1 className="text-[20px] font-bold text-[var(--color-text)] tracking-tight truncate">
+                  {pageTitle}
+                </h1>
+              </div>
+            )}
           </div>
 
           {/* ── Right: actions ──────────────────────────────────────── */}

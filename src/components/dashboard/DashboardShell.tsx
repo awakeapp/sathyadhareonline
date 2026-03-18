@@ -90,7 +90,7 @@ export default function DashboardShell({
       />
 
       {/* Scrollable main content area */}
-      <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 py-4 flex flex-col gap-4 sm:gap-6">
+      <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 pt-1.5 pb-6 flex flex-col gap-4 sm:gap-6">
         {children}
       </main>
     </div>
