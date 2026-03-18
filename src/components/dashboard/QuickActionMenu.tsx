@@ -24,12 +24,12 @@ interface QuickAction {
 
 const ACTIONS: QuickAction[] = [
   { label: 'Article', href: '/admin/articles/write', icon: FileEdit, color: '#6366f1' },
-  { label: 'Sequel', href: '/admin/sequels/write', icon: Layers, color: '#0ea5e9' }, // New bundle creation flow
+  { label: 'Sequel', href: '/admin/sequels/write', icon: Layers, color: '#0ea5e9' },
   { label: 'Library', href: '/admin/library', icon: Book, color: '#10b981' },
   { label: 'Friday Message', href: '/admin/friday/new', icon: Mail, color: '#f59e0b' },
   { label: 'Category', href: '/admin/categories/new', icon: Tags, color: '#8b5cf6' },
   { label: 'Banner', href: '/admin/banners', icon: ImageIcon, color: '#ec4899' },
-  { label: 'Video', href: '/admin/videos', icon: Video, color: '#ef4444' },
+  { label: 'Banner Video', href: '/admin/banner-videos', icon: Video, color: '#ef4444' },
   { label: 'Podcast', href: '/admin/podcasts', icon: Mic, color: '#14b8a6' },
 ];
 
