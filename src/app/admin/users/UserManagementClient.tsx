@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useTransition, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
 import { Input, Select, Label } from '@/components/ui/Input';
@@ -9,11 +9,13 @@ import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFo
 import { toast } from 'sonner';
 import {
   UserPlus, Mail, Edit2, Trash2,
-  Slash, Ban, CheckCircle, Search, Download, User, Clock, KeyRound, MoreVertical, Users
+  Slash, Ban, CheckCircle, Search, Download, User, Clock, KeyRound, MoreVertical, Users,
+  Activity, FileText, ChevronRight, LayoutGrid, CalendarDays
 } from 'lucide-react';
+import { BottomSheet } from '@/components/ui/BottomSheet';
 import {
   PresenceCard,
-  PresenceButton
+  PresenceButton,
 } from '@/components/PresenceUI';
 import {
   DropdownMenu,
@@ -31,6 +33,7 @@ import {
   inviteUserAction,
   toggleStatusAction,
   sendPasswordResetAction,
+  getUserActivityStatsAction
 } from './actions';
 
 interface UserProfile {
@@ -49,7 +52,6 @@ interface UserProfile {
   };
 }
 
-// Fix: role keys must be lowercase_underscore (normalised in page.tsx)
 const ROLE_META: Record<string, { label: string; color: string }> = {
   super_admin: { label: 'S. Admin', color: 'border-[var(--color-text)]/10 bg-[var(--color-text)]/5 text-[var(--color-text)]/70' },
   admin:       { label: 'Admin',    color: 'border-[var(--color-text)]/10 bg-[var(--color-text)]/5 text-[var(--color-text)]/70' },
@@ -89,6 +91,15 @@ export default function UserManagementClient({
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
 
+  // Detail Drawer
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerLoading, setDrawerLoading] = useState(false);
+  const [drawerStats, setDrawerStats] = useState<{
+    stats: { total: number; published: number; drafted: number; inReview: number };
+    recentWork: any[];
+  } | null>(null);
+
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -96,7 +107,22 @@ export default function UserManagementClient({
       if (searchParams?.get('invite') === 'true') setShowInvite(true);
     }, 0);
     return () => clearTimeout(t);
-  }, [searchParams]);
+  }, [pathname, searchParams]);
+
+  const handleUserClick = async (u: UserProfile) => {
+    setSelectedUser(u);
+    setIsDrawerOpen(true);
+    setDrawerLoading(true);
+    setDrawerStats(null);
+    try {
+      const res = await getUserActivityStatsAction(u.id);
+      if (res.success && res.stats) {
+        setDrawerStats({ stats: res.stats, recentWork: res.recentWork || [] });
+      }
+    } finally {
+      setDrawerLoading(false);
+    }
+  };
 
   const filteredUsers = useMemo(() => {
     return initialUsers.filter(u => {
@@ -119,6 +145,15 @@ export default function UserManagementClient({
       return true;
     });
   }, [initialUsers, searchQuery, roleFilter, statusFilter, viewMode]);
+
+  // Grouped Staff
+  const groupedStaff = useMemo(() => {
+    if (viewMode !== 'users') return null;
+    const roleOrder = ['super_admin', 'admin', 'editor'];
+    const groups: Record<string, UserProfile[]> = { super_admin: [], admin: [], editor: [] };
+    filteredUsers.forEach(u => { if (groups[u.role]) groups[u.role].push(u); });
+    return roleOrder.map(r => ({ role: r, users: groups[r] })).filter(g => g.users.length > 0);
+  }, [filteredUsers, viewMode]);
 
   async function handleAction(
     action: (fd: FormData) => Promise<{ error?: string; success?: boolean; message?: string }>,
@@ -259,8 +294,8 @@ export default function UserManagementClient({
         )}
       </div>
 
-      {/* ── User List ── */}
-      <div className="space-y-3">
+      {/* ── User List / Groups ── */}
+      <div className="space-y-8">
         {viewMode === 'subscribed' ? (
           <PresenceCard className="py-24 text-center flex flex-col items-center border-dashed border-2 border-[var(--color-border)]">
             <Mail className="w-10 h-10 text-[var(--color-muted)] mb-4 opacity-20" />
@@ -275,128 +310,140 @@ export default function UserManagementClient({
             <p className="font-bold text-[16px] text-[var(--color-muted)]">No users found</p>
             <p className="text-[13px] text-[var(--color-muted)]/60 mt-1">Try adjusting filters</p>
           </PresenceCard>
-        ) : (
-          filteredUsers.map(u => {
-            const roleMeta = ROLE_META[u.role] ?? { label: u.role, color: ROLE_META.reader.color };
-            const statusMeta = STATUS_META[u.status] ?? STATUS_META.active;
-            const initials = (u.full_name || u.email || '?').charAt(0).toUpperCase();
-            const lastSeen = formatRelative(u.last_sign_in_at);
+        ) : viewMode === 'users' ? (
+          <div className="space-y-12">
+            {groupedStaff?.map((group) => (
+              <div key={group.role} className="relative">
+                <div className="flex items-center gap-3 mb-6 px-1">
+                  <span className="text-[11px] font-black uppercase tracking-[0.2em] text-[var(--color-text)] opacity-40">
+                    {ROLE_META[group.role]?.label || group.role}
+                  </span>
+                  <div className="h-[1px] flex-1 bg-gradient-to-r from-[var(--color-border)] to-transparent" />
+                  <span className="text-[11px] font-black text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2 py-0.5 rounded-md min-w-[24px] text-center">
+                    {group.users.length}
+                  </span>
+                </div>
 
-            return (
-              <div key={u.id} className="group relative">
-                <div className="flex items-center p-4 bg-[var(--color-surface)] rounded-3xl border border-[var(--color-border)] hover:border-[var(--color-primary)]/30 hover:shadow-2xl hover:shadow-black/5 transition-all duration-500 gap-4">
-                  
-                  {/* Avatar Section */}
-                  <div className="relative shrink-0">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-[20px] font-bold text-white overflow-hidden shadow-sm transition-transform group-hover:scale-105 duration-500
-                      ${u.status === 'active'
-                        ? 'bg-gradient-to-br from-[var(--color-primary)] to-indigo-500'
-                        : 'bg-zinc-500'}`}>
-                      {u.avatar_url ? (
-                        <Image
-                          src={u.avatar_url}
-                          alt={u.full_name || 'U'}
-                          width={56}
-                          height={56}
-                          className="w-full h-full object-cover"
-                          unoptimized
-                        />
-                      ) : (
-                        initials
-                      )}
-                    </div>
-                    {/* Status indicator on avatar */}
-                    <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-[3px] border-[var(--color-surface)] flex items-center justify-center ${statusMeta.color} ${statusMeta.bg} shadow-sm`}>
-                      <statusMeta.icon className={`w-2 h-2 ${u.status === 'active' ? 'animate-pulse' : ''}`} strokeWidth={3} />
-                    </div>
-                  </div>
-
-                  {/* Main Content Area */}
-                  <div className="flex-1 min-w-0 pr-2">
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <h3 className="font-bold text-[17px] text-[var(--color-text)] tracking-tight truncate">
-                          {u.full_name || 'Anonymous Member'}
-                        </h3>
-                        <span className={`inline-flex px-1.5 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider border ${roleMeta.color} bg-transparent`}>
-                          {roleMeta.label}
-                        </span>
-                      </div>
-                      
-                      {/* Desktop Last Seen (Subtle) */}
-                      {lastSeen && (
-                        <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-bold text-[var(--color-muted)]/40 uppercase tracking-tighter">
-                          <Clock className="w-3 h-3" />
-                          {lastSeen}
-                        </span>
-                      )}
-                    </div>
-                    
-                    <p className="text-[14px] text-[var(--color-muted)] font-medium mb-2.5 opacity-60 group-hover:opacity-100 transition-opacity truncate">
-                      {u.email}
-                    </p>
-                    
-                    <div className="flex items-center gap-4 text-[11px] font-bold text-[var(--color-muted)]/30 uppercase tracking-widest leading-none">
-                      <div className="flex items-center gap-1.5 hover:text-[var(--color-text)] transition-colors">
-                        <Users className="w-3 h-3" strokeWidth={2.5} />
-                        Joined {formatDate(u.created_at)}
-                      </div>
-                      {/* Mobile Last Seen */}
-                      {lastSeen && (
-                        <div className="sm:hidden flex items-center gap-1.5 text-[var(--color-primary)]/60">
-                          <Clock className="w-3 h-3" strokeWidth={2.5} />
-                          {lastSeen}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Actions — Integral & Refined */}
-                  <div className="shrink-0">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="w-10 h-10 rounded-2xl bg-transparent border border-transparent hover:border-[var(--color-border)] hover:bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)]/40 hover:text-[var(--color-text)] transition-all">
-                          <MoreVertical className="w-4.5 h-4.5" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuPortal>
-                        <DropdownMenuContent align="end" className="w-[200px] p-1.5 bg-[var(--color-surface)] border-[var(--color-border)] shadow-2xl rounded-2xl animate-in fade-in slide-in-from-top-2 duration-200">
-                          <DropdownMenuLabel className="px-3 py-2 text-[10px] opacity-40 uppercase tracking-widest font-bold">Member Actions</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowEdit(true); }} className="rounded-xl py-2 px-3 font-bold text-[13px]">
-                            <Edit2 className="w-3.5 h-3.5 mr-2.5 opacity-60" />
-                            Manage Permissions
-                          </DropdownMenuItem>
-                          
-                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowReset(true); }} className="rounded-xl py-2 px-3 font-bold text-[13px] text-indigo-600 focus:bg-indigo-50 dark:focus:bg-indigo-500/10">
-                            <KeyRound className="w-3.5 h-3.5 mr-2.5" />
-                            Force Password Reset
-                          </DropdownMenuItem>
-
-                          <DropdownMenuSeparator className="my-1.5 opacity-10" />
-
-                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowStatus(true); }} className="rounded-xl py-2 px-3 font-bold text-[13px] text-amber-600 focus:bg-amber-50 dark:focus:bg-amber-500/10">
-                            <Slash className="w-3.5 h-3.5 mr-2.5" />
-                            {u.status === 'active' ? 'Suspend Access' : 'Restore Access'}
-                          </DropdownMenuItem>
-
-                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowDelete(true); }} className="rounded-xl py-2 px-3 font-bold text-[13px] text-rose-600 focus:bg-rose-50 dark:focus:bg-rose-500/10">
-                            <Trash2 className="w-3.5 h-3.5 mr-2.5" />
-                            Delete Account
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenuPortal>
-                    </DropdownMenu>
-                  </div>
+                <div className="space-y-3">
+                  {group.users.map(u => (
+                    <UserCard key={u.id} user={u} onUserClick={handleUserClick} setSelectedUser={setSelectedUser} setShowStatus={setShowStatus} setShowEdit={setShowEdit} setShowReset={setShowReset} setShowDelete={setShowDelete} />
+                  ))}
                 </div>
               </div>
-            );
-          })
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredUsers.map(u => (
+               <UserCard key={u.id} user={u} onUserClick={handleUserClick} setSelectedUser={setSelectedUser} setShowStatus={setShowStatus} setShowEdit={setShowEdit} setShowReset={setShowReset} setShowDelete={setShowDelete} />
+            ))}
+          </div>
         )}
       </div>
 
+      {/* ── USER DETAILS DRAWER (Premium Profile) ── */}
+      <BottomSheet 
+        isOpen={isDrawerOpen} 
+        onClose={() => setIsDrawerOpen(false)}
+        title="Profile Details"
+      >
+        {selectedUser && (
+          <div className="flex flex-col gap-6 pb-8">
+            <div className="flex items-center gap-4">
+               <div className={`w-20 h-20 rounded-3xl flex items-center justify-center text-[32px] font-bold text-white shadow-xl
+                 ${selectedUser.status === 'active' ? 'bg-[var(--color-primary)]' : 'bg-zinc-500'}`}>
+                 {selectedUser.avatar_url ? (
+                   <Image src={selectedUser.avatar_url} alt={selectedUser.full_name || ''} width={80} height={80} className="w-full h-full object-cover rounded-3xl" unoptimized />
+                 ) : (
+                   (selectedUser.full_name || '?').charAt(0).toUpperCase()
+                 )}
+               </div>
+               <div className="flex-1 min-w-0">
+                  <h2 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight leading-tight">
+                    {selectedUser.full_name || 'Member'}
+                  </h2>
+                  <p className="text-[14px] text-[var(--color-muted)] font-medium mt-0.5 truncate">{selectedUser.email}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="px-2 py-0.5 rounded-lg bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[10px] font-black uppercase tracking-widest text-[var(--color-text)]/50">
+                      {ROLE_META[selectedUser.role]?.label || selectedUser.role}
+                    </span>
+                    <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest ${STATUS_META[selectedUser.status]?.bg} ${STATUS_META[selectedUser.status]?.color}`}>
+                      {STATUS_META[selectedUser.status]?.label}
+                    </span>
+                  </div>
+               </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-4 bg-[var(--color-surface-2)] rounded-2xl border border-[var(--color-border)]">
+                <CalendarDays size={16} className="text-[var(--color-muted)] mb-2" />
+                <p className="text-[11px] font-bold text-[var(--color-muted)] uppercase tracking-wider">Joined</p>
+                <p className="text-[15px] font-bold text-[var(--color-text)] mt-0.5">{formatDate(selectedUser.created_at)}</p>
+              </div>
+              <div className="p-4 bg-[var(--color-surface-2)] rounded-2xl border border-[var(--color-border)]">
+                <Clock size={16} className="text-[var(--color-muted)] mb-2" />
+                <p className="text-[11px] font-bold text-[var(--color-muted)] uppercase tracking-wider">Last Activity</p>
+                <p className="text-[15px] font-bold text-[var(--color-text)] mt-0.5">{formatRelative(selectedUser.last_sign_in_at) || 'Never'}</p>
+              </div>
+            </div>
+
+            {['super_admin', 'admin', 'editor'].includes(selectedUser.role) && (
+              <div className="space-y-4 pt-2 border-t border-[var(--color-border)]">
+                <div className="flex items-center justify-between">
+                   <h3 className="text-[13px] font-bold text-[var(--color-text)] uppercase tracking-widest px-1">Activity Stats</h3>
+                   {drawerLoading && <div className="animate-spin h-3 w-3 border-2 border-[var(--color-primary)] border-t-transparent rounded-full" />}
+                </div>
+
+                {drawerStats ? (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-3 gap-2">
+                       <div className="flex flex-col items-center p-3 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)]">
+                         <span className="text-[18px] font-black text-[var(--color-text)]">{drawerStats.stats.published}</span>
+                         <span className="text-[9px] font-bold text-[#10b981] uppercase tracking-tighter">Published</span>
+                       </div>
+                       <div className="flex flex-col items-center p-3 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)]">
+                         <span className="text-[18px] font-black text-[var(--color-text)]">{drawerStats.stats.drafted}</span>
+                         <span className="text-[9px] font-bold text-[var(--color-muted)] uppercase tracking-tighter">Drafted</span>
+                       </div>
+                       <div className="flex flex-col items-center p-3 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)]">
+                         <span className="text-[18px] font-black text-[var(--color-text)]">{drawerStats.stats.inReview}</span>
+                         <span className="text-[9px] font-bold text-amber-500 uppercase tracking-tighter">In Review</span>
+                       </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="text-[12px] font-bold text-[var(--color-muted)] uppercase tracking-widest px-1">Recent Articles</p>
+                      {drawerStats.recentWork.length === 0 ? (
+                        <div className="py-8 text-center bg-[var(--color-surface-2)]/50 rounded-2xl text-[13px] text-[var(--color-muted)] italic">
+                          No articles written yet
+                        </div>
+                      ) : (
+                        drawerStats.recentWork.map(art => (
+                          <div key={art.id} className="flex items-center justify-between p-3 bg-[var(--color-surface-2)] rounded-xl border border-[var(--color-border)] shadow-sm">
+                            <div className="min-w-0 mr-3">
+                              <p className="text-[14px] font-bold text-[var(--color-text)] truncate">{art.title}</p>
+                              <p className="text-[11px] text-[var(--color-muted)] opacity-60 mt-0.5">{formatDate(art.created_at)}</p>
+                            </div>
+                            <span className={`shrink-0 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter
+                              ${art.status === 'published' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-zinc-500/10 text-zinc-500'}`}>
+                              {art.status}
+                            </span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                ) : !drawerLoading && (
+                   <div className="p-4 text-center text-[var(--color-muted)] text-[12px]">Click a name to load detailed activity</div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </BottomSheet>
+
       {/* ── MODALS ── */}
 
-      {/* 6. Password Reset Modal — Fix #6 */}
       <Modal open={showReset} onOpenChange={setShowReset}>
         <ModalContent>
           {selectedUser && (
@@ -404,7 +451,7 @@ export default function UserManagementClient({
               <ModalHeader>
                 <ModalTitle>Send Password Reset</ModalTitle>
                 <ModalDescription>
-                  Send a password reset email to <span className="font-bold">{selectedUser.email}</span>. They will receive a secure link to set a new password.
+                  Send a password reset email to <span className="font-bold">{selectedUser.email}</span>.
                 </ModalDescription>
               </ModalHeader>
               <form action={fd => handleAction(sendPasswordResetAction, fd, () => setShowReset(false))} className="pt-2">
@@ -425,7 +472,6 @@ export default function UserManagementClient({
         <ModalContent>
           <ModalHeader>
             <ModalTitle>Create User Account</ModalTitle>
-            <ModalDescription>Bypass email invite — account is created immediately.</ModalDescription>
           </ModalHeader>
           <form action={fd => handleAction(createUserAction, fd, () => setShowCreate(false))} className="space-y-4 pt-2">
             <div className="grid grid-cols-2 gap-3">
@@ -448,9 +494,8 @@ export default function UserManagementClient({
               <Input name="email" type="email" placeholder="user@example.com" required />
             </div>
             <div className="space-y-1.5 text-left">
-              {/* Fix #2 — was type="text", now type="password" so it's masked */}
               <Label>Temporary Password</Label>
-              <Input name="password" type="password" placeholder="Minimum 6 characters" required minLength={6} />
+              <Input name="password" type="password" required minLength={6} />
             </div>
             <ModalFooter>
               <Button type="button" variant="outline" onClick={() => setShowCreate(false)}>Cancel</Button>
@@ -460,17 +505,15 @@ export default function UserManagementClient({
         </ModalContent>
       </Modal>
 
-      {/* 2. Invite User */}
       <Modal open={showInvite} onOpenChange={setShowInvite}>
         <ModalContent>
           <ModalHeader>
             <ModalTitle>Invite Team Member</ModalTitle>
-            <ModalDescription>They will receive an email with a setup link.</ModalDescription>
           </ModalHeader>
           <form action={fd => handleAction(inviteUserAction, fd, () => setShowInvite(false))} className="space-y-4 pt-2 text-left">
             <div className="space-y-1.5">
               <Label>Email Address</Label>
-              <Input name="email" type="email" placeholder="editor@sathyadhare.com" required />
+              <Input name="email" type="email" required />
             </div>
             <div className="space-y-1.5">
               <Label>Initial Role</Label>
@@ -487,14 +530,12 @@ export default function UserManagementClient({
         </ModalContent>
       </Modal>
 
-      {/* 3. Edit User */}
       <Modal open={showEdit} onOpenChange={setShowEdit}>
         <ModalContent>
           {selectedUser && (
             <>
               <ModalHeader>
                 <ModalTitle>Edit Profile</ModalTitle>
-                <ModalDescription>Updating {selectedUser.email}</ModalDescription>
               </ModalHeader>
               <form action={fd => handleAction(updateUserAction, fd, () => setShowEdit(false))} className="space-y-4 pt-2 text-left">
                 <input type="hidden" name="userId" value={selectedUser.id} />
@@ -510,12 +551,7 @@ export default function UserManagementClient({
                     <option value="admin">Admin</option>
                     {currentUserRole === 'super_admin' && <option value="super_admin">Super Admin</option>}
                   </Select>
-                  {selectedUser.role === 'super_admin' && initialUsers.filter(u => u.role === 'super_admin' && u.status === 'active').length <= 1 && (
-                    <p className="text-[11px] text-amber-500 font-semibold mt-1">⚠️ Cannot demote the last active Super Admin.</p>
-                  )}
                 </div>
-
-                {/* Content Permissions */}
                 <div className="space-y-2 pt-3 border-t border-[var(--color-border)]">
                   <p className="text-[11px] font-black uppercase tracking-widest text-[var(--color-muted)]">Content Access</p>
                   {[
@@ -534,16 +570,9 @@ export default function UserManagementClient({
                     </label>
                   ))}
                 </div>
-
                 <ModalFooter>
                   <Button type="button" variant="outline" onClick={() => setShowEdit(false)}>Cancel</Button>
-                  <Button
-                    type="submit"
-                    loading={isPending}
-                    disabled={selectedUser.role === 'super_admin' && initialUsers.filter(u => u.role === 'super_admin' && u.status === 'active').length <= 1}
-                  >
-                    Save Changes
-                  </Button>
+                  <Button type="submit" loading={isPending}>Save Changes</Button>
                 </ModalFooter>
               </form>
             </>
@@ -551,33 +580,18 @@ export default function UserManagementClient({
         </ModalContent>
       </Modal>
 
-      {/* 4. Delete User */}
       <Modal open={showDelete} onOpenChange={setShowDelete}>
         <ModalContent>
           {selectedUser && (
             <>
               <ModalHeader>
-                <ModalTitle className="text-rose-500 text-left">Delete Account?</ModalTitle>
-                <ModalDescription className="text-left">
-                  This will permanently delete <span className="font-bold">{selectedUser.full_name || selectedUser.email}</span>.
-                  This cannot be undone.
-                </ModalDescription>
+                <ModalTitle className="text-rose-500">Delete Account?</ModalTitle>
               </ModalHeader>
               <form action={fd => handleAction(deleteUserAction, fd, () => setShowDelete(false))}>
                 <input type="hidden" name="userId" value={selectedUser.id} />
-                {selectedUser.role === 'super_admin' && initialUsers.filter(u => u.role === 'super_admin').length <= 1 && (
-                  <p className="text-[12px] text-amber-500 font-bold mb-4 text-center">Cannot delete the last Super Admin.</p>
-                )}
                 <ModalFooter>
                   <Button type="button" variant="outline" onClick={() => setShowDelete(false)} disabled={isPending}>Keep Account</Button>
-                  <Button
-                    type="submit"
-                    variant="destructive"
-                    loading={isPending}
-                    disabled={selectedUser.role === 'super_admin' && initialUsers.filter(u => u.role === 'super_admin').length <= 1}
-                  >
-                    Yes, Delete
-                  </Button>
+                  <Button type="submit" variant="destructive" loading={isPending}>Yes, Delete</Button>
                 </ModalFooter>
               </form>
             </>
@@ -585,68 +599,105 @@ export default function UserManagementClient({
         </ModalContent>
       </Modal>
 
-      {/* 5. Status Modal — now includes real Auth ban notice */}
       <Modal open={showStatus} onOpenChange={setShowStatus}>
         <ModalContent>
           {selectedUser && (
             <>
               <ModalHeader>
                 <ModalTitle>Manage Account Access</ModalTitle>
-                <ModalDescription>
-                  Set login permissions for <span className="font-bold">{selectedUser.full_name || selectedUser.email}</span>.
-                  Suspended and banned users will have their sessions terminated.
-                </ModalDescription>
               </ModalHeader>
               <form action={fd => handleAction(toggleStatusAction, fd, () => setShowStatus(false))} className="space-y-4 pt-2">
                 <input type="hidden" name="userId" value={selectedUser.id} />
                 <div className="grid grid-cols-1 gap-2">
                   {[
-                    { val: 'active',    label: 'Active',    desc: 'Full access — can log in normally.', icon: CheckCircle, col: 'text-emerald-500' },
-                    { val: 'suspended', label: 'Suspended', desc: 'Temporarily blocked from login.', icon: Slash, col: 'text-amber-500' },
-                    { val: 'banned',    label: 'Banned',    desc: 'Permanently blocked from all access.', icon: Ban, col: 'text-red-500' },
+                    { val: 'active',    label: 'Active',    icon: CheckCircle, col: 'text-emerald-500' },
+                    { val: 'suspended', label: 'Suspended', icon: Slash, col: 'text-amber-500' },
+                    { val: 'banned',    label: 'Banned',    icon: Ban, col: 'text-red-500' },
                   ].map(s => (
-                    <label key={s.val}
-                      className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all
-                        ${selectedUser.status === s.val
-                          ? 'bg-[var(--color-surface-2)] border-[var(--color-primary)]/50'
-                          : 'border-[var(--color-border)] hover:border-[var(--color-primary)]/30'}`}
-                    >
+                    <label key={s.val} className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${selectedUser.status === s.val ? 'bg-[var(--color-surface-2)] border-[var(--color-primary)]/50' : 'border-[var(--color-border)]'}`}>
                       <input type="radio" name="status" value={s.val} defaultChecked={selectedUser.status === s.val} className="sr-only" />
                       <div className={`w-9 h-9 rounded-xl border border-[var(--color-border)] flex items-center justify-center ${s.col}`}>
                         <s.icon className="w-4 h-4" />
                       </div>
-                      <div className="flex-1 text-left">
-                        <p className={`text-[13px] font-bold ${s.col}`}>{s.label}</p>
-                        <p className="text-[11px] text-[var(--color-muted)]">{s.desc}</p>
-                      </div>
+                      <p className={`text-[13px] font-bold ${s.col}`}>{s.label}</p>
                     </label>
                   ))}
                 </div>
-                {selectedUser.role === 'super_admin' && initialUsers.filter(u => u.role === 'super_admin' && u.status === 'active').length <= 1 && selectedUser.status === 'active' && (
-                  <p className="text-[12px] text-amber-500 font-bold text-center">
-                    ⚠️ Cannot suspend/ban the last active Super Admin.
-                  </p>
-                )}
                 <ModalFooter>
                   <Button type="button" variant="outline" onClick={() => setShowStatus(false)}>Cancel</Button>
-                  <Button
-                    type="submit"
-                    loading={isPending}
-                    disabled={
-                      selectedUser.role === 'super_admin' &&
-                      initialUsers.filter(u => u.role === 'super_admin' && u.status === 'active').length <= 1 &&
-                      selectedUser.status === 'active'
-                    }
-                  >
-                    Update Status
-                  </Button>
+                  <Button type="submit" loading={isPending}>Update Status</Button>
                 </ModalFooter>
               </form>
             </>
           )}
         </ModalContent>
       </Modal>
+    </div>
+  );
+}
 
+function UserCard({ user: u, onUserClick, setSelectedUser, setShowStatus, setShowEdit, setShowReset, setShowDelete }: any) {
+  const initials = (u.full_name || u.email || '?').charAt(0).toUpperCase();
+
+  const formatRelative = (iso?: string | null) => {
+    if (!iso) return null;
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    if (days < 30) return `${days}d ago`;
+    return iso.split('T')[0];
+  };
+
+  const lastSeen = formatRelative(u.last_sign_in_at);
+
+  return (
+    <div className="group relative">
+      <div className="flex items-center p-3.5 bg-[var(--color-surface)] rounded-[2rem] border border-[var(--color-border)] hover:border-[var(--color-primary)]/30 hover:shadow-2xl transition-all duration-300 gap-4">
+        <div onClick={() => onUserClick(u)} className="relative shrink-0 cursor-pointer overflow-hidden rounded-2xl">
+          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-[18px] font-bold text-white shadow-sm transition-all duration-500 ${u.status === 'active' ? 'bg-gradient-to-br from-[var(--color-primary)] to-indigo-600' : 'bg-zinc-500'}`}>
+            {u.avatar_url ? (
+              <Image src={u.avatar_url} alt={u.full_name || ''} width={48} height={48} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" unoptimized />
+            ) : initials}
+          </div>
+        </div>
+
+        <div className="flex-1 min-w-0 flex items-center justify-between gap-4">
+          <div onClick={() => onUserClick(u)} className="flex-1 min-w-0 cursor-pointer">
+            <h3 className="font-bold text-[17px] text-[var(--color-text)] tracking-tight leading-none truncate group-hover:text-[var(--color-primary)] transition-colors">
+              {u.full_name || 'Anonymous'}
+            </h3>
+            <div className="flex items-center gap-2 mt-1.5 opacity-40">
+               <span className="text-[11px] font-bold uppercase tracking-tighter">Joined {u.created_at.split('T')[0]}</span>
+               {lastSeen && <span className="text-[11px] font-bold uppercase tracking-tighter flex items-center gap-1.5">· {lastSeen}</span>}
+            </div>
+          </div>
+
+          <div className="shrink-0 flex items-center gap-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                  <button className="w-9 h-9 rounded-xl hover:bg-[var(--color-surface-2)] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <MoreVertical className="w-4 h-4 text-[var(--color-muted)]" />
+                  </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuContent align="end" className="w-[180px] p-1 bg-[var(--color-surface)] border-[var(--color-border)] shadow-xl rounded-xl">
+                  <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowEdit(true); }} className="rounded-lg py-2 font-bold text-[12px]">Manage</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowReset(true); }} className="rounded-lg py-2 font-bold text-[12px] text-indigo-500">Reset Pass</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowStatus(true); }} className="rounded-lg py-2 font-bold text-[12px] text-amber-500">Status</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowDelete(true); }} className="rounded-lg py-2 font-bold text-[12px] text-rose-500">Delete</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenuPortal>
+            </DropdownMenu>
+            <div onClick={() => onUserClick(u)} className="w-9 h-9 rounded-xl flex items-center justify-center text-[var(--color-muted)]/20 hover:text-[var(--color-text)] transition-colors cursor-pointer">
+              <ChevronRight size={18} strokeWidth={2.5} />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

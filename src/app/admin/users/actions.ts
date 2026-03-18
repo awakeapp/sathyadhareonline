@@ -267,3 +267,43 @@ export async function setUserPermissionsAction(
     return { error: error instanceof Error ? error.message : 'Failed to update permissions' };
   }
 }
+
+/**
+ * Fetches brief activity summary for a user to display in the profile drawer.
+ */
+export async function getUserActivityStatsAction(userId: string) {
+  try {
+    const { user: caller } = await verifyRole(['super_admin', 'admin', 'editor']);
+    if (!caller) throw new Error('Unauthorized');
+
+    const supabase = await createClient();
+    
+    // Get article counts and titles
+    const { data: articles, error: artError } = await supabase
+      .from('articles')
+      .select('id, title, status, created_at, published_at, slug')
+      .eq('author_id', userId)
+      .eq('is_deleted', false)
+      .order('created_at', { ascending: false });
+
+    if (artError) throw artError;
+
+    const published = articles.filter(a => a.status === 'published');
+    const drafted = articles.filter(a => a.status === 'draft');
+    const inReview = articles.filter(a => a.status === 'in_review');
+
+    return {
+      success: true,
+      stats: {
+        total: articles.length,
+        published: published.length,
+        drafted: drafted.length,
+        inReview: inReview.length,
+      },
+      recentWork: articles.slice(0, 8) // Show top 8 recent articles
+    };
+  } catch (error) {
+    console.error('getUserActivityStatsAction error:', error);
+    return { error: 'Failed to fetch user activity stats' };
+  }
+}
