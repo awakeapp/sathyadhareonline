@@ -161,7 +161,8 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
       <header
         className={`sticky top-0 z-[50] glass-ribbon overflow-visible px-4 sm:px-6 transition-all duration-500`}
         style={{
-          height: isSearchOpen ? 'calc(var(--header-height) + 60px)' : 'var(--header-height)',
+          paddingTop: 'env(safe-area-inset-top)',
+          height: isSearchOpen ? 'calc(var(--header-height) + 60px + env(safe-area-inset-top))' : 'calc(var(--header-height) + env(safe-area-inset-top))',
         }}
       >
         <div 

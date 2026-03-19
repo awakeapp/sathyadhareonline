@@ -269,7 +269,10 @@ export function PresenceHeader({
 
       <div 
         className="sticky top-0 z-50 bg-[var(--color-surface)]/95 backdrop-blur-xl border-b border-[var(--color-border)] shadow-sm px-4 sm:px-6"
-        style={{ height: 'var(--header-height)' }}
+        style={{ 
+          height: 'calc(var(--header-height) + env(safe-area-inset-top))',
+          paddingTop: 'env(safe-area-inset-top)'
+        }}
       >
         {/* 56-64px Header Height */}
         <div className="flex items-center justify-between h-full w-full max-w-[1400px] mx-auto">
