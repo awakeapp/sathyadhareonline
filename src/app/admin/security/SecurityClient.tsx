@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { createApiKeyAction, deleteApiKeyAction, getLoginHistoryAction } from './actions';
 import { Key, Shield, Clock, AlertTriangle, KeyRound, X, Search, Calendar, ChevronLeft, ChevronRight, User, Plus } from 'lucide-react';
 import { 
@@ -149,7 +149,7 @@ export default function SecurityClient({
                       <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Create API Key</h2>
                       <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">System access token for integrations</p>
                    </div>
-                   <button onClick={() => setIsCreatingKey(false)} className="w-10 h-10 rounded-full bg-zinc-50 dark:bg-white/5 text-zinc-500 flex items-center justify-center">
+                   <button onClick={() => setIsCreatingKey(false)} className="w-10 h-10 rounded-full bg-zinc-50 dark:bg-white/5 text-zinc-500 flex items-center justify-center min-w-[44px] min-h-[44px]">
                       <X className="w-5 h-5" strokeWidth={1.25} />
                    </button>
                 </div>
@@ -201,7 +201,7 @@ export default function SecurityClient({
                 <div className="absolute top-0 left-0 bottom-0 w-2 bg-rose-500"></div>
                 <div className="flex items-center gap-4">
                    <div className="w-14 h-14 rounded-2xl bg-rose-500 text-white flex items-center justify-center shadow-xl shadow-rose-500/20">
-                      <AlertTriangle className="w-8 h-8" strokeWidth={1.25} />
+                      <AlertTriangle className="w-8 h-8 min-w-[44px] min-h-[44px]" strokeWidth={1.25} />
                    </div>
                    <div>
                       <h3 className="text-2xl font-black text-rose-600 uppercase tracking-tighter">API Key Created</h3>
@@ -243,7 +243,7 @@ export default function SecurityClient({
                <PresenceCard key={k.id} noPadding className="group overflow-hidden">
                   <div className="p-4 flex flex-col md:flex-row gap-8 items-start md:items-center">
                      <div className="w-16 h-16 rounded-[1.5rem] bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50 shrink-0 shadow-inner group-hover:scale-110 transition-transform">
-                        <Key className="w-8 h-8" strokeWidth={1.25} />
+                        <Key className="w-8 h-8 min-w-[44px] min-h-[44px]" strokeWidth={1.25} />
                      </div>
                      <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-4 mb-3">
@@ -337,7 +337,7 @@ export default function SecurityClient({
                             </td>
                             <td className="px-8 py-6">
                               <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-white/5 flex items-center justify-center text-indigo-400">
+                                <div className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-white/5 flex items-center justify-center text-indigo-400 min-w-[44px] min-h-[44px]">
                                    <User className="w-5 h-5" strokeWidth={1.25} />
                                 </div>
                                 <div>

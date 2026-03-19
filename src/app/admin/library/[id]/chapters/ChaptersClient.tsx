@@ -6,7 +6,7 @@ import {
   Plus, GripVertical, Edit2, 
   Trash2, BookOpen, FileText, ArrowLeft
 } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { 
   PresenceCard, 
   PresenceButton, 
@@ -64,13 +64,13 @@ export default function ChaptersClient({
   };
 
   return (
-    <div className="max-w-4xl mx-auto w-full pb-20">
+    <div className="max-w-4xl mx-auto w-full pb-[calc(var(--bottom-nav-height)+1rem)]">
       
       {/* Book Info Card */}
       <PresenceCard className="mb-6 p-6">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600">
-            <BookOpen className="w-8 h-8" strokeWidth={1.5} />
+            <BookOpen className="w-8 h-8 min-w-[44px] min-h-[44px]" strokeWidth={1.5} />
           </div>
           <div>
             <h2 className="text-xl font-black text-[var(--color-text)] uppercase tracking-tight">{book.title}</h2>
@@ -128,13 +128,13 @@ export default function ChaptersClient({
 
                    <div className="flex items-center gap-2 shrink-0">
                       <Link href={`/admin/library/${book.id}/chapters/${ch.id}/edit`}>
-                        <button className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-white/5 text-zinc-400 hover:text-indigo-600 hover:bg-white dark:hover:bg-zinc-800 flex items-center justify-center transition-all">
+                        <button className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-white/5 text-zinc-400 hover:text-indigo-600 hover:bg-white dark:hover:bg-zinc-800 flex items-center justify-center transition-all min-w-[44px] min-h-[44px]">
                           <Edit2 className="w-4 h-4" />
                         </button>
                       </Link>
                       <button 
                         onClick={() => setDeleteId(ch.id)}
-                        className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-white/5 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition-all"
+                        className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-white/5 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition-all min-w-[44px] min-h-[44px]"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -165,7 +165,7 @@ export default function ChaptersClient({
         <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <PresenceCard className="w-full max-w-sm p-8 text-center animate-in zoom-in-95">
              <div className="w-16 h-16 rounded-full bg-rose-50 flex items-center justify-center text-rose-500 mx-auto mb-6">
-                <Trash2 className="w-8 h-8" />
+                <Trash2 className="w-8 h-8 min-w-[44px] min-h-[44px]" />
              </div>
              <h3 className="text-xl font-black text-[var(--color-text)] uppercase tracking-tight mb-2">Delete Chapter?</h3>
              <p className="text-xs text-zinc-500 mb-8 px-4 leading-relaxed">This will permanently remove the chapter content. This action cannot be undone.</p>

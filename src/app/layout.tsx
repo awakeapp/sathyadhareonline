@@ -103,7 +103,9 @@ export default async function RootLayout({
                     <TopHeader user={user} role={profile?.role || null} profile={profile} />
 
                     <PageTransition>
-                      <MainWrapper>{children}</MainWrapper>
+                      <div className="page-enter flex-1 flex flex-col min-h-0 min-w-0">
+                        <MainWrapper>{children}</MainWrapper>
+                      </div>
                     </PageTransition>
                   </div>
                 </div>
@@ -111,11 +113,22 @@ export default async function RootLayout({
                 <RippleEffect />
                 <InstallPrompt />
                 <OneSignalInitializer />
-                <Toaster position="bottom-center" theme="system" richColors closeButton toastOptions={{
-                  style: {
-                    marginBottom: 'env(safe-area-inset-bottom, 20px)',
-                  }
-                }} />
+                <Toaster
+                  position="bottom-center"
+                  toastOptions={{
+                    style: {
+                      background: 'var(--color-surface)',
+                      color: 'var(--color-text)',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: 'var(--radius-md)',
+                      fontSize: '14px',
+                      fontFamily: 'var(--font-dm-sans), sans-serif',
+                    },
+                    className: 'shadow-[var(--shadow-lg)]',
+                    duration: 2500,
+                  }}
+                  offset={72}
+                />
 
                 <DashboardReturnFab
                   role={profile?.role || null}

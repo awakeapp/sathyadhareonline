@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
 import { Input, Select, Label } from '@/components/ui/Input';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from '@/components/ui/Modal';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import {
   UserPlus, Mail, Edit2, Trash2, Slash, Ban, CheckCircle2, Search, Download, User, Clock, KeyRound, MoreVertical, Users,
   Activity, FileText, ChevronRight, LayoutGrid, CalendarDays, ShieldCheck, Globe, Monitor, Sidebar, ShieldAlert, Send
@@ -241,7 +241,7 @@ export default function UserManagementClient({
   };
 
   return (
-    <div className="flex flex-col gap-3 pb-24">
+    <div className="flex flex-col gap-3 pb-[calc(var(--bottom-nav-height)+1rem)]">
       {/* ── Action Bar ── */}
       <div className="grid grid-cols-2 gap-2">
         <button 
@@ -357,7 +357,7 @@ export default function UserManagementClient({
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] w-full max-w-[400px] px-4 animate-in slide-in-from-bottom-5 duration-500">
           <div className="bg-zinc-900 border border-white/10 rounded-[2rem] p-4 shadow-2xl flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 pl-2">
-               <div className="w-8 h-8 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-xs font-black shadow-lg shadow-[var(--color-primary)]/20">
+               <div className="w-8 h-8 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-xs font-black shadow-lg shadow-[var(--color-primary)]/20 min-w-[44px] min-h-[44px]">
                  {selectedIds.size}
                </div>
                <span className="text-[10px] font-black text-white uppercase tracking-widest">Selected</span>
@@ -873,7 +873,7 @@ function UserCard({ user, currentUserRole, isSelected, onSelect, onOpen, setShow
         <div className="p-2 flex items-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-surface-2)] transition-colors">
+              <button className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-surface-2)] transition-colors min-w-[44px] min-h-[44px]">
                 <MoreVertical size={16} />
               </button>
             </DropdownMenuTrigger>

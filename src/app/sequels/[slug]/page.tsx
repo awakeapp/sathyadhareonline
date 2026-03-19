@@ -55,7 +55,7 @@ export default async function SequelPage({ params }: { params: Promise<{ slug: s
     .filter((a) => a && a.status === 'published' && a.is_deleted === false);
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] pb-32">
+    <div className="min-h-screen bg-[var(--color-background)] pb-[calc(var(--bottom-nav-height)+1rem)]">
        <ScrollRestorer storageKey={`sequel_${sequel.id}`} isAuthenticated={!!user} userId={user?.id} />
        
        {/* High-End Issue Cover */}
@@ -77,7 +77,7 @@ export default async function SequelPage({ params }: { params: Promise<{ slug: s
           {/* Magazine Overlays */}
           <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[var(--color-background)] via-[var(--color-background)]/60 to-transparent z-10" />
           
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-end p-8 pb-12 sm:pb-20 text-center">
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-end p-8 pb-12 sm:pb-[calc(var(--bottom-nav-height)+1rem)] text-center">
              <div className="max-w-4xl px-4 animate-in fade-in slide-in-from-bottom-8 duration-1000">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.2em] mb-6 shadow-xl shadow-indigo-500/30">
                    <Layers className="w-3 h-3" />

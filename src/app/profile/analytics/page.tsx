@@ -46,7 +46,7 @@ export default async function AnalyticsPage() {
     .slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] pt-6 sm:pt-10 pb-24 px-4 sm:px-10">
+    <div className="min-h-screen bg-[var(--color-background)] pt-6 sm:pt-10 pb-[calc(var(--bottom-nav-height)+1rem)] px-4 sm:px-10">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <header className="mb-12">
@@ -71,7 +71,7 @@ export default async function AnalyticsPage() {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-12">
           <Card className="bg-[var(--color-surface)] border-[var(--color-border)] shadow-sm rounded-[2rem]">
             <CardContent className="p-8">
-              <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-6">
+              <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-6 min-w-[44px] min-h-[44px]">
                 <BookOpen size={20} />
               </div>
               <p className="text-3xl font-black text-[var(--color-text)]">{viewCount}</p>
@@ -81,7 +81,7 @@ export default async function AnalyticsPage() {
 
           <Card className="bg-[var(--color-surface)] border-[var(--color-border)] shadow-sm rounded-[2rem]">
             <CardContent className="p-8">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-6">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-6 min-w-[44px] min-h-[44px]">
                 <Clock size={20} />
               </div>
               <p className="text-3xl font-black text-[var(--color-text)]">{Math.floor(viewCount * 4.5)}m</p>
@@ -91,7 +91,7 @@ export default async function AnalyticsPage() {
 
           <Card className="bg-[var(--color-surface)] border-[var(--color-border)] shadow-sm rounded-[2rem] col-span-2 md:col-span-1">
             <CardContent className="p-8">
-              <div className="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-6">
+              <div className="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-6 min-w-[44px] min-h-[44px]">
                 <TrendingUp size={20} />
               </div>
               <p className="text-3xl font-black text-[var(--color-text)] truncate pr-2">
@@ -171,7 +171,7 @@ export default async function AnalyticsPage() {
         </div>
 
         {/* Footer info */}
-        <footer className="mt-16 pt-8 border-t border-[var(--color-border)] opacity-40">
+        <footer className="mt-[var(--header-height)] pt-8 border-t border-[var(--color-border)] opacity-40">
            <p className="text-[10px] font-black uppercase tracking-widest text-center">
              Verified Data Stream • {new Date().getFullYear()} Sathyadhare Systems
            </p>

@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { Plus, X, Pencil, Trash2, Link as LinkIcon, Image as ImageIcon } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { createClient } from '@/lib/supabase/client';
 import { createBanner, updateBanner, deleteBanner, toggleBanner } from './actions';
 
@@ -135,7 +135,7 @@ export default function BannersClient({ initialBanners }: Props) {
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] active:scale-90 transition-all"
+                className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] active:scale-90 transition-all min-w-[44px] min-h-[44px]"
               >
                 <X size={16} strokeWidth={2.5} />
               </button>
@@ -174,7 +174,7 @@ export default function BannersClient({ initialBanners }: Props) {
                   ) : (
                     <div className="flex flex-col items-center justify-center gap-2 py-8 px-4">
                       {uploading ? (
-                        <div className="w-8 h-8 border-2 border-[#685de6] border-t-transparent rounded-full animate-spin" />
+                        <div className="w-8 h-8 border-2 border-[#685de6] border-t-transparent rounded-full animate-spin min-w-[44px] min-h-[44px]" />
                       ) : (
                         <div className="w-12 h-12 rounded-2xl bg-[#685de6]/10 flex items-center justify-center text-[#685de6]">
                           <ImageIcon size={22} strokeWidth={1.5} />

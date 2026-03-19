@@ -2,7 +2,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 
 export default function AnalyticsLoading() {
   return (
-    <div className="min-h-screen pb-24 px-4 pt-6 bg-[var(--color-background)] text-[var(--color-text)]">
+    <div className="min-h-screen pb-[calc(var(--bottom-nav-height)+1rem)] px-4 pt-6 bg-[var(--color-background)] text-[var(--color-text)]">
       <div className="max-w-4xl mx-auto space-y-6">
         
         {/* Header Skeleton */}

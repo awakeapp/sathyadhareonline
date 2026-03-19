@@ -13,8 +13,8 @@ import { ArrowRight, FileText, Library, Users, Send, Layers, MessageSquare, Layo
 export function PresenceWrapper({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
     <div
-      className={`min-h-[100svh] bg-[var(--color-background)] pb-[100px] flex flex-col items-center ${className}`}
-      style={{ paddingTop: 'calc(env(safe-area-inset-top) + 60px)' }}
+      className={`min-h-[100svh] bg-[var(--color-background)] pb-[calc(var(--bottom-nav-height)+1rem)] flex flex-col items-center ${className}`}
+      style={{ paddingTop: 'calc(env(safe-area-inset-top) + var(--header-height))' }}
     >
       <div className="w-full max-w-[1400px] px-4 pb-6 pt-4 flex flex-col gap-4 sm:gap-6">
         {children}
@@ -118,11 +118,11 @@ export function PresenceHeader({
     <>
       {/* Notifications Panel Modal */}
       {isNotifOpen && (
-        <div className="fixed inset-0 z-[60] flex sm:items-start justify-end sm:pt-16 sm:pr-4 bg-black/20 dark:bg-black/60 backdrop-blur-md sm:bg-transparent sm:backdrop-blur-none" onClick={() => setIsNotifOpen(false)}>
+        <div className="fixed inset-0 z-[60] flex sm:items-start justify-end sm:pt-[var(--header-height)] sm:pr-4 bg-black/20 dark:bg-black/60 backdrop-blur-md sm:bg-transparent sm:backdrop-blur-none" onClick={() => setIsNotifOpen(false)}>
           <div className="bg-[var(--color-surface)] sm:rounded-2xl w-full h-full sm:h-auto sm:w-[380px] sm:max-h-[80vh] shadow-2xl border border-[var(--color-border)] flex flex-col animate-slide-up sm:animate-in sm:fade-in sm:slide-in-from-top-4" onClick={e => e.stopPropagation()}>
             <div className="p-4 border-b border-[var(--color-border)] flex items-center justify-between">
               <h3 className="text-[18px] font-bold text-[var(--color-text)]">Notifications</h3>
-              <button onClick={() => setIsNotifOpen(false)} className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)]">
+              <button onClick={() => setIsNotifOpen(false)} className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] min-w-[44px] min-h-[44px]">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
               </button>
             </div>
@@ -154,11 +154,11 @@ export function PresenceHeader({
 
       {/* Profile/Settings Drawer Modal */}
       {isProfileOpen && (
-        <div className="fixed inset-0 z-[60] flex sm:items-start justify-end sm:pt-16 sm:pr-4 bg-black/20 dark:bg-black/60 backdrop-blur-md sm:bg-transparent sm:backdrop-blur-none" onClick={() => setIsProfileOpen(false)}>
+        <div className="fixed inset-0 z-[60] flex sm:items-start justify-end sm:pt-[var(--header-height)] sm:pr-4 bg-black/20 dark:bg-black/60 backdrop-blur-md sm:bg-transparent sm:backdrop-blur-none" onClick={() => setIsProfileOpen(false)}>
           <div className="bg-[var(--color-surface)] sm:rounded-2xl w-full h-full sm:h-auto sm:w-[360px] sm:max-h-[85vh] shadow-2xl border border-[var(--color-border)] flex flex-col animate-slide-left sm:animate-in sm:fade-in sm:slide-in-from-right-4" onClick={e => e.stopPropagation()}>
             <div className="p-4 border-b border-[var(--color-border)] flex items-center justify-between">
               <h3 className="text-[18px] font-bold text-[var(--color-text)]">Account</h3>
-              <button onClick={() => setIsProfileOpen(false)} className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-border)] transition-colors">
+              <button onClick={() => setIsProfileOpen(false)} className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-border)] transition-colors min-w-[44px] min-h-[44px]">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
               </button>
             </div>
@@ -249,7 +249,7 @@ export function PresenceHeader({
                       className="flex items-center justify-between p-4 rounded-xl hover:bg-[var(--color-surface-2)] transition-all group border border-transparent hover:border-[var(--color-border)]"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] group-hover:bg-[var(--color-primary)]/10 group-hover:text-[var(--color-primary)] transition-colors">
+                        <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] group-hover:bg-[var(--color-primary)]/10 group-hover:text-[var(--color-primary)] transition-colors min-w-[44px] min-h-[44px]">
                           {getIcon(res.type)}
                         </div>
                         <div>
@@ -268,11 +268,11 @@ export function PresenceHeader({
       )}
 
       <div 
-        className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-surface)]/95 backdrop-blur-xl border-b border-[var(--color-border)] shadow-sm flex flex-col justify-end"
-        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+        className="sticky top-0 z-50 bg-[var(--color-surface)]/95 backdrop-blur-xl border-b border-[var(--color-border)] shadow-sm px-4 sm:px-6"
+        style={{ height: 'var(--header-height)' }}
       >
         {/* 56-64px Header Height */}
-        <div className="flex items-center justify-between h-[60px] px-4 w-full max-w-[1400px] mx-auto">
+        <div className="flex items-center justify-between h-full w-full max-w-[1400px] mx-auto">
           <div className="flex flex-col justify-center">
             {/* Page Title: 22px */}
             <h1 className="text-[22px] font-bold tracking-tight text-[var(--color-text)] leading-[1.5]">{title}</h1>
@@ -307,7 +307,7 @@ export function PresenceHeader({
                      } catch {}
                      window.location.href = '/';
                    }} 
-                   className="sm:hidden flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors text-[var(--color-primary)]"
+                   className="sm:hidden flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors text-[var(--color-primary)] min-w-[44px] min-h-[44px]"
                    title="Switch to Reader Mode"
                 >
                    <Eye className="w-5 h-5" />
@@ -315,7 +315,7 @@ export function PresenceHeader({
                 
                 {/* Dynamic Action 1 (e.g. Submissions) */}
                 {icon1Node ? (
-                  <Link href={icon1Href || '#'} className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors">
+                  <Link href={icon1Href || '#'} className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors min-w-[44px] min-h-[44px]">
                     {icon1Node}
                   </Link>
                 ) : (
@@ -323,7 +323,7 @@ export function PresenceHeader({
                 )}
     
                 {/* Dynamic Action 2 (e.g. Notifications/Logs) */}
-                <button onClick={() => setIsNotifOpen(true)} className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors">
+                <button onClick={() => setIsNotifOpen(true)} className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--color-surface-2)] transition-colors min-w-[44px] min-h-[44px]">
                   {icon2Node || <Bell className="w-5 h-5 text-[var(--color-text)]" strokeWidth={1.5} />}
                   {icon2Badge && <span className="absolute top-2 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-[var(--color-surface)]" />}
                 </button>
@@ -333,7 +333,7 @@ export function PresenceHeader({
             {/* User Settings Trigger - Always show if not explicitly hidden or kept */}
             <button
                onClick={() => setIsProfileOpen(true)}
-               className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[var(--color-surface-2)] transition-colors ml-1 shrink-0 text-[var(--color-text)]"
+               className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[var(--color-surface-2)] transition-colors ml-1 shrink-0 text-[var(--color-text)] min-w-[44px] min-h-[44px]"
             >
               <Settings className="w-5 h-5" strokeWidth={1.5} />
             </button>

@@ -43,7 +43,7 @@ export default async function WritePage({ searchParams }: Props) {
   /* ── Guest: sign-in gate ─────────────────────────────────────────────── */
   if (!user) {
     return (
-      <PageContainer className="min-h-[100svh] py-8 pb-32">
+      <PageContainer className="min-h-[100svh] py-8 pb-[calc(var(--bottom-nav-height)+1rem)]">
         <div className="pt-3 pb-5 border-b border-[var(--color-border)] mb-6">
           <h1 className="text-[26px] font-black text-[var(--color-text)] tracking-tight">Write</h1>
           <p className="text-[14px] text-[var(--color-muted)] mt-1">Submit your article for review</p>
@@ -113,7 +113,7 @@ export default async function WritePage({ searchParams }: Props) {
   /* ── Submission success screen ─────────────────────────────────────────── */
   if (submitted === 'true') {
     return (
-      <PageContainer className="min-h-[100svh] py-8 pb-32 flex flex-col items-center justify-center text-center">
+      <PageContainer className="min-h-[100svh] py-8 pb-[calc(var(--bottom-nav-height)+1rem)] flex flex-col items-center justify-center text-center">
         <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-5">
           <CheckCircle size={32} className="text-emerald-500" />
         </div>
@@ -166,7 +166,7 @@ export default async function WritePage({ searchParams }: Props) {
   }
 
   return (
-    <PageContainer className="py-8 pb-32 flex flex-col gap-6">
+    <PageContainer className="py-8 pb-[calc(var(--bottom-nav-height)+1rem)] flex flex-col gap-6">
 
       {/* Page title */}
       <div className="pt-2 border-b border-[var(--color-border)] pb-4">
@@ -177,7 +177,7 @@ export default async function WritePage({ searchParams }: Props) {
       {/* ── Submission Form ──────────────────────────────────────────────── */}
       <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl overflow-hidden">
         <div className="flex items-center gap-3 px-5 py-4 border-b border-[var(--color-border)]">
-          <div className="w-9 h-9 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
+          <div className="w-9 h-9 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] min-w-[44px] min-h-[44px]">
             <PenLine size={18} strokeWidth={1.75} />
           </div>
           <div>
@@ -266,7 +266,7 @@ export default async function WritePage({ searchParams }: Props) {
                   <div className="flex items-center gap-3 px-4 py-4">
                     {/* Status icon */}
                     <div
-                      className="w-9 h-9 rounded-xl shrink-0 flex items-center justify-center"
+                      className="w-9 h-9 rounded-xl shrink-0 flex items-center justify-center min-w-[44px] min-h-[44px]"
                       style={{ background: `${meta.color}14`, color: meta.color }}
                     >
                       <Icon size={17} strokeWidth={2} />

@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect } from 'react';
 import { Input } from '@/components/ui/Input';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { Loader2, SendHorizontal } from 'lucide-react';
 import { submitComment } from '@/app/actions/comments';
 import { createClient } from '@/lib/supabase/client';

@@ -108,7 +108,7 @@ export default function ArticleFormClient({ categories, users, role, onSubmit, c
               true ? 'bg-indigo-50/20 border-indigo-100' : ''
             }`}>
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-white dark:bg-zinc-900 border border-indigo-100 flex items-center justify-center text-indigo-500 shadow-sm">
+                <div className="w-10 h-10 rounded-xl bg-white dark:bg-zinc-900 border border-indigo-100 flex items-center justify-center text-indigo-500 shadow-sm min-w-[44px] min-h-[44px]">
                   <CheckCircle className="w-5 h-5" strokeWidth={1.5} />
                 </div>
                 <div>
@@ -154,7 +154,7 @@ export default function ArticleFormClient({ categories, users, role, onSubmit, c
         {/* Editor Header */}
         <header className="h-[72px] shrink-0 border-b border-[var(--color-border)] bg-[var(--color-surface)] flex items-center justify-between px-4 w-full sticky top-0 z-50">
            <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
-             <button type="button" onClick={() => setStage('metadata')} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[var(--color-surface-2)] text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors shrink-0">
+             <button type="button" onClick={() => setStage('metadata')} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[var(--color-surface-2)] text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors shrink-0 min-w-[44px] min-h-[44px]">
                <ArrowLeft className="w-5 h-5" strokeWidth={2} />
              </button>
              <div className="min-w-0 pr-4">

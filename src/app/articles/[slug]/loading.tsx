@@ -1,6 +1,6 @@
 export default function ArticleLoading() {
   return (
-    <div className="min-h-[100svh] px-4 py-8 pb-32 max-w-lg mx-auto sm:max-w-2xl lg:max-w-3xl animate-pulse">
+    <div className="min-h-[100svh] px-4 py-8 pb-[calc(var(--bottom-nav-height)+1rem)] max-w-lg mx-auto sm:max-w-2xl lg:max-w-3xl animate-pulse">
       {/* Category pill skeleton */}
       <div className="w-24 h-6 rounded-full bg-[var(--color-surface-2)] mb-5" />
 

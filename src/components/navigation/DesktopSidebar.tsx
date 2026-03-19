@@ -189,7 +189,7 @@ function DesktopSidebar({ role }: SidebarProps) {
         {!collapsed && (
           <div className="flex items-center gap-2.5 overflow-hidden">
             <div
-              className="w-8 h-8 flex-shrink-0 rounded-xl flex items-center justify-center font-black text-[11px] shadow-md"
+              className="w-8 h-8 flex-shrink-0 rounded-xl flex items-center justify-center font-black text-[11px] shadow-md min-w-[44px] min-h-[44px]"
               style={{ background: brandBg, color: brandColor, boxShadow: `0 2px 12px ${brandBg}50` }}
             >
               {brandAbbr}
@@ -199,7 +199,7 @@ function DesktopSidebar({ role }: SidebarProps) {
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className={`w-8 h-8 rounded-xl flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text)] transition-colors flex-shrink-0 ${collapsed ? 'mx-auto' : ''}`}
+          className={`w-8 h-8 rounded-xl flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text)] transition-colors flex-shrink-0 ${collapsed ? 'mx-auto' : ''} min-w-[44px] min-h-[44px]`}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}

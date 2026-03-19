@@ -29,9 +29,9 @@ export default async function PlansPage() {
         title="Super Admin"
         roleLabel="Subscription Plans"
         initials={initials}
-        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Href="/admin"
+        icon1Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
+        icon1Href="/admin"
+        icon2Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
       />
       
       <AdminContainer className="flex flex-col gap-4 relative z-20">

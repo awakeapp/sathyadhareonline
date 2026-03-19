@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
 import { Download, Users, Eye, MessageSquare, Calendar, ChevronRight } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { exportUsersCSVAction, exportContentPerformanceCSVAction, exportCategoryCSVAction } from './exports';
 import Link from 'next/link';
 
@@ -91,7 +91,7 @@ export default function AnalyticsClient({ startDate, endDate, timeSeries, topArt
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full pb-24">
+    <div className="flex flex-col gap-6 w-full pb-[calc(var(--bottom-nav-height)+1rem)]">
       
       {/* Segmented Controls */}
       <div className="bg-[#e3e3e8] dark:bg-[#1c1c1e] p-1 rounded-[10px] flex">

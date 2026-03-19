@@ -5,6 +5,7 @@ import {
   Globe, X, Plus, Type, List, ListOrdered, Quote, Trash2,
   CheckCircle2, AlertCircle, User, Loader2, AlertTriangle,
 } from "lucide-react";
+import { toast } from '@/lib/toast';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 const wordCount = (el: HTMLElement | null) => {
@@ -52,11 +53,6 @@ export default function ArticleWriteEditor({
   // "saved" = last save was successfully persisted to DB
   const [saveState,  setSaveState]  = useState<"idle" | "saved" | "unsaved" | "saving">("idle");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // ── toast state ──────────────────────────────────────────────────────────
-  const [toast,    setToast]    = useState("");
-  const [toastOn,  setToastOn]  = useState(false);
-  const [toastErr, setToastErr] = useState(false);
 
   // ── refs ─────────────────────────────────────────────────────────────────
   const bodyRef     = useRef<HTMLDivElement>(null);
@@ -122,10 +118,10 @@ export default function ArticleWriteEditor({
     try {
       await onSaveDraft?.(collectData());
       setSaveState("saved");
-      showToast("Draft saved successfully", false);
+      toast.success("Draft saved successfully");
     } catch (e) {
       setSaveState("unsaved");
-      showToast("Save failed — please try again", true);
+      toast.error("Save failed — please try again");
     }
   };
 
@@ -140,32 +136,24 @@ export default function ArticleWriteEditor({
   // ── submit ───────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
     const data = collectData();
-    if (!data.title.trim())        { showToast("Please add a title", true); return; }
-    if (!data.authorName.trim())   { showToast("Please add the author name", true); return; }
-    if (!data.categoryId)          { showToast("Please select a category", true); return; }
-    if (!data.summary.trim())      { showToast("Please add an elevator pitch / summary", true); return; }
-    if (data.bodyText.length < 20) { showToast("Article body is too short", true); return; }
+    if (!data.title.trim())        { toast.error("Please add a title"); return; }
+    if (!data.authorName.trim())   { toast.error("Please add the author name"); return; }
+    if (!data.categoryId)          { toast.error("Please select a category"); return; }
+    if (!data.summary.trim())      { toast.error("Please add an elevator pitch / summary"); return; }
+    if (data.bodyText.length < 20) { toast.error("Article body is too short"); return; }
 
     setIsSubmitting(true);
     setSaveState("saving");
     try {
       await onSubmit?.(data);
       setSaveState("saved");
-      showToast("Submitted successfully!", false);
+      toast.success("Submitted successfully!");
     } catch (e) {
       setSaveState("unsaved");
-      showToast("Submit failed — please try again", true);
+      toast.error("Submit failed — please try again");
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  // ── toast helper ─────────────────────────────────────────────────────────
-  const showToast = (msg: string, isError: boolean) => {
-    setToast(msg);
-    setToastErr(isError);
-    setToastOn(true);
-    setTimeout(() => setToastOn(false), 3000);
   };
 
   // ── format toolbar actions ───────────────────────────────────────────────
@@ -244,7 +232,7 @@ export default function ArticleWriteEditor({
   };
 
   const doInsertImgUrl = () => {
-    if (!imgUrl.trim()) { showToast("Please enter an image URL", true); return; }
+    if (!imgUrl.trim()) { toast.error("Please enter an image URL"); return; }
     setImgOpen(false);
     restoreSel();
     insertImgHTML(imgUrl.trim(), imgAlt.trim());
@@ -265,7 +253,7 @@ export default function ArticleWriteEditor({
   };
 
   const doInsertLink = () => {
-    if (!linkUrl.trim()) { showToast("Please enter a URL", true); return; }
+    if (!linkUrl.trim()) { toast.error("Please enter a URL"); return; }
     setLinkOpen(false);
     bodyRef.current?.focus();
     restoreSel();
@@ -992,14 +980,6 @@ export default function ArticleWriteEditor({
         {/* ── Hidden file input ── */}
         <input ref={fileInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileChange} />
 
-        {/* ── TOAST ── */}
-        <div className={`ae-toast ${toastErr ? "ae-toast-error" : "ae-toast-success"}${toastOn ? " ae-show" : ""}`}>
-          {toastErr
-            ? <AlertTriangle size={15} />
-            : <CheckCircle2 size={15} />
-          }
-          {toast}
-        </div>
 
         {/* Spin keyframe */}
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>

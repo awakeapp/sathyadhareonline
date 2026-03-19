@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { updateTemplateAction } from './actions';
 import { Mail, Edit, Calendar, Layout, ArrowLeft, Terminal, Check } from 'lucide-react';
 import { 
@@ -66,7 +66,7 @@ export default function EmailTemplatesClient({ initialTemplates }: { initialTemp
                   <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-zinc-900 dark:text-zinc-50 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">
                     <Mail className="w-7 h-7" strokeWidth={1.25} />
                   </div>
-                  <div className="w-10 h-10 rounded-full bg-zinc-50 dark:bg-white/5 flex items-center justify-center text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="w-10 h-10 rounded-full bg-zinc-50 dark:bg-white/5 flex items-center justify-center text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity min-w-[44px] min-h-[44px]">
                      <Edit className="w-4 h-4" strokeWidth={1.25} />
                   </div>
                 </div>

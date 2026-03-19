@@ -110,7 +110,7 @@ export default function LoginPage() {
       <div className="w-full max-w-[420px] flex flex-col">
         {/* Header Navigation */}
         <div className="flex items-center mb-12">
-          <Link href="/" className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[var(--color-surface-2)] transition-colors">
+          <Link href="/" className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[var(--color-surface-2)] transition-colors min-w-[44px] min-h-[44px]">
             <ArrowLeft className="w-5 h-5 text-[var(--color-text)]" />
           </Link>
         </div>
@@ -241,7 +241,7 @@ export default function LoginPage() {
         {tab === 'magic' && magicSent && (
           <div className="flex flex-col items-center gap-6 py-8 animate-in fade-in zoom-in-95">
             <div className="w-20 h-20 rounded-[2rem] bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-              <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+              <CheckCircle2 className="w-10 h-10 text-emerald-500 min-w-[44px] min-h-[44px]" />
             </div>
             <div className="text-center space-y-2">
               <h2 className="text-[20px] font-black text-[var(--color-text)] tracking-tight">Check Your Inbox</h2>

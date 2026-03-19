@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Share2, Bookmark, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 export interface BookItem {
   id: string;

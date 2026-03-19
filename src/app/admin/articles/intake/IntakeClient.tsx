@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input, Select, Label } from '@/components/ui/Input';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { ArrowLeft, Save, FileText, User, Link2, BookOpen, MessageSquare, Briefcase } from 'lucide-react';
 import { createIntakeAction } from './actions';
 

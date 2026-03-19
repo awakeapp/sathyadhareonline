@@ -76,7 +76,7 @@ export default async function EditorDashboard() {
         href="/editor/articles/write"
         className="flex items-center gap-3 p-4 bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 rounded-xl hover:bg-[var(--color-primary)]/10 active:scale-[0.99] transition-all"
       >
-        <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
+        <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] min-w-[44px] min-h-[44px]">
           <Edit3 size={20} strokeWidth={1.75} />
         </div>
         <div className="flex-1 min-w-0">

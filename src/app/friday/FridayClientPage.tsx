@@ -68,7 +68,7 @@ export default function FridayClientPage({ messages, initialIndex }: Props) {
           >
             <div className="flex items-center justify-between p-5 border-b border-[var(--color-border)]">
               <h3 className="text-[17px] font-black text-[var(--color-text)]">Select a Date</h3>
-              <button onClick={() => setShowDatePicker(false)} className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)]">
+              <button onClick={() => setShowDatePicker(false)} className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] min-w-[44px] min-h-[44px]">
                 <X size={18} strokeWidth={2.5} />
               </button>
             </div>

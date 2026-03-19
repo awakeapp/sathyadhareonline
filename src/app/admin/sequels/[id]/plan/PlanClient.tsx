@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Plus, FileText, AlignLeft, User as UserIcon, Calendar, Filter, Activity, Bookmark } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/Button';
 import { Input, Select, Label } from '@/components/ui/Input';
 import { addSequelPieceAction, updateSequelPieceAction } from './actions';

@@ -89,7 +89,7 @@ export default async function AdminEditorsPage() {
         href="/admin/articles"
         className="flex items-center gap-3 p-4 bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 rounded-xl hover:bg-[var(--color-primary)]/10 active:scale-[0.99] transition-all"
       >
-        <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
+        <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] min-w-[44px] min-h-[44px]">
           <PenLine size={20} strokeWidth={1.75} />
         </div>
         <div className="flex-1 min-w-0">
@@ -124,10 +124,10 @@ export default async function AdminEditorsPage() {
                     <img
                       src={editor.avatar_url}
                       alt={editor.full_name ?? 'Editor'}
-                      className="w-10 h-10 rounded-full object-cover border border-[var(--color-border)] shrink-0"
+                      className="w-10 h-10 rounded-full object-cover border border-[var(--color-border)] shrink-0 min-w-[44px] min-h-[44px]"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)] font-bold text-[15px] shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)] font-bold text-[15px] shrink-0 min-w-[44px] min-h-[44px]">
                       {initials}
                     </div>
                   )}

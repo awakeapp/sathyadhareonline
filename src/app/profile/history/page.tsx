@@ -46,7 +46,7 @@ export default async function ReadingHistoryPage() {
     });
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] pt-6 sm:pt-10 pb-24 px-4 sm:px-10">
+    <div className="min-h-screen bg-[var(--color-background)] pt-6 sm:pt-10 pb-[calc(var(--bottom-nav-height)+1rem)] px-4 sm:px-10">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <header className="mb-12">

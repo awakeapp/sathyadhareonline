@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/Button';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { Search, UploadCloud, Copy, Trash2, CheckCircle2, Image as ImageIcon, ChevronDown, Wand2 } from 'lucide-react';
 import { 
   PresenceCard, 
@@ -187,7 +187,7 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
           <div className="flex flex-col items-center gap-4">
             <div className={`w-20 h-20 rounded-3xl flex items-center justify-center transition-all duration-500 shadow-xl shadow-indigo-500/10
               ${dragOver ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white scale-110 rotate-6' : 'bg-indigo-50 dark:bg-indigo-500/10 text-zinc-900 dark:text-zinc-50 group-hover:scale-105 group-hover:-rotate-3'}`}>
-               <UploadCloud className="w-10 h-10" />
+               <UploadCloud className="w-10 h-10 min-w-[44px] min-h-[44px]" />
             </div>
             <div>
               <p className="text-xl font-black text-zinc-900 dark:text-zinc-50">
@@ -241,7 +241,7 @@ export default function MediaLibraryClient({ initialItems, userId }: Props) {
                                 {isCopied ? <CheckCircle2 className="w-4 h-4" strokeWidth={1.25} /> : <Copy className="w-4 h-4" strokeWidth={1.25} />}
                                 {isCopied ? 'Copied' : 'Link'}
                              </button>
-                             <button onClick={() => handleDelete(item)} className="w-9 h-9 rounded-xl bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 shadow-lg">
+                             <button onClick={() => handleDelete(item)} className="w-9 h-9 rounded-xl bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 shadow-lg min-w-[44px] min-h-[44px]">
                                 <Trash2 className="w-4 h-4" strokeWidth={1.25} />
                              </button>
                           </div>

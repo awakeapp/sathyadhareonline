@@ -7,7 +7,7 @@ import PageContainer from '@/components/layout/PageContainer';
 
 export default function AboutPage() {
   return (
-    <main className="min-h-[100dvh] relative overflow-hidden bg-[var(--color-background)] pb-20 selection:bg-[var(--color-primary)] selection:text-white">
+    <main className="min-h-[100dvh] relative overflow-hidden bg-[var(--color-background)] pb-[calc(var(--bottom-nav-height)+1rem)] selection:bg-[var(--color-primary)] selection:text-white">
       
       {/* Dynamic Background Elements */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[var(--color-primary)]/10 rounded-full blur-[120px] pointer-events-none animate-pulse" />

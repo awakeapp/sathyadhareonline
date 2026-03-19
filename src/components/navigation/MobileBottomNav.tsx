@@ -26,9 +26,9 @@ interface MobileBottomNavProps {
   const FloatingContainer = ({ children, visible = true }: { children: React.ReactNode, visible?: boolean }) => (
     <nav
       className={`md:hidden fixed z-[50] bottom-0 left-0 right-0 bg-[var(--color-surface)]/95 backdrop-blur-2xl border-t border-[var(--color-border)] transition-transform duration-500 ${visible ? 'translate-y-0' : 'translate-y-full'}`}
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}
     >
-      <div className="flex items-center justify-between h-[60px] px-1 relative w-full max-w-[500px] mx-auto">
+      <div className="flex items-center justify-between h-[var(--bottom-nav-height)] px-1 relative w-full max-w-[500px] mx-auto">
         {children}
       </div>
     </nav>
@@ -89,7 +89,7 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
               
               <div className="flex items-center justify-between p-5 border-b border-[var(--color-border)]">
                 <h3 className="text-[18px] font-bold text-[var(--color-text)]">Create Quick Action</h3>
-                <button onClick={() => setIsCreateOpen(false)} className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-border)] transition-colors">
+                <button onClick={() => setIsCreateOpen(false)} className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-border)] transition-colors min-w-[44px] min-h-[44px]">
                   <X size={20} strokeWidth={2} />
                 </button>
               </div>
@@ -250,7 +250,7 @@ export default function MobileBottomNav({ role }: MobileBottomNavProps) {
               <h3 className="text-[17px] font-black text-[var(--color-text)] tracking-tight">More</h3>
               <button
                 onClick={() => setIsCreateOpen(false)}
-                className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)]"
+                className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] min-w-[44px] min-h-[44px]"
               >
                 <X size={18} strokeWidth={2.5} />
               </button>

@@ -68,7 +68,7 @@ export default async function ContributorDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
           {canArticles && (
             <div className="bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-2xl p-6 flex flex-col gap-3 hover:border-[var(--color-primary)]/50 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-1">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-1 min-w-[44px] min-h-[44px]">
                 <FileText size={20} />
               </div>
               <h3 className="font-bold text-[16px] text-[var(--color-text)]">Articles</h3>
@@ -80,7 +80,7 @@ export default async function ContributorDashboard() {
           
           {canSequels && (
             <div className="bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-2xl p-6 flex flex-col gap-3 hover:border-[var(--color-primary)]/50 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center mb-1">
+              <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center mb-1 min-w-[44px] min-h-[44px]">
                 <Layers size={20} />
               </div>
               <h3 className="font-bold text-[16px] text-[var(--color-text)]">Sequels</h3>
@@ -92,7 +92,7 @@ export default async function ContributorDashboard() {
 
           {canLibrary && (
             <div className="bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-2xl p-6 flex flex-col gap-3 hover:border-[var(--color-primary)]/50 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center mb-1">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center mb-1 min-w-[44px] min-h-[44px]">
                 <Library size={20} />
               </div>
               <h3 className="font-bold text-[16px] text-[var(--color-text)]">Library</h3>

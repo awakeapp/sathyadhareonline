@@ -93,7 +93,7 @@ export default async function EditorNotificationsPage() {
                 className="flex items-start gap-3 p-4 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)]"
               >
                 <div
-                  className="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center"
+                  className="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center min-w-[44px] min-h-[44px]"
                   style={{ background: `${meta.color}14`, color: meta.color }}
                 >
                   <Icon size={18} strokeWidth={1.75} />

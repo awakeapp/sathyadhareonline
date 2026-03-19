@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Key, Plus, Trash2, KeyRound, Copy } from 'lucide-react';
 import { createApiKeyAction, revokeApiKeyAction } from './actions';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 export default function ApiKeysClient({ keys }: { keys: { id: string; name: string; key_hash: string; created_at: string }[] }) {
   const [createdKey, setCreatedKey] = useState<string | null>(null);
@@ -93,7 +93,7 @@ export default function ApiKeysClient({ keys }: { keys: { id: string; name: stri
               {keys.map((k) => (
                 <div key={k.id} className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center min-w-[44px] min-h-[44px]">
                       <KeyRound className="w-4 h-4 text-indigo-400" strokeWidth={1.25} />
                     </div>
                     <div>

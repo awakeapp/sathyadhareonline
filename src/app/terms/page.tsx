@@ -42,7 +42,7 @@ export default function TermsPage() {
       </div>
 
       {/* Main Content Card */}
-      <div className="flex-1 bg-white rounded-t-[3.5rem] px-8 pt-14 pb-32 relative z-10 rugged-shadow overflow-y-auto scrollbar-none shadow-[0_-20px_60px_rgba(0,0,0,0.15)]">
+      <div className="flex-1 bg-white rounded-t-[3.5rem] px-8 pt-[var(--header-height)] pb-[calc(var(--bottom-nav-height)+1rem)] relative z-10 rugged-shadow overflow-y-auto scrollbar-none shadow-[0_-20px_60px_rgba(0,0,0,0.15)]">
         <div className="max-w-xl mx-auto">
           <header className="mb-10">
             <h1 className="text-[28px] font-black text-[#1a1c20] tracking-tight mb-2">

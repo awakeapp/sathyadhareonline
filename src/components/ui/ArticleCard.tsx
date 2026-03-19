@@ -7,7 +7,7 @@ import { Share2, Link as LinkIcon, Bookmark, Check, Heart } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { haptics } from '@/lib/haptics';
 import { createClient } from '@/lib/supabase/client';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 interface Article {
   id: string;
@@ -281,7 +281,7 @@ export default function ArticleCard({ article, variant = 'list', href }: Article
             <div className="absolute top-2 right-2 z-20">
               <button 
                 onClick={handleToggleSave}
-                className={`w-9 h-9 flex items-center justify-center rounded-full backdrop-blur-md transition-all shadow-lg active:scale-90 ${isSaved ? 'bg-[var(--color-primary)] text-white' : 'bg-white/20 text-white hover:bg-white/40 border border-white/20'}`}
+                className={`w-9 h-9 flex items-center justify-center rounded-full backdrop-blur-md transition-all shadow-lg active:scale-90 ${isSaved ? 'bg-[var(--color-primary)] text-white' : 'bg-white/20 text-white hover:bg-white/40 border border-white/20'} min-w-[44px] min-h-[44px]`}
               >
                 <Bookmark size={14} strokeWidth={2.5} className={isSaved ? 'fill-current' : ''} />
               </button>

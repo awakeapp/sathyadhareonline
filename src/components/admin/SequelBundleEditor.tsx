@@ -22,7 +22,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import ArticleWriteEditor from '@/components/admin/ArticleWriteEditor';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 interface ArticleItem {
   id: string;
@@ -181,13 +181,13 @@ export default function SequelBundleEditor({
   const isAdmin = role === 'super_admin' || role === 'admin';
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] pb-32">
+    <div className="min-h-screen bg-[var(--color-background)] pb-[calc(var(--bottom-nav-height)+1rem)]">
       {/* --- PREMIUM HEADER --- */}
       <header className="sticky top-0 z-[60] bg-[var(--color-surface)]/80 backdrop-blur-xl border-b border-[var(--color-border)] px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button 
             onClick={onBack}
-            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[var(--color-surface-2)] transition-colors"
+            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[var(--color-surface-2)] transition-colors min-w-[44px] min-h-[44px]"
           >
             <ArrowLeft size={20} />
           </button>
@@ -230,7 +230,7 @@ export default function SequelBundleEditor({
                     <img src={bannerUrl} alt="Cover" className="w-full h-full object-cover" />
                     <button 
                       onClick={() => setBannerUrl('')}
-                      className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/50 backdrop-blur-md text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/50 backdrop-blur-md text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity min-w-[44px] min-h-[44px]"
                     >
                       <X size={16} />
                     </button>
@@ -531,7 +531,7 @@ export default function SequelBundleEditor({
                </div>
                <button 
                  onClick={() => setEditingArticleId(null)}
-                 className="w-10 h-10 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-rose-500/10 hover:text-rose-500 transition-colors"
+                 className="w-10 h-10 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center hover:bg-rose-500/10 hover:text-rose-500 transition-colors min-w-[44px] min-h-[44px]"
                 >
                   <X size={20} />
                 </button>

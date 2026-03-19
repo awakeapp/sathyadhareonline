@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useTransition, useCallback, useRef } from 'react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { getAuditLogsAction } from './actions';
 import { Search, ScrollText, Calendar, ChevronLeft, ChevronRight, User, Eye, FileJson, Download } from 'lucide-react';
 import { 
@@ -283,7 +283,7 @@ export default function AuditLogsClient({
                          </td>
                          <td className="px-4 py-5">
                            <div className="flex items-center gap-3">
-                             <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50 font-black text-xs shrink-0">
+                             <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50 font-black text-xs shrink-0 min-w-[44px] min-h-[44px]">
                                {actorInitial}
                              </div>
                              <div>

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useTransition } from 'react';
 import Link from 'next/link';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { 
   updateCommentStatusAction, 
   deleteCommentAction, 
@@ -155,7 +155,7 @@ export default function CommentsClient({
       {selectedIds.size > 0 && (
          <div className="sticky top-24 z-30 flex items-center justify-between p-5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-3xl shadow-2xl shadow-indigo-500/30 animate-in slide-in-from-top-4 duration-300">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-2xl bg-white/20 text-white font-black flex items-center justify-center">
+              <div className="w-10 h-10 rounded-2xl bg-white/20 text-white font-black flex items-center justify-center min-w-[44px] min-h-[44px]">
                 {selectedIds.size}
               </div>
               <span className="text-sm font-black text-white uppercase tracking-[0.2em]">Intercepted Targets</span>
@@ -187,14 +187,14 @@ export default function CommentsClient({
                   <div className="p-5 flex flex-col md:flex-row gap-4">
                     
                     <div className="shrink-0 pt-1">
-                       <button onClick={() => toggleSelect(c.id)} className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${isSelected ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white shadow-lg' : 'bg-zinc-50 dark:bg-white/5 text-zinc-300 border-2 border-transparent hover:border-indigo-100'}`}>
+                       <button onClick={() => toggleSelect(c.id)} className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${isSelected ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-white shadow-lg' : 'bg-zinc-50 dark:bg-white/5 text-zinc-300 border-2 border-transparent hover:border-indigo-100'} min-w-[44px] min-h-[44px]`}>
                           <CheckSquare className="w-5 h-5" strokeWidth={1.25} />
                        </button>
                     </div>
 
                     <div className="flex-1 min-w-0">
                        <div className="flex flex-col md:flex-row md:items-center gap-2 mb-3">
-                          <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50 shrink-0">
+                          <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-zinc-900 dark:text-zinc-50 shrink-0 min-w-[44px] min-h-[44px]">
                              <User className="w-5 h-5" strokeWidth={1.25} />
                           </div>
                           <div>

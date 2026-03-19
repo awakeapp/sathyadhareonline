@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Download, Share2, X, Link as LinkIcon, Check } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 type FridayMessage = {
   id: string;
@@ -24,7 +24,7 @@ function Lightbox({ src, alt, onClose }: { src: string; alt: string; onClose: ()
     >
       <button
         onClick={onClose}
-        className="absolute top-5 right-5 z-10 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+        className="absolute top-5 right-5 z-10 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors min-w-[44px] min-h-[44px]"
         aria-label="Close"
       >
         <X size={20} />

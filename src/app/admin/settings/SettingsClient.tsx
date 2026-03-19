@@ -3,7 +3,7 @@
 
 import { useState, useTransition } from 'react';
 import { Input } from '@/components/ui/Input';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { updateSettingsAction, updateMaintenanceAction } from './actions';
 import { Globe, Link as LinkIcon, Search, ToggleRight, Workflow, Save, ShieldAlert } from 'lucide-react';
 import { 

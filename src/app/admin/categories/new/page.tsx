@@ -31,9 +31,9 @@ export default async function NewCategoryPage() {
   }
 
   return (
-    <AdminContainer className="pb-24 pt-6 safe-area-pb">
+    <AdminContainer className="pb-[calc(var(--bottom-nav-height)+1rem)] pt-6 safe-area-pb">
         <div className="flex items-center gap-3 mb-8">
-          <Link href="/admin/categories" className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:text-white transition-colors active:scale-95">
+          <Link href="/admin/categories" className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:text-white transition-colors active:scale-95 min-w-[44px] min-h-[44px]">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>

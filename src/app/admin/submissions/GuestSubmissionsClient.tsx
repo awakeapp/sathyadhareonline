@@ -5,7 +5,7 @@ import {
   CheckCircle2, XCircle, Archive, ChevronDown, ChevronUp,
   Clock, Search, Mail, FileText, User as UserIcon, BookOpen
 } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { acceptSubmissionAction, rejectSubmissionAction, archiveSubmissionAction } from './submission-actions';
 
 type Submission = {

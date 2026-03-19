@@ -77,7 +77,7 @@ export default function AuthPromptSheet({
           {/* Close button (desktop) */}
           <button
             onClick={onClose}
-            className="hidden sm:flex absolute top-4 right-4 w-8 h-8 rounded-full bg-[var(--color-surface-2)] items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-border)] transition-colors"
+            className="hidden sm:flex absolute top-4 right-4 w-8 h-8 rounded-full bg-[var(--color-surface-2)] items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-border)] transition-colors min-w-[44px] min-h-[44px]"
             aria-label="Dismiss"
           >
             <X size={16} />

@@ -8,7 +8,7 @@ import {
   Plus, Edit2, Trash2, ChevronUp,
   ChevronDown, FolderOpen,
 } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { 
   PresenceCard, 
   PresenceButton 
@@ -210,10 +210,10 @@ export default function CategoryManagerClient({ categories: initial }: Props) {
                   <div className="p-5 flex flex-col md:flex-row items-center gap-4">
                      
                      <div className="flex flex-col gap-1 shrink-0">
-                        <button onClick={() => move(idx, -1)} disabled={idx === 0 || reordering} className="w-9 h-9 rounded-xl bg-zinc-50 dark:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-zinc-900 dark:text-zinc-50 disabled:opacity-20 transition-all">
+                        <button onClick={() => move(idx, -1)} disabled={idx === 0 || reordering} className="w-9 h-9 rounded-xl bg-zinc-50 dark:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-zinc-900 dark:text-zinc-50 disabled:opacity-20 transition-all min-w-[44px] min-h-[44px]">
                            <ChevronUp className="w-5 h-5" strokeWidth={1.25} />
                         </button>
-                        <button onClick={() => move(idx, 1)} disabled={idx === cats.length - 1 || reordering} className="w-9 h-9 rounded-xl bg-zinc-50 dark:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-zinc-900 dark:text-zinc-50 disabled:opacity-20 transition-all">
+                        <button onClick={() => move(idx, 1)} disabled={idx === cats.length - 1 || reordering} className="w-9 h-9 rounded-xl bg-zinc-50 dark:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-zinc-900 dark:text-zinc-50 disabled:opacity-20 transition-all min-w-[44px] min-h-[44px]">
                            <ChevronDown className="w-5 h-5" strokeWidth={1.25} />
                         </button>
                      </div>

@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import Link from 'next/link';
 import { 
   ShieldCheck, User, Check, 
@@ -135,7 +135,7 @@ export default function ProfileForm({ profile: initialProfile, stats }: ProfileF
   };
 
   return (
-    <div className="space-y-12 pb-20">
+    <div className="space-y-12 pb-[calc(var(--bottom-nav-height)+1rem)]">
       
       {/* ── PROFILE HEADER & STREAK ── */}
       <section className="flex flex-col items-center sm:flex-row sm:items-end gap-6 mb-12">
@@ -367,7 +367,7 @@ export default function ProfileForm({ profile: initialProfile, stats }: ProfileF
             <div className="divide-y divide-[var(--color-border)]">
               {stats.auditLogs.map((log: any, i: number) => (
                 <div key={i} className="p-5 flex items-start gap-4 hover:bg-[var(--color-surface-2)] transition-colors">
-                   <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 shrink-0">
+                   <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 shrink-0 min-w-[44px] min-h-[44px]">
                       <Activity size={18} strokeWidth={2.5} />
                    </div>
                    <div className="flex-1 min-w-0">

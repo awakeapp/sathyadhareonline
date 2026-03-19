@@ -23,7 +23,7 @@ export default async function FridayPage() {
   if (error) console.error('Error fetching Friday messages:', error);
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-10 mt-16 md:mt-20 pb-32 flex flex-col gap-10">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-10 mt-[var(--header-height)] md:mt-20 pb-[calc(var(--bottom-nav-height)+1rem)] flex flex-col gap-10">
       
       {/* Page Header */}
       <div className="text-center flex flex-col items-center gap-3">

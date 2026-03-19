@@ -37,7 +37,7 @@ export default async function CategoriesPage() {
   })).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
   return (
-    <PageContainer size="wide" className="min-h-[100svh] pt-6 pb-20">
+    <PageContainer size="wide" className="min-h-[100svh] pt-6 pb-[calc(var(--bottom-nav-height)+1rem)]">
       
       <header className="mb-10">
         <SectionHeader title="Explore Categories" />
@@ -71,7 +71,7 @@ export default async function CategoriesPage() {
                     </p>
                   </div>
                   
-                  <div className="w-10 h-10 rounded-full bg-[var(--color-background)] group-hover:bg-white/20 flex items-center justify-center text-[var(--color-text)] group-hover:text-white transition-all">
+                  <div className="w-10 h-10 rounded-full bg-[var(--color-background)] group-hover:bg-white/20 flex items-center justify-center text-[var(--color-text)] group-hover:text-white transition-all min-w-[44px] min-h-[44px]">
                     <ChevronRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" strokeWidth={3} />
                   </div>
                 </div>
@@ -82,7 +82,7 @@ export default async function CategoriesPage() {
       )}
 
       {/* Quick Links / Footer Note */}
-      <div className="mt-16 pt-8 border-t border-[var(--color-border)] flex flex-col items-center text-center">
+      <div className="mt-[var(--header-height)] pt-8 border-t border-[var(--color-border)] flex flex-col items-center text-center">
          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[var(--color-muted)] mb-6">Can&apos;t find what you&apos;re looking for?</p>
          <Link href="/search" className="flex items-center gap-2 px-6 py-3 rounded-full bg-[var(--color-surface-2)] text-[var(--color-text)] font-bold text-sm hover:bg-[var(--color-surface)] transition-all active:scale-95">
             Try Global Search

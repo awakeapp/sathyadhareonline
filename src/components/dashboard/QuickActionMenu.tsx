@@ -90,7 +90,7 @@ export default function QuickActionMenu({ isOpen, onClose, permissions }: Props)
           <h2 className="text-xl font-bold text-zinc-900">Create Quick Action</h2>
           <button 
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 hover:bg-zinc-200 transition-colors"
+            className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 hover:bg-zinc-200 transition-colors min-w-[44px] min-h-[44px]"
           >
             <X size={20} />
           </button>

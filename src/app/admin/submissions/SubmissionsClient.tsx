@@ -6,7 +6,7 @@ import {
   CheckCircle, Clock, FileText, 
   Layers, BookOpen, User, Mail
 } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { 
   PresenceCard, 
 } from '@/components/PresenceUI';
@@ -102,7 +102,7 @@ export default function SubmissionsClient({
                 <button 
                   disabled={isPending}
                   onClick={() => handlePublish(item.id, item.type)}
-                  className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
+                  className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-all shadow-sm min-w-[44px] min-h-[44px]"
                 >
                   <CheckCircle className="w-5 h-5" />
                 </button>

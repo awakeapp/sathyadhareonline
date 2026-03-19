@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { createSequelAction, updateSequelAction, deleteSequelAction } from './actions';
 import { Settings, Pen, Trash2, Layers, Search, Image as ImageIcon, X, Box } from 'lucide-react';
 import { 
@@ -122,7 +122,7 @@ export default function SequelsClient({ initialSequels, categories }: Props) {
                    {s.banner_image ? (
                      <img src={s.banner_image} alt={s.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                    ) : (
-                     <ImageIcon className="w-10 h-10 opacity-20 text-indigo-300" />
+                     <ImageIcon className="w-10 h-10 opacity-20 text-indigo-300 min-w-[44px] min-h-[44px]" />
                    )}
                    <div className="absolute top-4 right-4">
                      <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest backdrop-blur-md border ${
@@ -165,7 +165,7 @@ export default function SequelsClient({ initialSequels, categories }: Props) {
                     <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">{editingId ? 'Modify Sequence' : 'Create Node'}</h2>
                     <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">Registry Entry System</p>
                  </div>
-                 <button className="w-10 h-10 rounded-full bg-zinc-50 dark:bg-white/5 text-zinc-500 flex items-center justify-center" onClick={() => setShowModal(false)}>
+                 <button className="w-10 h-10 rounded-full bg-zinc-50 dark:bg-white/5 text-zinc-500 flex items-center justify-center min-w-[44px] min-h-[44px]" onClick={() => setShowModal(false)}>
                     <X className="w-5 h-5" strokeWidth={1.25} />
                  </button>
               </div>

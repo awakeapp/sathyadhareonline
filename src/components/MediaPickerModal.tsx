@@ -54,7 +54,7 @@ export default function MediaPickerModal({ onSelect, onClose }: Props) {
             <p className="text-xs text-[var(--color-muted)] mt-0.5">Select an image to insert</p>
           </div>
           <button onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--color-surface)] text-[var(--color-muted)] hover:text-white transition-colors">
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--color-surface)] text-[var(--color-muted)] hover:text-white transition-colors min-w-[44px] min-h-[44px]">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
             </svg>

@@ -1,0 +1,14 @@
+import { toast as sonnerToast } from 'sonner'
+
+export const toast = {
+  success: (msg: string) =>
+    sonnerToast.success(msg),
+  error: (msg: string) =>
+    sonnerToast.error(msg),
+  info: (msg: string) =>
+    sonnerToast(msg),
+  loading: (msg: string) =>
+    sonnerToast.loading(msg),
+  dismiss: () =>
+    sonnerToast.dismiss(),
+}

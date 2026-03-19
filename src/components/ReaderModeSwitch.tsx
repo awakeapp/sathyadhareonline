@@ -42,7 +42,7 @@ export default function ReaderModeSwitch({ role }: Props) {
       <div className="flex items-center gap-3 min-w-0">
         {/* Eye icon */}
         <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+          className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 min-w-[44px] min-h-[44px]"
           style={{ background: `${accentColor}22`, border: `1px solid ${accentColor}40` }}
         >
           <svg viewBox="0 0 24 24" fill={accentColor} className="w-5 h-5">

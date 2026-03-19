@@ -72,7 +72,7 @@ export function CommentList({ articleId }: { articleId: string }) {
   return (
     <div className="mt-12 space-y-6">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center min-w-[44px] min-h-[44px]">
           <MessageSquare size={18} strokeWidth={2.5} />
         </div>
         <h3 className="text-[17px] font-black text-[var(--color-text)] uppercase tracking-tight">
@@ -86,7 +86,7 @@ export function CommentList({ articleId }: { articleId: string }) {
           return (
             <div key={c.id} className="p-5 rounded-3xl bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/20 transition-all shadow-sm">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
+                <div className="w-8 h-8 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] min-w-[44px] min-h-[44px]">
                   <User size={14} strokeWidth={2.5} />
                 </div>
                 <div className="flex-1 min-w-0">

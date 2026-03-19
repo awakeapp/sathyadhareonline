@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/Card';
 
 export default function EditorialPage() {
   return (
-    <div className="min-h-[100svh] px-4 py-4 pb-32 max-w-lg mx-auto sm:max-w-2xl lg:max-w-5xl border-t border-[var(--color-border)]">
+    <div className="min-h-[100svh] px-4 py-4 pb-[calc(var(--bottom-nav-height)+1rem)] max-w-lg mx-auto sm:max-w-2xl lg:max-w-5xl border-t border-[var(--color-border)]">
       <div className="pt-3 pb-5 border-b border-[var(--color-border)] mb-6">
         <h1 className="text-2xl font-black text-[var(--color-text)] tracking-tight">Editorial</h1>
       </div>

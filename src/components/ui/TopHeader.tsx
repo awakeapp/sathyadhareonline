@@ -159,16 +159,14 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
     <>
       {!isAdminRoute && (
       <header
-        className={`fixed top-0 left-0 right-0 z-[50] glass-ribbon overflow-visible transition-all duration-500`}
+        className={`sticky top-0 z-[50] glass-ribbon overflow-visible px-4 sm:px-6 transition-all duration-500`}
         style={{
-          // Tighter vertical rhythm to prevent "Forehead" gap
-          height: isSearchOpen ? 'calc(var(--safe-top) + 116px)' : 'calc(var(--safe-top) + 56px)',
+          height: isSearchOpen ? 'calc(var(--header-height) + 60px)' : 'var(--header-height)',
         }}
       >
         <div 
-          className="flex items-center justify-between h-14 px-4 transition-transform duration-500 cubic-bezier(0.16,1,0.3,1)"
+          className="flex items-center justify-between h-[var(--header-height)] transition-transform duration-500 cubic-bezier(0.16,1,0.3,1)"
           style={{
-            marginTop: 'var(--safe-top)',
             transform: 'translateY(0)',
             opacity: 1
           }}
@@ -226,7 +224,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
             {/* ── Article reading controls in header ── */}
             {isArticlePage && (
               <div className="flex items-center gap-1 mr-1">
-                <div className="w-10 h-10 flex items-center justify-center">
+                <div className="w-10 h-10 flex items-center justify-center min-w-[44px] min-h-[44px]">
                   <ThemeSwitcher />
                 </div>
               </div>
@@ -238,7 +236,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                  import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
                  setIsSearchOpen(p => !p);
                }}
-               className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform active:scale-95 ml-1 ${isSearchOpen ? 'bg-[var(--color-surface-2)] text-[var(--color-primary)]' : 'text-[var(--color-text)] hover:bg-[var(--color-surface-2)]'}`}
+               className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform active:scale-95 ml-1 ${isSearchOpen ? 'bg-[var(--color-surface-2)] text-[var(--color-primary)]' : 'text-[var(--color-text)] hover:bg-[var(--color-surface-2)]'} min-w-[44px] min-h-[44px]`}
                title="Search"
             >
                <Search size={22} strokeWidth={2.25} />
@@ -250,7 +248,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
 
 
                 {/* Global Theme Switcher */}
-                <div className="w-10 h-10 flex items-center justify-center">
+                <div className="w-10 h-10 flex items-center justify-center min-w-[44px] min-h-[44px]">
                   <ThemeSwitcher />
                 </div>
 
@@ -260,7 +258,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                     import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
                     setIsMenuOpen(true);
                   }}
-                  className="w-10 h-10 rounded-full flex items-center justify-center transition-transform active:scale-95 ml-1 text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"
+                  className="w-10 h-10 rounded-full flex items-center justify-center transition-transform active:scale-95 ml-1 text-[var(--color-text)] hover:bg-[var(--color-surface-2)] min-w-[44px] min-h-[44px]"
                   title="Profile"
                   aria-label="Open profile"
                 >
@@ -316,7 +314,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                 />
                 <button
                   onClick={() => setIsMenuOpen(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-surface-2)] transition-colors min-w-[44px] min-h-[44px]"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -459,7 +457,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                       {/* Profile */}
                       <Link href="/profile" onClick={() => setIsMenuOpen(false)}
                         className="flex items-center gap-3.5 px-4 py-3.5 hover:bg-[var(--color-surface)] transition-colors active:scale-[0.98]">
-                        <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)]">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)] min-w-[44px] min-h-[44px]">
                           <UserIcon size={18} strokeWidth={2.25} />
                         </div>
                         <span className="text-sm font-semibold text-[var(--color-text)] flex-1">Account Settings</span>
@@ -469,7 +467,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                       {/* Highlights */}
                       <Link href="/highlights" onClick={() => setIsMenuOpen(false)}
                         className="flex items-center gap-3.5 px-4 py-3.5 hover:bg-[var(--color-surface)] transition-colors active:scale-[0.98]">
-                        <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)] text-orange-500">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)] text-orange-500 min-w-[44px] min-h-[44px]">
                           <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.25}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                           </svg>
@@ -481,7 +479,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                       {/* Analytics */}
                       <Link href="/profile/analytics" onClick={() => setIsMenuOpen(false)}
                         className="flex items-center gap-3.5 px-4 py-3.5 hover:bg-[var(--color-surface)] transition-colors active:scale-[0.98]">
-                        <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)] text-blue-500">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)] text-blue-500 min-w-[44px] min-h-[44px]">
                           <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.25}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                           </svg>
@@ -493,7 +491,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                       {/* About Us */}
                       <Link href="/about" onClick={() => setIsMenuOpen(false)}
                         className="flex items-center gap-3.5 px-4 py-3.5 hover:bg-[var(--color-surface)] transition-colors active:scale-[0.98]">
-                        <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)]">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)] min-w-[44px] min-h-[44px]">
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="10"/><path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" /></svg>
                         </div>
                         <span className="text-sm font-semibold text-[var(--color-text)] flex-1">About Us</span>
@@ -504,7 +502,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                       {isPrivilegedRole && (
                         <button onClick={() => { setIsMenuOpen(false); handleReturnToDashboard(); }}
                           className="flex items-center gap-3.5 px-4 py-3.5 w-full hover:bg-[var(--color-surface)] transition-colors active:scale-[0.98]">
-                          <div className="w-9 h-9 rounded-xl bg-[#685de6]/10 border border-[#685de6]/20 flex items-center justify-center text-[#685de6]">
+                          <div className="w-9 h-9 rounded-xl bg-[#685de6]/10 border border-[#685de6]/20 flex items-center justify-center text-[#685de6] min-w-[44px] min-h-[44px]">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
                               <rect x="3" y="3" width="7" height="7" rx="1"/>
                               <rect x="14" y="3" width="7" height="7" rx="1"/>
@@ -522,7 +520,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                           onClick={handleSignOut}
                           className="flex items-center gap-3.5 px-4 py-3.5 hover:bg-red-500/5 transition-colors active:scale-[0.98] w-full text-left"
                         >
-                          <div className="w-9 h-9 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400">
+                          <div className="w-9 h-9 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 min-w-[44px] min-h-[44px]">
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7" /></svg>
                           </div>
                           <span className="text-sm font-semibold text-red-400 flex-1">Sign Out</span>
@@ -530,7 +528,7 @@ export default function TopHeader({ user, role, profile }: TopHeaderProps) {
                       ) : (
                         <Link href="/login" onClick={() => setIsMenuOpen(false)}
                           className="flex items-center gap-3.5 px-4 py-3.5 hover:bg-[var(--color-surface)] transition-colors active:scale-[0.98]">
-                          <div className="w-9 h-9 rounded-xl bg-[#685de6]/10 border border-[#685de6]/20 flex items-center justify-center text-[#685de6]">
+                          <div className="w-9 h-9 rounded-xl bg-[#685de6]/10 border border-[#685de6]/20 flex items-center justify-center text-[#685de6] min-w-[44px] min-h-[44px]">
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14" /></svg>
                           </div>
                           <span className="text-sm font-semibold text-[#685de6] flex-1">Log In</span>

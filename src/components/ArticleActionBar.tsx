@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Share2, Link as LinkIcon, Check, Bookmark, Heart, Volume2, Square } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { createClient } from '@/lib/supabase/client';
 import AuthPromptSheet from '@/components/AuthPromptSheet';
 /* ─── helpers ─────────────────────────────────────────────── */
@@ -72,7 +72,7 @@ const IBtn = ({
         : active
         ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/30'
         : 'bg-[var(--color-surface-2)] text-[var(--color-muted)] hover:text-[var(--color-text)] border border-[var(--color-border)]'
-    }`}
+    } min-w-[44px] min-h-[44px]`}
   >
     {children}
     {badge && (
@@ -136,7 +136,7 @@ function SpeakerButton({ content, title }: { content: string; title?: string }) 
     <button
       onClick={playing ? stopAudio : handleClick}
       title={playing ? 'Stop' : paused ? 'Resume' : 'Listen'}
-      className="relative w-10 h-10 flex items-center justify-center shrink-0"
+      className="relative w-10 h-10 flex items-center justify-center shrink-0 min-w-[44px] min-h-[44px]"
     >
       {/* Circular progress track */}
       {(playing || paused) && (
@@ -155,7 +155,7 @@ function SpeakerButton({ content, title }: { content: string; title?: string }) 
         playing || paused
           ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/30'
           : 'bg-[var(--color-surface-2)] text-[var(--color-muted)] border border-[var(--color-border)]'
-      }`}>
+      } min-w-[44px] min-h-[44px]`}>
         {playing ? <Square size={16} fill="currentColor" strokeWidth={2.5} /> : <Volume2 size={16} strokeWidth={2.5} />}
       </div>
     </button>

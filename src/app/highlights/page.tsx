@@ -63,7 +63,7 @@ export default async function HighlightsPage() {
   }
 
   return (
-    <PageContainer size="wide" className="min-h-screen bg-[var(--color-background)] pt-6 sm:pt-10 pb-24">
+    <PageContainer size="wide" className="min-h-screen bg-[var(--color-background)] pt-6 sm:pt-10 pb-[calc(var(--bottom-nav-height)+1rem)]">
         {/* Header */}
         <header className="mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-6">
           <div>
@@ -144,7 +144,7 @@ export default async function HighlightsPage() {
                        <input type="hidden" name="highlightId" value={h.id} />
                        <button 
                         type="submit"
-                        className="w-10 h-10 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:bg-rose-500/10 hover:text-rose-500 transition-all"
+                        className="w-10 h-10 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:bg-rose-500/10 hover:text-rose-500 transition-all min-w-[44px] min-h-[44px]"
                         title="Delete Highlight"
                       >
                         <Trash2 size={16} />

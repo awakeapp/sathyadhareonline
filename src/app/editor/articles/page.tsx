@@ -132,7 +132,7 @@ export default async function EditorArticlesPage() {
                         <Link
                           href={`/articles/${article.slug}`}
                           target="_blank"
-                          className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center hover:bg-emerald-500/20 transition-colors"
+                          className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center hover:bg-emerald-500/20 transition-colors min-w-[44px] min-h-[44px]"
                           title="View published article"
                         >
                           <Eye size={16} strokeWidth={2} />

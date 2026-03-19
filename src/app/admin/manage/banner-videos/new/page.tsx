@@ -14,10 +14,10 @@ export default async function NewBannerVideoPage() {
   if (!user) redirect('/sign-in');
 
   return (
-    <AdminContainer className="flex flex-col gap-6 pb-20">
+    <AdminContainer className="flex flex-col gap-6 pb-[calc(var(--bottom-nav-height)+1rem)]">
       <PresenceHeader>
         <div className="flex items-center gap-4">
-          <Link href="/admin/manage?tab=banner" className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-surface-2)] transition-all">
+          <Link href="/admin/manage?tab=banner" className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-surface-2)] transition-all min-w-[44px] min-h-[44px]">
             <ArrowLeft size={18} />
           </Link>
           <div className="flex flex-col">

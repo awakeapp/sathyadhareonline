@@ -120,7 +120,7 @@ export default async function DashboardMetrics() {
               href={activity.href} 
               className="flex items-center p-4 hover:bg-[var(--color-surface-2)] transition-all gap-4 border-b border-[var(--color-border)] last:border-0 active:scale-[0.99]"
             >
-              <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-2)] flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-2)] flex items-center justify-center shrink-0 min-w-[44px] min-h-[44px]">
                 {activity.type === 'article' && <FileText size={18} className="text-[var(--color-text)]" strokeWidth={1.5} />}
                 {activity.type === 'submission' && <Send size={18} className="text-[var(--color-primary)]" strokeWidth={1.5} />}
                 {activity.type === 'comment' && <MessageSquare size={18} className="text-orange-500" strokeWidth={1.5} />}
@@ -175,7 +175,7 @@ function ActionCard({ href, icon, title, value, desc, color }: { href: string, i
       <div className="p-5 flex flex-col justify-between bg-[var(--color-surface)] rounded-[1.5rem] border border-[var(--color-border)] hover:border-[var(--color-primary)]/30 active:scale-[0.98] transition-all">
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${colorMap[color].split(' group-hover')[0]}`}>
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${colorMap[color].split(' group-hover')[0]} min-w-[44px] min-h-[44px]`}>
               {icon}
             </div>
             <h3 className="text-[15px] font-bold text-[var(--color-text)]">{title}</h3>

@@ -175,7 +175,7 @@ export default function NewsletterClient({ subscribers: initial }: Props) {
                 <button
                   onClick={() => handleRemove(sub)}
                   disabled={!!removingId || isPending}
-                  className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm flex items-center justify-center shrink-0"
+                  className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm flex items-center justify-center shrink-0 min-w-[44px] min-h-[44px]"
                 >
                   <Trash2 className="w-5 h-5" strokeWidth={1.25} />
                 </button>

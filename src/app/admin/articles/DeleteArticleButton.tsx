@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from '@/components/ui/Modal';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 interface Props {
   articleId: string;

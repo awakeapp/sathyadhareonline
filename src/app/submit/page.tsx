@@ -40,7 +40,7 @@ export default async function SubmitPage({ searchParams }: Props) {
     return (
       <main className="max-w-2xl mx-auto px-6 py-20 text-center min-h-[100svh]">
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-[2rem] bg-green-500/10 mb-8 border border-green-500/20">
-          <svg className="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="w-10 h-10 text-green-500 min-w-[44px] min-h-[44px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>

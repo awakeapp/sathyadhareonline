@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Plus, Trash2, Settings, Check, Box, X, ShieldCheck } from 'lucide-react';
 import { savePlanAction, deletePlanAction } from './actions';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { 
   PresenceCard, 
   PresenceButton 
@@ -174,7 +174,7 @@ export default function PlansClient({ initialPlans }: { initialPlans: Plan[] }) 
                     <label className="flex items-center gap-4 p-6 bg-emerald-50 dark:bg-emerald-500/10 border-2 border-emerald-100 dark:border-emerald-500/20 rounded-[2rem] cursor-pointer group active:scale-[0.98] transition-all">
                        <div className="relative">
                           <input type="checkbox" name="is_active" value="true" defaultChecked={editingPlan ? editingPlan.is_active : true} className="peer sr-only" />
-                          <div className="w-8 h-8 rounded-lg bg-white border-2 border-emerald-100 peer-checked:bg-emerald-500 peer-checked:border-emerald-500 transition-all flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-lg bg-white border-2 border-emerald-100 peer-checked:bg-emerald-500 peer-checked:border-emerald-500 transition-all flex items-center justify-center min-w-[44px] min-h-[44px]">
                              <Check className="w-5 h-5 text-white opacity-0 peer-checked:opacity-100" strokeWidth={1.25} />
                           </div>
                        </div>

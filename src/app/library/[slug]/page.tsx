@@ -41,22 +41,22 @@ export default async function LibraryItemPage({ params }: { params: { slug: stri
 
 
   return (
-    <PageContainer size="wide" className="min-h-[100svh] bg-[var(--color-bg)] py-8 pb-32">
+    <PageContainer size="wide" className="min-h-[100svh] bg-[var(--color-bg)] py-8 pb-[calc(var(--bottom-nav-height)+1rem)]">
       
       {/* Top Navigation */}
       <nav className="flex items-center justify-between mb-8 z-20 relative">
         <Link 
           href="/library" 
-          className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[var(--color-surface-2)] text-[var(--color-text)] hover:text-[#685de6] active:scale-90 transition-all shadow-sm"
+          className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[var(--color-surface-2)] text-[var(--color-text)] hover:text-[#685de6] active:scale-90 transition-all shadow-sm min-w-[44px] min-h-[44px]"
         >
           <ChevronLeft size={20} strokeWidth={2.5} />
         </Link>
         
         <div className="flex items-center gap-3">
-          <button className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[var(--color-surface-2)] text-[var(--color-text)] hover:text-[#685de6] active:scale-90 transition-all shadow-sm">
+          <button className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[var(--color-surface-2)] text-[var(--color-text)] hover:text-[#685de6] active:scale-90 transition-all shadow-sm min-w-[44px] min-h-[44px]">
             <Share2 size={16} strokeWidth={2.5} />
           </button>
-          <button className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[var(--color-surface-2)] text-[var(--color-text)] hover:text-[#685de6] active:scale-90 transition-all shadow-sm">
+          <button className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[var(--color-surface-2)] text-[var(--color-text)] hover:text-[#685de6] active:scale-90 transition-all shadow-sm min-w-[44px] min-h-[44px]">
             <Bookmark size={16} strokeWidth={2.5} />
           </button>
         </div>
@@ -116,7 +116,7 @@ export default async function LibraryItemPage({ params }: { params: { slug: stri
       </div>
 
       {/* Chapters / Index Section */}
-      <div className="mt-12 sm:mt-16 bg-[var(--color-surface)] sm:border border-[var(--color-border)] rounded-[2.5rem] p-6 sm:p-10 shadow-sm relative overflow-hidden">
+      <div className="mt-12 sm:mt-[var(--header-height)] bg-[var(--color-surface)] sm:border border-[var(--color-border)] rounded-[2.5rem] p-6 sm:p-10 shadow-sm relative overflow-hidden">
         {/* Decorative BG element */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--color-primary)]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
@@ -162,7 +162,7 @@ export default async function LibraryItemPage({ params }: { params: { slug: stri
                    </div>
 
                    {/* Arrow Icon */}
-                   <div className="w-10 h-10 rounded-full bg-[var(--color-surface-2)] sm:bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)] opacity-80 group-hover:opacity-100 group-hover:-translate-x-1 group-hover:bg-[var(--color-primary)] group-hover:border-transparent group-hover:text-white transition-all shadow-sm shrink-0">
+                   <div className="w-10 h-10 rounded-full bg-[var(--color-surface-2)] sm:bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)] opacity-80 group-hover:opacity-100 group-hover:-translate-x-1 group-hover:bg-[var(--color-primary)] group-hover:border-transparent group-hover:text-white transition-all shadow-sm shrink-0 min-w-[44px] min-h-[44px]">
                      <ArrowRight size={16} strokeWidth={2.5} />
                    </div>
                  </Card>

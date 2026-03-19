@@ -8,7 +8,7 @@ import {
   List, RotateCcw, Highlighter, Share2, 
   Clipboard, X, Loader2
 } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { useReaderSettings } from '@/context/ReaderSettingsContext';
 import { haptics } from '@/lib/haptics';
 
@@ -397,9 +397,9 @@ export function CopyProtected({ children, className = '', html, articleId, userI
       {html ? <div ref={ref} className={`select-none ${className}`} dangerouslySetInnerHTML={{ __html: html }} /> : <div ref={ref} className={`select-none ${className}`}>{children}</div>}
       {selection && (
         <div className="fixed z-[999] -translate-x-1/2 -translate-y-full flex items-center gap-1.5 p-1.5 rounded-2xl bg-black/90 text-white shadow-2xl animate-fade-in" style={{ left: selection.x, top: selection.y - 12 }}>
-          <button onClick={saveHighlight} disabled={isSaving} className="w-10 h-10 flex flex-col items-center justify-center rounded-xl hover:bg-white/10">{isSaving ? <Loader2 size={16} className="animate-spin"/> : <div className="flex flex-col items-center justify-center"><Highlighter size={16} className="text-amber-400"/><span className="text-[7px] font-black uppercase mt-0.5">Save</span></div>}</button>
-          <button onClick={copyToClipboard} className="w-10 h-10 flex flex-col items-center justify-center rounded-xl hover:bg-white/10"><Clipboard size={16}/><span className="text-[7px] font-black uppercase mt-0.5">Copy</span></button>
-          <button onClick={shareText} className="w-10 h-10 flex flex-col items-center justify-center rounded-xl hover:bg-white/10"><Share2 size={16} className="text-emerald-400"/><span className="text-[7px] font-black uppercase mt-0.5">Share</span></button>
+          <button onClick={saveHighlight} disabled={isSaving} className="w-10 h-10 flex flex-col items-center justify-center rounded-xl hover:bg-white/10 min-w-[44px] min-h-[44px]">{isSaving ? <Loader2 size={16} className="animate-spin"/> : <div className="flex flex-col items-center justify-center"><Highlighter size={16} className="text-amber-400"/><span className="text-[7px] font-black uppercase mt-0.5">Save</span></div>}</button>
+          <button onClick={copyToClipboard} className="w-10 h-10 flex flex-col items-center justify-center rounded-xl hover:bg-white/10 min-w-[44px] min-h-[44px]"><Clipboard size={16}/><span className="text-[7px] font-black uppercase mt-0.5">Copy</span></button>
+          <button onClick={shareText} className="w-10 h-10 flex flex-col items-center justify-center rounded-xl hover:bg-white/10 min-w-[44px] min-h-[44px]"><Share2 size={16} className="text-emerald-400"/><span className="text-[7px] font-black uppercase mt-0.5">Share</span></button>
         </div>
       )}
       {zoomImg && (

@@ -56,16 +56,16 @@ export default async function NewFridayMessagePage() {
         title="Super Admin"
         roleLabel="Friday Message · New"
         initials={initials}
-        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Href="/admin/friday"
+        icon1Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
+        icon1Href="/admin/friday"
+        icon2Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
       />
       
       <AdminContainer className="w-full flex flex-col gap-4 relative z-20">
         <PresenceCard className="p-0 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
            <div className="p-10 border-b border-indigo-50 dark:border-white/5 bg-indigo-50/10 flex items-center gap-5">
               <div className="w-14 h-14 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
-                 <Sparkles className="w-8 h-8" strokeWidth={1.25} />
+                 <Sparkles className="w-8 h-8 min-w-[44px] min-h-[44px]" strokeWidth={1.25} />
               </div>
               <div>
                  <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">Initialize Message</h2>

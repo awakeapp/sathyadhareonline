@@ -83,10 +83,10 @@ export default function DashboardBottomNav({ items, accentColor = 'var(--color-p
     <>
       <nav
         className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-surface)] border-t border-[var(--color-border)]"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}
         aria-label="Dashboard bottom navigation"
       >
-        <div className="flex items-center h-[60px] w-full max-w-[500px] mx-auto px-1">
+        <div className="flex items-center h-[var(--bottom-nav-height)] w-full max-w-[500px] mx-auto px-1">
           {items.map(item => (
             <DashNavTab
               key={item.href}

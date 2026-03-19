@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import ArticleCard from './ui/ArticleCard';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { ArticleCardSkeleton } from './ui/Skeleton';
 import { useEffect, useRef, useCallback } from 'react';
 

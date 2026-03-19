@@ -54,7 +54,7 @@ export default function ContinueReading({ article, label = "Continue Reading" }:
       </div>
 
       {/* Background Decor */}
-      <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-[var(--color-primary)]/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="absolute top-0 right-0 -mr-16 -mt-[var(--header-height)] w-48 h-48 bg-[var(--color-primary)]/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
     </Link>
   );
 }

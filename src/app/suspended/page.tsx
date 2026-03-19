@@ -7,7 +7,7 @@ export default function SuspendedPage() {
     <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)] p-6 text-white">
       <div className="max-w-md w-full bg-[var(--color-surface)] rounded-[2.5rem] border border-[var(--color-border)] p-10 text-center shadow-2xl">
         <div className="w-20 h-20 rounded-3xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-8 animate-pulse">
-          <AlertTriangle className="w-10 h-10 text-red-500" />
+          <AlertTriangle className="w-10 h-10 text-red-500 min-w-[44px] min-h-[44px]" />
         </div>
         
         <h1 className="text-3xl font-black tracking-tighter mb-4 leading-tight">Account Restricted</h1>

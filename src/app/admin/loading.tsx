@@ -1,6 +1,6 @@
 export default function AdminLoading() {
   return (
-    <div className="min-h-screen pb-28 animate-pulse bg-gray-50/50 dark:bg-transparent pt-4">
+    <div className="min-h-screen pb-[calc(var(--bottom-nav-height)+1rem)] animate-pulse bg-gray-50/50 dark:bg-transparent pt-4">
       <div className="w-full flex flex-col gap-4 relative z-20 max-w-[1400px] mx-auto px-4">
         {/* Top Cards Skeleton */}
         <div className="h-28 bg-[var(--color-surface)] rounded-3xl shadow-sm border border-[var(--color-border)]" />

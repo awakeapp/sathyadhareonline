@@ -112,7 +112,7 @@ export default async function AdminInboxPage() {
 
       {/* Notification banner from super admin */}
       <div className="flex items-start gap-3 p-4 bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/15 rounded-xl">
-        <div className="w-9 h-9 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] shrink-0">
+        <div className="w-9 h-9 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] shrink-0 min-w-[44px] min-h-[44px]">
           <Bell size={18} strokeWidth={1.75} />
         </div>
         <div className="min-w-0">
@@ -160,7 +160,7 @@ export default async function AdminInboxPage() {
               >
                 {/* Type icon */}
                 <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 min-w-[44px] min-h-[44px]"
                   style={{ background: `${meta.color}14`, color: meta.color }}
                 >
                   <Icon size={18} strokeWidth={1.75} />

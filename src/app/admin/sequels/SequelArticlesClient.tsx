@@ -5,7 +5,7 @@ import {
   Plus, GripVertical, Trash2, 
   Search, Layers, FileText, Filter
 } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { 
   PresenceCard, 
 } from '@/components/PresenceUI';
@@ -93,14 +93,14 @@ export default function SequelArticlesClient({
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-6xl mx-auto w-full pb-20">
+    <div className="flex flex-col gap-6 max-w-6xl mx-auto w-full pb-[calc(var(--bottom-nav-height)+1rem)]">
       
       {/* Sequel Header */}
       <PresenceCard className="p-6 bg-zinc-900 text-white border-none overflow-hidden relative group">
         <div className="absolute right-0 top-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
         <div className="flex items-center gap-5 relative z-10">
           <div className="w-16 h-16 rounded-[2.5rem] bg-indigo-500/20 flex items-center justify-center text-indigo-400 border border-white/5">
-            <Layers className="w-8 h-8" strokeWidth={1.5} />
+            <Layers className="w-8 h-8 min-w-[44px] min-h-[44px]" strokeWidth={1.5} />
           </div>
           <div>
             <h2 className="text-2xl font-black uppercase tracking-tight">{sequel.title}</h2>
@@ -160,7 +160,7 @@ export default function SequelArticlesClient({
                         <button 
                           onClick={() => handleToggle(art.id, false)}
                           disabled={isPending}
-                          className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-white/5 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition-all group-hover:bg-rose-50"
+                          className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-white/5 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition-all group-hover:bg-rose-50 min-w-[44px] min-h-[44px]"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -211,7 +211,7 @@ export default function SequelArticlesClient({
                   <button 
                     disabled={isPending}
                     onClick={() => handleToggle(art.id, true)}
-                    className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 flex items-center justify-center hover:bg-zinc-900 dark:hover:bg-white hover:text-white dark:hover:text-zinc-900 transition-all shrink-0 active:scale-90 shadow-sm"
+                    className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 flex items-center justify-center hover:bg-zinc-900 dark:hover:bg-white hover:text-white dark:hover:text-zinc-900 transition-all shrink-0 active:scale-90 shadow-sm min-w-[44px] min-h-[44px]"
                   >
                     <Plus className="w-5 h-5" strokeWidth={2.5} />
                   </button>

@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { Plus, X, Trash2, Image as ImageIcon, BookOpen, Layers } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { createClient } from '@/lib/supabase/client';
 import { createBook, updateBook, deleteBook, toggleBook } from './actions';
 
@@ -168,7 +168,7 @@ export default function LibraryClient({ initialBooks, availableArticles }: Props
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] active:scale-90 transition-all"
+                className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] active:scale-90 transition-all min-w-[44px] min-h-[44px]"
               >
                 <X size={16} strokeWidth={2.5} />
               </button>
@@ -206,9 +206,9 @@ export default function LibraryClient({ initialBooks, availableArticles }: Props
                   ) : (
                     <div className="flex flex-col items-center justify-center gap-2 py-8 px-4 w-full h-full">
                       {uploading ? (
-                        <div className="w-8 h-8 border-2 border-[#685de6] border-t-transparent rounded-full animate-spin" />
+                        <div className="w-8 h-8 border-2 border-[#685de6] border-t-transparent rounded-full animate-spin min-w-[44px] min-h-[44px]" />
                       ) : (
-                        <div className="w-10 h-10 rounded-xl bg-[#685de6]/10 flex items-center justify-center text-[#685de6]">
+                        <div className="w-10 h-10 rounded-xl bg-[#685de6]/10 flex items-center justify-center text-[#685de6] min-w-[44px] min-h-[44px]">
                           <ImageIcon size={20} strokeWidth={1.5} />
                         </div>
                       )}
@@ -278,7 +278,7 @@ export default function LibraryClient({ initialBooks, availableArticles }: Props
                         <button 
                           type="button" 
                           onClick={() => setChapters(c => c.filter((_, i) => i !== idx))} 
-                          className="w-8 h-8 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center shrink-0 hover:bg-red-500 hover:text-white transition-colors"
+                          className="w-8 h-8 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center shrink-0 hover:bg-red-500 hover:text-white transition-colors min-w-[44px] min-h-[44px]"
                           title="Remove Chapter"
                         >
                           <Trash2 size={14} strokeWidth={2.5} />

@@ -131,7 +131,7 @@ export default function ArticlesClientPage({ categories, initialArticles, active
                 <SlidersHorizontal className="w-5 h-5 text-[#685de6]" />
                 Sort Options
               </h3>
-              <button onClick={() => setFilterOpen(false)} className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-border)] transition-colors">
+              <button onClick={() => setFilterOpen(false)} className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-border)] transition-colors min-w-[44px] min-h-[44px]">
                 <X size={18} strokeWidth={2.5} />
               </button>
             </div>

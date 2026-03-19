@@ -1,181 +1,165 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { revalidatePath } from 'next/cache';
-import { logAuditEvent } from '@/lib/audit';
 
-export async function bulkDeleteArticles(ids: string[]) {
+export async function updateArticleStatus(articleId: string, newStatus: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: 'Unauthorized' };
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
-  if (!['admin', 'super_admin'].includes(profile?.role || '')) return { error: 'Permission denied' };
+  if (!user) {
+    return { error: 'Not authorized' };
+  }
 
-  const { error } = await supabase
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (!profile) {
+    return { error: 'Profile not found' };
+  }
+
+  if (profile.role === 'editor' && newStatus === 'published') {
+    return { error: 'Editors cannot publish' };
+  }
+
+  const { error: updateError } = await supabase
     .from('articles')
-    .update({ is_deleted: true, deleted_at: new Date().toISOString() })
-    .in('id', ids);
+    .update({ 
+      status: newStatus,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', articleId);
 
-  if (error) return { error: error.message };
+  if (updateError) {
+    return { error: updateError.message };
+  }
 
-  await logAuditEvent(user.id, 'BULK_ARTICLES_DELETED', { count: ids.length, ids });
-  revalidatePath('/admin/articles');
-  revalidatePath('/');
+  await supabase.from('audit_logs').insert({
+    action: 'ARTICLE_STATUS_CHANGED',
+    details: { articleId, newStatus },
+    user_id: user.id
+  });
+
   return { success: true };
 }
 
-export async function bulkUpdateStatus(ids: string[], status: string) {
+export async function assignArticle(articleId: string, assignToUserId: string, notes: string | null) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: 'Unauthorized' };
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
-  const role = profile?.role || '';
-  
-  // STAFF check
-  if (!['admin', 'super_admin', 'editor'].includes(role)) {
-    return { error: 'Permission denied' };
+  if (!user) {
+    return { error: 'Not authorized' };
   }
 
-  // PUBLISH check
-  if (status === 'published' && role === 'editor') {
-    // also check the granular permission
-    const permRow = await supabase
-      .from('user_content_permissions')
-      .select('can_publish_articles')
-      .eq('user_id', user.id)
-      .single()
-    
-    const canPublish = permRow.data?.can_publish_articles ?? false
-    
-    if (!canPublish) {
-      return { error: 'You do not have permission to publish.' }
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (!profile || profile.role === 'editor') {
+    return { error: 'Not authorized' };
+  }
+
+  const { error: updateError } = await supabase
+    .from('articles')
+    .update({ 
+      assigned_to: assignToUserId,
+      assigned_at: new Date().toISOString(),
+      assignment_notes: notes
+    })
+    .eq('id', articleId);
+
+  if (updateError) {
+    return { error: updateError.message };
+  }
+
+  await supabase.from('audit_logs').insert({
+    action: 'CONTENT_ASSIGNED',
+    details: { articleId, assignToUserId },
+    user_id: user.id
+  });
+
+  return { success: true };
+}
+
+export async function deleteArticle(articleId: string, hard: boolean = false) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'Not authorized' };
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (!profile || (hard && profile.role !== 'super_admin')) {
+    return { error: 'Not authorized' };
+  }
+
+  if (hard) {
+    const { error: deleteError } = await supabase
+      .from('articles')
+      .delete()
+      .eq('id', articleId);
+
+    if (deleteError) {
+      return { error: deleteError.message };
     }
-  }
-
-  const updatePayload: Record<string, unknown> = { status };
-  if (status === 'published') updatePayload.published_at = new Date().toISOString();
-
-  const { error } = await supabase
-    .from('articles')
-    .update(updatePayload)
-    .in('id', ids);
-
-  if (error) return { error: error.message };
-
-  await logAuditEvent(user.id, 'BULK_ARTICLES_STATUS', { count: ids.length, ids, new_status: status });
-  revalidatePath('/admin/articles');
-  revalidatePath('/editor/articles');
-  revalidatePath('/');
-  return { success: true };
-}
-
-export async function setArticleStatusAction(id: string, status: string) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: 'Unauthorized' };
-
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
-  const role = profile?.role || '';
-  
-  // STAFF check
-  if (!['admin', 'super_admin', 'editor'].includes(role)) return { error: 'Permission denied' };
-
-  // PUBLISH check
-  if (status === 'published' && role === 'editor') {
-    // also check the granular permission
-    const permRow = await supabase
-      .from('user_content_permissions')
-      .select('can_publish_articles')
-      .eq('user_id', user.id)
-      .single()
-    
-    const canPublish = permRow.data?.can_publish_articles ?? false
-    
-    if (!canPublish) {
-      return { error: 'You do not have permission to publish.' }
-    }
-  }
-
-  const updatePayload: Record<string, unknown> = { status };
-  if (status === 'published') {
-    updatePayload.published_at = new Date().toISOString();
-  }
-
-  const { error } = await supabase
-    .from('articles')
-    .update(updatePayload)
-    .eq('id', id);
-
-  if (error) return { error: error.message };
-
-  await logAuditEvent(user.id, 'ARTICLE_STATUS_CHANGED', { article_id: id, new_status: status });
-  revalidatePath('/admin/articles');
-  revalidatePath('/editor/articles');
-  revalidatePath('/');
-  return { success: true };
-}
-
-export async function restoreArticleAction(id: string) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: 'Unauthorized' };
-
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
-  if (!['admin', 'super_admin'].includes(profile?.role || '')) return { error: 'Permission denied' };
-
-  const { error } = await supabase
-    .from('articles')
-    .update({ is_deleted: false, deleted_at: null })
-    .eq('id', id);
-
-  if (error) return { error: error.message };
-
-  await logAuditEvent(user.id, 'ARTICLE_RESTORED', { article_id: id });
-  revalidatePath('/admin/articles');
-  return { success: true };
-}
-
-export async function featureArticleAction(id: string, currentStatus: boolean) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: 'Unauthorized' };
-
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
-  if (!['admin', 'super_admin'].includes(profile?.role || '')) return { error: 'Permission denied' };
-
-  if (currentStatus) {
-    await supabase.from('articles').update({ is_featured: false }).eq('id', id);
-    await logAuditEvent(user.id, 'ARTICLE_UNFEATURED', { article_id: id });
   } else {
-    await supabase.from('articles').update({ is_featured: false }).neq('id', id);
-    await supabase.from('articles').update({ is_featured: true }).eq('id', id);
-    await logAuditEvent(user.id, 'ARTICLE_FEATURED', { article_id: id });
+    const { error: updateError } = await supabase
+      .from('articles')
+      .update({ 
+        status: 'deleted',
+        deleted_at: new Date().toISOString()
+      })
+      .eq('id', articleId);
+
+    if (updateError) {
+      return { error: updateError.message };
+    }
   }
 
-  revalidatePath('/admin/articles');
-  revalidatePath('/');
+  await supabase.from('audit_logs').insert({
+    action: hard ? 'ARTICLE_HARD_DELETED' : 'ARTICLE_DELETED',
+    details: { articleId },
+    user_id: user.id
+  });
+
   return { success: true };
 }
 
-export async function deleteArticleAction(id: string) {
+export async function restoreArticle(articleId: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: 'Unauthorized' };
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
-  if (!['admin', 'super_admin'].includes(profile?.role || '')) return { error: 'Permission denied' };
+  if (!user) {
+    return { error: 'Not authorized' };
+  }
 
-  const { error } = await supabase
+  const { error: updateError } = await supabase
     .from('articles')
-    .update({ is_deleted: true, deleted_at: new Date().toISOString() })
-    .eq('id', id);
+    .update({ 
+      status: 'draft',
+      deleted_at: null
+    })
+    .eq('id', articleId);
 
-  if (error) return { error: error.message };
+  if (updateError) {
+    return { error: updateError.message };
+  }
 
-  await logAuditEvent(user.id, 'ARTICLE_DELETED', { article_id: id });
-  revalidatePath('/admin/articles');
-  revalidatePath('/');
+  await supabase.from('audit_logs').insert({
+    action: 'ARTICLE_RESTORED',
+    details: { articleId },
+    user_id: user.id
+  });
+
   return { success: true };
 }

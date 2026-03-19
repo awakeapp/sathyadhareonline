@@ -223,7 +223,7 @@ export default function DashboardHeader({ user, profile, role, roleLabel }: Prop
                 )}
                 <button
                   onClick={() => setIsNotifOpen(false)}
-                  className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-border)] transition-colors"
+                  className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-border)] transition-colors min-w-[44px] min-h-[44px]"
                   aria-label="Close notifications"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -237,7 +237,7 @@ export default function DashboardHeader({ user, profile, role, roleLabel }: Prop
             <div className="flex-1 overflow-y-auto divide-y divide-[var(--color-border)]">
               {notifications.length === 0 ? (
                 <div className="p-8 text-center bg-[var(--color-surface)] flex flex-col items-center justify-center h-full gap-2">
-                  <Bell className="w-8 h-8 text-[var(--color-muted)] opacity-30" />
+                  <Bell className="w-8 h-8 text-[var(--color-muted)] opacity-30 min-w-[44px] min-h-[44px]" />
                   <p className="text-[14px] text-[var(--color-muted)] font-medium">No notifications yet.</p>
                 </div>
               ) : (
@@ -307,7 +307,7 @@ export default function DashboardHeader({ user, profile, role, roleLabel }: Prop
                 className="flex items-center justify-between px-5 py-4 hover:bg-[var(--color-surface-2)] transition-colors active:scale-[0.99]"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)]">
+                  <div className="w-8 h-8 rounded-lg bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] min-w-[44px] min-h-[44px]">
                     <UserIcon size={16} strokeWidth={2} />
                   </div>
                   <span className="text-[14px] font-semibold text-[var(--color-text)]">Edit Profile</span>
@@ -319,7 +319,7 @@ export default function DashboardHeader({ user, profile, role, roleLabel }: Prop
                 onClick={handleReaderMode}
                 className="flex items-center gap-3 w-full px-5 py-4 hover:bg-[var(--color-surface-2)] transition-colors active:scale-[0.99] text-left"
               >
-                <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)]">
+                <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)] min-w-[44px] min-h-[44px]">
                   <Eye size={16} strokeWidth={2} />
                 </div>
                 <span className="text-[14px] font-semibold text-[var(--color-text)]">Switch to Reader Mode</span>
@@ -329,7 +329,7 @@ export default function DashboardHeader({ user, profile, role, roleLabel }: Prop
                 onClick={handleSignOut}
                 className="flex items-center gap-3 w-full px-5 py-4 hover:bg-rose-500/5 transition-colors active:scale-[0.99] text-left"
               >
-                <div className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500">
+                <div className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 min-w-[44px] min-h-[44px]">
                   <LogOut size={16} strokeWidth={2} />
                 </div>
                 <span className="text-[14px] font-semibold text-rose-500">Sign Out</span>
@@ -343,10 +343,10 @@ export default function DashboardHeader({ user, profile, role, roleLabel }: Prop
           Top bar — fixed, full-width, 60px tall (+ safe-area-inset-top)
       ══════════════════════════════════════════════════════════════════ */}
       <header
-        className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-surface)] border-b border-[var(--color-border)]"
-        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+        className="sticky top-0 z-50 bg-[var(--color-surface)] border-b border-[var(--color-border)] px-4 sm:px-6"
+        style={{ height: 'var(--header-height)' }}
       >
-        <div className="flex items-center justify-between h-[60px] px-4 w-full max-w-[1400px] mx-auto">
+        <div className="flex items-center justify-between h-full w-full max-w-[1400px] mx-auto">
           {/* ── Left: logo (Home) or Title (Sub-pages) ───────────────────────── */}
           <div className="flex-1 min-w-0 flex items-center pr-2">
             {isDashboardHome ? (
@@ -389,7 +389,7 @@ export default function DashboardHeader({ user, profile, role, roleLabel }: Prop
             </button>
             <button
               onClick={handleReaderMode}
-              className="sm:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-[var(--color-surface-2)] transition-colors text-[var(--color-primary)] active:scale-95"
+              className="sm:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-[var(--color-surface-2)] transition-colors text-[var(--color-primary)] active:scale-95 min-w-[44px] min-h-[44px]"
               title="Switch to Reader Mode"
               aria-label="Switch to Reader Mode"
             >
@@ -400,7 +400,7 @@ export default function DashboardHeader({ user, profile, role, roleLabel }: Prop
             <button
               id="dashboard-notif-btn"
               onClick={() => setIsNotifOpen(true)}
-              className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-[var(--color-surface-2)] transition-colors text-[var(--color-text)] active:scale-95"
+              className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-[var(--color-surface-2)] transition-colors text-[var(--color-text)] active:scale-95 min-w-[44px] min-h-[44px]"
               aria-label="Notifications"
             >
               <Bell size={20} strokeWidth={1.75} />
@@ -416,7 +416,7 @@ export default function DashboardHeader({ user, profile, role, roleLabel }: Prop
             <button
               id="dashboard-profile-btn"
               onClick={() => setIsProfileOpen(true)}
-              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[var(--color-surface-2)] transition-colors active:scale-95 ml-0.5 shrink-0"
+              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[var(--color-surface-2)] transition-colors active:scale-95 ml-0.5 shrink-0 min-w-[44px] min-h-[44px]"
               aria-label="Open profile"
               title={displayName}
             >

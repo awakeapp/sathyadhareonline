@@ -86,7 +86,7 @@ export default function TextToSpeech({ text, title }: TextToSpeechProps) {
             isPlaying || isPaused
               ? 'bg-[var(--color-primary)] text-white'
               : 'bg-[var(--color-surface-2)] text-[var(--color-primary)] border border-[var(--color-border)]'
-          }`}
+          } min-w-[44px] min-h-[44px]`}
         >
           {isPlaying ? <Pause size={14} strokeWidth={3} /> : <Play size={14} strokeWidth={3} className="ml-px" />}
         </button>

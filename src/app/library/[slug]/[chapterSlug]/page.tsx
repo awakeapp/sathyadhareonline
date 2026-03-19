@@ -62,7 +62,7 @@ export default async function LibraryChapterPage({
   const readTime = calculateReadTime(chapter.content || '');
 
   return (
-    <PageContainer className="min-h-[100svh] pb-20">
+    <PageContainer className="min-h-[100svh] pb-[calc(var(--bottom-nav-height)+1rem)]">
       
       {/* Top Nav */}
       <nav className="flex items-center justify-between py-6 mb-8 border-b border-[var(--color-border)]">

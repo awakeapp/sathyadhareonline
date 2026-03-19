@@ -132,7 +132,7 @@ export default function SavedClientPage({ articles }: Props) {
               {selectedDate ? 'Filtered' : 'By Date'}
             </button>
             {selectedDate && (
-              <button onClick={() => setSelectedDate(null)} className="w-8 h-8 rounded-xl border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] bg-[var(--color-surface)] active:scale-90 transition-all">
+              <button onClick={() => setSelectedDate(null)} className="w-8 h-8 rounded-xl border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] bg-[var(--color-surface)] active:scale-90 transition-all min-w-[44px] min-h-[44px]">
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
@@ -150,18 +150,18 @@ export default function SavedClientPage({ articles }: Props) {
           >
             <div className="flex items-center justify-between p-5 border-b border-[var(--color-border)]">
               <h3 className="text-[17px] font-black text-[var(--color-text)]">Filter by Date</h3>
-              <button onClick={() => setShowDatePicker(false)} className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)]">
+              <button onClick={() => setShowDatePicker(false)} className="w-9 h-9 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] min-w-[44px] min-h-[44px]">
                 <X size={18} strokeWidth={2.5} />
               </button>
             </div>
             <div className="p-5">
               {/* Month navigation */}
               <div className="flex items-center justify-between mb-4">
-                <button onClick={prevMonth} className="w-9 h-9 rounded-xl border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)] active:scale-90 transition-all">
+                <button onClick={prevMonth} className="w-9 h-9 rounded-xl border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)] active:scale-90 transition-all min-w-[44px] min-h-[44px]">
                   <span className="text-lg font-bold">‹</span>
                 </button>
                 <span className="text-sm font-black text-[var(--color-text)] uppercase tracking-widest">{monthName}</span>
-                <button onClick={nextMonth} className="w-9 h-9 rounded-xl border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)] active:scale-90 transition-all">
+                <button onClick={nextMonth} className="w-9 h-9 rounded-xl border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)] active:scale-90 transition-all min-w-[44px] min-h-[44px]">
                   <span className="text-lg font-bold">›</span>
                 </button>
               </div>
@@ -214,7 +214,7 @@ export default function SavedClientPage({ articles }: Props) {
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-10 text-center rounded-[2.5rem] bg-[var(--color-surface-2)] border-2 border-dashed border-[var(--color-border)] min-h-[50vh]">
             <div className="w-20 h-20 rounded-3xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center mb-6">
-              <FileText className="w-8 h-8 text-[var(--color-muted)] opacity-50" />
+              <FileText className="w-8 h-8 text-[var(--color-muted)] opacity-50 min-w-[44px] min-h-[44px]" />
             </div>
             <p className="text-xl font-black text-[var(--color-text)] tracking-tight">
               {selectedDate ? 'No articles saved' : 'No saved articles yet'}

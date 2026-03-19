@@ -20,7 +20,7 @@ export default function FinancialLayout({ children }: { children: React.ReactNod
         
         {/* ── Header ──────────────────────────────────────────────── */}
         <div className="flex items-center gap-4 mb-2 mt-2">
-          <Button asChild variant="outline" size="icon" className="rounded-full w-10 h-10 border-[var(--color-border)] text-[var(--color-muted)] shrink-0">
+          <Button asChild variant="outline" size="icon" className="rounded-full w-10 h-10 border-[var(--color-border)] text-[var(--color-muted)] shrink-0 min-w-[44px] min-h-[44px]">
             <Link href="/admin">
               <ChevronLeft className="w-5 h-5" strokeWidth={1.25} />
             </Link>
