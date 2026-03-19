@@ -5,6 +5,7 @@ import { Highlighter, Trash2, Calendar, Layout, ChevronRight, ArrowLeft } from '
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { revalidatePath } from 'next/cache';
+import PageContainer from '@/components/layout/PageContainer';
 
 interface Highlight {
   id: string;
@@ -62,8 +63,7 @@ export default async function HighlightsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] pt-6 sm:pt-10 pb-24 px-4 sm:px-10">
-      <div className="max-w-4xl mx-auto">
+    <PageContainer size="wide" className="min-h-screen bg-[var(--color-background)] pt-6 sm:pt-10 pb-24">
         {/* Header */}
         <header className="mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-6">
           <div>
@@ -156,7 +156,6 @@ export default async function HighlightsPage() {
             ))}
           </div>
         )}
-      </div>
-    </div>
+    </PageContainer>
   );
 }

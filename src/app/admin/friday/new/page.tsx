@@ -8,6 +8,7 @@ import {
   PresenceCard,
   PresenceButton 
 } from '@/components/PresenceUI';
+import AdminContainer from '@/components/layout/AdminContainer';
 
 export default async function NewFridayMessagePage() {
   const supabase = await createClient();
@@ -60,7 +61,7 @@ export default async function NewFridayMessagePage() {
         icon2Href="/admin/friday"
       />
       
-      <div className="w-full flex flex-col gap-4 relative z-20 max-w-3xl mx-auto">
+      <AdminContainer className="w-full flex flex-col gap-4 relative z-20">
         <PresenceCard className="p-0 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
            <div className="p-10 border-b border-indigo-50 dark:border-white/5 bg-indigo-50/10 flex items-center gap-5">
               <div className="w-14 h-14 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
@@ -114,7 +115,7 @@ export default async function NewFridayMessagePage() {
               </div>
            </form>
         </PresenceCard>
-      </div>
+      </AdminContainer>
     </PresenceWrapper>
   );
 }

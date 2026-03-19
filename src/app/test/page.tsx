@@ -11,7 +11,7 @@ export default async function TestPage() {
   const { data: isAdmin, error: rpcError } = await supabase.rpc('is_admin')
 
   return (
-    <main style={{ padding: '2rem', fontFamily: 'monospace' }}>
+    <main style={{ padding: '2rem', fontFamily: 'ui-monospace, monospace' }}>
       <h1>Supabase Connection Test</h1>
 
       {error ? (

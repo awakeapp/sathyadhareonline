@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import AdminContainer from '@/components/layout/AdminContainer';
 
 export default async function NewCategoryPage() {
 
@@ -30,8 +31,7 @@ export default async function NewCategoryPage() {
   }
 
   return (
-    <div className="min-h-screen pb-24 px-4 pt-6 bg-[var(--color-background)] text-white safe-area-pb">
-      <div className="max-w-2xl mx-auto">
+    <AdminContainer className="pb-24 pt-6 safe-area-pb">
         <div className="flex items-center gap-3 mb-8">
           <Link href="/admin/categories" className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:text-white transition-colors active:scale-95">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -102,7 +102,6 @@ export default async function NewCategoryPage() {
             
           </form>
         </div>
-      </div>
-    </div>
+    </AdminContainer>
   );
 }

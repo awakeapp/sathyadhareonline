@@ -452,7 +452,7 @@ export default function ArticleWriteEditor({
           width: 100%;
           border: none !important; outline: none !important;
           background: transparent !important;
-          font-family: var(--article-font-family), Georgia, serif;
+          font-family: var(--article-font-family), var(--font-noto-serif-kannada), serif;
           font-size: clamp(24px, 5vw, 36px);
           font-weight: 900;
           color: var(--color-text);
@@ -516,7 +516,7 @@ export default function ArticleWriteEditor({
         .ae-body {
           min-height: 360px;
           outline: none;
-          font-family: var(--article-font-family), Georgia, serif;
+          font-family: var(--article-font-family), var(--font-noto-serif-kannada), serif;
           font-size: var(--article-font-size, 16px);
           line-height: var(--article-line-height, 1.8);
           color: var(--color-text);

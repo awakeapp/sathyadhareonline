@@ -6,6 +6,7 @@ import {
   PresenceWrapper, 
   PresenceHeader 
 } from '@/components/PresenceUI';
+import AdminContainer from '@/components/layout/AdminContainer';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,9 +34,9 @@ export default async function PlansPage() {
         icon2Href="/admin"
       />
       
-      <div className="w-full flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
+      <AdminContainer className="flex flex-col gap-4 relative z-20">
         <PlansClient initialPlans={plans || []} />
-      </div>
+      </AdminContainer>
     </PresenceWrapper>
   );
 }

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, FileText, BarChart2, SquarePen } from 'lucide-react';
+import AdminContainer from '@/components/layout/AdminContainer';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,7 +46,7 @@ export default async function EditorArticlesPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 w-full">
+    <AdminContainer className="flex flex-col gap-4">
 
       {/* Page heading */}
       <div className="pt-2 flex items-center justify-between">
@@ -154,6 +155,6 @@ export default async function EditorArticlesPage() {
           })}
         </div>
       )}
-    </div>
+    </AdminContainer>
   );
 }

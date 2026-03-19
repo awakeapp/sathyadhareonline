@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import ArticleCard from '@/components/ui/ArticleCard';
 import { Card } from '@/components/ui/Card';
+import PageContainer from '@/components/layout/PageContainer';
 
 export const revalidate = 60;
 
@@ -35,7 +36,7 @@ export default async function CategoryPage({ params }: Props) {
     .order('published_at', { ascending: false });
 
   return (
-    <div className="min-h-[100svh] px-4 pt-6 pb-0 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl border-t border-[var(--color-border)]">
+    <PageContainer size="wide" className="min-h-[100svh] pt-6 pb-0 border-t border-[var(--color-border)]">
       
       <div className="mb-6 px-1">
         <h1 className="text-3xl font-black text-[var(--color-text)] tracking-tight">
@@ -57,6 +58,6 @@ export default async function CategoryPage({ params }: Props) {
           ))}
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

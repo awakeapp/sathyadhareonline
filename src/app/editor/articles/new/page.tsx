@@ -4,6 +4,7 @@ import Link from 'next/link';
 import RichTextEditor from '@/components/RichTextEditorClient';
 import { Send, Sparkles } from 'lucide-react';
 import sharp from 'sharp';
+import AdminContainer from '@/components/layout/AdminContainer';
 
 export const dynamic = 'force-dynamic';
 
@@ -79,7 +80,7 @@ export default async function EditorNewArticlePage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 w-full pb-6">
+    <AdminContainer className="flex flex-col gap-6 pb-6">
 
       {/* Page heading with inline save button */}
       <div className="pt-2 flex items-center justify-between">
@@ -178,6 +179,6 @@ export default async function EditorNewArticlePage() {
           </button>
         </div>
       </form>
-    </div>
+    </AdminContainer>
   );
 }

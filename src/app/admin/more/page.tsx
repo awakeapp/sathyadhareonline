@@ -5,6 +5,7 @@ import {
   Settings, Mail, Shield, IndianRupee,
   ChevronRight, ChevronLeft, Search, QrCode
 } from 'lucide-react';
+import AdminContainer from '@/components/layout/AdminContainer';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,7 +53,7 @@ export default async function MorePage() {
         </div>
       </div>
       
-      <div className="px-4 py-4 max-w-2xl mx-auto space-y-8">
+      <AdminContainer className="py-4 space-y-8">
         {/* Profile Card */}
         <div className="flex items-center gap-4 bg-[var(--color-surface)] p-4 rounded-2xl shadow-sm border border-[var(--color-border)]">
            <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xl font-bold uppercase shrink-0">
@@ -88,7 +89,7 @@ export default async function MorePage() {
             </div>
           </div>
         ))}
-      </div>
+      </AdminContainer>
     </div>
   );
 }

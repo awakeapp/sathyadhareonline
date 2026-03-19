@@ -12,6 +12,7 @@ import {
   PresenceHeader,
   PresenceCard 
 } from '@/components/PresenceUI';
+import AdminContainer from '@/components/layout/AdminContainer';
 
 export const dynamic = 'force-dynamic';
 
@@ -155,9 +156,9 @@ export default async function EditArticlePage({
         title="Super Admin"
         roleLabel="Edit and refine article content"
         initials={initials}
-        icon1Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
-        icon2Href="/admin/articles"
+        icon1Node={<ChevronLeft className="w-6 h-6" strokeWidth={1.25} />}
+        icon1Href="/admin/articles"
+        icon2Node={<Bell className="w-6 h-6" strokeWidth={1.25} />}
         renderActions={
           <div className="flex items-center gap-2">
             <button 
@@ -178,7 +179,7 @@ export default async function EditArticlePage({
         }
       />
       
-      <div className="w-full flex flex-col gap-4 relative z-20 max-w-4xl mx-auto">
+      <AdminContainer className="w-full flex flex-col gap-4 relative z-20">
         
         {/* State Bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
@@ -330,7 +331,7 @@ export default async function EditArticlePage({
             
           </form>
         </PresenceCard>
-      </div>
+      </AdminContainer>
     </PresenceWrapper>
   );
 }

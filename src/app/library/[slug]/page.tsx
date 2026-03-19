@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { Share2, Bookmark, BookOpen, ChevronLeft, ArrowRight, Play } from 'lucide-react';
+import PageContainer from '@/components/layout/PageContainer';
 
 export const revalidate = 60;
 
@@ -40,7 +41,7 @@ export default async function LibraryItemPage({ params }: { params: { slug: stri
 
 
   return (
-    <div className="min-h-[100svh] bg-[var(--color-bg)] px-4 py-8 pb-32 max-w-lg mx-auto sm:max-w-3xl lg:max-w-5xl">
+    <PageContainer size="wide" className="min-h-[100svh] bg-[var(--color-bg)] py-8 pb-32">
       
       {/* Top Navigation */}
       <nav className="flex items-center justify-between mb-8 z-20 relative">
@@ -178,6 +179,6 @@ export default async function LibraryItemPage({ params }: { params: { slug: stri
         </div>
       </div>
 
-    </div>
+    </PageContainer>
   );
 }

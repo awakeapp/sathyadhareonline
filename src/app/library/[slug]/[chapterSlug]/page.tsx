@@ -6,6 +6,7 @@ import { gfmHeadingId } from 'marked-gfm-heading-id';
 import { ChevronLeft, BookOpen, Clock } from 'lucide-react';
 import ArticleReaderControls, { CopyProtected } from '@/app/articles/[slug]/ArticleReaderControls';
 import BookChapterNav from '@/components/BookChapterNav';
+import PageContainer from '@/components/layout/PageContainer';
 
 
 export const revalidate = 60;
@@ -61,7 +62,7 @@ export default async function LibraryChapterPage({
   const readTime = calculateReadTime(chapter.content || '');
 
   return (
-    <div className="min-h-[100svh] px-4 pb-20 max-w-lg mx-auto sm:max-w-2xl lg:max-w-3xl">
+    <PageContainer className="min-h-[100svh] pb-20">
       
       {/* Top Nav */}
       <nav className="flex items-center justify-between py-6 mb-8 border-b border-[var(--color-border)]">
@@ -116,6 +117,6 @@ export default async function LibraryChapterPage({
         bookSlug={book.slug}
       />
 
-    </div>
+    </PageContainer>
   );
 }

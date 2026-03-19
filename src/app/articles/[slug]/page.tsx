@@ -22,6 +22,7 @@ import ContinueReading from './ContinueReading';
 import { ReadingProgressTracker } from './ReadingProgressTracker';
 import { CommentList } from './CommentList';
 import ArticleReadingTools from '@/components/ArticleReadingTools';
+import PageContainer from '@/components/layout/PageContainer';
 
 // Convert Kannada digits to English digits
 const KANNADA_NUMS = ['೦', '೧', '೨', '೩', '೪', '೫', '೬', '೭', '೮', '೯'];
@@ -171,7 +172,7 @@ export default async function ArticlePage({ params }: Props) {
   const renderedHtml = marked.parse(translateNum(article.content || '')) as string;
 
   return (
-    <div className="min-h-[100svh] px-4 pb-0 max-w-lg mx-auto sm:max-w-2xl lg:max-w-3xl article-page-container">
+    <PageContainer className="min-h-[100svh] pb-0 article-page-container">
       <style dangerouslySetInnerHTML={{ __html: `
         html.is-fullscreen main { padding-top: 0 !important; }
         html.is-fullscreen header, 
@@ -271,6 +272,6 @@ export default async function ArticlePage({ params }: Props) {
           </div>
         )}
       </div>
-    </div>
+    </PageContainer>
   );
 }

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { FileText, Layers, Library, PenLine, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import AdminContainer from '@/components/layout/AdminContainer';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,7 +39,7 @@ export default async function ContributorDashboard() {
   const canLibrary = permissions?.can_library ?? false;
 
   return (
-    <div className="w-full flex flex-col gap-10">
+    <AdminContainer className="flex flex-col gap-10">
       
       {/* 1. Header & Write Action */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[var(--color-border)]">
@@ -171,6 +172,6 @@ export default async function ContributorDashboard() {
         )}
       </div>
 
-    </div>
+    </AdminContainer>
   );
 }

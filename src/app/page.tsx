@@ -5,6 +5,7 @@ import { ChevronRight } from 'lucide-react';
 import SectionHeader from '@/components/ui/SectionHeader';
 import HomeLatestArticles from '@/components/HomeLatestArticles';
 import ArticleCard from '@/components/ui/ArticleCard';
+import PageContainer from '@/components/layout/PageContainer';
 
 
 export const revalidate = 60;
@@ -102,7 +103,7 @@ export default async function HomePage() {
   const activeBanners = bannersData || [];
 
   return (
-    <div className="min-h-[100svh] px-4 pt-2 pb-0 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl scroll-smooth">
+    <PageContainer size="wide" className="min-h-[100svh] pt-2 pb-0 scroll-smooth">
 
       {/* ── 1. Banner Carousel ── */}
       <div className="mb-8">
@@ -175,6 +176,6 @@ export default async function HomePage() {
         </div>
       </a>
 
-    </div>
+    </PageContainer>
   );
 }

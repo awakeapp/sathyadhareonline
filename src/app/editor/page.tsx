@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { FileText, ChevronRight, CheckCircle, Clock, Edit3 } from 'lucide-react';
+import AdminContainer from '@/components/layout/AdminContainer';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,7 +51,7 @@ export default async function EditorDashboard() {
   const { totalCount, publishedCount, draftCount, reviewCount, recent } = pageData;
 
   return (
-    <div className="flex flex-col gap-4 w-full pt-1">
+    <AdminContainer className="flex flex-col gap-4 pt-1">
       {/* Stats row */}
 
       {/* Stats row */}
@@ -127,6 +128,6 @@ export default async function EditorDashboard() {
         )}
       </div>
 
-    </div>
+    </AdminContainer>
   );
 }

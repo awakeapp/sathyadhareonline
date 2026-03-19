@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ArrowLeft, Heart, Target, BookOpen, ShieldCheck, Lightbulb, Globe, Handshake, History, Sparkles, Award } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
+import PageContainer from '@/components/layout/PageContainer';
 
 export default function AboutPage() {
   return (
@@ -12,7 +13,7 @@ export default function AboutPage() {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[var(--color-primary)]/10 rounded-full blur-[120px] pointer-events-none animate-pulse" />
       <div className="absolute bottom-[20%] right-[-5%] w-[30%] h-[30%] bg-orange-500/10 rounded-full blur-[100px] pointer-events-none" />
       
-      <div className="w-full max-w-3xl mx-auto px-6 relative z-10">
+      <PageContainer size="wide" className="relative z-10 !px-6">
 
         {/* Top Navigation */}
         <div className="flex items-center justify-between py-8 sticky top-0 bg-[var(--color-background)]/40 backdrop-blur-xl z-50 -mx-6 px-6">
@@ -182,7 +183,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-      </div>
+      </PageContainer>
     </main>
   );
 }

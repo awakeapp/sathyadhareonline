@@ -5,6 +5,7 @@ import SearchBar from '@/components/ui/SearchBar';
 import { Card } from '@/components/ui/Card';
 import { Search, Library } from 'lucide-react';
 import SearchFilters from '@/components/SearchFilters';
+import PageContainer from '@/components/layout/PageContainer';
 
 interface Props {
   searchParams: Promise<{ q?: string; c?: string; d?: string }>;
@@ -60,7 +61,7 @@ export default async function SearchPage({ searchParams }: Props) {
   }
 
   return (
-    <div className="min-h-[100svh] px-4 py-4 pb-12 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl border-t border-[var(--color-border)]">
+    <PageContainer size="wide" className="min-h-[100svh] py-4 pb-12 border-t border-[var(--color-border)]">
       
       {/* Header */}
       <section className="space-y-6 pt-2 mb-10 text-center">
@@ -121,6 +122,6 @@ export default async function SearchPage({ searchParams }: Props) {
           <p className="text-sm text-[var(--color-muted)] font-medium">Enter a search term above to browse our archive.</p>
         </section>
       )}
-    </div>
+    </PageContainer>
   );
 }

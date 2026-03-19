@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { PenLine, LogIn, CheckCircle, Clock, XCircle, ExternalLink, ChevronRight } from 'lucide-react';
 import type { Metadata } from 'next';
+import PageContainer from '@/components/layout/PageContainer';
 
 export const metadata: Metadata = {
   title: 'Write | Sathyadhare',
@@ -42,7 +43,7 @@ export default async function WritePage({ searchParams }: Props) {
   /* ── Guest: sign-in gate ─────────────────────────────────────────────── */
   if (!user) {
     return (
-      <div className="min-h-[100svh] px-4 py-8 pb-32 max-w-lg mx-auto">
+      <PageContainer className="min-h-[100svh] py-8 pb-32">
         <div className="pt-3 pb-5 border-b border-[var(--color-border)] mb-6">
           <h1 className="text-[26px] font-black text-[var(--color-text)] tracking-tight">Write</h1>
           <p className="text-[14px] text-[var(--color-muted)] mt-1">Submit your article for review</p>
@@ -71,7 +72,7 @@ export default async function WritePage({ searchParams }: Props) {
             </Link>
           </div>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
@@ -112,7 +113,7 @@ export default async function WritePage({ searchParams }: Props) {
   /* ── Submission success screen ─────────────────────────────────────────── */
   if (submitted === 'true') {
     return (
-      <div className="min-h-[100svh] px-4 py-8 pb-32 max-w-lg mx-auto flex flex-col items-center justify-center text-center">
+      <PageContainer className="min-h-[100svh] py-8 pb-32 flex flex-col items-center justify-center text-center">
         <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-5">
           <CheckCircle size={32} className="text-emerald-500" />
         </div>
@@ -134,7 +135,7 @@ export default async function WritePage({ searchParams }: Props) {
             Back to Home
           </Link>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
@@ -165,7 +166,7 @@ export default async function WritePage({ searchParams }: Props) {
   }
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-8 pb-32 flex flex-col gap-6">
+    <PageContainer className="py-8 pb-32 flex flex-col gap-6">
 
       {/* Page title */}
       <div className="pt-2 border-b border-[var(--color-border)] pb-4">
@@ -324,7 +325,6 @@ export default async function WritePage({ searchParams }: Props) {
           </div>
         )}
       </div>
-
-    </div>
+    </PageContainer>
   );
 }

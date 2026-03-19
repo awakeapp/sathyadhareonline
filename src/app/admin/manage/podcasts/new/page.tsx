@@ -7,6 +7,7 @@ import { Mic, ArrowLeft, Save, Mic2 } from 'lucide-react';
 import Link from 'next/link';
 import { createPodcastAction } from '@/app/admin/manage/actions';
 import { revalidatePath } from 'next/cache';
+import AdminContainer from '@/components/layout/AdminContainer';
 
 export default async function NewPodcastPage() {
   const supabase = await createClient();
@@ -16,7 +17,7 @@ export default async function NewPodcastPage() {
   const { data: categories } = await supabase.from('categories').select('id, name').order('name');
 
   return (
-    <div className="flex flex-col gap-6 max-w-[600px] mx-auto pb-20">
+    <AdminContainer className="flex flex-col gap-6 pb-20">
       <PresenceHeader>
         <div className="flex items-center gap-4">
           <Link href="/admin/manage?tab=podcast" className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-surface-2)] transition-all">
@@ -87,6 +88,6 @@ export default async function NewPodcastPage() {
           </PresenceButton>
         </div>
       </form>
-    </div>
+    </AdminContainer>
   );
 }

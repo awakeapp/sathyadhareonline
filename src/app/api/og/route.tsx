@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
           height: '630px',
           display: 'flex',
           position: 'relative',
-          fontFamily: 'system-ui, sans-serif',
+          fontFamily: 'sans-serif',
           background: '#0d0d0d',
           overflow: 'hidden',
         }}

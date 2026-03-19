@@ -6,6 +6,7 @@ import { PresenceHeader, PresenceButton } from '@/components/PresenceUI';
 import { Video, ArrowLeft, Save, PlayCircle } from 'lucide-react';
 import Link from 'next/link';
 import { createBannerVideoAction } from '@/app/admin/manage/actions';
+import AdminContainer from '@/components/layout/AdminContainer';
 
 export default async function NewBannerVideoPage() {
   const supabase = await createClient();
@@ -13,7 +14,7 @@ export default async function NewBannerVideoPage() {
   if (!user) redirect('/sign-in');
 
   return (
-    <div className="flex flex-col gap-6 max-w-[600px] mx-auto pb-20">
+    <AdminContainer className="flex flex-col gap-6 pb-20">
       <PresenceHeader>
         <div className="flex items-center gap-4">
           <Link href="/admin/manage?tab=banner" className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-surface-2)] transition-all">
@@ -68,6 +69,6 @@ export default async function NewBannerVideoPage() {
           </PresenceButton>
         </div>
       </form>
-    </div>
+    </AdminContainer>
   );
 }

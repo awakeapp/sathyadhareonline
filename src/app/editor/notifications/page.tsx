@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { Bell, CheckCircle, FileText, AlertCircle } from 'lucide-react';
+import AdminContainer from '@/components/layout/AdminContainer';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,7 +63,7 @@ export default async function EditorNotificationsPage() {
   });
 
   return (
-    <div className="flex flex-col gap-3">
+    <AdminContainer className="flex flex-col gap-3">
 
       {/* Page title */}
       <div className="pt-2 pb-1">
@@ -116,6 +117,6 @@ export default async function EditorNotificationsPage() {
         </div>
       )}
 
-    </div>
+    </AdminContainer>
   );
 }

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import PlanClient from './PlanClient';
+import AdminContainer from '@/components/layout/AdminContainer';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,7 +46,7 @@ export default async function SequelPlanPage({ params }: { params: { id: string 
     .order('full_name');
 
   return (
-    <div className="w-full flex flex-col gap-6 max-w-[1400px] mx-auto">
+    <AdminContainer className="flex flex-col gap-6">
       <PlanClient
         sequel={sequel}
         pieces={(pieces || []).map(p => ({
@@ -54,6 +55,6 @@ export default async function SequelPlanPage({ params }: { params: { id: string 
         }))}
         editors={editors || []}
       />
-    </div>
+    </AdminContainer>
   );
 }

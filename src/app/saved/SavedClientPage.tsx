@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { Bookmark, FileText, Calendar, X, SlidersHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import ArticleCard from '@/components/ui/ArticleCard';
+import PageContainer from '@/components/layout/PageContainer';
 interface Article {
   id: string;
   title: string;
@@ -83,7 +84,7 @@ export default function SavedClientPage({ articles }: Props) {
     <div className="min-h-screen pb-0">
       {/* Sticky header */}
       <div className="sticky z-40 bg-[var(--color-surface)]/95 backdrop-blur-xl border-b border-[var(--color-border)] transition-all" style={{ top: 'calc(var(--safe-top) + 56px)' }}>
-        <div className="flex items-center justify-between px-4 py-3 max-w-lg mx-auto">
+        <PageContainer size="wide" className="flex items-center justify-between py-3">
           <div className="flex items-center gap-2">
             <Bookmark className="w-5 h-5 text-[#685de6]" />
             <div>
@@ -136,7 +137,7 @@ export default function SavedClientPage({ articles }: Props) {
               </button>
             )}
           </div>
-        </div>
+        </PageContainer>
       </div>
 
       {/* Calendar bottom-sheet */}
@@ -209,7 +210,7 @@ export default function SavedClientPage({ articles }: Props) {
       )}
 
       {/* Article list */}
-      <div className="px-4 pt-4 max-w-lg mx-auto">
+      <PageContainer size="wide" className="pt-4">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-10 text-center rounded-[2.5rem] bg-[var(--color-surface-2)] border-2 border-dashed border-[var(--color-border)] min-h-[50vh]">
             <div className="w-20 h-20 rounded-3xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center mb-6">
@@ -237,7 +238,7 @@ export default function SavedClientPage({ articles }: Props) {
             ))}
           </div>
         )}
-      </div>
+      </PageContainer>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import IntakeClient from './IntakeClient';
+import AdminContainer from '@/components/layout/AdminContainer';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,7 +35,7 @@ export default async function IntakePage() {
     .order('full_name');
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto">
+    <AdminContainer className="flex flex-col gap-6">
       <div className="pt-2">
         <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight">External Article Intake</h1>
         <p className="text-[13px] text-[var(--color-muted)] mt-1">Source and assign external content to an editor for review.</p>
@@ -45,6 +46,6 @@ export default async function IntakePage() {
         editors={editors || []} 
         currentUserId={user.id}
       />
-    </div>
+    </AdminContainer>
   );
 }

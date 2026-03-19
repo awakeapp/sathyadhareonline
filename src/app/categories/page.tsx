@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import SectionHeader from '@/components/ui/SectionHeader';
 import { ChevronRight, Layers } from 'lucide-react';
+import PageContainer from '@/components/layout/PageContainer';
 
 export const revalidate = 3600; // Cache for 1 hour
 
@@ -36,7 +37,7 @@ export default async function CategoriesPage() {
   })).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
   return (
-    <div className="min-h-[100svh] px-4 pt-6 pb-20 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl">
+    <PageContainer size="wide" className="min-h-[100svh] pt-6 pb-20">
       
       <header className="mb-10">
         <SectionHeader title="Explore Categories" />
@@ -88,6 +89,6 @@ export default async function CategoriesPage() {
          </Link>
       </div>
 
-    </div>
+    </PageContainer>
   );
 }
