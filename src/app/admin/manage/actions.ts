@@ -72,3 +72,69 @@ export async function manageContentAction(
     return { error: err.message || 'Operation failed' };
   }
 }
+
+/**
+ * Create a new Podcast entry
+ */
+export async function createPodcastAction(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'Unauthorized' };
+
+  const title = formData.get('title') as string;
+  const description = formData.get('description') as string;
+  const audioUrl = formData.get('audio_url') as string;
+  const coverImage = formData.get('cover_image') as string;
+  const categoryId = formData.get('category_id') as string;
+  const status = formData.get('status') as string || 'draft';
+
+  try {
+    const { data: podcast, error } = await supabase.from('podcasts').insert({
+      title,
+      description,
+      audio_url: audioUrl,
+      cover_image: coverImage,
+      category_id: categoryId || null,
+      status,
+      author_id: user.id
+    }).select().single();
+
+    if (error) throw error;
+    await logAuditEvent(user.id, 'PODCAST_CREATED', { podcast_id: podcast.id, title });
+
+    revalidatePath('/admin/manage');
+    return { success: true, message: 'Podcast created successfully' };
+  } catch (err: any) {
+    return { error: err.message || 'Failed to create podcast' };
+  }
+}
+
+/**
+ * Create a new Banner Video
+ */
+export async function createBannerVideoAction(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'Unauthorized' };
+
+  const title = formData.get('title') as string;
+  const videoUrl = formData.get('video_url') as string;
+  const thumbnailUrl = formData.get('thumbnail_url') as string;
+
+  try {
+    const { data: video, error } = await supabase.from('banner_videos').insert({
+      title,
+      video_url: videoUrl,
+      thumbnail_url: thumbnailUrl,
+      author_id: user.id
+    }).select().single();
+
+    if (error) throw error;
+    await logAuditEvent(user.id, 'BANNER_VIDEO_CREATED', { video_id: video.id, title });
+
+    revalidatePath('/admin/manage');
+    return { success: true, message: 'Banner video created successfully' };
+  } catch (err: any) {
+    return { error: err.message || 'Failed to create video' };
+  }
+}

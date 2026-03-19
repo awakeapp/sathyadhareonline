@@ -49,11 +49,21 @@ export default async function ProfilePage() {
     .select('id', { count: 'exact', head: true })
     .eq('user_id', user.id);
 
+  // 5. Recent Login Events
+  const { data: auditLogs } = await supabase
+    .from('audit_logs')
+    .select('action, created_at, ip_address, user_agent')
+    .eq('user_id', user.id)
+    .ilike('action', '%LOGIN%')
+    .order('created_at', { ascending: false })
+    .limit(5);
+
   const stats = {
     articlesRead: readCount || 0,
     bookmarks: bookmarkCount || 0,
     comments: commentCount || 0,
-    highlights: highlightCount || 0
+    highlights: highlightCount || 0,
+    auditLogs: auditLogs || []
   };
 
   return (

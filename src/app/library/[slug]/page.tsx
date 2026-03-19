@@ -40,7 +40,7 @@ export default async function LibraryItemPage({ params }: { params: { slug: stri
 
 
   return (
-    <div className="min-h-[100svh] bg-[var(--color-bg)] px-4 py-8 pb-32 max-w-lg mx-auto sm:max-w-3xl lg:max-w-5xl font-sans">
+    <div className="min-h-[100svh] bg-[var(--color-bg)] px-4 py-8 pb-32 max-w-lg mx-auto sm:max-w-3xl lg:max-w-5xl">
       
       {/* Top Navigation */}
       <nav className="flex items-center justify-between mb-8 z-20 relative">

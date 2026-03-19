@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Mail, Lock, ShieldCheck, ArrowLeft, Eye, EyeOff, Link as LinkIcon, CheckCircle2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { getRedirectPath } from '@/lib/auth/redirectAfterLogin'
+import { loginAction } from './actions'
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" className="w-5 h-5 flex-shrink-0" aria-hidden>
@@ -40,19 +40,23 @@ export default function LoginPage() {
     setError(null)
     setLoading(true)
 
-    const supabase = createClient()
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+    const fd = new FormData()
+    fd.append('email', email)
+    fd.append('password', password)
+    const params = new URLSearchParams(window.location.search)
+    fd.append('returnTo', params.get('return_to') || '')
 
-    if (signInError || !data.user) {
-      setError(friendlyError(signInError?.message ?? 'Login failed. Please try again.'))
+    const res = await loginAction(fd)
+
+    if (res.error) {
+      setError(friendlyError(res.error))
       setLoading(false)
       return
     }
 
-    const params = new URLSearchParams(window.location.search)
-    const returnTo = params.get('return_to')
-    const destination = await getRedirectPath(supabase, data.user.id, returnTo)
-    window.location.href = destination
+    if (res.success && res.destination) {
+      window.location.href = res.destination
+    }
   }
 
   async function handleMagicLink(e: React.FormEvent) {

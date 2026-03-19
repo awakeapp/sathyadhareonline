@@ -47,3 +47,36 @@ export async function updateSettingsAction(payload: {
   
   return { success: true };
 }
+
+export async function updateMaintenanceAction(payload: {
+  maintenance_mode: boolean;
+  maintenance_whitelist: string;
+}) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'Unauthorized' };
+
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
+  if (!profile || profile.role !== 'super_admin') {
+    return { error: 'Permission Denied: Super Admin access required' };
+  }
+
+  const { error } = await supabase
+    .from('site_settings')
+    .update({
+      maintenance_mode: payload.maintenance_mode,
+      maintenance_whitelist: payload.maintenance_whitelist,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', 1);
+
+  if (error) {
+    console.error('Maintenance update error:', error);
+    return { error: 'Failed to update maintenance settings' };
+  }
+
+  await logAuditEvent(user.id, 'MAINTENANCE_MODE_CHANGED', { maintenance_mode: payload.maintenance_mode });
+
+  revalidatePath('/', 'layout');
+  return { success: true };
+}

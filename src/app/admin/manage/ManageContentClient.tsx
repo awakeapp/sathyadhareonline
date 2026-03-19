@@ -48,7 +48,7 @@ import QuickActionMenu from '@/components/dashboard/QuickActionMenu';
 import { manageContentAction } from './actions';
 
 // Standardized content types
-export type ContentType = 'article' | 'sequel' | 'book' | 'friday' | 'category' | 'banner' | 'podcast';
+export type ContentType = 'article' | 'sequel' | 'book' | 'friday' | 'category' | 'banner' | 'podcast' | 'banner_video';
 
 export interface BaseContent {
   id: string;
@@ -74,6 +74,7 @@ const TABS = [
   { id: 'category', label: 'Groups', icon: Tags },
   { id: 'banner', label: 'Banners', icon: ImageIconLucide },
   { id: 'podcast', label: 'Podcasts', icon: Mic },
+  { id: 'banner_video', label: 'Videos', icon: Video },
 ];
 
 const STATUS_META = {
@@ -141,6 +142,8 @@ export default function ManageContentClient({ initialContent, currentUser, users
       case 'friday': return `/admin/friday`;
       case 'banner': return `/admin/banners`;
       case 'category': return `/admin/categories`;
+      case 'podcast': return `/admin/manage?tab=podcast`;
+      case 'banner_video': return `/admin/manage?tab=banner_video`;
       default: return '#';
     }
   };
@@ -216,11 +219,14 @@ export default function ManageContentClient({ initialContent, currentUser, users
                   
                   {/* Item Type & Status */}
                   <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                       <span className="p-1.5 rounded-lg bg-[var(--color-surface-2)] text-[var(--color-muted)]">
-                         {TABS.find(t => t.id === item.type)?.icon({ size: 14 }) || <FileText size={14} />}
-                       </span>
-                       <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border ${status.color}`}>
+                      <div className="flex items-center gap-2">
+                        <span className="p-1.5 rounded-lg bg-[var(--color-surface-2)] text-[var(--color-muted)]">
+                          {(() => {
+                            const TabIcon = TABS.find(t => t.id === item.type)?.icon || FileText;
+                            return <TabIcon size={14} />;
+                          })()}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border ${status.color}`}>
                          {status.label}
                        </span>
                     </div>

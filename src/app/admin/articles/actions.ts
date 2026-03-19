@@ -33,9 +33,25 @@ export async function bulkUpdateStatus(ids: string[], status: string) {
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
   const role = profile?.role || '';
   
-  // Only managers can bulk update or publish
-  if (!['admin', 'super_admin'].includes(role)) {
-    return { error: 'Only admins can bulk update status' };
+  // STAFF check
+  if (!['admin', 'super_admin', 'editor'].includes(role)) {
+    return { error: 'Permission denied' };
+  }
+
+  // PUBLISH check
+  if (status === 'published' && role === 'editor') {
+    // also check the granular permission
+    const permRow = await supabase
+      .from('user_content_permissions')
+      .select('can_publish_articles')
+      .eq('user_id', user.id)
+      .single()
+    
+    const canPublish = permRow.data?.can_publish_articles ?? false
+    
+    if (!canPublish) {
+      return { error: 'You do not have permission to publish.' }
+    }
   }
 
   const updatePayload: Record<string, unknown> = { status };
@@ -68,7 +84,18 @@ export async function setArticleStatusAction(id: string, status: string) {
 
   // PUBLISH check
   if (status === 'published' && role === 'editor') {
-    return { error: 'Editors cannot publish. Please submit for review instead.' };
+    // also check the granular permission
+    const permRow = await supabase
+      .from('user_content_permissions')
+      .select('can_publish_articles')
+      .eq('user_id', user.id)
+      .single()
+    
+    const canPublish = permRow.data?.can_publish_articles ?? false
+    
+    if (!canPublish) {
+      return { error: 'You do not have permission to publish.' }
+    }
   }
 
   const updatePayload: Record<string, unknown> = { status };

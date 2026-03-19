@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Share2, Link as LinkIcon, Check, Bookmark, Heart, Volume2, Square } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
+import AuthPromptSheet from '@/components/AuthPromptSheet';
 /* ─── helpers ─────────────────────────────────────────────── */
 function getArticleUrl(slug: string) {
   return `${typeof window !== 'undefined' ? window.location.origin : 'https://sathyadhareonline.vercel.app'}/articles/${slug}`;
@@ -170,6 +171,9 @@ export default function ArticleActionBar({
   const [saved, setSaved] = useState(initialSaved ?? false);
   const [liked, setLiked] = useState(false);
   const [isClientAuth, setIsClientAuth] = useState(isAuthenticated);
+  const [showAuthSheet, setShowAuthSheet] = useState(false);
+
+  const currentUrl = typeof window !== 'undefined' ? window.location.pathname : `/articles/${slug}`;
 
   useEffect(() => {
     const supabase = createClient();
@@ -201,7 +205,7 @@ export default function ArticleActionBar({
 
   const toggleSave = async () => {
     if (!isClientAuth) {
-      toast.error('Please sign in to save articles.');
+      setShowAuthSheet(true);
       return;
     }
     import('@/lib/haptics').then(({ haptics }) => haptics.impact('light'));
@@ -216,6 +220,12 @@ export default function ArticleActionBar({
 
   return (
     <div className="mb-4">
+      <AuthPromptSheet
+        open={showAuthSheet}
+        onClose={() => setShowAuthSheet(false)}
+        returnTo={currentUrl}
+        message="Sign in to save articles and highlights"
+      />
       {/* ── Action row ── */}
       <div className="flex items-center gap-2">
 

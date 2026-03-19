@@ -38,14 +38,48 @@ export default function CommentsClient({
 }) {
   const [, startTransition] = useTransition();
 
+  const [localComments, setLocalComments] = useState(comments);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [articleFilter, setArticleFilter] = useState('all');
-
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
+  // Real-time synchronization
+  const { createClient } = require('@/lib/supabase/client'); // Dynamic import to avoid SSR issues if necessary, but we are in 'use client'
+  
+  const supabase = useMemo(() => createClient(), []);
+
+  useState(() => {
+    const channel = supabase
+      .channel('admin-comments-all')
+      .on('postgres_changes', { event: '*', table: 'comments', schema: 'public' }, async (payload: any) => {
+        if (payload.eventType === 'INSERT') {
+          // Fetch full data for the new comment including relations
+          const { data: newComment } = await supabase
+            .from('comments')
+            .select('*, articles(title), profiles(full_name, email)')
+            .eq('id', payload.new.id)
+            .single();
+          
+          if (newComment) {
+            setLocalComments(prev => [newComment, ...prev]);
+            toast.info(`New comment received from ${newComment.guest_name || newComment.profiles?.full_name || 'Reader'}`);
+          }
+        } else if (payload.eventType === 'UPDATE') {
+          setLocalComments(prev => prev.map(c => c.id === payload.new.id ? { ...c, ...payload.new } : c));
+        } else if (payload.eventType === 'DELETE') {
+          setLocalComments(prev => prev.filter(c => c.id === payload.old.id));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  });
+
   const filteredComments = useMemo(() => {
-    return comments.filter(c => {
+    return localComments.filter(c => {
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const MatchName = c.guest_name?.toLowerCase().includes(query) || false;

@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import NextImage from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Bell, Eye, ChevronRight, LogOut, User as UserIcon } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useTheme } from 'next-themes';
@@ -91,12 +91,24 @@ function getPageTitle(pathname: string): string {
    DashboardHeader
    — Fixed top bar shared across super_admin / admin / editor dashboards
 ══════════════════════════════════════════════════════════════════════ */
+function timeAgo(dateString: string) {
+  const diff = Date.now() - new Date(dateString).getTime();
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return 'Just now';
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
 export default function DashboardHeader({ user, profile, role, roleLabel }: Props) {
   const pathname = usePathname();
+  const router = useRouter();
   const { theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   /* Close panels on route change (Next.js soft-nav) */
   useEffect(() => {
@@ -104,6 +116,48 @@ export default function DashboardHeader({ user, profile, role, roleLabel }: Prop
     setIsNotifOpen(false);
     setIsProfileOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const supabase = createClient();
+    
+    const fetchNotifications = async () => {
+      const { data } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (data) setNotifications(data);
+    };
+    
+    fetchNotifications();
+
+    const channel = supabase.channel('user_notifs')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, fetchNotifications)
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id]);
+
+  const unreadCount = notifications.filter(n => !n.is_read).length;
+
+  const handleMarkAsRead = async (id: string, link: string | null) => {
+    const supabase = createClient();
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+    await supabase.from('notifications').update({ is_read: true }).eq('id', id);
+    if (link) {
+      setIsNotifOpen(false);
+      router.push(link);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    if (unreadCount === 0 || !user?.id) return;
+    const supabase = createClient();
+    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    await supabase.from('notifications').update({ is_read: true }).eq('user_id', user.id).eq('is_read', false);
+  };
 
   const currentTheme = mounted ? (theme === 'system' ? resolvedTheme : theme) : 'dark';
 
@@ -153,35 +207,55 @@ export default function DashboardHeader({ user, profile, role, roleLabel }: Prop
           >
             {/* Panel header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">
-              <h2 className="text-[17px] font-bold text-[var(--color-text)]">Notifications</h2>
-              <button
-                onClick={() => setIsNotifOpen(false)}
-                className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-border)] transition-colors"
-                aria-label="Close notifications"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              </button>
+              <div className="flex items-center gap-3">
+                <h2 className="text-[17px] font-bold text-[var(--color-text)]">Notifications</h2>
+                {unreadCount > 0 && (
+                  <span className="px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-500 text-[11px] font-bold">
+                    {unreadCount} new
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {unreadCount > 0 && (
+                  <button onClick={handleMarkAllAsRead} className="text-[12px] font-semibold text-[var(--color-primary)] hover:underline">
+                    Mark all read
+                  </button>
+                )}
+                <button
+                  onClick={() => setIsNotifOpen(false)}
+                  className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-border)] transition-colors"
+                  aria-label="Close notifications"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
-            {/* Placeholder items */}
+            {/* Notification items */}
             <div className="flex-1 overflow-y-auto divide-y divide-[var(--color-border)]">
-              {[
-                { title: 'Content Update',   desc: 'New article published.',              time: '2m ago' },
-                { title: 'Submission Alert', desc: 'Guest article awaiting review.',      time: '1h ago' },
-                { title: 'Community Action', desc: 'New comment reported.',               time: '3h ago' },
-                { title: 'System Alert',     desc: 'Weekly backup completed.',            time: '1d ago' },
-              ].map((n, i) => (
-                <div key={i} className="flex gap-3 px-5 py-4 hover:bg-[var(--color-surface-2)] transition-colors cursor-pointer">
-                  <div className="w-2 h-2 rounded-full bg-[var(--color-primary)] mt-1.5 shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-[14px] font-semibold text-[var(--color-text)] leading-tight">{n.title}</p>
-                    <p className="text-[13px] text-[var(--color-muted)] mt-0.5">{n.desc}</p>
-                    <p className="text-[11px] text-[var(--color-muted)] mt-1.5 font-medium">{n.time}</p>
-                  </div>
+              {notifications.length === 0 ? (
+                <div className="p-8 text-center bg-[var(--color-surface)] flex flex-col items-center justify-center h-full gap-2">
+                  <Bell className="w-8 h-8 text-[var(--color-muted)] opacity-30" />
+                  <p className="text-[14px] text-[var(--color-muted)] font-medium">No notifications yet.</p>
                 </div>
-              ))}
+              ) : (
+                notifications.map((n) => (
+                  <div 
+                    key={n.id} 
+                    onClick={() => handleMarkAsRead(n.id, n.link)}
+                    className={`flex gap-3 px-5 py-4 cursor-pointer transition-colors ${n.is_read ? 'bg-[var(--color-surface)] hover:bg-[var(--color-surface-2)]' : 'bg-[var(--color-primary)]/5 hover:bg-[var(--color-primary)]/10'}`}
+                  >
+                    <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${n.is_read ? 'bg-transparent' : 'bg-[var(--color-primary)]'}`} />
+                    <div className="min-w-0">
+                      <p className={`text-[14px] leading-tight ${n.is_read ? 'font-medium text-[var(--color-text)]' : 'font-bold text-[var(--color-text)]'}`}>{n.title}</p>
+                      {n.body && <p className={`text-[13px] mt-0.5 ${n.is_read ? 'text-[var(--color-muted)]/80' : 'text-[var(--color-muted)] font-medium'}`}>{n.body}</p>}
+                      <p className="text-[11px] text-[var(--color-muted)] mt-1.5 font-medium">{timeAgo(n.created_at)}</p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -330,8 +404,12 @@ export default function DashboardHeader({ user, profile, role, roleLabel }: Prop
               aria-label="Notifications"
             >
               <Bell size={20} strokeWidth={1.75} />
-              {/* Unread badge — shown by default as a shell placeholder */}
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-rose-500 border-2 border-[var(--color-surface)]" />
+              {/* Unread badge */}
+              {unreadCount > 0 && (
+                <div className="absolute top-2 right-2 flex items-center justify-center w-3.5 h-3.5 rounded-full bg-rose-500 border-2 border-[var(--color-surface)] text-white text-[8px] font-bold">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </div>
+              )}
             </button>
 
             {/* User avatar / initials — opens profile panel */}

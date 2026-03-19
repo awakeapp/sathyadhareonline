@@ -83,7 +83,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${dmSans.variable} ${balooTamma.variable} ${notoSerifKannada.variable} ${notoSansKannada.variable} ${tiroKannada.variable}`} suppressHydrationWarning>
       <body
-        className="font-sans antialiased transition-colors duration-300"
+        className="antialiased transition-colors duration-300"
         style={{ 
           backgroundColor: 'var(--color-background)',
           color: 'var(--color-text)',

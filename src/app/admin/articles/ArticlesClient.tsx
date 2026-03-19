@@ -176,6 +176,9 @@ export default function ArticlesClient({
       {/* ── Page Header & Desktop Actions ── */}
       <div className="flex items-center justify-end mb-2">
         <div className="hidden md:flex gap-3">
+          <Link href="/admin/articles/intake" className="flex items-center gap-2 h-10 px-4 rounded-xl bg-[var(--color-primary)] text-white font-bold text-[12px] uppercase tracking-widest hover:opacity-90 transition-all shadow-lg shadow-[var(--color-primary)]/10">
+            <Plus className="w-4 h-4" /> New Intake
+          </Link>
         </div>
       </div>
 

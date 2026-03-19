@@ -37,6 +37,10 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
     if (!error && data.user) {
+      // Capture security metrics
+      const ip = (request as any).ip || request.headers.get('x-forwarded-for')?.split(',')[0] || 'Unknown';
+      const agent = request.headers.get('user-agent') || 'Unknown Agent';
+
       // Check if user has a profile row
       const { data: profile } = await supabase
         .from('profiles')
@@ -48,8 +52,7 @@ export async function GET(request: NextRequest) {
 
       if (!profile) {
         // If no profile exists (first time Google login), create one
-        role = 'reader'
-        // Wrap in try catch so it doesn't break if insert fails
+        role = data.user.user_metadata?.role ?? 'reader'
         try {
           const fullName = data.user.user_metadata?.full_name || data.user.user_metadata?.name || ''
           const avatarUrl = data.user.user_metadata?.avatar_url || data.user.user_metadata?.picture || ''
@@ -60,14 +63,32 @@ export async function GET(request: NextRequest) {
             full_name: fullName,
             avatar_url: avatarUrl,
             role: role,
+            last_sign_in_ip: ip,
+            last_sign_in_agent: agent,
           })
         } catch (e) {
           console.error("Profile creation error", e)
         }
+      } else {
+        // Update existing profile with latest security data
+        try {
+          const { logAuditEvent } = await import('@/lib/audit');
+          await supabase.from('profiles')
+            .update({ 
+              last_sign_in_ip: ip, 
+              last_sign_in_agent: agent,
+              last_sign_in_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', data.user.id);
+            
+          await logAuditEvent(data.user.id, 'LOGIN_SESSION_EXCHANGE');
+        } catch (e) {
+          console.error("Security data update error", e)
+        }
       }
 
       const destination = getRedirectUrl(role, returnTo)
-
       return NextResponse.redirect(new URL(destination, request.url))
     }
   }

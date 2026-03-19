@@ -4,8 +4,8 @@
 import { useState, useTransition } from 'react';
 import { Input } from '@/components/ui/Input';
 import { toast } from 'sonner';
-import { updateSettingsAction } from './actions';
-import { Globe, Link as LinkIcon, Search, ToggleRight, Workflow, Save } from 'lucide-react';
+import { updateSettingsAction, updateMaintenanceAction } from './actions';
+import { Globe, Link as LinkIcon, Search, ToggleRight, Workflow, Save, ShieldAlert } from 'lucide-react';
 import { 
   PresenceCard, 
   PresenceButton 
@@ -17,6 +17,8 @@ interface SiteSettings {
   seo: Record<string, any>;
   integrations: Record<string, any>;
   features: Record<string, any>;
+  maintenance_mode?: boolean;
+  maintenance_whitelist?: string;
 }
 
 export default function SettingsClient({ initialSettings }: { initialSettings: SiteSettings }) {
@@ -28,6 +30,9 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
   const [seo, setSeo] = useState(initialSettings.seo || {});
   const [features, setFeatures] = useState(initialSettings.features || {});
   const [integrations, setIntegrations] = useState(initialSettings.integrations || {});
+  const [maintenanceMode, setMaintenanceMode] = useState(initialSettings.maintenance_mode ?? false);
+  const [maintenanceWhitelist, setMaintenanceWhitelist] = useState(initialSettings.maintenance_whitelist ?? '');
+  const [isMaintPending, startMaintTransition] = useTransition();
 
   const handleSave = () => {
     startTransition(async () => {
@@ -46,12 +51,24 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
     });
   };
 
+  const handleSaveMaintenance = () => {
+    startMaintTransition(async () => {
+      const res = await updateMaintenanceAction({
+        maintenance_mode: maintenanceMode,
+        maintenance_whitelist: maintenanceWhitelist,
+      });
+      if (res.error) toast.error(res.error);
+      else toast.success('Maintenance settings saved');
+    });
+  };
+
   const tabs = [
-    { id: 'general', label: 'General', icon: Globe },
-    { id: 'social', label: 'Social', icon: LinkIcon },
-    { id: 'seo', label: 'SEO', icon: Search },
-    { id: 'features', label: 'Features', icon: ToggleRight },
-    { id: 'integrations', label: 'Integrations', icon: Workflow },
+    { id: 'general',     label: 'General',     icon: Globe },
+    { id: 'social',      label: 'Social',      icon: LinkIcon },
+    { id: 'seo',         label: 'SEO',         icon: Search },
+    { id: 'features',    label: 'Features',    icon: ToggleRight },
+    { id: 'integrations',label: 'Integrations',icon: Workflow },
+    { id: 'maintenance', label: 'Maintenance', icon: ShieldAlert },
   ];
 
   return (
@@ -235,7 +252,68 @@ export default function SettingsClient({ initialSettings }: { initialSettings: S
                     </div>
                  </div>
                )}
-            </div>
+               {activeTab === 'maintenance' && (
+                 <div className="flex flex-col gap-6">
+                   <div>
+                     <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50">Maintenance Mode</h2>
+                     <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Control site availability</p>
+                   </div>
+
+                   {/* Toggle */}
+                   <label className={`cursor-pointer flex items-center justify-between p-6 rounded-[1.5rem] border-2 transition-all ${
+                     maintenanceMode
+                       ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/30'
+                       : 'bg-white dark:bg-zinc-950 border-gray-50 dark:border-white/5'
+                   }`}>
+                     <div className="space-y-1">
+                       <span className="font-black text-sm uppercase tracking-tight block">Maintenance Mode</span>
+                       <div className="flex items-center gap-2">
+                         <div className={`w-1.5 h-1.5 rounded-full ${maintenanceMode ? 'bg-amber-500 animate-pulse' : 'bg-gray-300'}`} />
+                         <span className={`text-[10px] font-bold uppercase tracking-widest ${maintenanceMode ? 'text-amber-600 dark:text-amber-400' : 'text-zinc-500'}`}>
+                           {maintenanceMode ? 'Site is DOWN for visitors' : 'Site is LIVE'}
+                         </span>
+                       </div>
+                     </div>
+                     <input type="checkbox" checked={maintenanceMode} onChange={e => setMaintenanceMode(e.target.checked)} className="hidden" />
+                     <div className={`w-12 h-7 shrink-0 rounded-full transition-all flex items-center p-1 cursor-pointer ${
+                       maintenanceMode ? 'bg-amber-500' : 'bg-gray-100 dark:bg-white/10'
+                     }`}>
+                       <div className={`h-5 w-5 bg-white rounded-full shadow-lg transition-all ${maintenanceMode ? 'translate-x-5' : 'translate-x-0'}`} />
+                     </div>
+                   </label>
+
+                   {maintenanceMode && (
+                     <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-[13px] font-semibold text-amber-700 dark:text-amber-400">
+                       ⚠️ Visitors will see the maintenance page. Whitelisted IPs can still access the site normally.
+                     </div>
+                   )}
+
+                   {/* Whitelist */}
+                   <div className="space-y-2">
+                     <label className="text-[10px] font-black uppercase text-zinc-500">Whitelisted IPs</label>
+                     <p className="text-[12px] text-zinc-500 font-medium -mt-1">Comma-separated. These IPs bypass maintenance mode.</p>
+                     <input
+                       type="text"
+                       value={maintenanceWhitelist}
+                       onChange={e => setMaintenanceWhitelist(e.target.value)}
+                       className="w-full h-14 px-5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-transparent focus:border-amber-300 dark:focus:border-amber-500/40 font-mono text-[13px] outline-none transition-all"
+                       placeholder="192.168.1.1, 10.0.0.1"
+                     />
+                   </div>
+
+                   {/* Save (separate from main save) */}
+                   <div className="flex justify-end pt-2">
+                     <button
+                       onClick={handleSaveMaintenance}
+                       disabled={isMaintPending}
+                       className="h-12 px-8 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black text-[12px] uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50"
+                     >
+                       {isMaintPending ? 'Saving…' : 'Save Maintenance Settings'}
+                     </button>
+                   </div>
+                 </div>
+               )}
+             </div>
           </div>
 
           <div className="p-4 bg-zinc-50 dark:bg-white/5 flex justify-end items-center gap-4 mt-auto border-t border-indigo-50 dark:border-white/5">

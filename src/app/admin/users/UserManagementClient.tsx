@@ -8,9 +8,8 @@ import { Input, Select, Label } from '@/components/ui/Input';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from '@/components/ui/Modal';
 import { toast } from 'sonner';
 import {
-  UserPlus, Mail, Edit2, Trash2,
-  Slash, Ban, CheckCircle, Search, Download, User, Clock, KeyRound, MoreVertical, Users,
-  Activity, FileText, ChevronRight, LayoutGrid, CalendarDays
+  UserPlus, Mail, Edit2, Trash2, Slash, Ban, CheckCircle2, Search, Download, User, Clock, KeyRound, MoreVertical, Users,
+  Activity, FileText, ChevronRight, LayoutGrid, CalendarDays, ShieldCheck, Globe, Monitor, Sidebar, ShieldAlert, Send
 } from 'lucide-react';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import {
@@ -33,7 +32,9 @@ import {
   inviteUserAction,
   toggleStatusAction,
   sendPasswordResetAction,
-  getUserActivityStatsAction
+  getUserActivityStatsAction,
+  revokeSessionsAction,
+  bulkUserAction
 } from './actions';
 
 interface UserProfile {
@@ -44,23 +45,30 @@ interface UserProfile {
   status: string;
   created_at: string;
   last_sign_in_at?: string | null;
+  last_sign_in_ip?: string | null;
+  last_sign_in_agent?: string | null;
+  account_notes?: string | null;
   avatar_url?: string | null;
   permissions?: {
     can_articles: boolean;
     can_sequels: boolean;
     can_library: boolean;
+    can_publish_articles?: boolean;
+    can_publish_sequels?: boolean;
+    can_publish_library?: boolean;
   };
 }
 
 const ROLE_META: Record<string, { label: string; color: string }> = {
   super_admin: { label: 'S. Admin', color: 'border-[var(--color-text)]/10 bg-[var(--color-text)]/5 text-[var(--color-text)]/70' },
   admin:       { label: 'Admin',    color: 'border-[var(--color-text)]/10 bg-[var(--color-text)]/5 text-[var(--color-text)]/70' },
-  editor:      { label: 'Editor',   color: 'border-[var(--color-text)]/10 bg-[var(--color-text)]/5 text-[var(--color-text)]/70' },
+  editor:      { label: 'Editor',   color: 'border-indigo-100 bg-indigo-50 text-indigo-600' },
+  contributor: { label: 'Collab',   color: 'border-emerald-100 bg-emerald-50 text-emerald-600' },
   reader:      { label: 'Reader',   color: 'border-[var(--color-text)]/5 text-[var(--color-muted)]' },
 };
 
 const STATUS_META: Record<string, { label: string; color: string; icon: React.ElementType; bg: string }> = {
-  active:    { label: 'Active',    color: 'text-emerald-500', bg: 'bg-emerald-500/10', icon: CheckCircle },
+  active:    { label: 'Active',    color: 'text-emerald-500', bg: 'bg-emerald-500/10', icon: CheckCircle2 },
   suspended: { label: 'Suspended', color: 'text-amber-500',   bg: 'bg-amber-500/10',   icon: Slash },
   banned:    { label: 'Banned',    color: 'text-red-500',     bg: 'bg-red-500/10',     icon: Ban },
 };
@@ -74,6 +82,7 @@ export default function UserManagementClient({
 }) {
   const [isPending, startTransition] = useTransition();
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // View Modes (ARRANGE LIKE: Users, Readers, Subscribed)
   const [viewMode, setViewMode] = useState<'users' | 'readers' | 'subscribed'>('users');
@@ -103,57 +112,66 @@ export default function UserManagementClient({
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      if (searchParams?.get('invite') === 'true') setShowInvite(true);
-    }, 0);
-    return () => clearTimeout(t);
-  }, [pathname, searchParams]);
-
-  const handleUserClick = async (u: UserProfile) => {
-    setSelectedUser(u);
-    setIsDrawerOpen(true);
-    setDrawerLoading(true);
-    setDrawerStats(null);
-    try {
-      const res = await getUserActivityStatsAction(u.id);
-      if (res.success && res.stats) {
-        setDrawerStats({ stats: res.stats, recentWork: res.recentWork || [] });
-      }
-    } finally {
-      setDrawerLoading(false);
+    if (searchParams?.get('invite') === 'true') {
+      setShowInvite(true);
     }
-  };
+  }, [searchParams, pathname]);
 
   const filteredUsers = useMemo(() => {
     return initialUsers.filter(u => {
-      // First filter by View Mode (Tab)
-      if (viewMode === 'users') {
-        if (!['super_admin', 'admin', 'editor'].includes(u.role)) return false;
-      } else if (viewMode === 'readers') {
-        if (u.role !== 'reader') return false;
-      } else if (viewMode === 'subscribed') {
-        return false; // No logic yet
-      }
+      const matchSearch =
+        u.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        u.email?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const roleMatch = roleFilter === 'all' || u.role === roleFilter;
+      const statusMatch = statusFilter === 'all' || u.status === statusFilter;
 
-      // Then filter by Action Bar filters
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        if (!u.email?.toLowerCase().includes(q) && !u.full_name?.toLowerCase().includes(q)) return false;
-      }
-      if (roleFilter !== 'all' && u.role !== roleFilter) return false;
-      if (statusFilter !== 'all' && u.status !== statusFilter) return false;
-      return true;
+      if (viewMode === 'users') return matchSearch && roleMatch && statusMatch && (u.role === 'admin' || u.role === 'super_admin' || u.role === 'editor' || u.role === 'contributor');
+      if (viewMode === 'readers') return matchSearch && u.role === 'reader';
+      return matchSearch;
     });
-  }, [initialUsers, searchQuery, roleFilter, statusFilter, viewMode]);
+  }, [initialUsers, searchQuery, viewMode, roleFilter, statusFilter]);
 
-  // Grouped Staff
   const groupedStaff = useMemo(() => {
     if (viewMode !== 'users') return null;
-    const roleOrder = ['super_admin', 'admin', 'editor'];
-    const groups: Record<string, UserProfile[]> = { super_admin: [], admin: [], editor: [] };
+    const roleOrder = ['super_admin', 'admin', 'editor', 'contributor'];
+    const groups: Record<string, UserProfile[]> = { super_admin: [], admin: [], editor: [], contributor: [] };
     filteredUsers.forEach(u => { if (groups[u.role]) groups[u.role].push(u); });
     return roleOrder.map(r => ({ role: r, users: groups[r] })).filter(g => g.users.length > 0);
   }, [filteredUsers, viewMode]);
+
+  const toggleSelect = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelectedIds(next);
+  };
+
+  const selectAll = () => {
+    if (selectedIds.size === filteredUsers.length) setSelectedIds(new Set());
+    else setSelectedIds(new Set(filteredUsers.map(u => u.id)));
+  };
+
+  async function handleBulkAction(action: 'role' | 'status' | 'delete' | 'revoke', value?: string) {
+    if (!selectedIds.size || isPending) return;
+    startTransition(async () => {
+      const res = await bulkUserAction(Array.from(selectedIds), action, value);
+      if (res.error) toast.error(res.error);
+      else {
+        toast.success(res.message);
+        setSelectedIds(new Set());
+      }
+    });
+  }
+
+  async function handleRevokeSessions(userId: string) {
+    if (isPending) return;
+    startTransition(async () => {
+      const res = await revokeSessionsAction(userId);
+      if (res.error) toast.error(res.error);
+      else toast.success(res.message);
+    });
+  }
 
   async function handleAction(
     action: (fd: FormData) => Promise<{ error?: string; success?: boolean; message?: string }>,
@@ -176,10 +194,14 @@ export default function UserManagementClient({
       u.last_sign_in_at ? new Date(u.last_sign_in_at).toISOString() : 'Never',
     ]);
     const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-    a.download = 'users_export.csv';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    const b = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(b);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'users_export.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const formatDate = (iso?: string | null, fallback = '—') => {
@@ -201,9 +223,26 @@ export default function UserManagementClient({
     return formatDate(iso);
   };
 
+  const openDrawerForUser = async (user: UserProfile) => {
+    setSelectedUser(user);
+    setIsDrawerOpen(true);
+    setDrawerLoading(true);
+    setDrawerStats(null);
+    try {
+      const res = await getUserActivityStatsAction(user.id);
+      if (res.success && res.stats) {
+        setDrawerStats({ stats: res.stats, recentWork: res.recentWork || [] });
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setDrawerLoading(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-3">
-      {/* ── Action Bar (Consolidated & Compact) ── */}
+    <div className="flex flex-col gap-3 pb-24">
+      {/* ── Action Bar ── */}
       <div className="grid grid-cols-2 gap-2">
         <button 
           onClick={() => setShowInvite(true)} 
@@ -219,12 +258,12 @@ export default function UserManagementClient({
         </button>
       </div>
 
-      {/* ── Tabs (Minimal) ── */}
+      {/* ── Tabs ── */}
       <div className="flex bg-[var(--color-surface-2)]/50 p-1 rounded-xl border border-[var(--color-border)] relative">
         {(['users', 'readers', 'subscribed'] as const).map((mode) => (
           <button
             key={mode}
-            onClick={() => setViewMode(mode)}
+            onClick={() => { setViewMode(mode); setSelectedIds(new Set()); }}
             className={`relative flex-1 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] rounded-lg transition-all duration-300 ${
               viewMode === mode 
                 ? 'text-[var(--color-primary)]' 
@@ -239,211 +278,315 @@ export default function UserManagementClient({
         ))}
       </div>
 
-      {/* ── Search & Filter Row (Single Compact Row) ── */}
+      {/* ── Search ── */}
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" strokeWidth={2.5} />
           <input
-            placeholder={`Search...`}
+            placeholder={`Search ${viewMode}...`}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             className="w-full h-10 pl-10 pr-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[15px] font-medium focus:border-[var(--color-primary)]/40 outline-none transition-all placeholder:text-[var(--color-muted)]/30"
           />
         </div>
-
-        {viewMode === 'users' && (
-          <div className="relative group min-w-[120px]">
-            <select 
-              value={roleFilter} 
-              onChange={e => setRoleFilter(e.target.value)}
-              className="w-full h-10 pl-3 pr-8 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[11px] font-bold uppercase tracking-wider text-[var(--color-text)] outline-none appearance-none cursor-pointer hover:bg-[var(--color-surface-2)]"
-            >
-              <option value="all">Roles</option>
-              <option value="super_admin">S.Admin</option>
-              <option value="admin">Admin</option>
-              <option value="editor">Editor</option>
-            </select>
-            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-muted)]">
-              <Users size={12} strokeWidth={2.5} />
-            </div>
-          </div>
-        )}
-
-        <button 
-          onClick={exportCSV} 
-          className="w-10 h-10 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-text)] transition-all flex items-center justify-center shadow-sm shrink-0"
-        >
-          <Download className="w-4 h-4" strokeWidth={2.5} />
-        </button>
-      </div>
-
-      {/* ── Stats bar ── */}
-      <div className="flex gap-3 flex-wrap text-[12px] font-bold text-[var(--color-muted)]/80 px-1">
-        <span>{filteredUsers.length} {viewMode === 'users' ? 'Staff Members' : viewMode === 'readers' ? 'Readers' : 'Subscribers'}</span>
-        {viewMode === 'users' && (
-          <>
-            <span>·</span>
-            <span>{initialUsers.filter(u => u.role === 'super_admin').length} Super Admins</span>
-          </>
-        )}
-        {initialUsers.filter(u => u.status !== 'active').length > 0 && (
-          <>
-            <span>·</span>
-            <span className="text-amber-600">{initialUsers.filter(u => u.status !== 'active').length} Restricted</span>
-          </>
+        {filteredUsers.length > 0 && (
+          <button 
+            onClick={selectAll}
+            className={`h-10 px-4 rounded-xl border border-[var(--color-border)] text-[10px] font-black uppercase tracking-widest transition-all ${selectedIds.size === filteredUsers.length ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]' : 'bg-[var(--color-surface)] text-[var(--color-muted)] hover:bg-[var(--color-surface-2)]'}`}
+          >
+            {selectedIds.size === filteredUsers.length ? 'Deselect' : 'Select All'}
+          </button>
         )}
       </div>
 
-      {/* ── User List / Groups ── */}
-      <div className="space-y-8">
-        {viewMode === 'subscribed' ? (
-          <PresenceCard className="py-24 text-center flex flex-col items-center border-dashed border-2 border-[var(--color-border)]">
-            <Mail className="w-10 h-10 text-[var(--color-muted)] mb-4 opacity-20" />
-            <h3 className="text-lg font-bold text-[var(--color-text)] mb-1">No Active Subscriptions</h3>
-            <p className="text-sm text-[var(--color-muted)] max-w-xs mx-auto">
-              Subscription billing is not yet enabled. Once active, your paying members will appear here.
-            </p>
-          </PresenceCard>
-        ) : filteredUsers.length === 0 ? (
-          <PresenceCard className="py-20 text-center flex flex-col items-center border-dashed border-2 border-[var(--color-border)]">
-            <User className="w-14 h-14 mb-4 text-[var(--color-border)]" />
-            <p className="font-bold text-[16px] text-[var(--color-muted)]">No users found</p>
-            <p className="text-[13px] text-[var(--color-muted)]/60 mt-1">Try adjusting filters</p>
-          </PresenceCard>
-        ) : viewMode === 'users' ? (
-          <div className="space-y-12">
-            {groupedStaff?.map((group) => (
-              <div key={group.role} className="relative">
-                <div className="flex items-center gap-3 mb-6 px-1">
-                  <span className="text-[11px] font-black uppercase tracking-[0.2em] text-[var(--color-text)] opacity-40">
-                    {ROLE_META[group.role]?.label || group.role}
-                  </span>
-                  <div className="h-[1px] flex-1 bg-gradient-to-r from-[var(--color-border)] to-transparent" />
-                  <span className="text-[11px] font-black text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2 py-0.5 rounded-md min-w-[24px] text-center">
-                    {group.users.length}
-                  </span>
-                </div>
-
-                <div className="space-y-3">
-                  {group.users.map(u => (
-                    <UserCard key={u.id} user={u} onUserClick={handleUserClick} setSelectedUser={setSelectedUser} setShowStatus={setShowStatus} setShowEdit={setShowEdit} setShowReset={setShowReset} setShowDelete={setShowDelete} />
-                  ))}
-                </div>
+      {/* ── User Feed ── */}
+      <div className="flex flex-col gap-2 pt-2">
+        {viewMode === 'users' ? (
+          groupedStaff?.map(group => (
+            <div key={group.role} className="flex flex-col gap-2 mb-4">
+              <div className="flex items-center justify-between px-1">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-muted)] opacity-50">
+                  {ROLE_META[group.role]?.label || group.role}
+                </h3>
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[var(--color-surface-2)] text-[var(--color-muted)]">{group.users.length}</span>
               </div>
-            ))}
-          </div>
+              <div className="grid grid-cols-1 gap-2">
+                {group.users.map(u => (
+                  <UserCard 
+                    key={u.id} 
+                    user={u} 
+                    currentUserRole={currentUserRole}
+                    isSelected={selectedIds.has(u.id)}
+                    onSelect={() => toggleSelect(u.id)}
+                    onOpen={() => openDrawerForUser(u)}
+                    handleRevokeSessions={handleRevokeSessions}
+                    setShowDelete={setShowDelete}
+                    setShowEdit={setShowEdit}
+                    setShowStatus={setShowStatus}
+                    setShowReset={setShowReset}
+                    setSelectedUser={setSelectedUser}
+                  />
+                ))}
+              </div>
+            </div>
+          ))
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 gap-2">
             {filteredUsers.map(u => (
-               <UserCard key={u.id} user={u} onUserClick={handleUserClick} setSelectedUser={setSelectedUser} setShowStatus={setShowStatus} setShowEdit={setShowEdit} setShowReset={setShowReset} setShowDelete={setShowDelete} />
+              <UserCard 
+                key={u.id} 
+                user={u} 
+                currentUserRole={currentUserRole}
+                isSelected={selectedIds.has(u.id)}
+                onSelect={() => toggleSelect(u.id)}
+                onOpen={() => openDrawerForUser(u)}
+                handleRevokeSessions={handleRevokeSessions}
+                setShowDelete={setShowDelete}
+                setShowEdit={setShowEdit}
+                setShowStatus={setShowStatus}
+                setShowReset={setShowReset}
+                setSelectedUser={setSelectedUser}
+              />
             ))}
           </div>
         )}
       </div>
 
-      {/* ── USER DETAILS DRAWER (Premium Profile) ── */}
-      <BottomSheet 
-        isOpen={isDrawerOpen} 
-        onClose={() => setIsDrawerOpen(false)}
-        title="Profile Details"
-      >
+      {/* ── Bulk Action Bar ── */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] w-full max-w-[400px] px-4 animate-in slide-in-from-bottom-5 duration-500">
+          <div className="bg-zinc-900 border border-white/10 rounded-[2rem] p-4 shadow-2xl flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 pl-2">
+               <div className="w-8 h-8 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-xs font-black shadow-lg shadow-[var(--color-primary)]/20">
+                 {selectedIds.size}
+               </div>
+               <span className="text-[10px] font-black text-white uppercase tracking-widest">Selected</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+               <DropdownMenu>
+                 <DropdownMenuTrigger asChild>
+                    <PresenceButton className="h-10 px-4 rounded-xl bg-white/10 text-white text-[10px] font-black uppercase tracking-widest border border-white/10 hover:bg-white/20 transition-all">
+                      Roles
+                    </PresenceButton>
+                 </DropdownMenuTrigger>
+                 <DropdownMenuPortal>
+                   <DropdownMenuContent className="p-1 bg-zinc-900 border-white/10 rounded-xl w-36">
+                      <DropdownMenuItem onClick={() => handleBulkAction('role', 'editor')} className="text-white hover:bg-white/5 font-bold text-xs p-2 rounded-lg">Editor</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleBulkAction('role', 'contributor')} className="text-white hover:bg-white/5 font-bold text-xs p-2 rounded-lg">Contributor</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleBulkAction('role', 'reader')} className="text-white hover:bg-white/5 font-bold text-xs p-2 rounded-lg">Reader</DropdownMenuItem>
+                   </DropdownMenuContent>
+                 </DropdownMenuPortal>
+               </DropdownMenu>
+
+                <PresenceButton 
+                  onClick={() => handleBulkAction('revoke')}
+                  className="h-10 px-4 rounded-xl bg-amber-500/10 text-amber-500 text-[10px] font-black uppercase tracking-widest border border-amber-500/20 hover:bg-amber-500/20 transition-all"
+                >
+                  Revoke
+                </PresenceButton>
+
+                <PresenceButton 
+                  onClick={() => handleBulkAction('delete')}
+                  className="h-10 w-10 flex items-center justify-center rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500/20"
+                >
+                  <Trash2 size={16} />
+                </PresenceButton>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Detail Drawer ── */}
+      <BottomSheet isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
         {selectedUser && (
-          <div className="flex flex-col gap-6 pb-8">
-            <div className="flex items-center gap-4">
-               <div className={`w-20 h-20 rounded-3xl flex items-center justify-center text-[32px] font-bold text-white shadow-xl
-                 ${selectedUser.status === 'active' ? 'bg-[var(--color-primary)]' : 'bg-zinc-500'}`}>
-                 {selectedUser.avatar_url ? (
-                   <Image src={selectedUser.avatar_url} alt={selectedUser.full_name || ''} width={80} height={80} className="w-full h-full object-cover rounded-3xl" unoptimized />
-                 ) : (
-                   (selectedUser.full_name || '?').charAt(0).toUpperCase()
-                 )}
-               </div>
-               <div className="flex-1 min-w-0">
-                  <h2 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight leading-tight">
-                    {selectedUser.full_name || 'Member'}
-                  </h2>
-                  <p className="text-[14px] text-[var(--color-muted)] font-medium mt-0.5 truncate">{selectedUser.email}</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="px-2 py-0.5 rounded-lg bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[10px] font-black uppercase tracking-widest text-[var(--color-text)]/50">
-                      {ROLE_META[selectedUser.role]?.label || selectedUser.role}
-                    </span>
-                    <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest ${STATUS_META[selectedUser.status]?.bg} ${STATUS_META[selectedUser.status]?.color}`}>
-                      {STATUS_META[selectedUser.status]?.label}
-                    </span>
+          <div className="flex flex-col gap-6">
+            {/* Header */}
+            <div className="flex items-center gap-5 p-2">
+              <div className="w-20 h-20 rounded-[2rem] bg-[var(--color-surface-2)] overflow-hidden border border-[var(--color-border)] shadow-inner">
+                {selectedUser.avatar_url ? (
+                  <Image src={selectedUser.avatar_url} alt="" width={80} height={80} className="object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-[var(--color-muted)]">
+                    <User size={32} strokeWidth={1.5} />
                   </div>
-               </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-4 bg-[var(--color-surface-2)] rounded-2xl border border-[var(--color-border)]">
-                <CalendarDays size={16} className="text-[var(--color-muted)] mb-2" />
-                <p className="text-[11px] font-bold text-[var(--color-muted)] uppercase tracking-wider">Joined</p>
-                <p className="text-[15px] font-bold text-[var(--color-text)] mt-0.5">{formatDate(selectedUser.created_at)}</p>
-              </div>
-              <div className="p-4 bg-[var(--color-surface-2)] rounded-2xl border border-[var(--color-border)]">
-                <Clock size={16} className="text-[var(--color-muted)] mb-2" />
-                <p className="text-[11px] font-bold text-[var(--color-muted)] uppercase tracking-wider">Last Activity</p>
-                <p className="text-[15px] font-bold text-[var(--color-text)] mt-0.5">{formatRelative(selectedUser.last_sign_in_at) || 'Never'}</p>
-              </div>
-            </div>
-
-            {['super_admin', 'admin', 'editor'].includes(selectedUser.role) && (
-              <div className="space-y-4 pt-2 border-t border-[var(--color-border)]">
-                <div className="flex items-center justify-between">
-                   <h3 className="text-[13px] font-bold text-[var(--color-text)] uppercase tracking-widest px-1">Activity Stats</h3>
-                   {drawerLoading && <div className="animate-spin h-3 w-3 border-2 border-[var(--color-primary)] border-t-transparent rounded-full" />}
-                </div>
-
-                {drawerStats ? (
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-3 gap-2">
-                       <div className="flex flex-col items-center p-3 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)]">
-                         <span className="text-[18px] font-black text-[var(--color-text)]">{drawerStats.stats.published}</span>
-                         <span className="text-[9px] font-bold text-[#10b981] uppercase tracking-tighter">Published</span>
-                       </div>
-                       <div className="flex flex-col items-center p-3 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)]">
-                         <span className="text-[18px] font-black text-[var(--color-text)]">{drawerStats.stats.drafted}</span>
-                         <span className="text-[9px] font-bold text-[var(--color-muted)] uppercase tracking-tighter">Drafted</span>
-                       </div>
-                       <div className="flex flex-col items-center p-3 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)]">
-                         <span className="text-[18px] font-black text-[var(--color-text)]">{drawerStats.stats.inReview}</span>
-                         <span className="text-[9px] font-bold text-amber-500 uppercase tracking-tighter">In Review</span>
-                       </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <p className="text-[12px] font-bold text-[var(--color-muted)] uppercase tracking-widest px-1">Recent Articles</p>
-                      {drawerStats.recentWork.length === 0 ? (
-                        <div className="py-8 text-center bg-[var(--color-surface-2)]/50 rounded-2xl text-[13px] text-[var(--color-muted)] italic">
-                          No articles written yet
-                        </div>
-                      ) : (
-                        drawerStats.recentWork.map(art => (
-                          <div key={art.id} className="flex items-center justify-between p-3 bg-[var(--color-surface-2)] rounded-xl border border-[var(--color-border)] shadow-sm">
-                            <div className="min-w-0 mr-3">
-                              <p className="text-[14px] font-bold text-[var(--color-text)] truncate">{art.title}</p>
-                              <p className="text-[11px] text-[var(--color-muted)] opacity-60 mt-0.5">{formatDate(art.created_at)}</p>
-                            </div>
-                            <span className={`shrink-0 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter
-                              ${art.status === 'published' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-zinc-500/10 text-zinc-500'}`}>
-                              {art.status}
-                            </span>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                ) : !drawerLoading && (
-                   <div className="p-4 text-center text-[var(--color-muted)] text-[12px]">Click a name to load detailed activity</div>
                 )}
               </div>
-            )}
+              <div className="flex-1">
+                <h3 className="text-xl font-black text-[var(--color-text)] uppercase tracking-tight leading-none mb-1.5">{selectedUser.full_name || 'Incognito User'}</h3>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${ROLE_META[selectedUser.role]?.color}`}>
+                    {ROLE_META[selectedUser.role]?.label || selectedUser.role}
+                  </span>
+                  <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${STATUS_META[selectedUser.status]?.bg} ${STATUS_META[selectedUser.status]?.color}`}>
+                    {selectedUser.status}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Info Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-4 bg-[var(--color-surface-2)] rounded-[2rem] border border-[var(--color-border)] flex flex-col gap-1">
+                 <span className="text-[9px] font-black text-[var(--color-muted)] uppercase tracking-widest">Email</span>
+                 <p className="text-[12px] font-bold text-[var(--color-text)] truncate">{selectedUser.email}</p>
+              </div>
+              <div className="p-4 bg-[var(--color-surface-2)] rounded-[2rem] border border-[var(--color-border)] flex flex-col gap-1">
+                 <span className="text-[9px] font-black text-[var(--color-muted)] uppercase tracking-widest">Joined</span>
+                 <p className="text-[12px] font-bold text-[var(--color-text)]">{formatDate(selectedUser.created_at)}</p>
+              </div>
+            </div>
+
+            {/* Security Audit (IP / Agent) */}
+            <div className="p-5 bg-[var(--color-surface-2)] rounded-[2.5rem] border border-[var(--color-border)] space-y-4">
+              <div className="flex items-center justify-between">
+                 <h4 className="text-[10px] font-black text-[var(--color-text)] uppercase tracking-[0.2em] flex items-center gap-2">
+                   <ShieldCheck size={14} className="text-[var(--color-primary)]" /> Security Baseline
+                 </h4>
+                 <span className="text-[9px] font-bold text-[var(--color-muted)]">Verified</span>
+              </div>
+              <div className="grid grid-cols-1 gap-3">
+                 <div className="flex items-center gap-3">
+                   <div className="p-2 rounded-lg bg-white shadow-sm border border-[var(--color-border)]"><Globe size={14} className="text-indigo-500" /></div>
+                   <div className="flex flex-col">
+                      <span className="text-[8px] font-black text-[var(--color-muted)] uppercase tracking-widest">Last Access IP</span>
+                      <span className="text-[11px] font-mono font-bold">{selectedUser.last_sign_in_ip || 'Not logged'}</span>
+                   </div>
+                 </div>
+                 <div className="flex items-center gap-3">
+                   <div className="p-2 rounded-lg bg-white shadow-sm border border-[var(--color-border)]"><Monitor size={14} className="text-emerald-500" /></div>
+                   <div className="flex flex-col">
+                      <span className="text-[8px] font-black text-[var(--color-muted)] uppercase tracking-widest">Browser / OS</span>
+                      <span className="text-[11px] font-bold truncate max-w-[200px]">{selectedUser.last_sign_in_agent || 'Unknown Agent'}</span>
+                   </div>
+                 </div>
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="space-y-3">
+              <h4 className="text-[10px] font-black text-[var(--color-muted)] uppercase tracking-[0.2em] px-2 opacity-50 flex items-center gap-2">
+                <Activity size={12} /> Contributions & Work
+              </h4>
+              {drawerLoading ? (
+                <div className="h-20 bg-[var(--color-surface-2)] rounded-[2rem] animate-pulse" />
+              ) : drawerStats ? (
+                <div className="flex flex-col gap-4">
+                  <div className="grid grid-cols-4 gap-2">
+                    {[
+                      { l: 'Total', v: drawerStats.stats.total, c: 'bg-[var(--color-surface)] text-[var(--color-text)]' },
+                      { l: 'Live', v: drawerStats.stats.published, c: 'bg-emerald-50 text-emerald-600' },
+                      { l: 'Review', v: drawerStats.stats.inReview, c: 'bg-amber-50 text-amber-600' },
+                      { l: 'Drafts', v: drawerStats.stats.drafted, c: 'bg-zinc-100 text-zinc-600' },
+                    ].map(s => (
+                      <div key={s.l} className={`p-3 rounded-2xl border border-[var(--color-border)] flex flex-col items-center gap-1 ${s.c}`}>
+                        <span className="text-[14px] font-black">{s.v}</span>
+                        <span className="text-[7px] font-black uppercase tracking-widest opacity-60">{s.l}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-[9px] font-black text-[var(--color-muted)] uppercase tracking-widest px-2">Most Recent Articles</p>
+                    <div className="flex flex-col gap-2">
+                      {drawerStats.recentWork.length === 0 ? (
+                        <p className="text-[10px] p-4 text-center bg-[var(--color-surface-2)] rounded-2xl italic text-[var(--color-muted)]">No articles created yet</p>
+                      ) : drawerStats.recentWork.map(art => (
+                        <div key={art.id} className="flex items-center justify-between p-3 bg-[var(--color-surface-2)] rounded-xl border border-[var(--color-border)] group">
+                           <div className="flex-1 min-w-0">
+                             <p className="text-[12px] font-bold text-[var(--color-text)] truncate">{art.title}</p>
+                             <p className="text-[8px] font-black uppercase tracking-widest text-[var(--color-muted)]">{formatDate(art.created_at)}</p>
+                           </div>
+                           <ChevronRight size={14} className="text-[var(--color-muted)] group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 text-center bg-rose-50 text-rose-500 rounded-2xl text-[10px] font-bold">Failed to load stats</div>
+              )}
+            </div>
+
+            {/* Account Notes */}
+            <div className="p-4 bg-zinc-50 dark:bg-zinc-950 rounded-[2rem] border border-dashed border-zinc-200 dark:border-zinc-800">
+               <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest block mb-1">Administrative Notes</span>
+               <p className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400 leading-relaxed italic">
+                 {selectedUser.account_notes || 'No internal notes added for this profile.'}
+               </p>
+            </div>
+
+            {/* Security Activity (New) */}
+            <div className="space-y-3">
+               <h4 className="text-[10px] font-black text-[var(--color-muted)] uppercase tracking-[0.2em] px-2 opacity-50 flex items-center gap-2">
+                 <ShieldAlert size={12} /> Security Activity Log
+               </h4>
+               {drawerLoading ? (
+                 <div className="h-40 bg-[var(--color-surface-2)] rounded-[2rem] animate-pulse" />
+               ) : (drawerStats as any)?.auditLogs?.length === 0 ? (
+                 <div className="p-8 text-center bg-zinc-50 dark:bg-zinc-950 rounded-[2rem] border border-zinc-100 dark:border-zinc-900 italic text-[10px] text-[var(--color-muted)]">
+                   No security events recorded.
+                 </div>
+               ) : (
+                 <div className="flex flex-col gap-2">
+                    {(drawerStats as any).auditLogs.map((log: any) => (
+                      <div key={log.id} className="p-3 bg-[var(--color-surface-2)] rounded-2xl border border-[var(--color-border)] flex flex-col gap-2">
+                         <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-2">
+                               <div className="w-6 h-6 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+                                  <Activity size={12} strokeWidth={2.5} />
+                               </div>
+                               <span className="text-[10px] font-black font-mono text-zinc-900 dark:text-zinc-50 uppercase tracking-tighter truncate max-w-[150px]">
+                                  {log.action.replace(/_/g, ' ')}
+                               </span>
+                            </div>
+                            <span className="text-[8px] font-black text-[var(--color-muted)] uppercase tracking-widest opacity-40">
+                               {new Date(log.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} • {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                         </div>
+                         <div className="flex items-center gap-3 opacity-60">
+                            <div className="flex items-center gap-1">
+                               <Globe size={10} className="text-zinc-400" />
+                               <span className="text-[9px] font-bold font-mono text-zinc-500">{log.ip_address || '?.?.?.?'}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                               <Monitor size={10} className="text-zinc-400" />
+                               <span className="text-[9px] font-bold text-zinc-500 truncate max-w-[120px]">{log.user_agent?.split(' ')[0] || 'Unknown'} Browser</span>
+                            </div>
+                         </div>
+                      </div>
+                    ))}
+                 </div>
+               )}
+            </div>
+            
+            <div className="flex gap-2 pt-4">
+              <PresenceButton 
+                variant="outline" 
+                className="flex-1 rounded-2xl h-14" 
+                onClick={() => { setIsDrawerOpen(false); setSelectedUser(selectedUser); setShowEdit(true); }}
+              >
+                <Edit2 size={16} className="mr-2" /> Modify Profile
+              </PresenceButton>
+              <PresenceButton 
+                variant="outline" 
+                className="flex-1 rounded-2xl h-14 bg-amber-50 text-amber-600 border-amber-100 hover:bg-amber-100"
+                onClick={() => handleRevokeSessions(selectedUser.id)}
+                loading={isPending}
+              >
+                <KeyRound size={16} className="mr-2" /> Revoke Sessions
+              </PresenceButton>
+              <PresenceButton 
+                className="flex-1 rounded-2xl h-14 bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                onClick={exportCSV}
+              >
+                <Download size={16} className="mr-2" /> Export
+              </PresenceButton>
+            </div>
           </div>
         )}
       </BottomSheet>
 
-      {/* ── MODALS ── */}
-
+      {/* ── All Modals (Integrated with new fields) ── */}
       <Modal open={showReset} onOpenChange={setShowReset}>
         <ModalContent>
           {selectedUser && (
@@ -483,6 +626,7 @@ export default function UserManagementClient({
                 <Label>Role</Label>
                 <Select name="role">
                   <option value="reader">Reader</option>
+                  <option value="contributor">Contributor (Collab)</option>
                   <option value="editor">Editor</option>
                   <option value="admin">Admin</option>
                   {currentUserRole === 'super_admin' && <option value="super_admin">Super Admin</option>}
@@ -518,6 +662,7 @@ export default function UserManagementClient({
             <div className="space-y-1.5">
               <Label>Initial Role</Label>
               <Select name="role">
+                <option value="contributor">Contributor</option>
                 <option value="editor">Editor</option>
                 <option value="admin">Admin</option>
               </Select>
@@ -539,37 +684,69 @@ export default function UserManagementClient({
               </ModalHeader>
               <form action={fd => handleAction(updateUserAction, fd, () => setShowEdit(false))} className="space-y-4 pt-2 text-left">
                 <input type="hidden" name="userId" value={selectedUser.id} />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label>Full Name</Label>
+                    <Input name="full_name" defaultValue={selectedUser.full_name || ''} required />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Role</Label>
+                    <Select name="role" defaultValue={selectedUser.role}>
+                      <option value="reader">Reader</option>
+                      <option value="contributor">Contributor</option>
+                      <option value="editor">Editor</option>
+                      <option value="admin">Admin</option>
+                      {currentUserRole === 'super_admin' && <option value="super_admin">Super Admin</option>}
+                    </Select>
+                  </div>
+                </div>
+
                 <div className="space-y-1.5">
-                  <Label>Full Name</Label>
-                  <Input name="full_name" defaultValue={selectedUser.full_name || ''} required />
+                   <Label>Account Notes</Label>
+                   <textarea name="account_notes" defaultValue={selectedUser.account_notes || ''} className="w-full p-4 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm font-medium h-20 resize-none" placeholder="Internal notes for this user..." />
                 </div>
-                <div className="space-y-1.5">
-                  <Label>Role</Label>
-                  <Select name="role" defaultValue={selectedUser.role}>
-                    <option value="reader">Reader</option>
-                    <option value="editor">Editor</option>
-                    <option value="admin">Admin</option>
-                    {currentUserRole === 'super_admin' && <option value="super_admin">Super Admin</option>}
-                  </Select>
+
+                <div className="space-y-3 pt-3 border-t border-[var(--color-border)]">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-muted)] flex items-center gap-2">
+                    <Sidebar size={12} /> Granular Access Control
+                  </p>
+                  
+                  <div className="grid grid-cols-1 gap-1.5">
+                    {[
+                      { id: 'can_articles', label: 'Article Section', pub: 'can_publish_articles', pubLabel: 'Can Publish Articles' },
+                      { id: 'can_sequels', label: 'Sequel Section', pub: 'can_publish_sequels', pubLabel: 'Can Publish Sequels' },
+                      { id: 'can_library', label: 'Library Section', pub: 'can_publish_library', pubLabel: 'Can Publish Library' },
+                    ].map(p => (
+                      <div key={p.id} className="space-y-1.5">
+                        <label className="flex items-center justify-between p-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] cursor-pointer hover:bg-[var(--color-surface)] transition-colors group">
+                          <div className="flex flex-col">
+                            <span className="text-[13px] font-bold text-[var(--color-text)]">{p.label}</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest opacity-40">View / Write Access</span>
+                          </div>
+                          <input
+                            type="checkbox"
+                            name={p.id}
+                            defaultChecked={(selectedUser.permissions as any)?.[p.id] ?? true}
+                            className="w-5 h-5 rounded-lg border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)] transition-all"
+                          />
+                        </label>
+                        <label className="flex items-center justify-between p-3 ml-6 rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface-2)]/50 cursor-pointer hover:bg-[var(--color-surface)] transition-colors group">
+                          <div className="flex flex-col">
+                            <span className="text-[12px] font-bold text-emerald-600">Publishing Auth</span>
+                            <span className="text-[8px] font-black uppercase tracking-widest opacity-40">Make Content Live</span>
+                          </div>
+                          <input
+                            type="checkbox"
+                            name={p.pub}
+                            defaultChecked={(selectedUser.permissions as any)?.[p.pub] ?? true}
+                            className="w-4 h-4 rounded-lg border-gray-300 text-emerald-500 focus:ring-emerald-500 transition-all"
+                          />
+                        </label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="space-y-2 pt-3 border-t border-[var(--color-border)]">
-                  <p className="text-[11px] font-black uppercase tracking-widest text-[var(--color-muted)]">Content Access</p>
-                  {[
-                    { id: 'can_articles', label: 'Articles', key: 'can_articles' },
-                    { id: 'can_sequels', label: 'Sequels', key: 'can_sequels' },
-                    { id: 'can_library', label: 'Library', key: 'can_library' },
-                  ].map(p => (
-                    <label key={p.id} className="flex items-center justify-between p-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] cursor-pointer hover:bg-[var(--color-surface)] transition-colors">
-                      <span className="text-[13px] font-semibold text-[var(--color-text)]">{p.label}</span>
-                      <input
-                        type="checkbox"
-                        name={p.id}
-                        defaultChecked={(selectedUser.permissions as any)?.[p.key] ?? true}
-                        className="w-4 h-4 rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
-                      />
-                    </label>
-                  ))}
-                </div>
+
                 <ModalFooter>
                   <Button type="button" variant="outline" onClick={() => setShowEdit(false)}>Cancel</Button>
                   <Button type="submit" loading={isPending}>Save Changes</Button>
@@ -586,6 +763,7 @@ export default function UserManagementClient({
             <>
               <ModalHeader>
                 <ModalTitle className="text-rose-500">Delete Account?</ModalTitle>
+                <ModalDescription>This action is irreversible. All authentication data for {selectedUser.email} will be purged.</ModalDescription>
               </ModalHeader>
               <form action={fd => handleAction(deleteUserAction, fd, () => setShowDelete(false))}>
                 <input type="hidden" name="userId" value={selectedUser.id} />
@@ -604,28 +782,21 @@ export default function UserManagementClient({
           {selectedUser && (
             <>
               <ModalHeader>
-                <ModalTitle>Manage Account Access</ModalTitle>
+                <ModalTitle>Account Status: {selectedUser.full_name || selectedUser.email}</ModalTitle>
               </ModalHeader>
-              <form action={fd => handleAction(toggleStatusAction, fd, () => setShowStatus(false))} className="space-y-4 pt-2">
+              <form action={fd => handleAction(toggleStatusAction as any, fd, () => setShowStatus(false))} className="space-y-4 pt-2 text-left">
                 <input type="hidden" name="userId" value={selectedUser.id} />
-                <div className="grid grid-cols-1 gap-2">
-                  {[
-                    { val: 'active',    label: 'Active',    icon: CheckCircle, col: 'text-emerald-500' },
-                    { val: 'suspended', label: 'Suspended', icon: Slash, col: 'text-amber-500' },
-                    { val: 'banned',    label: 'Banned',    icon: Ban, col: 'text-red-500' },
-                  ].map(s => (
-                    <label key={s.val} className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${selectedUser.status === s.val ? 'bg-[var(--color-surface-2)] border-[var(--color-primary)]/50' : 'border-[var(--color-border)]'}`}>
-                      <input type="radio" name="status" value={s.val} defaultChecked={selectedUser.status === s.val} className="sr-only" />
-                      <div className={`w-9 h-9 rounded-xl border border-[var(--color-border)] flex items-center justify-center ${s.col}`}>
-                        <s.icon className="w-4 h-4" />
-                      </div>
-                      <p className={`text-[13px] font-bold ${s.col}`}>{s.label}</p>
-                    </label>
-                  ))}
+                <div className="space-y-1.5">
+                  <Label>Status</Label>
+                  <Select name="status" defaultValue={selectedUser.status}>
+                    <option value="active">Active</option>
+                    <option value="suspended">Suspended</option>
+                    <option value="banned">Banned</option>
+                  </Select>
                 </div>
                 <ModalFooter>
                   <Button type="button" variant="outline" onClick={() => setShowStatus(false)}>Cancel</Button>
-                  <Button type="submit" loading={isPending}>Update Status</Button>
+                  <Button type="submit" loading={isPending}>Save Status</Button>
                 </ModalFooter>
               </form>
             </>
@@ -636,68 +807,100 @@ export default function UserManagementClient({
   );
 }
 
-function UserCard({ user: u, onUserClick, setSelectedUser, setShowStatus, setShowEdit, setShowReset, setShowDelete }: any) {
-  const initials = (u.full_name || u.email || '?').charAt(0).toUpperCase();
+function UserCard({ user, currentUserRole, isSelected, onSelect, onOpen, setShowDelete, setShowEdit, setShowStatus, setShowReset, setSelectedUser, handleRevokeSessions }: { 
+  user: UserProfile; 
+  currentUserRole: string;
+  isSelected: boolean;
+  onSelect: () => void;
+  onOpen: () => void;
+  setShowDelete: (v: boolean) => void;
+  setShowEdit: (v: boolean) => void;
+  setShowStatus: (v: boolean) => void;
+  setShowReset: (v: boolean) => void;
+  setSelectedUser: (u: UserProfile) => void;
+  handleRevokeSessions: (id: string) => void;
+}) {
+  const status = STATUS_META[user.status] || STATUS_META.active;
+  const role = ROLE_META[user.role] || ROLE_META.reader;
 
-  const formatRelative = (iso?: string | null) => {
-    if (!iso) return null;
-    const diff = Date.now() - new Date(iso).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'Just now';
-    if (mins < 60) return `${mins}m ago`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
-    const days = Math.floor(hrs / 24);
-    if (days < 30) return `${days}d ago`;
-    return iso.split('T')[0];
+  const handleAction = (u: UserProfile, openFn: (v: boolean) => void) => {
+    setSelectedUser(u);
+    openFn(true);
   };
 
-  const lastSeen = formatRelative(u.last_sign_in_at);
-
   return (
-    <div className="group relative">
-      <div className="flex items-center p-3.5 bg-[var(--color-surface)] rounded-[2rem] border border-[var(--color-border)] hover:border-[var(--color-primary)]/30 hover:shadow-2xl transition-all duration-300 gap-4">
-        <div onClick={() => onUserClick(u)} className="relative shrink-0 cursor-pointer overflow-hidden rounded-2xl">
-          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-[18px] font-bold text-white shadow-sm transition-all duration-500 ${u.status === 'active' ? 'bg-gradient-to-br from-[var(--color-primary)] to-indigo-600' : 'bg-zinc-500'}`}>
-            {u.avatar_url ? (
-              <Image src={u.avatar_url} alt={u.full_name || ''} width={48} height={48} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" unoptimized />
-            ) : initials}
+    <PresenceCard className={`p-0 overflow-hidden group transition-all duration-300 border ${isSelected ? 'border-[var(--color-primary)] ring-4 ring-[var(--color-primary)]/5' : 'border-[var(--color-border)] hover:border-[var(--color-primary)]/30'}`}>
+      <div className="flex items-stretch">
+        {/* Selection Checkbox Area */}
+        <button 
+          onClick={onSelect}
+          className={`w-12 flex items-center justify-center border-r border-[var(--color-border)] transition-all ${isSelected ? 'bg-[var(--color-primary)]/5' : 'hover:bg-[var(--color-surface-2)]'}`}
+        >
+          <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-[var(--color-primary)] border-[var(--color-primary)] scale-110 shadow-lg' : 'border-[var(--color-border)] bg-transparent'}`}>
+            {isSelected && <CheckCircle2 size={12} className="text-white" />}
+          </div>
+        </button>
+
+        <div className="flex-1 flex items-center gap-3 p-3 min-w-0" onClick={onOpen}>
+          <div className="relative flex-shrink-0">
+             <div className="w-12 h-12 rounded-2xl bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-center justify-center overflow-hidden group-hover:shadow-md transition-shadow shadow-inner">
+                {user.avatar_url ? (
+                  <Image src={user.avatar_url} alt="" width={48} height={48} className="object-cover" />
+                ) : (
+                  <User size={20} className="text-[var(--color-muted)]" />
+                )}
+             </div>
+             <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white flex items-center justify-center ${status.bg} ${status.color}`}>
+                <status.icon size={8} />
+             </div>
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <h4 className="text-[13px] font-bold text-[var(--color-text)] truncate">{user.full_name || 'Anonymous'}</h4>
+              {(user.permissions as any)?.can_publish_articles && <ShieldCheck size={10} className="text-emerald-500" />}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border ${role.color}`}>
+                {role.label}
+              </span>
+              <span className="text-[9px] font-bold text-[var(--color-muted)] flex items-center gap-1">
+                <Clock size={10} /> Active {new Date(user.last_sign_in_at || user.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="flex-1 min-w-0 flex items-center justify-between gap-4">
-          <div onClick={() => onUserClick(u)} className="flex-1 min-w-0 cursor-pointer">
-            <h3 className="font-bold text-[17px] text-[var(--color-text)] tracking-tight leading-none truncate group-hover:text-[var(--color-primary)] transition-colors">
-              {u.full_name || 'Anonymous'}
-            </h3>
-            <div className="flex items-center gap-2 mt-1.5 opacity-40">
-               <span className="text-[11px] font-bold uppercase tracking-tighter">Joined {u.created_at.split('T')[0]}</span>
-               {lastSeen && <span className="text-[11px] font-bold uppercase tracking-tighter flex items-center gap-1.5">· {lastSeen}</span>}
-            </div>
-          </div>
-
-          <div className="shrink-0 flex items-center gap-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                  <button className="w-9 h-9 rounded-xl hover:bg-[var(--color-surface-2)] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <MoreVertical className="w-4 h-4 text-[var(--color-muted)]" />
-                  </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuContent align="end" className="w-[180px] p-1 bg-[var(--color-surface)] border-[var(--color-border)] shadow-xl rounded-xl">
-                  <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowEdit(true); }} className="rounded-lg py-2 font-bold text-[12px]">Manage</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowReset(true); }} className="rounded-lg py-2 font-bold text-[12px] text-indigo-500">Reset Pass</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowStatus(true); }} className="rounded-lg py-2 font-bold text-[12px] text-amber-500">Status</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => { setSelectedUser(u); setShowDelete(true); }} className="rounded-lg py-2 font-bold text-[12px] text-rose-500">Delete</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenuPortal>
-            </DropdownMenu>
-            <div onClick={() => onUserClick(u)} className="w-9 h-9 rounded-xl flex items-center justify-center text-[var(--color-muted)]/20 hover:text-[var(--color-text)] transition-colors cursor-pointer">
-              <ChevronRight size={18} strokeWidth={2.5} />
-            </div>
-          </div>
+        <div className="p-2 flex items-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-muted)] hover:bg-[var(--color-surface-2)] transition-colors">
+                <MoreVertical size={16} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuContent align="end" className="w-48 bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xl rounded-xl p-1 z-[100]">
+                <DropdownMenuLabel className="px-3 py-2 text-[10px] uppercase font-black opacity-30">Quick Actions</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => handleAction(user, setShowEdit)} className="flex items-center px-3 py-2 rounded-lg text-sm font-bold hover:bg-[var(--color-surface-2)] group">
+                  <Edit2 size={14} className="mr-3 text-indigo-500 group-hover:scale-110 transition-transform" /> Modify Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleAction(user, setShowStatus)} className="flex items-center px-3 py-2 rounded-lg text-sm font-bold hover:bg-[var(--color-surface-2)] group">
+                  <Slash size={14} className="mr-3 text-amber-500 group-hover:rotate-12 transition-transform" /> Account Status
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleAction(user, setShowReset)} className="flex items-center px-3 py-2 rounded-lg text-sm font-bold hover:bg-[var(--color-surface-2)] group">
+                  <KeyRound size={14} className="mr-3 text-emerald-500 group-hover:rotate-45 transition-transform" /> Reset Password
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleRevokeSessions(user.id)} className="flex items-center px-3 py-2 rounded-lg text-sm font-bold hover:bg-amber-50 text-amber-600 group">
+                  <KeyRound size={14} className="mr-3 text-amber-500 group-hover:scale-110 transition-transform" /> Revoke Sessions
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="opacity-10" />
+                <DropdownMenuItem onClick={() => handleAction(user, setShowDelete)} className="flex items-center px-3 py-2 rounded-lg text-sm font-bold text-rose-500 hover:bg-rose-50 group">
+                  <Trash2 size={14} className="mr-3 group-hover:animate-bounce" /> Delete User
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenuPortal>
+          </DropdownMenu>
         </div>
       </div>
-    </div>
+    </PresenceCard>
   );
 }

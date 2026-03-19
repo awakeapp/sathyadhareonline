@@ -96,7 +96,6 @@ export const ADMIN_SECTIONS: NavSection[] = [
     items: [
       { label: 'Library',    href: '/admin/library',     icon: BookOpen    },
       { label: 'Categories', href: '/admin/categories', icon: Tags       },
-      { label: 'Users',     href: '/admin/users',      icon: Users        },
       { label: 'Submissions', href: '/admin/submissions', icon: Send },
       { label: 'Comments',  href: '/admin/comments',   icon: MessageSquare },
       { label: 'Media',     href: '/admin/media',       icon: ImageIcon    },
@@ -155,6 +154,7 @@ export const READER_NAV: NavItem[] = [
   { name: 'Articles', href: '/articles', exact: false, icon: FileText },
   { name: 'Library', href: '/library', exact: false, icon: Library },
   { name: 'Sequels', href: '/sequels', exact: false, icon: Layers },
+  { name: 'Friday', href: '/friday', exact: false, icon: Mail },
   { name: 'Search', href: '/search', exact: false, icon: Search },
   { name: 'Podcast', href: '/podcast', exact: false, icon: Mic },
   { name: 'More', href: '#more', exact: false, icon: Menu, isMoreToggle: true },

@@ -61,7 +61,7 @@ export default async function LibraryChapterPage({
   const readTime = calculateReadTime(chapter.content || '');
 
   return (
-    <div className="font-sans antialiased min-h-[100svh] px-4 pb-20 max-w-lg mx-auto sm:max-w-2xl lg:max-w-3xl">
+    <div className="min-h-[100svh] px-4 pb-20 max-w-lg mx-auto sm:max-w-2xl lg:max-w-3xl">
       
       {/* Top Nav */}
       <nav className="flex items-center justify-between py-6 mb-8 border-b border-[var(--color-border)]">

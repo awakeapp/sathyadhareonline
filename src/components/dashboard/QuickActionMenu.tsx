@@ -29,8 +29,8 @@ const ACTIONS: QuickAction[] = [
   { label: 'Friday Message', href: '/admin/friday/new', icon: Mail, color: '#f59e0b' },
   { label: 'Category', href: '/admin/categories/new', icon: Tags, color: '#8b5cf6' },
   { label: 'Banner', href: '/admin/banners', icon: ImageIcon, color: '#ec4899' },
-  { label: 'Banner Video', href: '/admin/banner-videos', icon: Video, color: '#ef4444' },
-  { label: 'Podcast', href: '/admin/podcasts', icon: Mic, color: '#14b8a6' },
+  { label: 'Banner Video', href: '/admin/manage/banner-videos/new', icon: Video, color: '#ef4444' },
+  { label: 'Podcast', href: '/admin/manage/podcasts/new', icon: Mic, color: '#14b8a6' },
 ];
 
 interface Props {

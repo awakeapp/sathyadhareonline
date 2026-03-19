@@ -8,7 +8,8 @@ import Link from 'next/link';
 import { 
   ShieldCheck, User, Check, 
   BookOpen, Bookmark, MessageSquare, 
-  Quote, Highlighter, Lock, Eye, EyeOff, KeyRound
+  Quote, Highlighter, Lock, Eye, EyeOff, KeyRound,
+  Globe, Monitor, Activity
 } from 'lucide-react';
 import ReadingStreak from '@/components/ReadingStreak';
 import { Input, Label } from '@/components/ui/Input';
@@ -28,6 +29,7 @@ interface ProfileFormProps {
     bookmarks: number;
     comments: number;
     highlights: number;
+    auditLogs: any[];
   };
   userEmail?: string;
 }
@@ -347,6 +349,52 @@ export default function ProfileForm({ profile: initialProfile, stats }: ProfileF
             </Link>
           </p>
         </form>
+      </section>
+
+      {/* ── SECURITY HISTORY ── */}
+      <section className="max-w-xl">
+        <div className="mb-6">
+          <h2 className="text-lg font-black text-[var(--color-text)] uppercase tracking-tight">Security History</h2>
+          <p className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest mt-1">Recent account access events</p>
+        </div>
+
+        <div className="bg-[var(--color-surface)] rounded-[2rem] border border-[var(--color-border)] overflow-hidden">
+          {(!stats.auditLogs || stats.auditLogs.length === 0) ? (
+            <div className="p-10 text-center italic text-sm text-[var(--color-muted)] opacity-60">
+               No login history found.
+            </div>
+          ) : (
+            <div className="divide-y divide-[var(--color-border)]">
+              {stats.auditLogs.map((log: any, i: number) => (
+                <div key={i} className="p-5 flex items-start gap-4 hover:bg-[var(--color-surface-2)] transition-colors">
+                   <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 shrink-0">
+                      <Activity size={18} strokeWidth={2.5} />
+                   </div>
+                   <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-4 mb-2">
+                         <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+                           {log.action?.replace('_', ' ') || 'Access'}
+                         </span>
+                         <span className="text-[9px] font-black uppercase tracking-widest text-[var(--color-muted)] opacity-50">
+                           {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {new Date(log.created_at).toLocaleDateString()}
+                         </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 mt-3">
+                         <div className="flex items-center gap-2">
+                            <Globe size={11} className="text-[var(--color-muted)]" />
+                            <span className="text-[11px] font-mono font-bold text-[var(--color-text)] opacity-80">{log.ip_address || 'Hidden'}</span>
+                         </div>
+                         <div className="flex items-center gap-2">
+                           <Monitor size={11} className="text-[var(--color-muted)]" />
+                           <span className="text-[11px] font-bold text-[var(--color-text)] opacity-80 truncate">{log.user_agent?.split(' ')[0] || 'Unknown'} Browser</span>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </section>
 
     </div>

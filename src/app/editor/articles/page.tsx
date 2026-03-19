@@ -23,11 +23,11 @@ export default async function EditorArticlesPage() {
 
   if (!profile || profile.role !== 'editor') redirect('/sign-in');
 
-  // Only fetch THIS editor's own articles — enforced server-side
+  // Only fetch articles assigned to this editor
   const { data: articles, error } = await supabase
     .from('articles')
-    .select('id, title, status, slug, updated_at, created_at')
-    .eq('author_id', user.id)
+    .select('id, title, status, slug, updated_at, created_at, assignment_notes, assigned_at')
+    .eq('assigned_to', user.id)
     .eq('is_deleted', false)
     .order('updated_at', { ascending: false });
 
@@ -50,9 +50,9 @@ export default async function EditorArticlesPage() {
       {/* Page heading */}
       <div className="pt-2 flex items-center justify-between">
         <div>
-          <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight">My Work</h1>
+          <h1 className="text-[22px] font-bold text-[var(--color-text)] tracking-tight">My Assignments</h1>
           <p className="text-[13px] text-[var(--color-muted)] mt-0.5">
-            {articles?.length ?? 0} article{(articles?.length ?? 0) !== 1 ? 's' : ''} assigned to you
+            You have {articles?.length ?? 0} assigned article{(articles?.length ?? 0) !== 1 ? 's' : ''} to review and format
           </p>
         </div>
         <Link
@@ -106,22 +106,22 @@ export default async function EditorArticlesPage() {
 
                   <div className="flex-1 flex items-center gap-3 px-4 py-4">
                     {/* Text */}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[14px] font-bold text-[var(--color-text)] truncate leading-tight">
+                    <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+                      <p className="text-[14px] font-bold text-[var(--color-text)] leading-snug">
                         {article.title}
                       </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] font-black uppercase tracking-wider" style={{ color: meta.color }}>
+                      {article.assignment_notes && (
+                        <p className="text-[12px] font-medium text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-500/10 px-3 py-2 rounded-xl border border-amber-100 dark:border-amber-500/20">
+                          <span className="font-bold mr-1">Admin Notes:</span> {article.assignment_notes}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                        <span className="text-[10px] font-black uppercase tracking-wider bg-[var(--color-surface-2)] px-2 py-0.5 rounded-md" style={{ color: meta.color }}>
                           {meta.label}
                         </span>
-                        <span className="text-[11px] text-[var(--color-muted)]">
-                          · {new Date(article.updated_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                        <span className="text-[11px] font-bold text-[var(--color-muted)]">
+                          Assigned: {article.assigned_at ? new Date(article.assigned_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : new Date(article.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </span>
-                        {views > 0 && (
-                          <span className="flex items-center gap-0.5 text-[11px] text-[var(--color-muted)]">
-                            · <BarChart2 size={11} strokeWidth={2} className="ml-0.5" /> {views}
-                          </span>
-                        )}
                       </div>
                     </div>
 

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useTransition, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { getAuditLogsAction } from './actions';
-import { Search, ScrollText, Calendar, ChevronLeft, ChevronRight, User, Eye, FileJson } from 'lucide-react';
+import { Search, ScrollText, Calendar, ChevronLeft, ChevronRight, User, Eye, FileJson, Download } from 'lucide-react';
 import { 
   PresenceCard, 
   PresenceButton 
@@ -55,6 +55,7 @@ export default function AuditLogsClient({
   const [endDate, setEndDate] = useState('');
 
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [isExporting, setIsExporting] = useState(false);
   const hasMounted = useRef(false);
 
   const loadLogs = useCallback(() => {
@@ -98,6 +99,60 @@ export default function AuditLogsClient({
   };
 
   const totalPages = Math.ceil(totalCount / limit);
+
+  const exportCSV = async () => {
+    setIsExporting(true);
+    try {
+      // Fetch ALL matching rows (no pagination limit)
+      const res = await getAuditLogsAction({
+        page: 1,
+        limit: 10000,
+        userId: userFilter,
+        actionSearch,
+        startDate,
+        endDate,
+      });
+      const rows = res.logs as unknown as AuditLog[];
+
+      // Build CSV
+      const escape = (v: unknown) => {
+        const str = typeof v === 'object' ? JSON.stringify(v) : String(v ?? '');
+        return `"${str.replace(/"/g, '""')}"`;
+      };
+
+      const header = ['Date', 'Time', 'User', 'Role', 'Action', 'Details'];
+      const csvLines = [
+        header.join(','),
+        ...rows.map(log => {
+          const profile = Array.isArray(log.profiles) ? log.profiles[0] : log.profiles;
+          const dt = new Date(log.created_at);
+          return [
+            escape(dt.toLocaleDateString('en-GB')),
+            escape(dt.toLocaleTimeString('en-GB')),
+            escape(profile?.full_name || profile?.email || 'Unknown'),
+            escape(profile?.role || ''),
+            escape(log.action),
+            escape(log.details),
+          ].join(',');
+        }),
+      ];
+
+      const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const today = new Date().toISOString().slice(0, 10);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `audit-log-${today}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success(`Exported ${rows.length} log entries`);
+    } catch {
+      toast.error('Export failed');
+    }
+    setIsExporting(false);
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -164,9 +219,21 @@ export default function AuditLogsClient({
              </div>
           </div>
 
-          <PresenceButton type="submit" className="h-12 px-8 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black text-[10px] uppercase tracking-widest shadow-xl shadow-indigo-500/20" loading={isPending}>
-             Search Logs
-          </PresenceButton>
+          <div className="flex items-center gap-3 shrink-0">
+            <PresenceButton type="submit" className="h-12 px-8 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black text-[10px] uppercase tracking-widest shadow-xl shadow-indigo-500/20" loading={isPending}>
+               Search Logs
+            </PresenceButton>
+            <button
+              type="button"
+              onClick={exportCSV}
+              disabled={isExporting || isPending}
+              className="h-12 px-5 rounded-2xl bg-white dark:bg-zinc-950 border border-gray-100 dark:border-white/10 text-zinc-600 dark:text-zinc-300 font-black text-[10px] uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-all disabled:opacity-40 flex items-center gap-2"
+              title="Export filtered logs as CSV"
+            >
+              <Download className="w-4 h-4" strokeWidth={2} />
+              {isExporting ? 'Exporting…' : 'CSV'}
+            </button>
+          </div>
         </form>
       </PresenceCard>
 

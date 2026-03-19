@@ -102,7 +102,7 @@ export default async function HomePage() {
   const activeBanners = bannersData || [];
 
   return (
-    <div className="font-sans antialiased min-h-[100svh] px-4 pt-2 pb-0 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl scroll-smooth">
+    <div className="min-h-[100svh] px-4 pt-2 pb-0 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl scroll-smooth">
 
       {/* ── 1. Banner Carousel ── */}
       <div className="mb-8">

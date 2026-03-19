@@ -15,6 +15,7 @@ export function getDashboardForRole(role: string): string {
     case 'super_admin': return '/dashboard/super-admin'
     case 'admin':       return '/dashboard/admin'
     case 'editor':      return '/dashboard/editor'
+    case 'contributor': return '/contributor'
     default:            return '/dashboard/reader'
   }
 }
@@ -37,17 +38,20 @@ export function getRedirectUrl(role: string, requestedPath?: string | null): str
     if (requestedPath.startsWith('/dashboard/super-admin') && role === 'super_admin') return requestedPath
     if (requestedPath.startsWith('/dashboard/admin')       && (role === 'admin' || role === 'super_admin')) return requestedPath
     if (requestedPath.startsWith('/dashboard/editor')      && role === 'editor') return requestedPath
+    if (requestedPath.startsWith('/dashboard/contributor') && role === 'contributor') return requestedPath
     if (requestedPath.startsWith('/dashboard/reader')      && role === 'reader') return requestedPath
 
     // Legacy direct routes — kept for backward compat
     if (requestedPath.startsWith('/admin')  && (role === 'super_admin' || role === 'admin')) return requestedPath
     if (requestedPath.startsWith('/editor') && role === 'editor') return requestedPath
+    if (requestedPath.startsWith('/contributor') && role === 'contributor') return requestedPath
 
     // Public / profile paths — any authenticated user can go here
     const isPrivilegedRoute =
       requestedPath.startsWith('/dashboard') ||
       requestedPath.startsWith('/admin')     ||
-      requestedPath.startsWith('/editor')
+      requestedPath.startsWith('/editor')    ||
+      requestedPath.startsWith('/contributor')
     if (!isPrivilegedRoute) return requestedPath
   }
 

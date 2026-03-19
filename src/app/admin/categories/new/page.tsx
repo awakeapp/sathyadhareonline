@@ -30,7 +30,7 @@ export default async function NewCategoryPage() {
   }
 
   return (
-    <div className="min-h-screen pb-24 px-4 pt-6 bg-[var(--color-background)] font-sans antialiased text-white safe-area-pb">
+    <div className="min-h-screen pb-24 px-4 pt-6 bg-[var(--color-background)] text-white safe-area-pb">
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-3 mb-8">
           <Link href="/admin/categories" className="w-10 h-10 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:text-white transition-colors active:scale-95">

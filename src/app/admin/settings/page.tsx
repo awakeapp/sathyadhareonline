@@ -22,7 +22,7 @@ export default async function SettingsPage() {
 
   const { data: settings } = await supabase
     .from('site_settings')
-    .select('general, social_links, seo, integrations, features')
+    .select('general, social_links, seo, integrations, features, maintenance_mode, maintenance_whitelist')
     .eq('id', 1)
     .maybeSingle();
 
@@ -47,6 +47,8 @@ export default async function SettingsPage() {
     seo: { meta_title: 'Sathyadhare', meta_description: '', og_image: '' },
     integrations: { google_oauth_enabled: false, google_client_id: '', analytics_id: '' },
     features: { comments_enabled: true, guest_submissions_enabled: true, newsletter_enabled: true, registration_enabled: true },
+    maintenance_mode: false,
+    maintenance_whitelist: '',
   };
 
   return (

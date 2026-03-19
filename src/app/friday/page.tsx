@@ -1,31 +1,46 @@
 import { createClient } from '@/lib/supabase/server';
-import FridayClientPage from './FridayClientPage';
+import FridayGalleryClient from './FridayGalleryClient';
 
 export const dynamic = 'force-dynamic';
 
-export default async function FridayPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
-  const { date } = await searchParams;
+export const metadata = {
+  title: 'Friday Messages | Sathyadhare',
+  description: 'ಶುಕ್ರವಾರದ ಸಂದೇಶಗಳು — Inspiring Friday messages and posters from Sathyadhare.',
+};
+
+const PAGE_SIZE = 20;
+
+export default async function FridayPage() {
   const supabase = await createClient();
 
-  // Fetch all published Friday messages ordered newest first
-  const { data: messages } = await supabase
+  const { data: messages, error } = await supabase
     .from('friday_messages')
     .select('id, title, image_url, message_text, created_at')
     .eq('is_published', true)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(PAGE_SIZE);
 
-  const allMessages = messages || [];
-
-  // Find the index to display — by date param or latest (index 0)
-  let activeIndex = 0;
-  if (date) {
-    const idx = allMessages.findIndex(m =>
-      new Date(m.created_at).toISOString().slice(0, 10) === date
-    );
-    if (idx !== -1) activeIndex = idx;
-  }
+  if (error) console.error('Error fetching Friday messages:', error);
 
   return (
-    <FridayClientPage messages={allMessages} initialIndex={activeIndex} />
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-10 mt-16 md:mt-20 pb-32 flex flex-col gap-10">
+      
+      {/* Page Header */}
+      <div className="text-center flex flex-col items-center gap-3">
+        <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-2xl mb-1">
+          🕌
+        </div>
+        <h1 className="text-3xl md:text-4xl font-extrabold text-[var(--color-text)] tracking-tight">
+          ಶುಕ್ರವಾರದ ಸಂದೇಶಗಳು
+        </h1>
+        <p className="text-[15px] text-[var(--color-muted)] font-medium max-w-md leading-relaxed">
+          Inspiring Friday messages — download and share with family and friends.
+        </p>
+        <div className="w-16 h-1 rounded-full bg-emerald-500/40 mt-2" />
+      </div>
+
+      {/* Gallery */}
+      <FridayGalleryClient initialMessages={messages || []} />
+    </div>
   );
 }

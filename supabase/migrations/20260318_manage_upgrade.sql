@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS podcasts (
   cover_image   text,
   category_id   uuid REFERENCES categories(id),
   status        text NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published', 'archived')),
+  is_deleted    boolean NOT NULL DEFAULT false,
+  deleted_at    timestamptz,
   author_id     uuid REFERENCES profiles(id),
   assigned_to   uuid REFERENCES profiles(id),
   created_at    timestamptz NOT NULL DEFAULT now()

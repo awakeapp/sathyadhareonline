@@ -36,7 +36,7 @@ export default async function CategoriesPage() {
   })).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
   return (
-    <div className="font-sans antialiased min-h-[100svh] px-4 pt-6 pb-20 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl">
+    <div className="min-h-[100svh] px-4 pt-6 pb-20 max-w-lg mx-auto sm:max-w-2xl lg:max-w-4xl">
       
       <header className="mb-10">
         <SectionHeader title="Explore Categories" />

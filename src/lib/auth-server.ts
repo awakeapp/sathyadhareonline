@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 
-export type Role = 'super_admin' | 'admin' | 'editor' | 'reader';
+export type Role = 'super_admin' | 'admin' | 'editor' | 'contributor' | 'reader';
 
 export async function verifyRole(allowedRoles: Role[]) {
   const supabase = await createClient();

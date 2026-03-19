@@ -20,6 +20,8 @@ import TableOfContents from '@/components/TableOfContents';
 import ChapterNav from '@/components/ChapterNav';
 import ContinueReading from './ContinueReading';
 import { ReadingProgressTracker } from './ReadingProgressTracker';
+import { CommentList } from './CommentList';
+import ArticleReadingTools from '@/components/ArticleReadingTools';
 
 // Convert Kannada digits to English digits
 const KANNADA_NUMS = ['೦', '೧', '೨', '೩', '೪', '೫', '೬', '೭', '೮', '೯'];
@@ -169,7 +171,7 @@ export default async function ArticlePage({ params }: Props) {
   const renderedHtml = marked.parse(translateNum(article.content || '')) as string;
 
   return (
-    <div className="font-sans antialiased min-h-[100svh] px-4 pb-0 max-w-lg mx-auto sm:max-w-2xl lg:max-w-3xl article-page-container">
+    <div className="min-h-[100svh] px-4 pb-0 max-w-lg mx-auto sm:max-w-2xl lg:max-w-3xl article-page-container">
       <style dangerouslySetInnerHTML={{ __html: `
         html.is-fullscreen main { padding-top: 0 !important; }
         html.is-fullscreen header, 
@@ -189,6 +191,14 @@ export default async function ArticlePage({ params }: Props) {
 
       <header className="hide-in-fullscreen pt-3 pb-5 border-b border-[var(--color-border)] mb-6">
         <h1 className="text-[1.75rem] sm:text-4xl font-black text-[var(--color-text)] leading-[1.1] tracking-tighter mb-4">{article.title}</h1>
+        
+        {/* Modern Reading Experience Tools */}
+        <ArticleReadingTools 
+          articleId={article.id} 
+          content={article.content || ''} 
+          title={article.title} 
+          existingSummary={article.ai_summary} 
+        />
         <div className="flex flex-col gap-2.5 mb-4">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center shrink-0">
@@ -241,7 +251,12 @@ export default async function ArticlePage({ params }: Props) {
       <div className="hide-in-fullscreen">
         {related && related[0] && !nextChapter && <ContinueReading article={related[0] as unknown as { title: string; slug: string; cover_image: string | null }} />}
         {nextChapter && <ContinueReading article={nextChapter as unknown as { title: string; slug: string; cover_image: string | null }} label="Next Chapter" />}
-        <CommentBox articleId={article.id} isAuthenticated={!!user} />
+        
+        {/* Community Section: Feedback from others and submission box */}
+        <div className="mt-12 pt-8 border-t border-[var(--color-border)]">
+          <CommentList articleId={article.id} />
+          <CommentBox articleId={article.id} isAuthenticated={!!user} />
+        </div>
         {sequelInfo && <ChapterNav prev={prevChapter} next={nextChapter} currentIndex={currentChapterIndex} totalChapters={totalChapters} sequelTitle={sequelInfo.title} sequelSlug={sequelInfo.slug} />}
         {related && related.length > 0 && (
           <div className="mt-12 pt-8 border-t border-[var(--color-border)]">

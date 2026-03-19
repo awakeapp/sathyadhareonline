@@ -3,8 +3,9 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 // Route access rules — proxy is the outermost gate
 const ROUTE_ROLES: Record<string, string[] | '*'> = {
-  '/admin':      ['super_admin', 'admin'],
+  '/admin':      ['super_admin', 'admin', 'editor'],
   '/editor':     ['editor'],
+  '/contributor':['contributor'],
   '/dashboard':  '*',   // any authenticated user; page-level does role redirect
   '/profile':    '*',
   '/saved':      '*',
@@ -58,15 +59,62 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = path
     const redirectRes = NextResponse.redirect(url)
-    
-    // Apply cookies from supabaseResponse using the cookies API 
-    // to properly preserve all attributes (max-age, path, secure, etc.)
     supabaseResponse.cookies.getAll().forEach((cookie) => {
       redirectRes.cookies.set(cookie.name, cookie.value, cookie)
     })
-    
     return redirectRes
   }
+
+  // ── Maintenance Mode check ──────────────────────────────────────────
+  const maintenancePassthrough =
+    pathname.startsWith('/maintenance') ||
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/auth') ||
+    pathname === '/favicon.ico'
+
+  if (!maintenancePassthrough) {
+    try {
+      const { data: siteSettings } = await supabase
+        .from('site_settings')
+        .select('maintenance_mode, maintenance_whitelist')
+        .eq('id', 1)
+        .maybeSingle()
+
+      if (siteSettings?.maintenance_mode) {
+        const ip =
+          request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+          request.headers.get('x-real-ip')?.trim() ||
+          ''
+
+        const whitelist = (siteSettings.maintenance_whitelist || '')
+          .split(',')
+          .map((s: string) => s.trim())
+          .filter(Boolean)
+
+        // Reuse already-resolved user; also check role for admin bypass
+        let isAdmin = false
+        if (user) {
+          const { data: mProfile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .maybeSingle()
+          if (mProfile?.role === 'super_admin' || mProfile?.role === 'admin') {
+            isAdmin = true
+          }
+        }
+
+        const isWhitelisted = isAdmin || whitelist.includes(ip)
+        if (!isWhitelisted) {
+          return redirectWithCookies('/maintenance')
+        }
+      }
+    } catch {
+      // If DB is unreachable, fail open to avoid false lockouts
+    }
+  }
+  // ── End Maintenance Mode check ──────────────────────────────────────
 
   // 1. Identify protective rule
   const protectedPrefix = Object.keys(ROUTE_ROLES).find(prefix => pathname.startsWith(prefix))
@@ -126,6 +174,8 @@ export async function middleware(request: NextRequest) {
         return redirectWithCookies('/admin')
       } else if (role === 'editor') {
         return redirectWithCookies('/editor')
+      } else if (role === 'contributor') {
+        return redirectWithCookies('/contributor')
       } else {
         return redirectWithCookies('/')
       }
